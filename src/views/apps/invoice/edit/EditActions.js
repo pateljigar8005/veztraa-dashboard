@@ -13,7 +13,7 @@ const EditActions = ({ id, setSendSidebarOpen, setAddPaymentOpen }) => {
           <Button color='primary' block className='mb-75' onClick={() => setSendSidebarOpen(true)}>
             Send Invoice
           </Button>
-          <Button tag={Link} to={`/apps/invoice/preview/${id}`} color='primary' block outline className='mb-75'>
+          <Button tag={Link} to={`/invoice/preview/${id}`} color='primary' block outline className='mb-75'>
             Preview
           </Button>
           <Button color='primary' block outline className='mb-75'>

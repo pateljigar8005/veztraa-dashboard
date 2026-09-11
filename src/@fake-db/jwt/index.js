@@ -20,10 +20,7 @@ const data = {
           action: 'manage',
           subject: 'all'
         }
-      ],
-      extras: {
-        eCommerceCartItemsCount: 5
-      }
+      ]
     },
     {
       id: 2,
@@ -42,10 +39,7 @@ const data = {
           action: 'read',
           subject: 'Auth'
         }
-      ],
-      extras: {
-        eCommerceCartItemsCount: 5
-      }
+      ]
     }
   ]
 }

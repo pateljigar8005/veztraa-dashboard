@@ -83,7 +83,7 @@ export const columns = [
         {renderClient(row)}
         <div className='d-flex flex-column'>
           <Link
-            to={`/apps/user/view/${row.id}`}
+            to={`/user/view/${row.id}`}
             className='user_name text-truncate text-body'
             onClick={() => store.dispatch(getUser(row.id))}
           >
@@ -101,22 +101,6 @@ export const columns = [
     sortField: 'role',
     selector: row => row.role,
     cell: row => renderRole(row)
-  },
-  {
-    name: 'Plan',
-    minWidth: '138px',
-    sortable: true,
-    sortField: 'currentPlan',
-    selector: row => row.currentPlan,
-    cell: row => <span className='text-capitalize'>{row.currentPlan}</span>
-  },
-  {
-    name: 'Billing',
-    minWidth: '230px',
-    sortable: true,
-    sortField: 'billing',
-    selector: row => row.billing,
-    cell: row => <span className='text-capitalize'>{row.billing}</span>
   },
   {
     name: 'Status',
@@ -143,7 +127,7 @@ export const columns = [
             <DropdownItem
               tag={Link}
               className='w-100'
-              to={`/apps/user/view/${row.id}`}
+              to={`/user/view/${row.id}`}
               onClick={() => store.dispatch(getUser(row.id))}
             >
               <FileText size={14} className='me-50' />

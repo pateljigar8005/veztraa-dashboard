@@ -3,7 +3,6 @@ import { NavLink } from 'react-router-dom'
 
 // ** Third Party Components
 import classnames from 'classnames'
-import { useTranslation } from 'react-i18next'
 
 // ** Reactstrap Imports
 import { Badge } from 'reactstrap'
@@ -11,9 +10,6 @@ import { Badge } from 'reactstrap'
 const VerticalNavMenuLink = ({ item, activeItem }) => {
   // ** Conditional Link Tag, if item has newTab or externalLink props use <a> tag else use NavLink
   const LinkTag = item.externalLink ? 'a' : NavLink
-
-  // ** Hooks
-  const { t } = useTranslation()
 
   return (
     <li
@@ -46,7 +42,7 @@ const VerticalNavMenuLink = ({ item, activeItem }) => {
         }}
       >
         {item.icon}
-        <span className='menu-item text-truncate'>{t(item.title)}</span>
+        <span className='menu-item text-truncate'>{item.title}</span>
 
         {item.badge && item.badgeText ? (
           <Badge className='ms-auto me-1' color={item.badge} pill>

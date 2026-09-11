@@ -56,7 +56,7 @@ const TodoSidebar = props => {
                 <ListGroupItem
                   action
                   tag={Link}
-                  to={'/apps/todo/'}
+                  to={'/todo/'}
                   active={params.filter === '' && params.tag === ''}
                   onClick={() => handleFilter('')}
                 >
@@ -65,7 +65,7 @@ const TodoSidebar = props => {
                 </ListGroupItem>
                 <ListGroupItem
                   tag={Link}
-                  to={'/apps/todo/important'}
+                  to={'/todo/important'}
                   active={handleActiveItem('important')}
                   onClick={() => handleFilter('important')}
                   action
@@ -75,7 +75,7 @@ const TodoSidebar = props => {
                 </ListGroupItem>
                 <ListGroupItem
                   tag={Link}
-                  to={'/apps/todo/completed'}
+                  to={'/todo/completed'}
                   active={handleActiveItem('completed')}
                   onClick={() => handleFilter('completed')}
                   action
@@ -85,7 +85,7 @@ const TodoSidebar = props => {
                 </ListGroupItem>
                 <ListGroupItem
                   tag={Link}
-                  to={'/apps/todo/deleted'}
+                  to={'/todo/deleted'}
                   active={handleActiveItem('deleted')}
                   onClick={() => handleFilter('deleted')}
                   action
@@ -103,7 +103,7 @@ const TodoSidebar = props => {
                   active={handleActiveItem('team')}
                   className='d-flex align-items-center'
                   tag={Link}
-                  to='/apps/todo/tag/team'
+                  to='/todo/tag/team'
                   onClick={() => handleTag('team')}
                   action
                 >
@@ -114,7 +114,7 @@ const TodoSidebar = props => {
                   active={handleActiveItem('low')}
                   className='d-flex align-items-center'
                   tag={Link}
-                  to='/apps/todo/tag/low'
+                  to='/todo/tag/low'
                   onClick={() => handleTag('low')}
                   action
                 >
@@ -125,7 +125,7 @@ const TodoSidebar = props => {
                   active={handleActiveItem('medium')}
                   className='d-flex align-items-center'
                   tag={Link}
-                  to='/apps/todo/tag/medium'
+                  to='/todo/tag/medium'
                   onClick={() => handleTag('medium')}
                   action
                 >
@@ -136,7 +136,7 @@ const TodoSidebar = props => {
                   active={handleActiveItem('high')}
                   className='d-flex align-items-center'
                   tag={Link}
-                  to='/apps/todo/tag/high'
+                  to='/todo/tag/high'
                   onClick={() => handleTag('high')}
                   action
                 >
@@ -147,7 +147,7 @@ const TodoSidebar = props => {
                   active={handleActiveItem('update')}
                   className='d-flex align-items-center'
                   tag={Link}
-                  to='/apps/todo/tag/update'
+                  to='/todo/tag/update'
                   onClick={() => handleTag('update')}
                   action
                 >

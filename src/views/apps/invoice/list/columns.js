@@ -67,7 +67,7 @@ export const columns = [
     sortField: 'id',
     minWidth: '107px',
     // selector: row => row.id,
-    cell: row => <Link to={`/apps/invoice/preview/${row.id}`}>{`#${row.id}`}</Link>
+    cell: row => <Link to={`/invoice/preview/${row.id}`}>{`#${row.id}`}</Link>
   },
   {
     sortable: true,
@@ -153,7 +153,7 @@ export const columns = [
         <UncontrolledTooltip placement='top' target={`send-tooltip-${row.id}`}>
           Send Mail
         </UncontrolledTooltip>
-        <Link to={`/apps/invoice/preview/${row.id}`} id={`pw-tooltip-${row.id}`}>
+        <Link to={`/invoice/preview/${row.id}`} id={`pw-tooltip-${row.id}`}>
           <Eye size={17} className='mx-1' />
         </Link>
         <UncontrolledTooltip placement='top' target={`pw-tooltip-${row.id}`}>
@@ -168,7 +168,7 @@ export const columns = [
               <Download size={14} className='me-50' />
               <span className='align-middle'>Download</span>
             </DropdownItem>
-            <DropdownItem tag={Link} to={`/apps/invoice/edit/${row.id}`} className='w-100'>
+            <DropdownItem tag={Link} to={`/invoice/edit/${row.id}`} className='w-100'>
               <Edit size={14} className='me-50' />
               <span className='align-middle'>Edit</span>
             </DropdownItem>

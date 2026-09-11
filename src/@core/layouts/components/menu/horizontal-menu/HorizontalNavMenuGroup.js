@@ -5,7 +5,6 @@ import { Link, useLocation } from 'react-router-dom'
 // ** Third Party Components
 import classnames from 'classnames'
 import { usePopper } from 'react-popper'
-import { useTranslation } from 'react-i18next'
 
 // ** Utils
 import { hasActiveChild } from '@layouts/utils'
@@ -61,7 +60,6 @@ const HorizontalNavMenuGroup = props => {
   const popperPlacementSubMenu = isRtl ? 'left-start' : 'right-start'
 
   // ** Hooks
-  const { t } = useTranslation()
   const currentURL = useLocation().pathname
   const { update, styles, attributes } = usePopper(referenceElement, popperElement, {
     placement: isChild ? popperPlacementSubMenu : popperPlacement,
@@ -103,7 +101,7 @@ const HorizontalNavMenuGroup = props => {
         })}
       >
         {item.icon}
-        <span>{t(item.title)}</span>
+        <span>{item.title}</span>
       </Link>
       <ul
         ref={setPopperElement}

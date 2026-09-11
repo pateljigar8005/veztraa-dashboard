@@ -14,21 +14,15 @@ const InvoiceEdit = lazy(() => import('../../views/apps/invoice/edit'))
 const InvoicePrint = lazy(() => import('../../views/apps/invoice/print'))
 const InvoicePreview = lazy(() => import('../../views/apps/invoice/preview'))
 
-const EcommerceShop = lazy(() => import('../../views/apps/ecommerce/shop'))
-const EcommerceDetail = lazy(() => import('../../views/apps/ecommerce/detail'))
-const EcommerceWishlist = lazy(() => import('../../views/apps/ecommerce/wishlist'))
-const EcommerceCheckout = lazy(() => import('../../views/apps/ecommerce/checkout'))
-
 const UserList = lazy(() => import('../../views/apps/user/list'))
 const UserView = lazy(() => import('../../views/apps/user/view'))
 
 const Roles = lazy(() => import('../../views/apps/roles-permissions/roles'))
-const Permissions = lazy(() => import('../../views/apps/roles-permissions/permissions'))
 
 const AppRoutes = [
   {
     element: <Email />,
-    path: '/apps/email',
+    path: '/email',
     meta: {
       appLayout: true,
       className: 'email-application'
@@ -36,7 +30,7 @@ const AppRoutes = [
   },
   {
     element: <Email />,
-    path: '/apps/email/:folder',
+    path: '/email/:folder',
     meta: {
       appLayout: true,
       className: 'email-application'
@@ -44,7 +38,7 @@ const AppRoutes = [
   },
   {
     element: <Email />,
-    path: '/apps/email/label/:label',
+    path: '/email/label/:label',
     meta: {
       appLayout: true,
       className: 'email-application'
@@ -52,10 +46,10 @@ const AppRoutes = [
   },
   {
     element: <Email />,
-    path: '/apps/email/:filter'
+    path: '/email/:filter'
   },
   {
-    path: '/apps/chat',
+    path: '/chat',
     element: <Chat />,
     meta: {
       appLayout: true,
@@ -64,7 +58,7 @@ const AppRoutes = [
   },
   {
     element: <Todo />,
-    path: '/apps/todo',
+    path: '/todo',
     meta: {
       appLayout: true,
       className: 'todo-application'
@@ -72,7 +66,7 @@ const AppRoutes = [
   },
   {
     element: <Todo />,
-    path: '/apps/todo/:filter',
+    path: '/todo/:filter',
     meta: {
       appLayout: true,
       className: 'todo-application'
@@ -80,7 +74,7 @@ const AppRoutes = [
   },
   {
     element: <Todo />,
-    path: '/apps/todo/tag/:tag',
+    path: '/todo/tag/:tag',
     meta: {
       appLayout: true,
       className: 'todo-application'
@@ -88,11 +82,11 @@ const AppRoutes = [
   },
   {
     element: <Calendar />,
-    path: '/apps/calendar'
+    path: '/calendar'
   },
   {
     element: <Kanban />,
-    path: '/apps/kanban',
+    path: '/kanban',
     meta: {
       appLayout: true,
       className: 'kanban-application'
@@ -100,89 +94,50 @@ const AppRoutes = [
   },
   {
     element: <InvoiceList />,
-    path: '/apps/invoice/list'
+    path: '/invoice'
   },
   {
     element: <InvoicePreview />,
-    path: '/apps/invoice/preview/:id'
+    path: '/invoice/preview/:id'
   },
   {
-    path: '/apps/invoice/preview',
-    element: <Navigate to='/apps/invoice/preview/4987' />
+    path: '/invoice/preview',
+    element: <Navigate to='/invoice/preview/4987' />
   },
   {
     element: <InvoiceEdit />,
-    path: '/apps/invoice/edit/:id'
+    path: '/invoice/edit/:id'
   },
   {
-    path: '/apps/invoice/edit',
-    element: <Navigate to='/apps/invoice/edit/4987' />
+    path: '/invoice/edit',
+    element: <Navigate to='/invoice/edit/4987' />
   },
   {
     element: <InvoiceAdd />,
-    path: '/apps/invoice/add'
+    path: '/invoice/add'
   },
   {
-    path: '/apps/invoice/print',
+    path: '/invoice/print',
     element: <InvoicePrint />,
     meta: {
       layout: 'blank'
     }
   },
   {
-    element: <EcommerceShop />,
-    path: '/apps/ecommerce/shop',
-    meta: {
-      className: 'ecommerce-application'
-    }
-  },
-  {
-    element: <EcommerceWishlist />,
-    path: '/apps/ecommerce/wishlist',
-    meta: {
-      className: 'ecommerce-application'
-    }
-  },
-  {
-    path: '/apps/ecommerce/product-detail',
-    element: <Navigate to='/apps/ecommerce/product-detail/apple-i-phone-11-64-gb-black-26' />,
-    meta: {
-      className: 'ecommerce-application'
-    }
-  },
-  {
-    path: '/apps/ecommerce/product-detail/:product',
-    element: <EcommerceDetail />,
-    meta: {
-      className: 'ecommerce-application'
-    }
-  },
-  {
-    path: '/apps/ecommerce/checkout',
-    element: <EcommerceCheckout />,
-    meta: {
-      className: 'ecommerce-application'
-    }
-  },
-  {
     element: <UserList />,
-    path: '/apps/user/list'
+    path: '/user'
   },
   {
-    path: '/apps/user/view',
-    element: <Navigate to='/apps/user/view/1' />
+    path: '/user/view',
+    element: <Navigate to='/user/view/1' />
   },
   {
     element: <UserView />,
-    path: '/apps/user/view/:id'
+    path: '/user/view/:id'
   },
   {
     element: <Roles />,
-    path: '/apps/roles'
-  },
-  {
-    element: <Permissions />,
-    path: '/apps/permissions'
+    path: '/roles'
   }
 ]
 

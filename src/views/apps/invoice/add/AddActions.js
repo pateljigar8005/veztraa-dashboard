@@ -13,7 +13,7 @@ const AddActions = () => {
           <Button color='primary' block className='mb-75' disabled>
             Send Invoice
           </Button>
-          <Button tag={Link} to='/apps/invoice/preview' color='primary' block outline className='mb-75'>
+          <Button tag={Link} to='/invoice/preview' color='primary' block outline className='mb-75'>
             Preview
           </Button>
           <Button color='primary' block outline>

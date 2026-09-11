@@ -40,7 +40,7 @@ const CustomHeader = ({ handleFilter, value, handleStatusValue, statusValue, han
               <option value='50'>50</option>
             </Input>
           </div>
-          <Button tag={Link} to='/apps/invoice/add' color='primary'>
+          <Button tag={Link} to='/invoice/add' color='primary'>
             Add Record
           </Button>
         </Col>

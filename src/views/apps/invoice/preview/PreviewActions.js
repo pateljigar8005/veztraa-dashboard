@@ -14,10 +14,10 @@ const PreviewActions = ({ id, setSendSidebarOpen, setAddPaymentOpen }) => {
         <Button color='secondary' block outline className='mb-75'>
           Download
         </Button>
-        <Button color='secondary' tag={Link} to='/apps/invoice/print' target='_blank' block outline className='mb-75'>
+        <Button color='secondary' tag={Link} to='/invoice/print' target='_blank' block outline className='mb-75'>
           Print
         </Button>
-        <Button tag={Link} to={`/apps/invoice/edit/${id}`} color='secondary' block outline className='mb-75'>
+        <Button tag={Link} to={`/invoice/edit/${id}`} color='secondary' block outline className='mb-75'>
           Edit
         </Button>
         <Button color='success' block onClick={() => setAddPaymentOpen(true)}>

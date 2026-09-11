@@ -62,7 +62,7 @@ const Sidebar = props => {
               <ListGroup tag='div' className='list-group-messages'>
                 <ListGroupItem
                   tag={Link}
-                  to='/apps/email/inbox'
+                  to='/email/inbox'
                   onClick={() => handleFolder('inbox')}
                   action
                   active={!Object.keys(params).length || handleActiveItem('inbox')}
@@ -77,7 +77,7 @@ const Sidebar = props => {
                 </ListGroupItem>
                 <ListGroupItem
                   tag={Link}
-                  to='/apps/email/sent'
+                  to='/email/sent'
                   onClick={() => handleFolder('sent')}
                   action
                   active={handleActiveItem('sent')}
@@ -87,7 +87,7 @@ const Sidebar = props => {
                 </ListGroupItem>
                 <ListGroupItem
                   tag={Link}
-                  to='/apps/email/draft'
+                  to='/email/draft'
                   onClick={() => handleFolder('draft')}
                   action
                   active={handleActiveItem('draft')}
@@ -102,7 +102,7 @@ const Sidebar = props => {
                 </ListGroupItem>
                 <ListGroupItem
                   tag={Link}
-                  to='/apps/email/starred'
+                  to='/email/starred'
                   onClick={() => handleFolder('starred')}
                   action
                   active={handleActiveItem('starred')}
@@ -112,7 +112,7 @@ const Sidebar = props => {
                 </ListGroupItem>
                 <ListGroupItem
                   tag={Link}
-                  to='/apps/email/spam'
+                  to='/email/spam'
                   onClick={() => handleFolder('spam')}
                   action
                   active={handleActiveItem('spam')}
@@ -127,7 +127,7 @@ const Sidebar = props => {
                 </ListGroupItem>
                 <ListGroupItem
                   tag={Link}
-                  to='/apps/email/trash'
+                  to='/email/trash'
                   onClick={() => handleFolder('trash')}
                   action
                   active={handleActiveItem('trash')}
@@ -140,7 +140,7 @@ const Sidebar = props => {
               <ListGroup tag='div' className='list-group-labels'>
                 <ListGroupItem
                   tag={Link}
-                  to='/apps/email/label/personal'
+                  to='/email/label/personal'
                   onClick={() => handleLabel('personal')}
                   active={handleActiveItem('personal')}
                   action
@@ -150,7 +150,7 @@ const Sidebar = props => {
                 </ListGroupItem>
                 <ListGroupItem
                   tag={Link}
-                  to='/apps/email/label/company'
+                  to='/email/label/company'
                   onClick={() => handleLabel('company')}
                   active={handleActiveItem('company')}
                   action
@@ -160,7 +160,7 @@ const Sidebar = props => {
                 </ListGroupItem>
                 <ListGroupItem
                   tag={Link}
-                  to='/apps/email/label/important'
+                  to='/email/label/important'
                   onClick={() => handleLabel('important')}
                   active={handleActiveItem('important')}
                   action
@@ -170,7 +170,7 @@ const Sidebar = props => {
                 </ListGroupItem>
                 <ListGroupItem
                   tag={Link}
-                  to='/apps/email/label/private'
+                  to='/email/label/private'
                   onClick={() => handleLabel('private')}
                   active={handleActiveItem('private')}
                   action

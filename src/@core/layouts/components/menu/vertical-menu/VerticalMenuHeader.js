@@ -51,10 +51,15 @@ const VerticalMenuHeader = props => {
       <ul className='nav navbar-nav flex-row'>
         <li className='nav-item me-auto'>
           <NavLink to={user ? getHomeRouteForLoggedInUser(user.role) : '/'} className='navbar-brand'>
-            <span className='brand-logo'>
-              <img src={themeConfig.app.appLogoImage} alt='logo' />
-            </span>
-            <h2 className='brand-text mb-0'>{themeConfig.app.appName}</h2>
+            {menuCollapsed && !menuHover ? (
+              <span className='brand-logo'>
+                <img src={themeConfig.app.appLogoImage} alt='logo' height='36' />
+              </span>
+            ) : (
+              <span className='brand-logo brand-logo-full'>
+                <img src={themeConfig.app.appLogoImageFull} alt={themeConfig.app.appName} height='36' />
+              </span>
+            )}
           </NavLink>
         </li>
         <li className='nav-item nav-toggle'>

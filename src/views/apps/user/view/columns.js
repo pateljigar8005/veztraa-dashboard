@@ -40,7 +40,7 @@ export const columns = [
     sortField: 'id',
     minWidth: '107px',
     selector: row => row.id,
-    cell: row => <Link className='fw-bolder' to={`/apps/invoice/preview/${row.id}`}>{`#${row.id}`}</Link>
+    cell: row => <Link className='fw-bolder' to={`/invoice/preview/${row.id}`}>{`#${row.id}`}</Link>
   },
   {
     name: <TrendingUp size={14} />,
@@ -89,7 +89,7 @@ export const columns = [
           Send Mail
         </UncontrolledTooltip>
 
-        <Link className='text-body' to={`/apps/invoice/preview/${row.id}`} id={`pw-tooltip-${row.id}`}>
+        <Link className='text-body' to={`/invoice/preview/${row.id}`} id={`pw-tooltip-${row.id}`}>
           <Eye size={17} className='mx-1' />
         </Link>
         <UncontrolledTooltip placement='top' target={`pw-tooltip-${row.id}`}>

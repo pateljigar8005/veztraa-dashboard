@@ -52,7 +52,7 @@ const InvoiceEdit = () => {
       <h4 className='alert-heading'>Invoice not found</h4>
       <div className='alert-body'>
         Invoice with id: {id} doesn't exist. Check list of all invoices:{' '}
-        <Link to='/apps/invoice/list'>Invoice List</Link>
+        <Link to='/invoice'>Invoice List</Link>
       </div>
     </Alert>
   )
