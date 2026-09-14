@@ -1,9 +1,6 @@
 // ** React Imports
 import { Fragment, useState, useEffect } from 'react'
 
-// ** Invoice List Sidebar
-import Sidebar from './Sidebar'
-
 // ** Table Columns
 import { columns } from './columns'
 
@@ -12,80 +9,19 @@ import { getAllData, getData } from '../store'
 import { useDispatch, useSelector } from 'react-redux'
 
 // ** Third Party Components
-import Select from 'react-select'
 import ReactPaginate from 'react-paginate'
 import DataTable from 'react-data-table-component'
-import { ChevronDown, Share, Printer, FileText, File, Grid, Copy } from 'react-feather'
-
-// ** Utils
-import { selectThemeColors } from '@utils'
+import { ChevronDown } from 'react-feather'
 
 // ** Reactstrap Imports
-import {
-  Row,
-  Col,
-  Card,
-  Input,
-  Label,
-  Button,
-  CardBody,
-  CardTitle,
-  CardHeader,
-  DropdownMenu,
-  DropdownItem,
-  DropdownToggle,
-  UncontrolledDropdown
-} from 'reactstrap'
+import { Row, Col, Card, Input } from 'reactstrap'
 
 // ** Styles
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 
 // ** Table Header
-const CustomHeader = ({ store, toggleSidebar, handlePerPage, rowsPerPage, handleFilter, searchTerm }) => {
-  // ** Converts table to CSV
-  function convertArrayOfObjectsToCSV(array) {
-    let result
-
-    const columnDelimiter = ','
-    const lineDelimiter = '\n'
-    const keys = Object.keys(store.data[0])
-
-    result = ''
-    result += keys.join(columnDelimiter)
-    result += lineDelimiter
-
-    array.forEach(item => {
-      let ctr = 0
-      keys.forEach(key => {
-        if (ctr > 0) result += columnDelimiter
-
-        result += item[key]
-
-        ctr++
-      })
-      result += lineDelimiter
-    })
-
-    return result
-  }
-
-  // ** Downloads CSV
-  function downloadCSV(array) {
-    const link = document.createElement('a')
-    let csv = convertArrayOfObjectsToCSV(array)
-    if (csv === null) return
-
-    const filename = 'export.csv'
-
-    if (!csv.match(/^data:text\/csv/i)) {
-      csv = `data:text/csv;charset=utf-8,${csv}`
-    }
-
-    link.setAttribute('href', encodeURI(csv))
-    link.setAttribute('download', filename)
-    link.click()
-  }
+const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) => {
   return (
     <div className='invoice-list-table-header w-100 me-1 ms-50 mt-2 mb-75'>
       <Row>
@@ -111,52 +47,15 @@ const CustomHeader = ({ store, toggleSidebar, handlePerPage, rowsPerPage, handle
           xl='6'
           className='d-flex align-items-sm-center justify-content-xl-end justify-content-start flex-xl-nowrap flex-wrap flex-sm-row flex-column pe-xl-1 p-0 mt-xl-0 mt-1'
         >
-          <div className='d-flex align-items-center mb-sm-0 mb-1 me-1'>
-            <label className='mb-0' htmlFor='search-invoice'>
-              Search:
-            </label>
+          <div className='d-flex align-items-center mb-sm-0 mb-1'>
             <Input
               id='search-invoice'
-              className='ms-50 w-100'
+              className='w-100'
               type='text'
+              placeholder='Search'
               value={searchTerm}
               onChange={e => handleFilter(e.target.value)}
             />
-          </div>
-
-          <div className='d-flex align-items-center table-header-actions'>
-            <UncontrolledDropdown className='me-1'>
-              <DropdownToggle color='secondary' caret outline>
-                <Share className='font-small-4 me-50' />
-                <span className='align-middle'>Export</span>
-              </DropdownToggle>
-              <DropdownMenu>
-                <DropdownItem className='w-100'>
-                  <Printer className='font-small-4 me-50' />
-                  <span className='align-middle'>Print</span>
-                </DropdownItem>
-                <DropdownItem className='w-100' onClick={() => downloadCSV(store.data)}>
-                  <FileText className='font-small-4 me-50' />
-                  <span className='align-middle'>CSV</span>
-                </DropdownItem>
-                <DropdownItem className='w-100'>
-                  <Grid className='font-small-4 me-50' />
-                  <span className='align-middle'>Excel</span>
-                </DropdownItem>
-                <DropdownItem className='w-100'>
-                  <File className='font-small-4 me-50' />
-                  <span className='align-middle'>PDF</span>
-                </DropdownItem>
-                <DropdownItem className='w-100'>
-                  <Copy className='font-small-4 me-50' />
-                  <span className='align-middle'>Copy</span>
-                </DropdownItem>
-              </DropdownMenu>
-            </UncontrolledDropdown>
-
-            <Button className='add-new-user' color='primary' onClick={toggleSidebar}>
-              Add New User
-            </Button>
           </div>
         </Col>
       </Row>
@@ -175,12 +74,6 @@ const UsersList = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [sortColumn, setSortColumn] = useState('id')
   const [rowsPerPage, setRowsPerPage] = useState(10)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [currentRole, setCurrentRole] = useState({ value: '', label: 'Select Role' })
-  const [currentStatus, setCurrentStatus] = useState({ value: '', label: 'Select Status', number: 0 })
-
-  // ** Function to toggle sidebar
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen)
 
   // ** Get data on mount
   useEffect(() => {
@@ -191,29 +84,10 @@ const UsersList = () => {
         sortColumn,
         q: searchTerm,
         page: currentPage,
-        perPage: rowsPerPage,
-        role: currentRole.value,
-        status: currentStatus.value
+        perPage: rowsPerPage
       })
     )
   }, [dispatch, store.data.length, sort, sortColumn, currentPage])
-
-  // ** User filter options
-  const roleOptions = [
-    { value: '', label: 'Select Role' },
-    { value: 'admin', label: 'Admin' },
-    { value: 'author', label: 'Author' },
-    { value: 'editor', label: 'Editor' },
-    { value: 'maintainer', label: 'Maintainer' },
-    { value: 'subscriber', label: 'Subscriber' }
-  ]
-
-  const statusOptions = [
-    { value: '', label: 'Select Status', number: 0 },
-    { value: 'pending', label: 'Pending', number: 1 },
-    { value: 'active', label: 'Active', number: 2 },
-    { value: 'inactive', label: 'Inactive', number: 3 }
-  ]
 
   // ** Function in get data on page change
   const handlePagination = page => {
@@ -223,9 +97,7 @@ const UsersList = () => {
         sortColumn,
         q: searchTerm,
         perPage: rowsPerPage,
-        page: page.selected + 1,
-        role: currentRole.value,
-        status: currentStatus.value
+        page: page.selected + 1
       })
     )
     setCurrentPage(page.selected + 1)
@@ -240,9 +112,7 @@ const UsersList = () => {
         sortColumn,
         q: searchTerm,
         perPage: value,
-        page: currentPage,
-        role: currentRole.value,
-        status: currentStatus.value
+        page: currentPage
       })
     )
     setRowsPerPage(value)
@@ -257,9 +127,7 @@ const UsersList = () => {
         q: val,
         sortColumn,
         page: currentPage,
-        perPage: rowsPerPage,
-        role: currentRole.value,
-        status: currentStatus.value
+        perPage: rowsPerPage
       })
     )
   }
@@ -289,15 +157,7 @@ const UsersList = () => {
 
   // ** Table data to render
   const dataToRender = () => {
-    const filters = {
-      role: currentRole.value,
-      status: currentStatus.value,
-      q: searchTerm
-    }
-
-    const isFiltered = Object.keys(filters).some(function (k) {
-      return filters[k].length > 0
-    })
+    const isFiltered = searchTerm.length > 0
 
     if (store.data.length > 0) {
       return store.data
@@ -317,9 +177,7 @@ const UsersList = () => {
         sortColumn,
         q: searchTerm,
         page: currentPage,
-        perPage: rowsPerPage,
-        role: currentRole.value,
-        status: currentStatus.value
+        perPage: rowsPerPage
       })
     )
   }
@@ -327,66 +185,6 @@ const UsersList = () => {
   return (
     <Fragment>
       <Card>
-        <CardHeader>
-          <CardTitle tag='h4'>Filters</CardTitle>
-        </CardHeader>
-        <CardBody>
-          <Row>
-            <Col md='6'>
-              <Label for='role-select'>Role</Label>
-              <Select
-                isClearable={false}
-                value={currentRole}
-                options={roleOptions}
-                className='react-select'
-                classNamePrefix='select'
-                theme={selectThemeColors}
-                onChange={data => {
-                  setCurrentRole(data)
-                  dispatch(
-                    getData({
-                      sort,
-                      sortColumn,
-                      q: searchTerm,
-                      role: data.value,
-                      page: currentPage,
-                      perPage: rowsPerPage,
-                      status: currentStatus.value
-                    })
-                  )
-                }}
-              />
-            </Col>
-            <Col md='6'>
-              <Label for='status-select'>Status</Label>
-              <Select
-                theme={selectThemeColors}
-                isClearable={false}
-                className='react-select'
-                classNamePrefix='select'
-                options={statusOptions}
-                value={currentStatus}
-                onChange={data => {
-                  setCurrentStatus(data)
-                  dispatch(
-                    getData({
-                      sort,
-                      sortColumn,
-                      q: searchTerm,
-                      page: currentPage,
-                      status: data.value,
-                      perPage: rowsPerPage,
-                      role: currentRole.value
-                    })
-                  )
-                }}
-              />
-            </Col>
-          </Row>
-        </CardBody>
-      </Card>
-
-      <Card className='overflow-hidden'>
         <div className='react-dataTable'>
           <DataTable
             noHeader
@@ -403,19 +201,15 @@ const UsersList = () => {
             data={dataToRender()}
             subHeaderComponent={
               <CustomHeader
-                store={store}
                 searchTerm={searchTerm}
                 rowsPerPage={rowsPerPage}
                 handleFilter={handleFilter}
                 handlePerPage={handlePerPage}
-                toggleSidebar={toggleSidebar}
               />
             }
           />
         </div>
       </Card>
-
-      <Sidebar open={sidebarOpen} toggleSidebar={toggleSidebar} />
     </Fragment>
   )
 }

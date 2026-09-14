@@ -1,3 +1,7 @@
+// ** Must run before any lazy chunk (e.g. the PDF Designer page) can inject
+// its global stylesheet - see the file for why this has to be first.
+import './utility/reportDesignerStyleGuard'
+
 // ** React Imports
 import { Suspense, lazy } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -24,6 +28,9 @@ import Spinner from './@core/components/spinner/Fallback-spinner'
 // ** Ripple Button
 import './@core/components/ripple-button'
 
+// ** Axios base config (must load before anything makes a request)
+import './configs/axiosConfig'
+
 // ** Fake Database
 import './@fake-db'
 
@@ -37,6 +44,9 @@ import 'react-perfect-scrollbar/dist/css/styles.css'
 
 // ** React Hot Toast Styles
 import '@styles/react/libs/react-hot-toasts/react-hot-toasts.scss'
+
+// ** Sweet Alerts (used for "are you sure?" delete confirmations)
+import './@core/scss/base/plugins/extensions/ext-component-sweet-alerts.scss'
 
 // ** Core styles
 import './@core/assets/fonts/feather/iconfont.css'

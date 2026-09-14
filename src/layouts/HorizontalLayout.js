@@ -8,6 +8,10 @@ import Layout from '@layouts/HorizontalLayout'
 // ** Menu Items Array
 import navigation from '@src/navigation/horizontal'
 
+// ** Utils
+import { filterNavByPermissions } from '@src/utility/navPermissions'
+import { useSyncedUserData } from '@src/utility/hooks/useSyncedUserData'
+
 const HorizontalLayout = props => {
   // const [menuData, setMenuData] = useState([])
 
@@ -16,8 +20,12 @@ const HorizontalLayout = props => {
   //   axios.get(URL).then(response => setMenuData(response.data))
   // }, [])
 
+  const userData = useSyncedUserData()
+
+  const menuData = filterNavByPermissions(navigation, userData)
+
   return (
-    <Layout menuData={navigation} {...props}>
+    <Layout menuData={menuData} {...props}>
       <Outlet />
     </Layout>
   )

@@ -1,73 +1,62 @@
 // ** React Imports
-import { Link } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { Fragment, useState, useEffect } from 'react'
 
 // ** Table Columns
 import { columns } from './columns'
 
+// ** Store & Actions
+import { getAllData, getData } from '../store'
+import { useDispatch, useSelector } from 'react-redux'
+
 // ** Third Party Components
 import ReactPaginate from 'react-paginate'
-import { ChevronDown } from 'react-feather'
 import DataTable from 'react-data-table-component'
+import { ChevronDown } from 'react-feather'
 
 // ** Reactstrap Imports
-import { Button, Input, Row, Col, Card } from 'reactstrap'
-
-// ** Store & Actions
-import { getData } from '../store'
-import { useDispatch, useSelector } from 'react-redux'
+import { Row, Col, Card, Input } from 'reactstrap'
 
 // ** Styles
 import '@styles/react/apps/app-invoice.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 
-const CustomHeader = ({ handleFilter, value, handleStatusValue, statusValue, handlePerPage, rowsPerPage }) => {
+// ** Table Header
+const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) => {
   return (
-    <div className='invoice-list-table-header w-100 py-2'>
+    <div className='invoice-list-table-header w-100 me-1 ms-50 mt-2 mb-75'>
       <Row>
-        <Col lg='6' className='d-flex align-items-center px-0 px-lg-1'>
-          <div className='d-flex align-items-center me-2'>
+        <Col xl='6' className='d-flex align-items-center p-0'>
+          <div className='d-flex align-items-center w-100'>
             <label htmlFor='rows-per-page'>Show</label>
             <Input
+              className='mx-50'
               type='select'
               id='rows-per-page'
               value={rowsPerPage}
               onChange={handlePerPage}
-              className='form-control ms-50 pe-3'
+              style={{ width: '5rem' }}
             >
               <option value='10'>10</option>
               <option value='25'>25</option>
               <option value='50'>50</option>
             </Input>
+            <label htmlFor='rows-per-page'>Entries</label>
           </div>
-          <Button tag={Link} to='/invoice/add' color='primary'>
-            Add Record
-          </Button>
         </Col>
         <Col
-          lg='6'
-          className='actions-right d-flex align-items-center justify-content-lg-end flex-lg-nowrap flex-wrap mt-lg-0 mt-1 pe-lg-1 p-0'
+          xl='6'
+          className='d-flex align-items-sm-center justify-content-xl-end justify-content-start flex-xl-nowrap flex-wrap flex-sm-row flex-column pe-xl-1 p-0 mt-xl-0 mt-1'
         >
-          <div className='d-flex align-items-center'>
-            <label htmlFor='search-invoice'>Search</label>
+          <div className='d-flex align-items-center mb-sm-0 mb-1'>
             <Input
               id='search-invoice'
-              className='ms-50 me-2 w-100'
+              className='w-100'
               type='text'
-              value={value}
+              placeholder='Search'
+              value={searchTerm}
               onChange={e => handleFilter(e.target.value)}
-              placeholder='Search Invoice'
             />
           </div>
-          <Input className='w-auto ' type='select' value={statusValue} onChange={handleStatusValue}>
-            <option value=''>Select Status</option>
-            <option value='downloaded'>Downloaded</option>
-            <option value='draft'>Draft</option>
-            <option value='paid'>Paid</option>
-            <option value='partial payment'>Partial Payment</option>
-            <option value='past due'>Past Due</option>
-            <option value='sent'>Sent</option>
-          </Input>
         </Col>
       </Row>
     </div>
@@ -75,80 +64,36 @@ const CustomHeader = ({ handleFilter, value, handleStatusValue, statusValue, han
 }
 
 const InvoiceList = () => {
-  // ** Store vars
+  // ** Store Vars
   const dispatch = useDispatch()
   const store = useSelector(state => state.invoice)
 
   // ** States
-  const [value, setValue] = useState('')
   const [sort, setSort] = useState('desc')
-  const [sortColumn, setSortColumn] = useState('id')
+  const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const [statusValue, setStatusValue] = useState('')
+  const [sortColumn, setSortColumn] = useState('id')
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
   useEffect(() => {
+    dispatch(getAllData())
     dispatch(
       getData({
         sort,
-        q: value,
         sortColumn,
+        q: searchTerm,
         page: currentPage,
-        perPage: rowsPerPage,
-        status: statusValue
+        perPage: rowsPerPage
       })
     )
-  }, [dispatch, store.data.length])
-
-  const handleFilter = val => {
-    setValue(val)
-    dispatch(
-      getData({
-        sort,
-        q: val,
-        sortColumn,
-        page: currentPage,
-        perPage: rowsPerPage,
-        status: statusValue
-      })
-    )
-  }
-
-  const handlePerPage = e => {
-    dispatch(
-      getData({
-        sort,
-        q: value,
-        sortColumn,
-        page: currentPage,
-        status: statusValue,
-        perPage: parseInt(e.target.value)
-      })
-    )
-    setRowsPerPage(parseInt(e.target.value))
-  }
-
-  const handleStatusValue = e => {
-    setStatusValue(e.target.value)
-    dispatch(
-      getData({
-        sort,
-        q: value,
-        sortColumn,
-        page: currentPage,
-        perPage: rowsPerPage,
-        status: e.target.value
-      })
-    )
-  }
+  }, [dispatch, store.data.length, sort, sortColumn, currentPage])
 
   const handlePagination = page => {
     dispatch(
       getData({
         sort,
-        q: value,
         sortColumn,
-        status: statusValue,
+        q: searchTerm,
         perPage: rowsPerPage,
         page: page.selected + 1
       })
@@ -156,40 +101,57 @@ const InvoiceList = () => {
     setCurrentPage(page.selected + 1)
   }
 
+  const handlePerPage = e => {
+    const value = parseInt(e.currentTarget.value)
+    dispatch(
+      getData({
+        sort,
+        sortColumn,
+        q: searchTerm,
+        perPage: value,
+        page: currentPage
+      })
+    )
+    setRowsPerPage(value)
+  }
+
+  const handleFilter = val => {
+    setSearchTerm(val)
+    dispatch(
+      getData({
+        sort,
+        q: val,
+        sortColumn,
+        page: currentPage,
+        perPage: rowsPerPage
+      })
+    )
+  }
+
   const CustomPagination = () => {
-    const count = Number((store.total / rowsPerPage).toFixed(0))
+    const count = Number(Math.ceil(store.total / rowsPerPage))
 
     return (
       <ReactPaginate
-        nextLabel=''
-        breakLabel='...'
-        previousLabel=''
+        previousLabel={''}
+        nextLabel={''}
         pageCount={count || 1}
         activeClassName='active'
-        breakClassName='page-item'
-        pageClassName={'page-item'}
-        breakLinkClassName='page-link'
-        nextLinkClassName={'page-link'}
-        pageLinkClassName={'page-link'}
-        nextClassName={'page-item next'}
-        previousLinkClassName={'page-link'}
-        previousClassName={'page-item prev'}
-        onPageChange={page => handlePagination(page)}
         forcePage={currentPage !== 0 ? currentPage - 1 : 0}
-        containerClassName={'pagination react-paginate justify-content-end p-1'}
+        onPageChange={page => handlePagination(page)}
+        pageClassName={'page-item'}
+        nextLinkClassName={'page-link'}
+        nextClassName={'page-item next'}
+        previousClassName={'page-item prev'}
+        previousLinkClassName={'page-link'}
+        pageLinkClassName={'page-link'}
+        containerClassName={'pagination react-paginate justify-content-end my-2 pe-1'}
       />
     )
   }
 
   const dataToRender = () => {
-    const filters = {
-      q: value,
-      status: statusValue
-    }
-
-    const isFiltered = Object.keys(filters).some(function (k) {
-      return filters[k].length > 0
-    })
+    const isFiltered = searchTerm.length > 0
 
     if (store.data.length > 0) {
       return store.data
@@ -205,49 +167,44 @@ const InvoiceList = () => {
     setSortColumn(column.sortField)
     dispatch(
       getData({
-        q: value,
+        sort,
+        sortColumn,
+        q: searchTerm,
         page: currentPage,
-        sort: sortDirection,
-        status: statusValue,
-        perPage: rowsPerPage,
-        sortColumn: column.sortField
+        perPage: rowsPerPage
       })
     )
   }
 
   return (
-    <div className='invoice-list-wrapper'>
+    <Fragment>
       <Card>
-        <div className='invoice-list-dataTable react-dataTable'>
+        <div className='react-dataTable'>
           <DataTable
             noHeader
-            pagination
+            subHeader
             sortServer
+            pagination
+            responsive
             paginationServer
-            subHeader={true}
             columns={columns}
-            responsive={true}
             onSort={handleSort}
-            data={dataToRender()}
             sortIcon={<ChevronDown />}
             className='react-dataTable'
-            defaultSortField='invoiceId'
-            paginationDefaultPage={currentPage}
             paginationComponent={CustomPagination}
+            data={dataToRender()}
             subHeaderComponent={
               <CustomHeader
-                value={value}
-                statusValue={statusValue}
+                searchTerm={searchTerm}
                 rowsPerPage={rowsPerPage}
                 handleFilter={handleFilter}
                 handlePerPage={handlePerPage}
-                handleStatusValue={handleStatusValue}
               />
             }
           />
         </div>
       </Card>
-    </div>
+    </Fragment>
   )
 }
 

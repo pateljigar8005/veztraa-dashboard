@@ -7,7 +7,6 @@ import './apps/email'
 import './apps/kanban'
 import './apps/invoice'
 import './apps/calendar'
-import './apps/userList'
 import './cards/card-analytics'
 import './cards/card-statistics'
 

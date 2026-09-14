@@ -4,11 +4,10 @@ import { useState, Fragment } from 'react'
 // ** Third Party Components
 import classnames from 'classnames'
 import Flatpickr from 'react-flatpickr'
-import { Editor } from 'react-draft-wysiwyg'
+import { Editor } from '@veztraa/editor'
 import { X, Star, Trash } from 'react-feather'
 import Select, { components } from 'react-select' //eslint-disable-line
 import { useForm, Controller } from 'react-hook-form'
-import { EditorState, ContentState } from 'draft-js'
 
 // ** Reactstrap Imports
 import { Modal, ModalBody, Button, Form, Input, Label, FormFeedback } from 'reactstrap'
@@ -25,7 +24,6 @@ import img5 from '@src/assets/images/portrait/small/avatar-s-2.jpg'
 import img6 from '@src/assets/images/portrait/small/avatar-s-11.jpg'
 
 // ** Styles Imports
-import '@styles/react/libs/editor/editor.scss'
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 import '@styles/react/libs/react-select/_react-select.scss'
 
@@ -74,7 +72,7 @@ const TaskSidebar = props => {
   // ** States
   const [assignee, setAssignee] = useState({ value: 'pheobe', label: 'Pheobe Buffay', img: img1 })
   const [tags, setTags] = useState([])
-  const [desc, setDesc] = useState(EditorState.createEmpty())
+  const [desc, setDesc] = useState('')
   const [completed, setCompleted] = useState(false)
   const [important, setImportant] = useState(false)
   const [deleted, setDeleted] = useState(false)
@@ -155,14 +153,7 @@ const TaskSidebar = props => {
         }
       ])
       setDueDate(selectedTask.dueDate)
-      if (typeof selectedTask.description === 'string') {
-        setDesc(EditorState.createWithContent(ContentState.createFromText(selectedTask.description)))
-      } else {
-        const obj = selectedTask.description._immutable.currentContent.blockMap
-        const property = Object.keys(obj).map(val => val)
-
-        setDesc(EditorState.createWithContent(ContentState.createFromText(obj[property].text)))
-      }
+      setDesc(typeof selectedTask.description === 'string' ? selectedTask.description : '')
 
       if (selectedTask.tags.length) {
         const tags = []
@@ -189,10 +180,8 @@ const TaskSidebar = props => {
 
   // ** Function to reset fields
   const handleResetFields = () => {
-    const descValue = EditorState.createWithContent(ContentState.createFromText(store.selectedTask.description))
-
     setValue('title', store.selectedTask.title)
-    setDesc(descValue)
+    setDesc(typeof store.selectedTask.description === 'string' ? store.selectedTask.description : '')
     setCompleted(store.selectedTask.isCompleted)
     setImportant(store.selectedTask.isImportant)
     setDeleted(store.selectedTask.isDeleted)
@@ -373,18 +362,7 @@ const TaskSidebar = props => {
             <Label for='task-desc' className='form-label'>
               Description
             </Label>
-            <Editor
-              editorState={desc}
-              wrapperClassName='toolbar-bottom'
-              toolbar={{
-                options: ['inline', 'textAlign'],
-                inline: {
-                  inDropdown: false,
-                  options: ['bold', 'italic', 'underline']
-                }
-              }}
-              onEditorStateChange={data => setDesc(data)}
-            />
+            <Editor value={desc} onChange={setDesc} height={150} />
           </div>
           <div>{renderFooterButtons()}</div>
         </ModalBody>

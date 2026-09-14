@@ -5,33 +5,46 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 
 export const getAllData = createAsyncThunk('appUsers/getAllData', async () => {
-  const response = await axios.get('/api/users/list/all-data')
-  return response.data
+  const response = await axios.get('/users', { params: { perPage: 100 } })
+  return response.data.data.users
 })
 
 export const getData = createAsyncThunk('appUsers/getData', async params => {
-  const response = await axios.get('/api/users/list/data', params)
+  const response = await axios.get('/users', {
+    params: {
+      page: params.page || 1,
+      perPage: params.perPage || 10,
+      q: params.q || ''
+    }
+  })
   return {
     params,
-    data: response.data.users,
-    totalPages: response.data.total
+    data: response.data.data.users,
+    totalPages: response.data.data.total
   }
 })
 
 export const getUser = createAsyncThunk('appUsers/getUser', async id => {
-  const response = await axios.get('/api/users/user', { id })
-  return response.data.user
+  const response = await axios.get(`/users/${id}`)
+  return response.data.data
 })
 
 export const addUser = createAsyncThunk('appUsers/addUser', async (user, { dispatch, getState }) => {
-  await axios.post('/apps/users/add-user', user)
+  const response = await axios.post('/users', user)
   await dispatch(getData(getState().users.params))
   await dispatch(getAllData())
-  return user
+  return response.data.data
+})
+
+export const updateUser = createAsyncThunk('appUsers/updateUser', async ({ id, ...user }, { dispatch, getState }) => {
+  const response = await axios.put(`/users/${id}`, user)
+  await dispatch(getData(getState().users.params))
+  await dispatch(getAllData())
+  return response.data.data
 })
 
 export const deleteUser = createAsyncThunk('appUsers/deleteUser', async (id, { dispatch, getState }) => {
-  await axios.delete('/apps/users/delete', { id })
+  await axios.delete(`/users/${id}`)
   await dispatch(getData(getState().users.params))
   await dispatch(getAllData())
   return id

@@ -47,6 +47,10 @@
 // Select Menu
 .select__menu,
 .react-select__menu {
+  z-index: 1000;
+  background-color: $white;
+  opacity: 1;
+
   .select__menu-list,
   .react-select__menu-list {
     .select__option,

@@ -1,195 +1,170 @@
 // ** React Imports
 import { Fragment } from 'react'
 import { Link } from 'react-router-dom'
-
-// ** Custom Components
-import Avatar from '@components/avatar'
+import toast from 'react-hot-toast'
 
 // ** Store & Actions
 import { store } from '@store/store'
 import { deleteInvoice } from '../store'
 
+// ** Icons Imports
+import { Copy, FileText, Trash2 } from 'react-feather'
+
 // ** Reactstrap Imports
-import {
-  Badge,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-  UncontrolledTooltip,
-  UncontrolledDropdown
-} from 'reactstrap'
+import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
 
-// ** Third Party Components
-import {
-  Eye,
-  Send,
-  Edit,
-  Copy,
-  Save,
-  Info,
-  Trash,
-  PieChart,
-  Download,
-  TrendingUp,
-  CheckCircle,
-  MoreVertical,
-  ArrowDownCircle
-} from 'react-feather'
+// ** Utils
+import { currentUserCan } from '@src/utility/navPermissions'
+import { confirmDelete } from '@src/utility/confirmDelete'
 
-// ** Vars
-const invoiceStatusObj = {
-  Sent: { color: 'light-secondary', icon: Send },
-  Paid: { color: 'light-success', icon: CheckCircle },
-  Draft: { color: 'light-primary', icon: Save },
-  Downloaded: { color: 'light-info', icon: ArrowDownCircle },
-  'Past Due': { color: 'light-danger', icon: Info },
-  'Partial Payment': { color: 'light-warning', icon: PieChart }
+const statusColorObj = {
+  draft: 'light-secondary',
+  sent: 'light-info',
+  paid: 'light-success',
+  partial: 'light-warning',
+  overdue: 'light-danger'
 }
 
-// ** renders client column
-const renderClient = row => {
-  const stateNum = Math.floor(Math.random() * 6),
-    states = ['light-success', 'light-danger', 'light-warning', 'light-info', 'light-primary', 'light-secondary'],
-    color = states[stateNum]
-
-  if (row.avatar.length) {
-    return <Avatar className='me-50' img={row.avatar} width='32' height='32' />
-  } else {
-    return <Avatar color={color} className='me-50' content={row.client ? row.client.name : 'John Doe'} initials />
-  }
+const computeTotal = i => {
+  const subtotal = (i.line_items || []).reduce((sum, item) => sum + (Number(item.qty) || 0) * (Number(item.rate) || 0), 0)
+  const taxAmount = subtotal * ((Number(i.tax_rate) || 0) / 100)
+  const discountAmount = i.discount_type === '%' ? subtotal * ((Number(i.discount_value) || 0) / 100) : Number(i.discount_value) || 0
+  return subtotal + taxAmount - discountAmount
 }
 
-// ** Table columns
 export const columns = [
   {
-    name: '#',
+    name: 'Invoice #',
     sortable: true,
+    minWidth: '140px',
     sortField: 'id',
-    minWidth: '107px',
-    // selector: row => row.id,
-    cell: row => <Link to={`/invoice/preview/${row.id}`}>{`#${row.id}`}</Link>
+    selector: row => row.invoice_number,
+    cell: row => (
+      <Link to={`/invoice/view/${row.id}`} className='text-body'>
+        <span className='fw-bolder'>{row.invoice_number}</span>
+      </Link>
+    )
   },
   {
+    name: 'Customer',
     sortable: true,
-    minWidth: '102px',
-    sortField: 'invoiceStatus',
-    name: <TrendingUp size={14} />,
-    // selector: row => row.invoiceStatus,
-    cell: row => {
-      const color = invoiceStatusObj[row.invoiceStatus] ? invoiceStatusObj[row.invoiceStatus].color : 'primary',
-        Icon = invoiceStatusObj[row.invoiceStatus] ? invoiceStatusObj[row.invoiceStatus].icon : Edit
-      return (
-        <Fragment>
-          <Avatar color={color} icon={<Icon size={14} />} id={`av-tooltip-${row.id}`} />
-          <UncontrolledTooltip placement='top' target={`av-tooltip-${row.id}`}>
-            <span className='fw-bold'>{row.invoiceStatus}</span>
-            <br />
-            <span className='fw-bold'>Balance:</span> {row.balance}
-            <br />
-            <span className='fw-bold'>Due Date:</span> {row.dueDate}
-          </UncontrolledTooltip>
-        </Fragment>
-      )
-    }
+    minWidth: '240px',
+    sortField: 'contact_name',
+    selector: row => row.contact_name,
+    cell: row => (
+      <div className='d-flex flex-column'>
+        <Link to={`/invoice/view/${row.id}`} className='user_name text-truncate text-body'>
+          <span className='fw-bolder'>{row.contact_name}</span>
+        </Link>
+        <small className='text-truncate text-muted mb-0'>{row.company_name || '-'}</small>
+      </div>
+    )
   },
   {
-    name: 'Client',
+    name: 'Due Date',
+    minWidth: '140px',
     sortable: true,
-    minWidth: '350px',
-    sortField: 'client.name',
-    // selector: row => row.client.name,
-    cell: row => {
-      const name = row.client ? row.client.name : 'John Doe',
-        email = row.client ? row.client.companyEmail : 'johnDoe@email.com'
-      return (
-        <div className='d-flex justify-content-left align-items-center'>
-          {renderClient(row)}
-          <div className='d-flex flex-column'>
-            <h6 className='user-name text-truncate mb-0'>{name}</h6>
-            <small className='text-truncate text-muted mb-0'>{email}</small>
-          </div>
-        </div>
-      )
-    }
+    sortField: 'due_date',
+    selector: row => row.due_date,
+    cell: row => <span>{row.due_date}</span>
   },
   {
     name: 'Total',
-    sortable: true,
-    minWidth: '150px',
-    sortField: 'total',
-    // selector: row => row.total,
-    cell: row => <span>${row.total || 0}</span>
+    minWidth: '120px',
+    selector: row => row.total,
+    cell: row => (
+      <span>
+        {row.currency} {computeTotal(row).toFixed(2)}
+      </span>
+    )
   },
   {
-    sortable: true,
-    minWidth: '200px',
-    name: 'Issued Date',
-    sortField: 'dueDate',
-    cell: row => row.dueDate
-    // selector: row => row.dueDate
+    name: 'Balance Due',
+    minWidth: '130px',
+    selector: row => row.balance_due,
+    cell: row => (
+      <span className={Number(row.balance_due) > 0 ? 'text-danger' : 'text-success'}>
+        {row.currency} {Number(row.balance_due ?? computeTotal(row)).toFixed(2)}
+      </span>
+    )
   },
   {
+    name: 'Status',
+    minWidth: '120px',
     sortable: true,
-    name: 'Balance',
-    minWidth: '164px',
-    sortField: 'balance',
-    // selector: row => row.balance,
-    cell: row => {
-      return row.balance !== 0 ? (
-        <span>{row.balance}</span>
-      ) : (
-        <Badge color='light-success' pill>
-          Paid
-        </Badge>
-      )
-    }
+    sortField: 'status',
+    selector: row => row.status,
+    cell: row => (
+      <Badge className='text-capitalize' color={statusColorObj[row.status] || 'light-secondary'} pill>
+        {row.status}
+      </Badge>
+    )
   },
   {
-    name: 'Action',
-    minWidth: '110px',
+    name: 'Actions',
+    right: true,
+    minWidth: '130px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
-        <Send className='cursor-pointer' size={17} id={`send-tooltip-${row.id}`} />
-        <UncontrolledTooltip placement='top' target={`send-tooltip-${row.id}`}>
-          Send Mail
+        <Button
+          tag={Link}
+          to={`/invoice/view/${row.id}`}
+          id={`details-tooltip-${row.id}`}
+          className='btn-icon me-1'
+          color='flat-secondary'
+          size='sm'
+          style={{ borderRadius: '4px', backgroundColor: '#82868b1f' }}
+        >
+          <FileText size={16} className='text-secondary' />
+        </Button>
+        <UncontrolledTooltip placement='top' target={`details-tooltip-${row.id}`}>
+          Details
         </UncontrolledTooltip>
-        <Link to={`/invoice/preview/${row.id}`} id={`pw-tooltip-${row.id}`}>
-          <Eye size={17} className='mx-1' />
-        </Link>
-        <UncontrolledTooltip placement='top' target={`pw-tooltip-${row.id}`}>
-          Preview Invoice
-        </UncontrolledTooltip>
-        <UncontrolledDropdown>
-          <DropdownToggle tag='span'>
-            <MoreVertical size={17} className='cursor-pointer' />
-          </DropdownToggle>
-          <DropdownMenu end>
-            <DropdownItem tag='a' href='/' className='w-100' onClick={e => e.preventDefault()}>
-              <Download size={14} className='me-50' />
-              <span className='align-middle'>Download</span>
-            </DropdownItem>
-            <DropdownItem tag={Link} to={`/invoice/edit/${row.id}`} className='w-100'>
-              <Edit size={14} className='me-50' />
-              <span className='align-middle'>Edit</span>
-            </DropdownItem>
-            <DropdownItem
+
+        {currentUserCan('/invoice', 'add') && (
+          <Fragment>
+            <Button
+              tag={Link}
+              to={`/invoice/add?clone=${row.id}`}
+              id={`clone-tooltip-${row.id}`}
+              className='btn-icon me-1'
+              color='flat-secondary'
+              size='sm'
+              style={{ borderRadius: '4px', backgroundColor: '#82868b1f' }}
+            >
+              <Copy size={16} className='text-secondary' />
+            </Button>
+            <UncontrolledTooltip placement='top' target={`clone-tooltip-${row.id}`}>
+              Clone
+            </UncontrolledTooltip>
+          </Fragment>
+        )}
+
+        {currentUserCan('/invoice', 'delete') && (
+          <Fragment>
+            <Button
               tag='a'
               href='/'
-              className='w-100'
+              id={`delete-tooltip-${row.id}`}
+              className='btn-icon'
+              color='flat-danger'
+              size='sm'
+              style={{ borderRadius: '4px', backgroundColor: '#ea54551f' }}
               onClick={e => {
                 e.preventDefault()
-                store.dispatch(deleteInvoice(row.id))
+                confirmDelete({
+                  text: `This will permanently delete the invoice for "${row.contact_name}".`,
+                  onConfirm: () => store.dispatch(deleteInvoice(row.id)).then(() => toast.success('Invoice deleted'))
+                })
               }}
             >
-              <Trash size={14} className='me-50' />
-              <span className='align-middle'>Delete</span>
-            </DropdownItem>
-            <DropdownItem tag='a' href='/' className='w-100' onClick={e => e.preventDefault()}>
-              <Copy size={14} className='me-50' />
-              <span className='align-middle'>Duplicate</span>
-            </DropdownItem>
-          </DropdownMenu>
-        </UncontrolledDropdown>
+              <Trash2 size={16} className='text-danger' />
+            </Button>
+            <UncontrolledTooltip placement='top' target={`delete-tooltip-${row.id}`}>
+              Delete
+            </UncontrolledTooltip>
+          </Fragment>
+        )}
       </div>
     )
   }

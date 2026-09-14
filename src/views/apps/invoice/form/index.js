@@ -1,0 +1,493 @@
+// ** React Imports
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+
+// ** Third Party Components
+import axios from 'axios'
+import toast from 'react-hot-toast'
+import Select from 'react-select'
+import { useForm, useFieldArray, Controller } from 'react-hook-form'
+import { useDispatch, useSelector } from 'react-redux'
+
+// ** Reactstrap Imports
+import { Row, Col, Card, CardHeader, CardTitle, CardBody, Form, Label, Input } from 'reactstrap'
+
+// ** Utils
+import { selectThemeColors } from '@utils'
+
+// ** Shared Components
+import CatalogModal from '../../shared/CatalogModal'
+import TermsSection from '../../shared/TermsSection'
+import PaymentMethodSection from '../../shared/PaymentMethodSection'
+import LineItemsTable from '../../shared/LineItemsTable'
+
+// ** Store & Actions
+import { addInvoice, updateInvoice, getInvoice } from '../store'
+
+// ** Options
+import { discountTypeOptions } from '../../quotation/documentOptions'
+
+// ** Styles
+import '@styles/react/libs/react-select/_react-select.scss'
+import '@styles/base/pages/app-invoice.scss'
+
+const defaultValues = {
+  contact_name: '',
+  company_name: '',
+  email: '',
+  phone: '',
+  billing_address: '',
+  issue_date: new Date().toISOString().slice(0, 10),
+  due_date: '',
+  status: 'draft',
+  tax_rate: 0,
+  discount_value: 0,
+  line_items: [{ description: '', qty: 1, rate: 0 }]
+}
+
+const InvoiceForm = () => {
+  // ** Hooks & Vars
+  const { id } = useParams()
+  const [searchParams] = useSearchParams()
+  const preselectedClientId = searchParams.get('client_id')
+  const cloneId = searchParams.get('clone')
+  const isEdit = Boolean(id)
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const store = useSelector(state => state.invoice)
+
+  const [clientOptions, setClientOptions] = useState([])
+  const [currencyOptions, setCurrencyOptions] = useState([])
+  const [paymentMethodOptions, setPaymentMethodOptions] = useState([])
+  const [templateOptions, setTemplateOptions] = useState([])
+  const [termsContent, setTermsContent] = useState('')
+  const [paymentMethodContent, setPaymentMethodContent] = useState('')
+  const [catalogOpen, setCatalogOpen] = useState(false)
+  const [taxEnabled, setTaxEnabled] = useState(true)
+  const [defaultDueDays, setDefaultDueDays] = useState(null)
+
+  const {
+    control,
+    reset,
+    setValue,
+    setError,
+    handleSubmit,
+    watch,
+    formState: { errors }
+  } = useForm({ defaultValues })
+
+  const { fields, append, remove, move } = useFieldArray({ control, name: 'line_items' })
+
+  const clientId = watch('client_id')
+  const status = watch('status')
+  const currency = watch('currency')
+  const paymentMethodId = watch('payment_method_id')
+  const templateId = watch('terms_template_id')
+  const lineItems = watch('line_items')
+  const taxRate = watch('tax_rate')
+  const discountValue = watch('discount_value')
+  const discountType = watch('discount_type')
+
+  useEffect(() => {
+    axios.get('/clients', { params: { perPage: 100 } }).then(response => {
+      setClientOptions(
+        response.data.data.clients.map(c => ({
+          value: c.id,
+          label: c.fullName,
+          company_name: c.company_name,
+          email: c.email,
+          phone: c.phone,
+          address: c.address,
+          currency_icon: c.currency_icon
+        }))
+      )
+    })
+    axios.get('/currencies', { params: { perPage: 100 } }).then(response => {
+      setCurrencyOptions(
+        response.data.data.currencies
+          .filter(c => c.is_active)
+          .map(c => ({ value: c.icon, label: `${c.name} (${c.icon})` }))
+      )
+    })
+    axios.get('/payment-methods', { params: { perPage: 100 } }).then(response => {
+      setPaymentMethodOptions(
+        response.data.data.paymentMethods
+          .filter(m => m.is_active)
+          .map(m => ({ value: m.id, label: m.name, content: m.description }))
+      )
+    })
+    axios.get('/terms-templates', { params: { perPage: 100 } }).then(response => {
+      setTemplateOptions(response.data.data.termsTemplates.map(t => ({ value: t.id, label: t.name, content: t.content })))
+    })
+    axios.get('/company').then(response => {
+      setTaxEnabled(!!response.data.data.tax_enabled)
+      setDefaultDueDays(response.data.data.default_due_days)
+    })
+  }, [])
+
+  useEffect(() => {
+    if (!isEdit && preselectedClientId) {
+      setValue('client_id', Number(preselectedClientId))
+    }
+  }, [preselectedClientId])
+
+  // ** Fetch the invoice being edited, or the source invoice being cloned
+  useEffect(() => {
+    if (isEdit) dispatch(getInvoice(id))
+    else if (cloneId) dispatch(getInvoice(cloneId))
+  }, [id, cloneId])
+
+  useEffect(() => {
+    const sourceId = isEdit ? Number(id) : Number(cloneId)
+    if (sourceId && store.selectedInvoice && store.selectedInvoice.id === sourceId) {
+      const inv = store.selectedInvoice
+      reset({
+        contact_name: inv.contact_name || '',
+        company_name: inv.company_name || '',
+        email: inv.email || '',
+        phone: inv.phone || '',
+        billing_address: inv.billing_address || '',
+        issue_date: inv.issue_date || '',
+        due_date: inv.due_date || '',
+        tax_rate: inv.tax_rate || 0,
+        discount_value: inv.discount_value || 0,
+        line_items: inv.line_items && inv.line_items.length ? inv.line_items : [{ description: '', qty: 1, rate: 0 }]
+      })
+      setValue('client_id', inv.client_id || '')
+      setValue('status', inv.status || 'draft')
+      setValue('currency', inv.currency || 'USD')
+      setValue('payment_method_id', inv.payment_method_id || '')
+      setValue('terms_template_id', inv.terms_template_id || '')
+      setValue('discount_type', inv.discount_type || '$')
+      setTermsContent(inv.terms_content || '')
+      setPaymentMethodContent(inv.payment_method_content || '')
+    }
+  }, [store.selectedInvoice])
+
+  const handleQuickFill = option => {
+    setValue('client_id', option ? option.value : '')
+    if (option) {
+      setValue('contact_name', option.label)
+      setValue('company_name', option.company_name || '')
+      setValue('email', option.email || '')
+      setValue('phone', option.phone || '')
+      setValue('billing_address', option.address || '')
+      if (option.currency_icon) setValue('currency', option.currency_icon)
+    }
+  }
+
+  // ** Auto-fill Due Date from Company Settings' default term whenever the
+  // user picks an issue date - only on an explicit change, not while an
+  // existing/cloned invoice's dates are being loaded. Built from the y/m/d
+  // parts directly (rather than `new Date(str)` + `toISOString()`, which
+  // parses/formats in UTC) so it can't shift a day depending on the
+  // browser's local timezone.
+  const handleIssueDateChange = onChange => e => {
+    onChange(e)
+    const value = e.target.value
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+    if (defaultDueDays === null || defaultDueDays === undefined || !match) return
+
+    const due = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+    if (isNaN(due.getTime())) return
+
+    due.setDate(due.getDate() + Number(defaultDueDays))
+    const pad = n => String(n).padStart(2, '0')
+    setValue('due_date', `${due.getFullYear()}-${pad(due.getMonth() + 1)}-${pad(due.getDate())}`)
+  }
+
+  const handleAddFromCatalog = items => {
+    if (lineItems.length === 1 && !lineItems[0].description) {
+      remove(0)
+    }
+    items.forEach(item => append({ description: item.name, qty: 1, rate: item.price }))
+  }
+
+  const subtotal = (lineItems || []).reduce((sum, item) => sum + (Number(item.qty) || 0) * (Number(item.rate) || 0), 0)
+  const taxAmount = taxEnabled ? subtotal * ((Number(taxRate) || 0) / 100) : 0
+  const discountAmount =
+    discountType === '%' ? subtotal * ((Number(discountValue) || 0) / 100) : Number(discountValue) || 0
+  const total = subtotal + taxAmount - discountAmount
+
+  const checkIsValid = data => ['contact_name', 'issue_date', 'due_date'].every(key => data[key].length > 0)
+
+  const onSubmit = data => {
+    if (checkIsValid(data)) {
+      const payload = {
+        client_id: clientId || null,
+        contact_name: data.contact_name,
+        company_name: data.company_name,
+        email: data.email,
+        phone: data.phone,
+        billing_address: data.billing_address,
+        status: status || 'draft',
+        currency: currency || 'USD',
+        issue_date: data.issue_date,
+        due_date: data.due_date,
+        line_items: data.line_items,
+        terms_template_id: templateId || null,
+        terms_content: termsContent,
+        payment_method_id: paymentMethodId || null,
+        payment_method_content: paymentMethodContent,
+        tax_rate: taxEnabled ? Number(data.tax_rate) || 0 : 0,
+        discount_value: Number(data.discount_value) || 0,
+        discount_type: discountType || '$'
+      }
+
+      const action = isEdit ? updateInvoice({ id: Number(id), ...payload }) : addInvoice(payload)
+      dispatch(action).then(result => {
+        toast.success(isEdit ? 'Invoice updated' : 'Invoice added')
+        navigate(`/invoice/view/${result.payload.id}`)
+      })
+    } else {
+      for (const key of ['contact_name', 'issue_date', 'due_date']) {
+        if (!data[key] || data[key].length === 0) {
+          setError(key, { type: 'manual' })
+        }
+      }
+    }
+  }
+
+  const selectedClientOption = clientOptions.find(i => i.value === clientId) || null
+  const selectedCurrencyOption = currencyOptions.find(i => i.value === currency) || null
+  const selectedDiscountTypeOption = discountTypeOptions.find(i => i.value === discountType) || null
+
+  return (
+    <div className='invoice-add-wrapper'>
+      <Form onSubmit={handleSubmit(onSubmit)}>
+        <Row className='invoice-add'>
+          <Col xl={9} md={8} sm={12}>
+            <Card className='invoice-preview-card'>
+              {/* Header */}
+              <CardBody className='invoice-padding pb-0'>
+                <div className='d-flex justify-content-end invoice-spacing mt-0'>
+                  <div className='invoice-number-date'>
+                    <div className='d-flex align-items-center mb-1'>
+                      <span className='title me-1'>Issue Date:</span>
+                      <Controller
+                        name='issue_date'
+                        control={control}
+                        render={({ field }) => (
+                          <Input
+                            type='date'
+                            className='invoice-edit-input'
+                            invalid={errors.issue_date && true}
+                            {...field}
+                            onChange={handleIssueDateChange(field.onChange)}
+                          />
+                        )}
+                      />
+                    </div>
+                    <div className='d-flex align-items-center'>
+                      <span className='title me-1'>Due Date:</span>
+                      <Controller
+                        name='due_date'
+                        control={control}
+                        render={({ field }) => (
+                          <Input type='date' className='invoice-edit-input' invalid={errors.due_date && true} {...field} />
+                        )}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardBody>
+              {/* /Header */}
+
+              <hr className='invoice-spacing' />
+
+              {/* Bill To & Details */}
+              <CardBody className='invoice-padding pt-0'>
+                <Row className='row-bill-to invoice-spacing'>
+                  <Col className='col-bill-to ps-0' xl='12'>
+                    <h6 className='invoice-to-title'>Bill To:</h6>
+                    <Label className='form-label small mb-50'>⚡ Quick Fill Customer</Label>
+                    <Select
+                      isClearable
+                      className='react-select mb-1'
+                      classNamePrefix='select'
+                      theme={selectThemeColors}
+                      options={clientOptions}
+                      value={selectedClientOption}
+                      onChange={handleQuickFill}
+                      placeholder='Type to search customers...'
+                    />
+                    <Row>
+                      <Col md={6} className='mb-1'>
+                        <Label className='form-label' for='contact_name'>
+                          Contact Name <span className='text-danger'>*</span>
+                        </Label>
+                        <Controller
+                          name='contact_name'
+                          control={control}
+                          render={({ field }) => <Input id='contact_name' invalid={errors.contact_name && true} {...field} />}
+                        />
+                      </Col>
+                      <Col md={6} className='mb-1'>
+                        <Label className='form-label' for='company_name'>
+                          Company Name
+                        </Label>
+                        <Controller
+                          name='company_name'
+                          control={control}
+                          render={({ field }) => <Input id='company_name' {...field} />}
+                        />
+                      </Col>
+                      <Col md={6} className='mb-1'>
+                        <Label className='form-label' for='email'>
+                          Email
+                        </Label>
+                        <Controller name='email' control={control} render={({ field }) => <Input type='email' id='email' {...field} />} />
+                      </Col>
+                      <Col md={6} className='mb-1'>
+                        <Label className='form-label' for='phone'>
+                          Phone
+                        </Label>
+                        <Controller name='phone' control={control} render={({ field }) => <Input id='phone' {...field} />} />
+                      </Col>
+                      <Col md={12}>
+                        <Label className='form-label' for='billing_address'>
+                          Billing Address
+                        </Label>
+                        <Controller
+                          name='billing_address'
+                          control={control}
+                          render={({ field }) => <Input type='textarea' rows='3' id='billing_address' {...field} />}
+                        />
+                      </Col>
+                    </Row>
+                  </Col>
+                </Row>
+              </CardBody>
+              {/* /Bill To */}
+
+              {/* Product Details */}
+              <LineItemsTable
+                control={control}
+                fields={fields}
+                lineItems={lineItems}
+                remove={remove}
+                move={move}
+                onAddItem={() => append({ description: '', qty: 1, rate: 0 })}
+                onOpenCatalog={() => setCatalogOpen(true)}
+              />
+              {/* /Product Details */}
+
+              {/* Invoice Total */}
+              <CardBody className='invoice-padding'>
+                <Row className='invoice-sales-total-wrapper'>
+                  <Col md={12}>
+                    <div className='invoice-total-wrapper' style={{ width: '100%', maxWidth: 'none' }}>
+                      <div className='invoice-total-item'>
+                        <p className='invoice-total-title'>Subtotal:</p>
+                        <p className='invoice-total-amount'>${subtotal.toFixed(2)}</p>
+                      </div>
+                      {taxEnabled && (
+                        <>
+                          <div className='invoice-total-item align-items-center'>
+                            <p className='invoice-total-title mb-0'>Tax Rate (%):</p>
+                            <Controller
+                              name='tax_rate'
+                              control={control}
+                              render={({ field }) => <Input type='number' step='0.01' min='0' style={{ width: '90px' }} {...field} />}
+                            />
+                          </div>
+                          <div className='invoice-total-item'>
+                            <p className='invoice-total-title'>Tax Amount:</p>
+                            <p className='invoice-total-amount'>${taxAmount.toFixed(2)}</p>
+                          </div>
+                        </>
+                      )}
+                      <div className='invoice-total-item align-items-center'>
+                        <p className='invoice-total-title mb-0'>Discount:</p>
+                        <div className='d-flex'>
+                          <Controller
+                            name='discount_value'
+                            control={control}
+                            render={({ field }) => <Input type='number' step='0.01' min='0' style={{ width: '90px' }} {...field} />}
+                          />
+                          <Select
+                            className='react-select ms-1'
+                            classNamePrefix='select'
+                            theme={selectThemeColors}
+                            options={discountTypeOptions}
+                            value={selectedDiscountTypeOption}
+                            onChange={option => setValue('discount_type', option ? option.value : '$')}
+                            styles={{ container: base => ({ ...base, minWidth: '70px' }) }}
+                          />
+                        </div>
+                      </div>
+                      <div className='invoice-total-item'>
+                        <p className='invoice-total-title'>Discount Amount:</p>
+                        <p className='invoice-total-amount text-success'>-${discountAmount.toFixed(2)}</p>
+                      </div>
+                      <hr className='my-50' />
+                      <div className='invoice-total-item'>
+                        <p className='invoice-total-title'>Total:</p>
+                        <p className='invoice-total-amount'>${total.toFixed(2)}</p>
+                      </div>
+                    </div>
+                  </Col>
+                </Row>
+              </CardBody>
+              {/* /Invoice Total */}
+
+              <hr className='invoice-spacing mt-0' />
+
+              {/* Invoice Note & Terms */}
+              <CardBody className='invoice-padding py-0'>
+                <Row>
+                  <Col>
+                    <div className='mb-2'>
+                      <TermsSection
+                        templateOptions={templateOptions}
+                        templateId={templateId}
+                        onTemplateChange={value => setValue('terms_template_id', value)}
+                        content={termsContent}
+                        onContentChange={setTermsContent}
+                        defaultOpen={isEdit || Boolean(cloneId)}
+                      />
+                    </div>
+                    <div className='mb-2'>
+                      <PaymentMethodSection
+                        methodOptions={paymentMethodOptions}
+                        methodId={paymentMethodId}
+                        onMethodChange={value => setValue('payment_method_id', value)}
+                        content={paymentMethodContent}
+                        onContentChange={setPaymentMethodContent}
+                        defaultOpen={isEdit || Boolean(cloneId)}
+                      />
+                    </div>
+                  </Col>
+                </Row>
+              </CardBody>
+              {/* /Invoice Note & Terms */}
+            </Card>
+          </Col>
+
+          <Col xl={3} md={4} sm={12}>
+            <Card style={{ position: 'sticky', top: '7rem' }}>
+              <CardHeader>
+                <CardTitle tag='h4'>Invoice Details</CardTitle>
+              </CardHeader>
+              <CardBody>
+                <Label className='form-label'>Currency</Label>
+                <Select
+                  className='react-select'
+                  classNamePrefix='select'
+                  theme={selectThemeColors}
+                  options={currencyOptions}
+                  value={selectedCurrencyOption}
+                  onChange={option => setValue('currency', option ? option.value : 'USD')}
+                />
+              </CardBody>
+            </Card>
+          </Col>
+        </Row>
+
+        <CatalogModal isOpen={catalogOpen} toggle={() => setCatalogOpen(!catalogOpen)} onAdd={handleAddFromCatalog} />
+      </Form>
+    </div>
+  )
+}
+
+export default InvoiceForm

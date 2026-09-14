@@ -8,6 +8,9 @@ import Avatar from '@components/avatar'
 // ** Utils
 import { isUserLoggedIn } from '@utils'
 
+// ** Auth
+import useJwt from '@src/auth/jwt/useJwt'
+
 // ** Store & Actions
 import { useDispatch } from 'react-redux'
 import { handleLogout } from '@store/authentication'
@@ -17,9 +20,6 @@ import { Mail, CheckSquare, MessageSquare, Power } from 'react-feather'
 
 // ** Reactstrap Imports
 import { UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem } from 'reactstrap'
-
-// ** Default Avatar Image
-import defaultAvatar from '@src/assets/images/portrait/small/avatar-s-11.jpg'
 
 const UserDropdown = () => {
   // ** Store Vars
@@ -36,16 +36,20 @@ const UserDropdown = () => {
   }, [])
 
   //** Vars
-  const userAvatar = (userData && userData.avatar) || defaultAvatar
+  const displayName = (userData && userData.fullName) || 'John Doe'
 
   return (
     <UncontrolledDropdown tag='li' className='dropdown-user nav-item'>
       <DropdownToggle href='/' tag='a' className='nav-link dropdown-user-link' onClick={e => e.preventDefault()}>
         <div className='user-nav d-sm-flex d-none'>
-          <span className='user-name fw-bold'>{(userData && userData['username']) || 'John Doe'}</span>
+          <span className='user-name fw-bold'>{displayName}</span>
           <span className='user-status'>{(userData && userData.role) || 'Admin'}</span>
         </div>
-        <Avatar img={userAvatar} imgHeight='40' imgWidth='40' status='online' />
+        {userData && userData.avatar ? (
+          <Avatar img={userData.avatar} imgHeight='40' imgWidth='40' />
+        ) : (
+          <Avatar initials content={displayName} color='light-primary' imgHeight='40' imgWidth='40' />
+        )}
       </DropdownToggle>
       <DropdownMenu end>
         <DropdownItem tag={Link} to='/email'>
@@ -61,7 +65,11 @@ const UserDropdown = () => {
           <span className='align-middle'>Chats</span>
         </DropdownItem>
         <DropdownItem divider />
-        <DropdownItem tag={Link} to='/login' onClick={() => dispatch(handleLogout())}>
+        <DropdownItem
+          tag={Link}
+          to='/login'
+          onClick={() => useJwt.logout().finally(() => dispatch(handleLogout()))}
+        >
           <Power size={14} className='me-75' />
           <span className='align-middle'>Logout</span>
         </DropdownItem>

@@ -31,8 +31,8 @@ import { Card, CardBody, CardTitle, CardText, Form, Label, Input, Button, FormFe
 import '@styles/react/pages/page-authentication.scss'
 
 const defaultValues = {
-  password: 'admin',
-  loginEmail: 'admin@demo.com'
+  password: '',
+  loginEmail: ''
 }
 
 const LoginBasic = () => {

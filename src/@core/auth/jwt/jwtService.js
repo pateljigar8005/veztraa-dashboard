@@ -105,4 +105,10 @@ export default class JwtService {
       refreshToken: this.getRefreshToken()
     })
   }
+
+  logout() {
+    return axios.post(this.jwtConfig.logoutEndpoint, {
+      refreshToken: this.getRefreshToken()
+    })
+  }
 }

@@ -5,7 +5,7 @@ import { useState } from 'react'
 import Avatar from '@components/avatar'
 
 // ** Third Party Components
-import { Editor } from 'react-draft-wysiwyg'
+import { Editor } from '@veztraa/editor'
 import Select, { components } from 'react-select'
 import { Minus, X, Maximize2, Paperclip, MoreVertical, Trash } from 'react-feather'
 
@@ -36,7 +36,6 @@ import img5 from '@src/assets/images/portrait/small/avatar-s-2.jpg'
 import img6 from '@src/assets/images/portrait/small/avatar-s-11.jpg'
 
 // ** Styles
-import '@styles/react/libs/editor/editor.scss'
 import '@styles/react/libs/react-select/_react-select.scss'
 
 const ComposePopup = props => {
@@ -46,6 +45,7 @@ const ComposePopup = props => {
   // ** States
   const [ccOpen, setCCOpen] = useState(false)
   const [bccOpen, setBCCOpen] = useState(false)
+  const [message, setMessage] = useState('')
 
   // ** User Select Options & Components
   const selectOptions = [
@@ -196,19 +196,7 @@ const ComposePopup = props => {
             <Input id='email-subject' placeholder='Subject' />
           </div>
           <div id='message-editor'>
-            <Editor
-              placeholder='Message'
-              toolbarClassName='rounded-0'
-              wrapperClassName='toolbar-bottom'
-              editorClassName='rounded-0 border-0'
-              toolbar={{
-                options: ['inline', 'textAlign'],
-                inline: {
-                  inDropdown: false,
-                  options: ['bold', 'italic', 'underline', 'strikethrough']
-                }
-              }}
-            />
+            <Editor value={message} onChange={setMessage} placeholder='Message' height={200} />
           </div>
           <div className='compose-footer-wrapper'>
             <div className='btn-wrapper d-flex align-items-center'>
