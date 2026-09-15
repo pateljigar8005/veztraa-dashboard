@@ -20,9 +20,6 @@ import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
 
-// ** Industry Options
-import { industryOptions } from '../industryOptions'
-
 // ** Renders Client Column
 const renderClient = row => (
   <Avatar
@@ -39,8 +36,6 @@ const statusObj = {
   inactive: 'light-secondary'
 }
 
-const industryLabel = value => industryOptions.find(i => i.value === value)?.label || value || '-'
-
 export const columns = [
   {
     name: 'Client',
@@ -49,13 +44,15 @@ export const columns = [
     sortField: 'fullName',
     selector: row => row.fullName,
     cell: row => (
-      <div className='d-flex justify-content-left align-items-center'>
+      <div className='d-flex justify-content-left align-items-center' style={{ minWidth: 0 }}>
         {renderClient(row)}
-        <div className='d-flex flex-column'>
-          <Link to={`/client/view/${row.id}`} className='user_name text-truncate text-body'>
+        <div className='d-flex flex-column overflow-hidden' style={{ minWidth: 0 }}>
+          <Link to={`/client/view/${row.id}`} className='user_name text-truncate text-body' title={row.fullName}>
             <span className='fw-bolder'>{row.fullName}</span>
           </Link>
-          <small className='text-truncate text-muted mb-0'>{row.email}</small>
+          <small className='text-truncate text-muted mb-0' title={row.email}>
+            {row.email}
+          </small>
         </div>
       </div>
     )
@@ -72,9 +69,9 @@ export const columns = [
     name: 'Industry',
     minWidth: '160px',
     sortable: true,
-    sortField: 'industry',
-    selector: row => row.industry,
-    cell: row => <span>{industryLabel(row.industry)}</span>
+    sortField: 'industry_name',
+    selector: row => row.industry_name,
+    cell: row => <span>{row.industry_name || '-'}</span>
   },
   {
     name: 'Currency',

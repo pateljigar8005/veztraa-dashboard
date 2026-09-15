@@ -23,6 +23,9 @@ const PaymentMethodForm = lazy(() => import('../../views/apps/payment-method/for
 const CurrencyList = lazy(() => import('../../views/apps/currency/list'))
 const CurrencyForm = lazy(() => import('../../views/apps/currency/form'))
 
+const IndustryList = lazy(() => import('../../views/apps/industry/list'))
+const IndustryForm = lazy(() => import('../../views/apps/industry/form'))
+
 const ServiceItemList = lazy(() => import('../../views/apps/service-item/list'))
 const ServiceItemForm = lazy(() => import('../../views/apps/service-item/form'))
 
@@ -36,14 +39,28 @@ const PdfDesignerTemplateForm = lazy(() => import('../../views/apps/pdf-designer
 
 const QuotationList = lazy(() => import('../../views/apps/quotation/list'))
 const QuotationForm = lazy(() => import('../../views/apps/quotation/form'))
+const QuotationView = lazy(() => import('../../views/apps/quotation/view'))
 
 const ContractList = lazy(() => import('../../views/apps/contract/list'))
 const ContractForm = lazy(() => import('../../views/apps/contract/form'))
+const ContractView = lazy(() => import('../../views/apps/contract/view'))
 
 const Roles = lazy(() => import('../../views/apps/roles-permissions/roles'))
 const RoleForm = lazy(() => import('../../views/apps/roles-permissions/roles/form'))
 
 const CompanySettings = lazy(() => import('../../views/apps/company'))
+
+const TeamMemberList = lazy(() => import('../../views/apps/team-member/list'))
+const TeamMemberForm = lazy(() => import('../../views/apps/team-member/form'))
+
+const PortfolioList = lazy(() => import('../../views/apps/portfolio/list'))
+const PortfolioForm = lazy(() => import('../../views/apps/portfolio/form'))
+
+const CaseStudyList = lazy(() => import('../../views/apps/case-study/list'))
+const CaseStudyForm = lazy(() => import('../../views/apps/case-study/form'))
+
+const JobListingList = lazy(() => import('../../views/apps/job-listing/list'))
+const JobListingForm = lazy(() => import('../../views/apps/job-listing/form'))
 
 const AppRoutes = [
   {
@@ -208,6 +225,18 @@ const AppRoutes = [
     path: '/currency/edit/:id'
   },
   {
+    element: <IndustryList />,
+    path: '/industry'
+  },
+  {
+    element: <IndustryForm />,
+    path: '/industry/add'
+  },
+  {
+    element: <IndustryForm />,
+    path: '/industry/edit/:id'
+  },
+  {
     element: <ServiceItemList />,
     path: '/service-item'
   },
@@ -261,11 +290,24 @@ const AppRoutes = [
   },
   {
     element: <QuotationForm />,
-    path: '/quotation/add'
+    path: '/quotation/add',
+    meta: {
+      className: 'invoice-form-page'
+    }
   },
   {
     element: <QuotationForm />,
-    path: '/quotation/edit/:id'
+    path: '/quotation/edit/:id',
+    meta: {
+      className: 'invoice-form-page'
+    }
+  },
+  {
+    element: <QuotationView />,
+    path: '/quotation/view/:id',
+    meta: {
+      className: 'invoice-form-page'
+    }
   },
   {
     element: <ContractList />,
@@ -273,15 +315,76 @@ const AppRoutes = [
   },
   {
     element: <ContractForm />,
-    path: '/contract/add'
+    path: '/contract/add',
+    meta: {
+      className: 'invoice-form-page'
+    }
   },
   {
     element: <ContractForm />,
-    path: '/contract/edit/:id'
+    path: '/contract/edit/:id',
+    meta: {
+      className: 'invoice-form-page'
+    }
+  },
+  {
+    element: <ContractView />,
+    path: '/contract/view/:id',
+    meta: {
+      className: 'invoice-form-page'
+    }
   },
   {
     element: <CompanySettings />,
     path: '/company'
+  },
+  {
+    element: <TeamMemberList />,
+    path: '/team-member'
+  },
+  {
+    element: <TeamMemberForm />,
+    path: '/team-member/add'
+  },
+  {
+    element: <TeamMemberForm />,
+    path: '/team-member/edit/:id'
+  },
+  {
+    element: <PortfolioList />,
+    path: '/portfolio'
+  },
+  {
+    element: <PortfolioForm />,
+    path: '/portfolio/add'
+  },
+  {
+    element: <PortfolioForm />,
+    path: '/portfolio/edit/:id'
+  },
+  {
+    element: <CaseStudyList />,
+    path: '/case-study'
+  },
+  {
+    element: <CaseStudyForm />,
+    path: '/case-study/add'
+  },
+  {
+    element: <CaseStudyForm />,
+    path: '/case-study/edit/:id'
+  },
+  {
+    element: <JobListingList />,
+    path: '/job-listing'
+  },
+  {
+    element: <JobListingForm />,
+    path: '/job-listing/add'
+  },
+  {
+    element: <JobListingForm />,
+    path: '/job-listing/edit/:id'
   }
 ]
 

@@ -1,6 +1,9 @@
 // ** React Imports
 import { Fragment, useState, useEffect } from 'react'
 
+// ** Hooks
+import useDebounce from '@hooks/useDebounce'
+
 // ** Table Columns
 import { columns } from './columns'
 
@@ -23,7 +26,7 @@ import '@styles/react/libs/tables/react-dataTable-component.scss'
 // ** Table Header
 const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) => {
   return (
-    <div className='invoice-list-table-header w-100 me-1 ms-50 mt-2 mb-75'>
+    <div className='invoice-list-table-header w-100 me-1 ms-50 mt-1 mb-75'>
       <Row>
         <Col xl='6' className='d-flex align-items-center p-0'>
           <div className='d-flex align-items-center w-100'>
@@ -45,7 +48,7 @@ const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) 
         </Col>
         <Col
           xl='6'
-          className='d-flex align-items-sm-center justify-content-xl-end justify-content-start flex-xl-nowrap flex-wrap flex-sm-row flex-column pe-xl-1 p-0 mt-xl-0 mt-1'
+          className='d-flex align-items-sm-center justify-content-xl-end justify-content-start flex-xl-nowrap flex-wrap flex-sm-row flex-column  p-0 mt-xl-0 mt-1'
         >
           <div className='d-flex align-items-center mb-sm-0 mb-1'>
             <Input
@@ -75,6 +78,9 @@ const TermsTemplatesList = () => {
   const [sortColumn, setSortColumn] = useState('id')
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
+  // ** Debounce the search term so typing doesn't fire a request per keystroke
+  const debouncedSearchTerm = useDebounce(searchTerm, 400)
+
   // ** Get data on mount
   useEffect(() => {
     dispatch(getAllData())
@@ -82,12 +88,12 @@ const TermsTemplatesList = () => {
       getData({
         sort,
         sortColumn,
-        q: searchTerm,
+        q: debouncedSearchTerm,
         page: currentPage,
         perPage: rowsPerPage
       })
     )
-  }, [dispatch, store.data.length, sort, sortColumn, currentPage])
+  }, [dispatch, sort, sortColumn, currentPage, debouncedSearchTerm])
 
   // ** Function in get data on page change
   const handlePagination = page => {
@@ -119,17 +125,11 @@ const TermsTemplatesList = () => {
   }
 
   // ** Function in get data on search query change
+  // ** Debounced via debouncedSearchTerm above - just update local state and
+  // reset to page 1 here; the mount effect refetches once typing settles.
   const handleFilter = val => {
     setSearchTerm(val)
-    dispatch(
-      getData({
-        sort,
-        q: val,
-        sortColumn,
-        page: currentPage,
-        perPage: rowsPerPage
-      })
-    )
+    setCurrentPage(1)
   }
 
   // ** Custom Pagination
@@ -168,18 +168,13 @@ const TermsTemplatesList = () => {
     }
   }
 
+  // ** Just update the sort state - the mount effect above already
+  // depends on [sort, sortColumn] and refetches with the new values.
+  // (Dispatching here too used the stale pre-update sort/sortColumn from
+  // this closure, so the table always sorted one click behind.)
   const handleSort = (column, sortDirection) => {
     setSort(sortDirection)
     setSortColumn(column.sortField)
-    dispatch(
-      getData({
-        sort,
-        sortColumn,
-        q: searchTerm,
-        page: currentPage,
-        perPage: rowsPerPage
-      })
-    )
   }
 
   return (

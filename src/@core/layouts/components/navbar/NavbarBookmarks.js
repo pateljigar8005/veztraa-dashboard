@@ -23,12 +23,17 @@ const listToAddRoute = {
   '/terms-template': '/terms-template/add',
   '/pdf-designer': '/pdf-designer/add',
   '/currency': '/currency/add',
-  '/roles': '/roles/add'
+  '/industry': '/industry/add',
+  '/roles': '/roles/add',
+  '/team-member': '/team-member/add',
+  '/portfolio': '/portfolio/add',
+  '/case-study': '/case-study/add',
+  '/job-listing': '/job-listing/add'
 }
 
 // ** Matches any module's "/add" or "/edit/:id" form route
 const addOrEditRoutePattern =
-  /^\/(user|client|payment-method|service-item|project|quotation|contract|invoice|terms-template|roles|pdf-designer|currency)\/(add|edit\/[^/]+)$/
+  /^\/(user|client|payment-method|service-item|project|quotation|contract|invoice|terms-template|roles|pdf-designer|currency|industry|team-member|portfolio|case-study|job-listing)\/(add|edit\/[^/]+)$/
 
 // ** The PDF Designer page has no <form> - only the widget's own toolbar Save
 // button can hand back the current design (see its form/index.js). So on that
@@ -40,10 +45,16 @@ const isPdfDesignerFormRoute = pathname => /^\/pdf-designer\/(add|edit\/[^/]+)$/
 // just /company), but it's still a <form> the navbar Save icon should submit.
 const isCompanySettingsRoute = pathname => pathname === '/company'
 
-// ** Only the Invoice Details page currently offers a PDF download - it does
-// the actual rendering itself (via @veztraa/report-renderer) and exposes a
-// button with this id for the navbar icon to forward the click into.
-const isInvoiceViewRoute = pathname => /^\/invoice\/view\/[^/]+$/.test(pathname)
+// ** The Invoice, Contract and Quotation Details pages each offer a PDF
+// download - they render it themselves (via @veztraa/report-renderer) and
+// expose a hidden button whose id this table maps to, for the navbar icon
+// to forward its click into.
+const downloadButtonIdByRoute = [
+  { pattern: /^\/invoice\/view\/[^/]+$/, buttonId: 'invoice-download-pdf-btn' },
+  { pattern: /^\/contract\/view\/[^/]+$/, buttonId: 'contract-download-pdf-btn' },
+  { pattern: /^\/quotation\/view\/[^/]+$/, buttonId: 'quotation-download-pdf-btn' }
+]
+const findDownloadButtonId = pathname => downloadButtonIdByRoute.find(i => i.pattern.test(pathname))?.buttonId || null
 
 const NavbarBookmarks = props => {
   // ** Props
@@ -61,7 +72,17 @@ const NavbarBookmarks = props => {
   }
 
   const addRoute = listToAddRoute[location.pathname]
+  const isListRoute = Boolean(listToAddRoute[location.pathname])
   const addEnabled = Boolean(addRoute) && hasActionPermission(location.pathname, 'add', userData)
+
+  // ** A list page that supports advanced search renders a hidden button
+  // with this id (see AdvancedSearchModal usage in each module's Table.js);
+  // pages that don't (e.g. Roles, which has no server-side search) simply
+  // don't render one, so the click silently no-ops.
+  const handleSearch = () => {
+    if (!isListRoute) return
+    document.getElementById('navbar-advanced-search-trigger')?.click()
+  }
 
   const saveRouteAction = inferRouteAction(location.pathname)
   const isSaveRoute = addOrEditRoutePattern.test(location.pathname) || isCompanySettingsRoute(location.pathname)
@@ -79,10 +100,11 @@ const NavbarBookmarks = props => {
     if (form) form.requestSubmit()
   }
 
-  const downloadEnabled = isInvoiceViewRoute(location.pathname)
+  const downloadButtonId = findDownloadButtonId(location.pathname)
+  const downloadEnabled = Boolean(downloadButtonId)
   const handleDownload = () => {
-    if (!downloadEnabled) return
-    document.getElementById('invoice-download-pdf-btn')?.click()
+    if (!downloadButtonId) return
+    document.getElementById(downloadButtonId)?.click()
   }
 
   return (
@@ -124,12 +146,13 @@ const NavbarBookmarks = props => {
           <NavLink
             className='nav-link-style'
             id='navbar-search-btn'
-            style={{ opacity: addEnabled ? 1 : 0.35, pointerEvents: addEnabled ? 'auto' : 'none' }}
+            style={{ opacity: isListRoute ? 1 : 0.35, pointerEvents: isListRoute ? 'auto' : 'none' }}
+            onClick={handleSearch}
           >
             <Search className='ficon' />
           </NavLink>
           <UncontrolledTooltip placement='bottom' target='navbar-search-btn'>
-            {addEnabled ? 'Search' : 'Search (open a list page first)'}
+            {isListRoute ? 'Advanced Search' : 'Search (open a list page first)'}
           </UncontrolledTooltip>
         </NavItem>
         <NavItem className='d-none d-lg-block'>
@@ -167,7 +190,7 @@ const NavbarBookmarks = props => {
             <Download className='ficon' />
           </NavLink>
           <UncontrolledTooltip placement='bottom' target='navbar-download-btn'>
-            {downloadEnabled ? 'Download PDF' : 'Download PDF (open an invoice first)'}
+            {downloadEnabled ? 'Download PDF' : 'Download PDF (open an invoice, contract or quotation first)'}
           </UncontrolledTooltip>
         </NavItem>
       </ul>

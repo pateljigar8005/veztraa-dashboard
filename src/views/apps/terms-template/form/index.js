@@ -2,6 +2,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
+// ** Hooks
+import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
+
 // ** Third Party Components
 import toast from 'react-hot-toast'
 import { Editor } from '@veztraa/editor'
@@ -25,14 +28,19 @@ const TermsTemplateForm = () => {
   const store = useSelector(state => state.termsTemplates)
 
   const [content, setContent] = useState('')
+  // Tracks edits to content, which isn't registered with react-hook-form so
+  // its own isDirty can't see it.
+  const [extraDirty, setExtraDirty] = useState(false)
 
   const {
     control,
     reset,
     setError,
     handleSubmit,
-    formState: { errors }
+    formState: { errors, isDirty }
   } = useForm({ defaultValues })
+
+  useUnsavedChangesGuard(isDirty || extraDirty)
 
   useEffect(() => {
     if (isEdit) dispatch(getTermsTemplate(id))
@@ -81,7 +89,14 @@ const TermsTemplateForm = () => {
             </Col>
             <Col md={12}>
               <Label className='form-label'>Content</Label>
-              <Editor value={content} onChange={setContent} height={500} />
+              <Editor
+                value={content}
+                onChange={value => {
+                  setContent(value)
+                  setExtraDirty(true)
+                }}
+                height={500}
+              />
             </Col>
           </Row>
         </Form>

@@ -2,6 +2,9 @@
 import { Fragment, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
+// ** Hooks
+import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
+
 // ** Third Party Components
 import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
@@ -45,14 +48,19 @@ const RoleForm = () => {
 
   // ** permissions shape: { [menuId]: { view, add, edit, delete, export } }
   const [permissions, setPermissions] = useState({})
+  // Tracks edits to permissions, which isn't registered with react-hook-form
+  // so its own isDirty can't see it.
+  const [extraDirty, setExtraDirty] = useState(false)
 
   const {
     control,
     reset,
     setError,
     handleSubmit,
-    formState: { errors }
+    formState: { errors, isDirty }
   } = useForm({ defaultValues })
+
+  useUnsavedChangesGuard(isDirty || extraDirty)
 
   useEffect(() => {
     if (isEdit) dispatch(getRole(id))
@@ -72,6 +80,7 @@ const RoleForm = () => {
       const current = prev[menuId] || {}
       return { ...prev, [menuId]: applyPermissionRule(current, action, !current[action]) }
     })
+    setExtraDirty(true)
   }
 
   const allItems = menuPermissionGroups.flatMap(group => group.items)
@@ -86,6 +95,7 @@ const RoleForm = () => {
       })
       return next
     })
+    setExtraDirty(true)
   }
 
   const isRowAllChecked = menuId => actions.every(action => isChecked(menuId, action))
@@ -95,6 +105,7 @@ const RoleForm = () => {
       ...prev,
       [menuId]: { view: checked, add: checked, edit: checked, delete: checked, export: checked }
     }))
+    setExtraDirty(true)
   }
 
   const onSubmit = data => {

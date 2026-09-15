@@ -14,7 +14,10 @@ export const getData = createAsyncThunk('appProjects/getData', async params => {
     params: {
       page: params.page || 1,
       perPage: params.perPage || 10,
-      q: params.q || ''
+      q: params.q || '',
+      sortColumn: params.sortColumn || 'id',
+      sortDirection: params.sort || 'desc',
+      ...params.filters
     }
   })
   return {
@@ -53,6 +56,26 @@ export const deleteProject = createAsyncThunk('appProjects/deleteProject', async
   return id
 })
 
+export const getProjectDocuments = createAsyncThunk('appProjects/getProjectDocuments', async projectId => {
+  const response = await axios.get(`/projects/${projectId}/documents`)
+  return response.data.data.documents
+})
+
+export const uploadProjectDocument = createAsyncThunk(
+  'appProjects/uploadProjectDocument',
+  async ({ projectId, file }) => {
+    const formData = new FormData()
+    formData.append('document', file)
+    const response = await axios.post(`/projects/${projectId}/documents`, formData)
+    return response.data.data
+  }
+)
+
+export const deleteProjectDocument = createAsyncThunk('appProjects/deleteProjectDocument', async id => {
+  await axios.delete(`/project-documents/${id}`)
+  return id
+})
+
 export const appProjectsSlice = createSlice({
   name: 'appProjects',
   initialState: {
@@ -60,7 +83,8 @@ export const appProjectsSlice = createSlice({
     total: 1,
     params: {},
     allData: [],
-    selectedProject: null
+    selectedProject: null,
+    documents: []
   },
   reducers: {},
   extraReducers: builder => {
@@ -75,6 +99,15 @@ export const appProjectsSlice = createSlice({
       })
       .addCase(getProject.fulfilled, (state, action) => {
         state.selectedProject = action.payload
+      })
+      .addCase(getProjectDocuments.fulfilled, (state, action) => {
+        state.documents = action.payload
+      })
+      .addCase(uploadProjectDocument.fulfilled, (state, action) => {
+        state.documents = [action.payload, ...state.documents]
+      })
+      .addCase(deleteProjectDocument.fulfilled, (state, action) => {
+        state.documents = state.documents.filter(d => d.id !== action.payload)
       })
   }
 })

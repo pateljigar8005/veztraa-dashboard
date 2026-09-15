@@ -15,7 +15,11 @@ import {
   PenTool,
   Globe,
   Layout,
-  DollarSign
+  DollarSign,
+  Users,
+  Image,
+  Award,
+  List
 } from 'react-feather'
 
 export default [
@@ -86,6 +90,33 @@ export default [
     navLink: '/invoice'
   },
   {
+    header: 'Website'
+  },
+  {
+    id: 'teamMembers',
+    title: 'Team',
+    icon: <Users size={20} />,
+    navLink: '/team-member'
+  },
+  {
+    id: 'portfolioItems',
+    title: 'Portfolio',
+    icon: <Image size={20} />,
+    navLink: '/portfolio'
+  },
+  {
+    id: 'caseStudies',
+    title: 'Case Studies',
+    icon: <Award size={20} />,
+    navLink: '/case-study'
+  },
+  {
+    id: 'jobListings',
+    title: 'Job Listings',
+    icon: <List size={20} />,
+    navLink: '/job-listing'
+  },
+  {
     header: 'Settings'
   },
   {
@@ -135,5 +166,11 @@ export default [
     title: 'Currency',
     icon: <DollarSign size={20} />,
     navLink: '/currency'
+  },
+  {
+    id: 'industries',
+    title: 'Industry',
+    icon: <Briefcase size={20} />,
+    navLink: '/industry'
   }
 ]

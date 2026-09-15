@@ -15,10 +15,15 @@ import quotations from '@src/views/apps/quotation/store'
 import contracts from '@src/views/apps/contract/store'
 import paymentMethods from '@src/views/apps/payment-method/store'
 import currencies from '@src/views/apps/currency/store'
+import industries from '@src/views/apps/industry/store'
 import serviceItems from '@src/views/apps/service-item/store'
 import termsTemplates from '@src/views/apps/terms-template/store'
 import pdfDesignerTemplates from '@src/views/apps/pdf-designer/store'
 import roles from '@src/views/apps/roles-permissions/roles/store'
+import teamMembers from '@src/views/apps/team-member/store'
+import portfolioItems from '@src/views/apps/portfolio/store'
+import caseStudies from '@src/views/apps/case-study/store'
+import jobListings from '@src/views/apps/job-listing/store'
 
 const rootReducer = {
   auth,
@@ -37,10 +42,15 @@ const rootReducer = {
   contracts,
   paymentMethods,
   currencies,
+  industries,
   serviceItems,
   termsTemplates,
   pdfDesignerTemplates,
-  roles
+  roles,
+  teamMembers,
+  portfolioItems,
+  caseStudies,
+  jobListings
 }
 
 export default rootReducer

@@ -1,6 +1,17 @@
 // ** React Imports
 import { Fragment, useState, useEffect } from 'react'
 
+// ** Hooks
+import useDebounce from '@hooks/useDebounce'
+
+// ** Axios
+import axios from 'axios'
+
+// ** Shared Components
+import AdvancedSearchModal from '../../shared/AdvancedSearchModal'
+// ** Options
+import { invoiceStatusOptions, currencyOptions } from '../../quotation/documentOptions'
+
 // ** Table Columns
 import { columns } from './columns'
 
@@ -14,16 +25,31 @@ import DataTable from 'react-data-table-component'
 import { ChevronDown } from 'react-feather'
 
 // ** Reactstrap Imports
-import { Row, Col, Card, Input } from 'reactstrap'
+import { Row, Col, Card, Input, Button } from 'reactstrap'
 
 // ** Styles
 import '@styles/react/apps/app-invoice.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 
+
+const searchFields = [
+  { name: 'status', label: 'Status', type: 'select', options: invoiceStatusOptions },
+  {
+    name: 'client_id',
+    label: 'Client',
+    type: 'select',
+    fetchOptions: () =>
+      axios.get('/clients', { params: { perPage: 100 } }).then(r => r.data.data.clients.map(c => ({ value: c.id, label: c.fullName })))
+  },
+  { name: 'currency', label: 'Currency', type: 'select', options: currencyOptions },
+  { name: 'issue_date', label: 'Issue Date', type: 'date-range' },
+  { name: 'due_date', label: 'Due Date', type: 'date-range' },
+  { name: 'total', label: 'Total Amount', type: 'number-range' }
+]
 // ** Table Header
 const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) => {
   return (
-    <div className='invoice-list-table-header w-100 me-1 ms-50 mt-2 mb-75'>
+    <div className='invoice-list-table-header w-100 me-1 ms-50 mt-1 mb-75'>
       <Row>
         <Col xl='6' className='d-flex align-items-center p-0'>
           <div className='d-flex align-items-center w-100'>
@@ -45,7 +71,7 @@ const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) 
         </Col>
         <Col
           xl='6'
-          className='d-flex align-items-sm-center justify-content-xl-end justify-content-start flex-xl-nowrap flex-wrap flex-sm-row flex-column pe-xl-1 p-0 mt-xl-0 mt-1'
+          className='d-flex align-items-sm-center justify-content-xl-end justify-content-start flex-xl-nowrap flex-wrap flex-sm-row flex-column  p-0 mt-xl-0 mt-1'
         >
           <div className='d-flex align-items-center mb-sm-0 mb-1'>
             <Input
@@ -75,18 +101,26 @@ const InvoiceList = () => {
   const [sortColumn, setSortColumn] = useState('id')
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
+  // ** Advanced search (opened via the navbar search icon)
+  const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false)
+  const [filters, setFilters] = useState({})
+
+  // ** Debounce the search term so typing doesn't fire a request per keystroke
+  const debouncedSearchTerm = useDebounce(searchTerm, 400)
+
   useEffect(() => {
     dispatch(getAllData())
     dispatch(
       getData({
         sort,
         sortColumn,
-        q: searchTerm,
+        q: debouncedSearchTerm,
         page: currentPage,
-        perPage: rowsPerPage
+        perPage: rowsPerPage,
+        filters
       })
     )
-  }, [dispatch, store.data.length, sort, sortColumn, currentPage])
+  }, [dispatch, sort, sortColumn, currentPage, debouncedSearchTerm, filters])
 
   const handlePagination = page => {
     dispatch(
@@ -95,7 +129,8 @@ const InvoiceList = () => {
         sortColumn,
         q: searchTerm,
         perPage: rowsPerPage,
-        page: page.selected + 1
+        page: page.selected + 1,
+        filters
       })
     )
     setCurrentPage(page.selected + 1)
@@ -109,23 +144,31 @@ const InvoiceList = () => {
         sortColumn,
         q: searchTerm,
         perPage: value,
-        page: currentPage
+        page: currentPage,
+        filters
       })
     )
     setRowsPerPage(value)
   }
 
+  // ** Debounced via debouncedSearchTerm above - just update local state and
+  // reset to page 1 here; the mount effect refetches once typing settles.
   const handleFilter = val => {
     setSearchTerm(val)
-    dispatch(
-      getData({
-        sort,
-        q: val,
-        sortColumn,
-        page: currentPage,
-        perPage: rowsPerPage
-      })
-    )
+    setCurrentPage(1)
+  }
+
+
+  // ** Advanced search: apply/clear both reset to page 1 and let the mount
+  // effect (which depends on `filters`) refetch with the new criteria.
+  const handleApplyFilters = newFilters => {
+    setFilters(newFilters)
+    setCurrentPage(1)
+  }
+
+  const handleClearFilters = () => {
+    setFilters({})
+    setCurrentPage(1)
   }
 
   const CustomPagination = () => {
@@ -151,7 +194,7 @@ const InvoiceList = () => {
   }
 
   const dataToRender = () => {
-    const isFiltered = searchTerm.length > 0
+    const isFiltered = searchTerm.length > 0 || Object.keys(filters).length > 0
 
     if (store.data.length > 0) {
       return store.data
@@ -162,22 +205,26 @@ const InvoiceList = () => {
     }
   }
 
+  // ** Just update the sort state - the mount effect above already
+  // depends on [sort, sortColumn] and refetches with the new values.
+  // (Dispatching here too used the stale pre-update sort/sortColumn from
+  // this closure, so the table always sorted one click behind.)
   const handleSort = (column, sortDirection) => {
     setSort(sortDirection)
     setSortColumn(column.sortField)
-    dispatch(
-      getData({
-        sort,
-        sortColumn,
-        q: searchTerm,
-        page: currentPage,
-        perPage: rowsPerPage
-      })
-    )
   }
 
   return (
     <Fragment>
+      <Button id='navbar-advanced-search-trigger' className='d-none' onClick={() => setAdvancedSearchOpen(true)} />
+      <AdvancedSearchModal
+        isOpen={advancedSearchOpen}
+        toggle={() => setAdvancedSearchOpen(!advancedSearchOpen)}
+        fields={searchFields}
+        values={filters}
+        onApply={handleApplyFilters}
+        onClear={handleClearFilters}
+      />
       <Card>
         <div className='react-dataTable'>
           <DataTable

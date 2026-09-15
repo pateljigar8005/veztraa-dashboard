@@ -2,6 +2,9 @@
 import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
+// ** Hooks
+import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
+
 // ** Third Party Components
 import toast from 'react-hot-toast'
 import Select from 'react-select'
@@ -41,8 +44,10 @@ const ServiceItemForm = () => {
     setError,
     handleSubmit,
     watch,
-    formState: { errors }
+    formState: { errors, isDirty }
   } = useForm({ defaultValues })
+
+  useUnsavedChangesGuard(isDirty)
 
   const category = watch('category')
   const unit = watch('unit')
@@ -123,7 +128,7 @@ const ServiceItemForm = () => {
                 theme={selectThemeColors}
                 options={categoryOptions}
                 value={selectedCategoryOption}
-                onChange={option => setValue('category', option ? option.value : '')}
+                onChange={option => setValue('category', option ? option.value : '', { shouldDirty: true })}
                 placeholder='Select category...'
               />
             </Col>
@@ -149,7 +154,7 @@ const ServiceItemForm = () => {
                 theme={selectThemeColors}
                 options={unitOptions}
                 value={selectedUnitOption}
-                onChange={option => setValue('unit', option ? option.value : '')}
+                onChange={option => setValue('unit', option ? option.value : '', { shouldDirty: true })}
                 placeholder='Select unit...'
               />
             </Col>

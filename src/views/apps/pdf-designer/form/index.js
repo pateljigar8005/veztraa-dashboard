@@ -92,9 +92,15 @@ const PdfDesignerTemplateForm = () => {
       ? updatePdfDesignerTemplate({ id: Number(id), ...payload })
       : addPdfDesignerTemplate(payload)
 
-    dispatch(action).then(() => {
+    dispatch(action).then(result => {
       toast.success(isEdit ? 'PDF designer template updated' : 'PDF designer template added')
-      navigate('/pdf-designer')
+      // Stay in the designer instead of bouncing back to the list. A brand
+      // new template has no id yet, though - move the URL onto its real
+      // edit route (replacing /add) so a second Save updates it instead of
+      // silently creating a duplicate template each time.
+      if (!isEdit) {
+        navigate(`/pdf-designer/edit/${result.payload.id}`, { replace: true })
+      }
     })
   }
 

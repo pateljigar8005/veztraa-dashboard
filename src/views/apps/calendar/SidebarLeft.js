@@ -19,9 +19,17 @@ const filters = [
   { label: 'ETC', color: 'info', className: 'form-check-info' }
 ]
 
+// ** Upcoming due dates pulled in from the Kanban/Todo modules (read-only,
+// see calendar/store/index.js) - kept as a separate filter group since
+// they're not real calendar events and aren't affected by "View All".
+const taskFilters = [
+  { label: 'Kanban Tasks', className: 'form-check-secondary mb-1' },
+  { label: 'To-Do', className: 'form-check-dark' }
+]
+
 const SidebarLeft = props => {
   // ** Props
-  const { handleAddEventSidebar, toggleSidebar, updateFilter, updateAllFilters, store, dispatch } = props
+  const { handleAddEventSidebar, toggleSidebar, updateFilter, updateAllFilters, toggleTaskFilter, store, dispatch } = props
 
   // ** Function to handle Add Event Click
   const handleAddEventClick = () => {
@@ -81,6 +89,36 @@ const SidebarLeft = props => {
                   </div>
                 )
               })}
+          </div>
+        </CardBody>
+        <CardBody>
+          <h5 className='section-label mb-1'>
+            <span className='align-middle'>Upcoming Tasks</span>
+          </h5>
+          <div className='calendar-events-filter'>
+            {taskFilters.map(filter => (
+              <div
+                key={`${filter.label}-key`}
+                className={classnames('form-check', {
+                  [filter.className]: filter.className
+                })}
+              >
+                <Input
+                  type='checkbox'
+                  key={filter.label}
+                  label={filter.label}
+                  className='input-filter'
+                  id={`${filter.label}-event`}
+                  checked={store.taskFilters.includes(filter.label)}
+                  onChange={() => {
+                    dispatch(toggleTaskFilter(filter.label))
+                  }}
+                />
+                <Label className='form-check-label' for={`${filter.label}-event`}>
+                  {filter.label}
+                </Label>
+              </div>
+            ))}
           </div>
         </CardBody>
       </Card>

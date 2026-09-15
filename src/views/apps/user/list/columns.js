@@ -19,11 +19,12 @@ import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
 // ** Utils
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
+import { resolveAvatarUrl } from '@utils'
 
 // ** Renders Client Columns
 const renderClient = row => {
   if (row.avatar && row.avatar.length) {
-    return <Avatar className='me-1' img={row.avatar} width='32' height='32' />
+    return <Avatar className='me-1' img={resolveAvatarUrl(row.avatar)} width='32' height='32' />
   } else {
     return (
       <Avatar
@@ -85,16 +86,19 @@ export const columns = [
     sortField: 'fullName',
     selector: row => row.fullName,
     cell: row => (
-      <div className='d-flex justify-content-left align-items-center'>
+      <div className='d-flex justify-content-left align-items-center' style={{ minWidth: 0 }}>
         {renderClient(row)}
-        <div className='d-flex flex-column'>
+        <div className='d-flex flex-column overflow-hidden' style={{ minWidth: 0 }}>
           <Link
             to={`/user/edit/${row.id}`}
             className='user_name text-truncate text-body'
+            title={row.fullName}
           >
             <span className='fw-bolder'>{row.fullName}</span>
           </Link>
-          <small className='text-truncate text-muted mb-0'>{row.email}</small>
+          <small className='text-truncate text-muted mb-0' title={row.email}>
+            {row.email}
+          </small>
         </div>
       </div>
     )

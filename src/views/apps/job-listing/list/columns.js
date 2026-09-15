@@ -1,0 +1,117 @@
+// ** React Imports
+import { Fragment } from 'react'
+import { Link } from 'react-router-dom'
+import toast from 'react-hot-toast'
+
+// ** Store & Actions
+import { store } from '@store/store'
+import { deleteJobListing } from '../store'
+
+// ** Icons Imports
+import { Edit2, Trash2 } from 'react-feather'
+
+// ** Reactstrap Imports
+import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
+
+// ** Utils
+import { currentUserCan } from '@src/utility/navPermissions'
+import { confirmDelete } from '@src/utility/confirmDelete'
+
+const statusObj = {
+  active: 'light-success',
+  inactive: 'light-secondary'
+}
+
+export const columns = [
+  {
+    name: 'Job Title',
+    sortable: true,
+    minWidth: '260px',
+    sortField: 'title',
+    selector: row => row.title,
+    cell: row => (
+      <div className='d-flex flex-column overflow-hidden' style={{ minWidth: 0 }}>
+        <Link to={`/job-listing/edit/${row.id}`} className='user_name text-truncate text-body' title={row.title}>
+          <span className='fw-bolder'>{row.title}</span>
+        </Link>
+        <small className='text-truncate text-muted mb-0' title={row.location}>
+          {row.location || '-'}
+        </small>
+      </div>
+    )
+  },
+  {
+    name: 'Positions',
+    minWidth: '120px',
+    sortable: true,
+    sortField: 'positions',
+    selector: row => row.positions,
+    cell: row => <span>{row.positions}</span>
+  },
+  {
+    name: 'Status',
+    minWidth: '120px',
+    sortable: true,
+    sortField: 'status',
+    selector: row => row.status,
+    cell: row => (
+      <Badge className='text-capitalize' color={statusObj[row.status]} pill>
+        {row.status}
+      </Badge>
+    )
+  },
+  {
+    name: 'Actions',
+    right: true,
+    minWidth: '90px',
+    cell: row => (
+      <div className='column-action d-flex align-items-center'>
+        {currentUserCan('/job-listing', 'edit') && (
+          <Fragment>
+            <Button
+              tag={Link}
+              to={`/job-listing/edit/${row.id}`}
+              id={`edit-tooltip-${row.id}`}
+              className='btn-icon me-1'
+              color='flat-primary'
+              size='sm'
+              style={{ borderRadius: '4px', backgroundColor: '#7367f01f' }}
+            >
+              <Edit2 size={16} className='text-primary' />
+            </Button>
+            <UncontrolledTooltip placement='top' target={`edit-tooltip-${row.id}`}>
+              Edit
+            </UncontrolledTooltip>
+          </Fragment>
+        )}
+
+        {currentUserCan('/job-listing', 'delete') && (
+          <Fragment>
+            <Button
+              tag='a'
+              href='/'
+              id={`delete-tooltip-${row.id}`}
+              className='btn-icon'
+              color='flat-danger'
+              size='sm'
+              style={{ borderRadius: '4px', backgroundColor: '#ea54551f' }}
+              onClick={e => {
+                e.preventDefault()
+                confirmDelete({
+                  text: `This will permanently delete "${row.title}".`,
+                  onConfirm: () =>
+                    store.dispatch(deleteJobListing(row.id)).then(() => toast.success('Job listing deleted'))
+                })
+              }}
+            >
+              <Trash2 size={16} className='text-danger' />
+            </Button>
+            <UncontrolledTooltip placement='top' target={`delete-tooltip-${row.id}`}>
+              Delete
+            </UncontrolledTooltip>
+          </Fragment>
+        )}
+      </div>
+    )
+  }
+]

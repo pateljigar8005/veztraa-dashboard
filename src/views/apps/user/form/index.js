@@ -2,6 +2,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
+// ** Hooks
+import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
+
 // ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
@@ -12,7 +15,13 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormText } from 'reactstrap'
 
 // ** Store & Actions
-import { addUser, updateUser, getUser } from '../store'
+import { addUser, updateUser, getUser, uploadAvatar } from '../store'
+
+// ** Custom Components
+import Avatar from '@components/avatar'
+
+// ** Utils
+import { resolveAvatarUrl } from '@utils'
 
 const defaultValues = {
   first_name: '',
@@ -33,14 +42,24 @@ const UserForm = () => {
   // ** States
   const [roles, setRoles] = useState([])
   const [roleId, setRoleId] = useState('')
+  const [avatarFile, setAvatarFile] = useState(null)
+  const [avatarPreview, setAvatarPreview] = useState(null)
+  // Tracks edits to the state above (role, avatar), none of which is
+  // registered with react-hook-form, so its own isDirty can't see them.
+  const [extraDirty, setExtraDirty] = useState(false)
 
   const {
     control,
     reset,
+    watch,
     setError,
     handleSubmit,
-    formState: { errors }
+    formState: { errors, isDirty }
   } = useForm({ defaultValues })
+
+  useUnsavedChangesGuard(isDirty || extraDirty)
+
+  const fullName = `${watch('first_name')} ${watch('last_name')}`.trim()
 
   // ** Fetch roles for the dropdown
   useEffect(() => {
@@ -68,8 +87,25 @@ const UserForm = () => {
         password: ''
       })
       if (user.role_id) setRoleId(String(user.role_id))
+      setAvatarPreview(resolveAvatarUrl(user.avatar))
     }
   }, [store.selectedUser])
+
+  // ** Edit mode: upload immediately since the user already has an id.
+  // Add mode: just stage the file - it's uploaded right after the new
+  // user is created, once a real id exists to attach it to.
+  const handleAvatarChange = e => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    setAvatarPreview(URL.createObjectURL(file))
+    if (isEdit) {
+      dispatch(uploadAvatar({ id: Number(id), file })).then(() => toast.success('Avatar updated'))
+    } else {
+      setAvatarFile(file)
+      setExtraDirty(true)
+    }
+  }
 
   const checkIsValid = data => {
     const requiredOk = ['first_name', 'last_name', 'email', 'phone'].every(key => data[key].length > 0)
@@ -89,10 +125,14 @@ const UserForm = () => {
       if (data.password.length) payload.password = data.password
 
       const action = isEdit ? updateUser({ id: Number(id), ...payload }) : addUser(payload)
-      dispatch(action).then(() => {
-      toast.success(isEdit ? 'User updated' : 'User added')
-      navigate('/user')
-    })
+      dispatch(action).then(result => {
+        toast.success(isEdit ? 'User updated' : 'User added')
+        if (!isEdit && avatarFile) {
+          dispatch(uploadAvatar({ id: result.payload.id, file: avatarFile })).finally(() => navigate('/user'))
+        } else {
+          navigate('/user')
+        }
+      })
     } else {
       for (const key in data) {
         if (key === 'password' && isEdit) continue
@@ -111,6 +151,32 @@ const UserForm = () => {
       <CardBody>
         <Form onSubmit={handleSubmit(onSubmit)}>
           <Row>
+            <Col md={12} className='mb-2 d-flex align-items-center'>
+              {avatarPreview ? (
+                <Avatar img={avatarPreview} imgHeight='80' imgWidth='80' className='me-1' />
+              ) : (
+                <Avatar
+                  initials
+                  size='xl'
+                  color='light-primary'
+                  content={fullName || 'New User'}
+                  className='me-1'
+                />
+              )}
+              <div>
+                <Label className='btn btn-primary btn-sm mb-0' for='avatar-upload'>
+                  Upload Photo
+                </Label>
+                <Input
+                  type='file'
+                  id='avatar-upload'
+                  accept='.jpg,.jpeg,.png,.gif,.webp'
+                  className='d-none'
+                  onChange={handleAvatarChange}
+                />
+                <p className='text-muted small mb-0 mt-50'>JPG, PNG, GIF or WEBP. Max 2MB.</p>
+              </div>
+            </Col>
             <Col md={6} className='mb-1'>
               <Label className='form-label' for='first_name'>
                 First Name <span className='text-danger'>*</span>
@@ -184,7 +250,15 @@ const UserForm = () => {
               <Label className='form-label' for='user-role'>
                 User Role
               </Label>
-              <Input type='select' id='user-role' value={roleId} onChange={e => setRoleId(e.target.value)}>
+              <Input
+                type='select'
+                id='user-role'
+                value={roleId}
+                onChange={e => {
+                  setRoleId(e.target.value)
+                  setExtraDirty(true)
+                }}
+              >
                 {roles.map(role => (
                   <option key={role.id} value={role.id}>
                     {role.name}

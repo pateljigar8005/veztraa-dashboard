@@ -2,21 +2,24 @@
 import { Badge, Card, CardBody } from 'reactstrap'
 
 // ** Custom Components
-import AvatarGroup from '@components/avatar-group'
+import Avatar from '@components/avatar'
 
 // ** Third Party Imports
-import classnames from 'classnames'
-import { Paperclip, MessageSquare } from 'react-feather'
+import { MessageSquare, Calendar } from 'react-feather'
 
 // ** Redux Imports
 import { useDispatch } from 'react-redux'
 
 // ** Actions
 import { handleSelectTask } from './store'
+import { taskTypeColors, priorityColors } from './kanbanOptions'
+
+// ** Utils
+import { resolveAvatarUrl } from '@utils'
 
 const KanbanTasks = props => {
   // ** Props
-  const { task, labelColors, handleTaskSidebarToggle } = props
+  const { task, handleTaskSidebarToggle } = props
 
   // ** Hooks
   const dispatch = useDispatch()
@@ -26,88 +29,64 @@ const KanbanTasks = props => {
     handleTaskSidebarToggle()
   }
 
-  const renderLabels = () => {
-    if (task.labels.length) {
-      return (
-        <div className='mb-1'>
-          {task.labels.map((label, index) => {
-            const isLastChip = task.labels[task.labels.length - 1] === label
-
-            return (
-              <Badge
-                pill
-                key={index}
-                label={label}
-                color={`light-${labelColors[label]}`}
-                className={classnames({ 'me-75': !isLastChip })}
-              >
-                {label}
-              </Badge>
-            )
-          })}
-        </div>
-      )
-    } else {
-      return null
-    }
-  }
-
-  const renderAttachmentsComments = () => {
-    if ((task.attachments && task.attachments.length) || (task.comments && task.comments.length)) {
-      return (
-        <div className='d-flex align-items-center'>
-          {task.attachments && task.attachments.length ? (
-            <div className='d-flex align-items-center cursor-pointer me-75'>
-              <Paperclip size={16} className='me-25' />
-              <span>{task.attachments.length}</span>
-            </div>
-          ) : null}
-          {task.comments && task.comments.length ? (
-            <div className='d-flex align-items-center cursor-pointer'>
-              <MessageSquare size={16} className='me-50' />
-              <span>{task.comments.length}</span>
-            </div>
-          ) : null}
-        </div>
-      )
-    } else {
-      return null
-    }
-  }
-
-  const taskFooterClasses = () => {
-    if (task.comments && !task.comments.length && task.attachments && !task.attachments.length) {
-      return 'justify-content-end'
-    } else {
-      return 'justify-content-between'
-    }
-  }
-
-  const renderTaskFooter = () => {
-    return (task.attachments && task.attachments.length) ||
-      (task.comments && task.comments.length) ||
-      (task.assignedTo && task.assignedTo.length) ? (
-      <div className={`task-footer d-flex align-items-center mt-1 ${taskFooterClasses()}`}>
-        {renderAttachmentsComments()}
-        {task.assignedTo.length ? (
-          <div>{task.assignedTo.length ? <AvatarGroup data={task.assignedTo} /> : null}</div>
-        ) : null}
-      </div>
-    ) : null
-  }
-
   return (
-    <Card onClick={handleTaskClick} className='task' data-board-id={task.boardId} data-task-id={task.id}>
+    <Card onClick={handleTaskClick} className='task' data-board-id={task.board_id} data-task-id={task.id}>
       <CardBody data-task-id={task.id}>
-        {renderLabels()}
-
-        {task.coverImage ? (
-          <img className='img-fluid rounded task-img mb-1' alt={task.title} src={task.coverImage} />
-        ) : null}
+        <div className='mb-1'>
+          <Badge pill color={`light-${taskTypeColors[task.task_type] || 'primary'}`} className='text-capitalize me-50'>
+            {task.task_type}
+          </Badge>
+          <Badge pill color={`light-${priorityColors[task.priority] || 'secondary'}`} className='text-capitalize'>
+            {task.priority}
+          </Badge>
+        </div>
 
         <span className='task-title'>{task.title}</span>
 
-        {renderTaskFooter()}
+        <div className='task-footer d-flex align-items-center justify-content-between mt-1'>
+          <div className='d-flex align-items-center'>
+            {task.due_date && (
+              <div className='d-flex align-items-center me-75 text-muted'>
+                <Calendar size={14} className='me-25' />
+                <small>{task.due_date}</small>
+              </div>
+            )}
+            {task.comment_count > 0 && (
+              <div className='d-flex align-items-center text-muted'>
+                <MessageSquare size={14} className='me-25' />
+                <small>{task.comment_count}</small>
+              </div>
+            )}
+          </div>
+          {task.assignees && task.assignees.length > 0 && (
+            <div className='d-flex align-items-center'>
+              {task.assignees.slice(0, 3).map((assignee, index) => (
+                <Avatar
+                  key={assignee.id}
+                  initials
+                  size='sm'
+                  color='light-primary'
+                  content={assignee.name}
+                  title={assignee.name}
+                  img={resolveAvatarUrl(assignee.avatar) || undefined}
+                  style={{ marginLeft: index === 0 ? 0 : '-0.6rem', border: '2px solid #fff' }}
+                />
+              ))}
+              {task.assignees.length > 3 && (
+                <Avatar
+                  size='sm'
+                  color='light-secondary'
+                  content={`+${task.assignees.length - 3}`}
+                  title={task.assignees
+                    .slice(3)
+                    .map(a => a.name)
+                    .join(', ')}
+                  style={{ marginLeft: '-0.6rem', border: '2px solid #fff' }}
+                />
+              )}
+            </div>
+          )}
+        </div>
       </CardBody>
     </Card>
   )

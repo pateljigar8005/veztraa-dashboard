@@ -1,7 +1,8 @@
 // ** React Imports
-import { useState, Fragment } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 
 // ** Third Party Components
+import axios from 'axios'
 import classnames from 'classnames'
 import Flatpickr from 'react-flatpickr'
 import { Editor } from '@veztraa/editor'
@@ -10,18 +11,14 @@ import Select, { components } from 'react-select' //eslint-disable-line
 import { useForm, Controller } from 'react-hook-form'
 
 // ** Reactstrap Imports
-import { Modal, ModalBody, Button, Form, Input, Label, FormFeedback } from 'reactstrap'
+import { Modal, ModalBody, ModalFooter, Button, Form, Input, Label, FormFeedback } from 'reactstrap'
+
+// ** Custom Components
+import Avatar from '@components/avatar'
+import TaskAttachments from './TaskAttachments'
 
 // ** Utils
-import { isObjEmpty, selectThemeColors } from '@utils'
-
-// ** Assignee Avatars
-import img1 from '@src/assets/images/portrait/small/avatar-s-3.jpg'
-import img2 from '@src/assets/images/portrait/small/avatar-s-1.jpg'
-import img3 from '@src/assets/images/portrait/small/avatar-s-4.jpg'
-import img4 from '@src/assets/images/portrait/small/avatar-s-6.jpg'
-import img5 from '@src/assets/images/portrait/small/avatar-s-2.jpg'
-import img6 from '@src/assets/images/portrait/small/avatar-s-11.jpg'
+import { isObjEmpty, selectThemeColors, resolveAvatarUrl } from '@utils'
 
 // ** Styles Imports
 import '@styles/react/libs/flatpickr/flatpickr.scss'
@@ -30,15 +27,25 @@ import '@styles/react/libs/react-select/_react-select.scss'
 // ** Function to capitalize the first letter of string
 const capitalize = string => string.charAt(0).toUpperCase() + string.slice(1)
 
+// ** Turns a Flatpickr-selected Date into a plain 'YYYY-MM-DD' string using
+// local getters, not toISOString() (which is UTC and can shift a day
+// depending on the browser's timezone) - the only format this state ever
+// holds, so no conversion is needed anywhere else it's read.
+const toDateOnly = date => {
+  if (!date) return null
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
 // ** Modal Header
 const ModalHeader = props => {
   // ** Props
-  const { children, store, handleTaskSidebar, setDeleted, deleted, important, setImportant, deleteTask, dispatch } =
-    props
+  const { children, store, handleTaskSidebar, important, setImportant, deleteTask, dispatch } = props
 
   // ** Function to delete task
   const handleDeleteTask = () => {
-    setDeleted(!deleted)
     dispatch(deleteTask(store.selectedTask.id))
     handleTaskSidebar()
   }
@@ -70,13 +77,13 @@ const TaskSidebar = props => {
   const { open, handleTaskSidebar, store, dispatch, updateTask, selectTask, addTask, deleteTask } = props
 
   // ** States
-  const [assignee, setAssignee] = useState({ value: 'pheobe', label: 'Pheobe Buffay', img: img1 })
+  const [assigneeOptions, setAssigneeOptions] = useState([])
+  const [assignee, setAssignee] = useState(null)
   const [tags, setTags] = useState([])
   const [desc, setDesc] = useState('')
   const [completed, setCompleted] = useState(false)
   const [important, setImportant] = useState(false)
-  const [deleted, setDeleted] = useState(false)
-  const [dueDate, setDueDate] = useState(new Date())
+  const [dueDate, setDueDate] = useState(null)
 
   const {
     control,
@@ -89,15 +96,18 @@ const TaskSidebar = props => {
     defaultValues: { title: '' }
   })
 
-  // ** Assignee Select Options
-  const assigneeOptions = [
-    { value: 'pheobe', label: 'Pheobe Buffay', img: img1 },
-    { value: 'chandler', label: 'Chandler Bing', img: img2 },
-    { value: 'ross', label: 'Ross Geller', img: img3 },
-    { value: 'monica', label: 'Monica Geller', img: img4 },
-    { value: 'joey', label: 'Joey Tribbiani', img: img5 },
-    { value: 'Rachel', label: 'Rachel Green', img: img6 }
-  ]
+  // ** Real users for the Assignee select, instead of the old hardcoded demo list
+  useEffect(() => {
+    axios.get('/users', { params: { perPage: 100 } }).then(response => {
+      setAssigneeOptions(
+        response.data.data.users.map(u => ({
+          value: u.id,
+          label: u.fullName,
+          img: resolveAvatarUrl(u.avatar)
+        }))
+      )
+    })
+  }, [])
 
   // ** Tag Select Options
   const tagOptions = [
@@ -113,7 +123,11 @@ const TaskSidebar = props => {
     return (
       <components.Option {...props}>
         <div className='d-flex align-items-center'>
-          <img className='d-block rounded-circle me-50' src={data.img} height='26' width='26' alt={data.label} />
+          {data.img ? (
+            <img className='d-block rounded-circle me-50' src={data.img} height='26' width='26' alt={data.label} />
+          ) : (
+            <Avatar initials className='me-50' size='sm' color='light-primary' content={data.label} />
+          )}
           <p className='mb-0'>{data.label}</p>
         </div>
       </components.Option>
@@ -145,14 +159,16 @@ const TaskSidebar = props => {
       setValue('title', selectedTask.title)
       setCompleted(selectedTask.isCompleted)
       setImportant(selectedTask.isImportant)
-      setAssignee([
-        {
-          value: selectedTask.assignee.fullName,
-          label: selectedTask.assignee.fullName,
-          img: selectedTask.assignee.avatar
-        }
-      ])
-      setDueDate(selectedTask.dueDate)
+      setAssignee(
+        selectedTask.assignee
+          ? {
+            value: selectedTask.assignee.id,
+            label: selectedTask.assignee.fullName,
+            img: resolveAvatarUrl(selectedTask.assignee.avatar)
+          }
+          : null
+      )
+      setDueDate(selectedTask.dueDate || null)
       setDesc(typeof selectedTask.description === 'string' ? selectedTask.description : '')
 
       if (selectedTask.tags.length) {
@@ -170,50 +186,21 @@ const TaskSidebar = props => {
     setTags([])
     setDesc('')
     setValue('title', '')
-    setAssignee({ value: 'pheobe', label: 'Pheobe Buffay', img: img1 })
+    setAssignee(null)
     setCompleted(false)
     setImportant(false)
-    setDueDate(new Date())
+    setDueDate(null)
     dispatch(selectTask({}))
     clearErrors()
-  }
-
-  // ** Function to reset fields
-  const handleResetFields = () => {
-    setValue('title', store.selectedTask.title)
-    setDesc(typeof store.selectedTask.description === 'string' ? store.selectedTask.description : '')
-    setCompleted(store.selectedTask.isCompleted)
-    setImportant(store.selectedTask.isImportant)
-    setDeleted(store.selectedTask.isDeleted)
-    setDueDate(store.selectedTask.dueDate)
-    if (store.selectedTask.assignee.fullName !== assignee.label) {
-      setAssignee({
-        value: store.selectedTask.assignee.fullName,
-        label: store.selectedTask.assignee.fullName,
-        img: store.selectedTask.assignee.avatar
-      })
-    }
-    if (store.selectedTask.tags.length) {
-      const tags = []
-      store.selectedTask.tags.map(tag => {
-        tags.push({ value: tag, label: capitalize(tag) })
-      })
-      setTags(tags)
-    }
   }
 
   // ** Renders Footer Buttons
   const renderFooterButtons = () => {
     if (store && !isObjEmpty(store.selectedTask)) {
       return (
-        <Fragment>
-          <Button color='primary' className='update-btn update-todo-item me-1'>
-            Update
-          </Button>
-          <Button color='secondary' onClick={handleResetFields} outline>
-            Reset
-          </Button>
-        </Fragment>
+        <Button color='primary' className='update-btn update-todo-item'>
+          Update
+        </Button>
       )
     } else {
       return (
@@ -230,68 +217,43 @@ const TaskSidebar = props => {
   }
 
   const onSubmit = data => {
-    const newTaskTag = []
-
-    const doesInclude = !isObjEmpty(store.selectedTask) && assignee.label === store.selectedTask.assignee.fullName
-
-    if (tags.length) {
-      tags.map(tag => newTaskTag.push(tag.value))
+    if (!data.title.length) {
+      setError('title', { type: 'manual' })
+      return
     }
 
-    const newAssignee = {
-      fullName: assignee.label,
-      avatar: assignee.img
-    }
-    const state = {
-      dueDate,
+    const payload = {
       title: data.title,
-      tags: newTaskTag,
       description: desc,
-      isCompleted: completed,
-      isDeleted: deleted,
-      isImportant: important,
-      assignee: doesInclude || assignee.label === undefined ? store.selectedTask.assignee : newAssignee
+      due_date: dueDate,
+      tags: tags.map(tag => tag.value),
+      assigned_to: assignee ? assignee.value : null,
+      is_completed: completed,
+      is_important: important
     }
 
-    if (data.title.length) {
-      if (isObjEmpty(errors)) {
-        if (isObjEmpty(store.selectedTask) || (!isObjEmpty(store.selectedTask) && !store.selectedTask.title.length)) {
-          dispatch(addTask(state))
-        } else {
-          dispatch(updateTask({ ...state, id: store.selectedTask.id }))
-        }
-        handleTaskSidebar()
-      }
+    if (isObjEmpty(store.selectedTask)) {
+      dispatch(addTask(payload))
     } else {
-      setError('title', {
-        type: 'manual'
-      })
+      dispatch(updateTask({ id: store.selectedTask.id, ...payload }))
     }
+    handleTaskSidebar()
   }
+
   return (
     <Modal
       isOpen={open}
       toggle={handleTaskSidebar}
-      className='sidebar-lg'
-      contentClassName='p-0'
+      centered
+      size='xl'
       onOpened={handleSidebarOpened}
       onClosed={handleSidebarClosed}
-      modalClassName='modal-slide-in sidebar-todo-modal'
     >
       <Form id='form-modal-todo' className='todo-modal' onSubmit={handleSubmit(onSubmit)}>
-        <ModalHeader
-          store={store}
-          deleted={deleted}
-          dispatch={dispatch}
-          important={important}
-          deleteTask={deleteTask}
-          setDeleted={setDeleted}
-          setImportant={setImportant}
-          handleTaskSidebar={handleTaskSidebar}
-        >
+        <ModalHeader store={store} dispatch={dispatch} important={important} deleteTask={deleteTask} setImportant={setImportant} handleTaskSidebar={handleTaskSidebar}>
           {handleSidebarTitle()}
         </ModalHeader>
-        <ModalBody className='flex-grow-1 pb-sm-0 pb-3'>
+        <ModalBody className='flex-grow-1' style={{ maxHeight: '65vh', overflowY: 'auto' }}>
           <div className='mb-1'>
             <Label className='form-label' for='task-title'>
               Title <span className='text-danger'>*</span>
@@ -319,12 +281,13 @@ const TaskSidebar = props => {
               id='task-assignee'
               className='react-select'
               classNamePrefix='select'
-              isClearable={false}
+              isClearable
               options={assigneeOptions}
               theme={selectThemeColors}
               value={assignee}
               onChange={data => setAssignee(data)}
               components={{ Option: AssigneeComponent }}
+              placeholder='Unassigned'
             />
           </div>
           <div className='mb-1'>
@@ -335,7 +298,7 @@ const TaskSidebar = props => {
               id='due-date'
               name='due-date'
               className='form-control'
-              onChange={date => setDueDate(date[0])}
+              onChange={date => setDueDate(toDateOnly(date[0]))}
               value={dueDate}
               options={{ dateFormat: 'Y-m-d' }}
             />
@@ -362,10 +325,18 @@ const TaskSidebar = props => {
             <Label for='task-desc' className='form-label'>
               Description
             </Label>
-            <Editor value={desc} onChange={setDesc} height={150} />
+            <Editor value={desc} onChange={setDesc} height={300} />
           </div>
-          <div>{renderFooterButtons()}</div>
+          <div>
+            <Label className='form-label'>Attachments</Label>
+            {store && !isObjEmpty(store.selectedTask) ? (
+              <TaskAttachments taskId={store.selectedTask.id} />
+            ) : (
+              <p className='text-muted small mb-0'>Save the task first to attach files.</p>
+            )}
+          </div>
         </ModalBody>
+        <ModalFooter>{renderFooterButtons()}</ModalFooter>
       </Form>
     </Modal>
   )

@@ -13,7 +13,7 @@ import { Plus, MoreVertical } from 'react-feather'
 import { useDispatch } from 'react-redux'
 
 // ** Actions
-import { addTask, clearTasks, deleteBoard, reorderTasks, updateTaskBoard } from './store'
+import { addTask, clearTasks, deleteBoard, reorderTasks, moveTaskToBoard, updateBoardTitle } from './store'
 
 import KanbanTasks from './KanbanTasks'
 // ** Kanban Component
@@ -24,7 +24,7 @@ const defaultValues = {
 
 const KanbanBoard = props => {
   // ** Props
-  const { board, index, store, labelColors, handleTaskSidebarToggle } = props
+  const { board, index, store, handleTaskSidebarToggle } = props
 
   // ** States
   const [title, setTitle] = useState('')
@@ -61,8 +61,16 @@ const KanbanBoard = props => {
     dispatch(deleteBoard(board.id))
   }
 
+  const handleTitleBlur = () => {
+    if (title.trim() && title !== board.title) {
+      dispatch(updateBoardTitle({ id: board.id, title: title.trim() }))
+    } else {
+      setTitle(board.title)
+    }
+  }
+
   const handleAddTaskFormSubmit = data => {
-    dispatch(addTask({ title: data.taskTitle, boardId: board.id }))
+    dispatch(addTask({ board_id: board.id, title: data.taskTitle }))
     handleAddTaskReset()
   }
 
@@ -117,11 +125,10 @@ const KanbanBoard = props => {
     }
   }
 
-  const MoveTaskToAnotherBoard = ev => {
+  const moveTaskToAnotherBoard = ev => {
     dispatch(
-      updateTaskBoard({
+      moveTaskToBoard({
         taskId: ev.item.dataset.taskId,
-        boardId: ev.item.dataset.boardId,
         newBoardId: ev.to.classList[1].replace('board-', '')
       })
     )
@@ -132,7 +139,12 @@ const KanbanBoard = props => {
       <div className='board-wrapper'>
         <div className='d-flex align-items-center justify-content-between'>
           <div className='d-flex align-items-center board-header'>
-            <Input className='board-title' value={title} onChange={e => setTitle(e.target.value)} />
+            <Input
+              className='board-title'
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              onBlur={handleTitleBlur}
+            />
           </div>
           <UncontrolledDropdown className='more-options-dropdown'>
             <DropdownToggle className='btn-icon' color='transparent' size='sm'>
@@ -160,28 +172,27 @@ const KanbanBoard = props => {
             </DropdownMenu>
           </UncontrolledDropdown>
         </div>
-        <div>
+        <div className='board-content'>
           <ReactSortable
             list={store.tasks}
             group='shared-group'
             setList={() => null}
             onChange={sortTaskOnSameBoard}
-            onAdd={MoveTaskToAnotherBoard}
+            onAdd={moveTaskToAnotherBoard}
             className={`tasks-wrapper board-${board.id}`}
           >
-            {store.tasks.map((task, index) => {
-              if (task.boardId === board.id) {
+            {store.tasks.map((task, taskIndex) => {
+              if (task.board_id === board.id) {
                 return (
                   <KanbanTasks
                     task={task}
-                    index={index}
-                    labelColors={labelColors}
-                    key={`${task.boardId}-${index}`}
+                    index={taskIndex}
+                    key={`${task.board_id}-${taskIndex}`}
                     handleTaskSidebarToggle={handleTaskSidebarToggle}
                   />
                 )
               } else {
-                return <Fragment key={`${task.boardId}-${index}`}></Fragment>
+                return <Fragment key={`${task.board_id}-${taskIndex}`}></Fragment>
               }
             })}
           </ReactSortable>

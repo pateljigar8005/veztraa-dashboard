@@ -2,6 +2,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
+// ** Hooks
+import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
+
 // ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
@@ -18,17 +21,13 @@ import { selectThemeColors } from '@utils'
 // ** Store & Actions
 import { addClient, updateClient, getClient } from '../store'
 
-// ** Industry Options
-import { industryOptions } from '../industryOptions'
-
 const defaultValues = {
   first_name: '',
   last_name: '',
   company_name: '',
   email: '',
   phone: '',
-  address: '',
-  industry: ''
+  address: ''
 }
 
 const ClientForm = () => {
@@ -40,6 +39,7 @@ const ClientForm = () => {
   const store = useSelector(state => state.clients)
 
   const [currencyOptions, setCurrencyOptions] = useState([])
+  const [industryOptions, setIndustryOptions] = useState([])
 
   const {
     control,
@@ -48,17 +48,23 @@ const ClientForm = () => {
     setError,
     handleSubmit,
     watch,
-    formState: { errors }
+    formState: { errors, isDirty }
   } = useForm({ defaultValues })
 
-  const industry = watch('industry')
+  useUnsavedChangesGuard(isDirty)
+
+  const industryId = watch('industry_id')
   const currencyId = watch('currency_id')
 
-  // ** Fetch active currencies for the select
+  // ** Fetch active currencies and industries for the selects
   useEffect(() => {
     axios.get('/currencies', { params: { perPage: 100 } }).then(response => {
       const active = response.data.data.currencies.filter(c => c.is_active)
       setCurrencyOptions(active.map(c => ({ value: c.id, label: `${c.name} (${c.icon})` })))
+    })
+    axios.get('/industries', { params: { perPage: 100 } }).then(response => {
+      const active = response.data.data.industries.filter(i => i.is_active)
+      setIndustryOptions(active.map(i => ({ value: i.id, label: i.name })))
     })
   }, [])
 
@@ -79,7 +85,7 @@ const ClientForm = () => {
         phone: client.phone || '',
         address: client.address || ''
       })
-      setValue('industry', client.industry || '')
+      setValue('industry_id', client.industry_id || '')
       setValue('currency_id', client.currency_id || '')
     }
   }, [store.selectedClient])
@@ -95,7 +101,7 @@ const ClientForm = () => {
         email: data.email,
         phone: data.phone,
         address: data.address,
-        industry: industry || null,
+        industry_id: industryId || null,
         currency_id: currencyId || null
       }
 
@@ -113,7 +119,7 @@ const ClientForm = () => {
     }
   }
 
-  const selectedIndustryOption = industryOptions.find(i => i.value === industry) || null
+  const selectedIndustryOption = industryOptions.find(i => i.value === industryId) || null
   const selectedCurrencyOption = currencyOptions.find(c => c.value === currencyId) || null
 
   return (
@@ -170,7 +176,7 @@ const ClientForm = () => {
                 theme={selectThemeColors}
                 options={industryOptions}
                 value={selectedIndustryOption}
-                onChange={option => setValue('industry', option ? option.value : '')}
+                onChange={option => setValue('industry_id', option ? option.value : '', { shouldDirty: true })}
                 placeholder='Select industry...'
               />
             </Col>
@@ -214,7 +220,7 @@ const ClientForm = () => {
                 theme={selectThemeColors}
                 options={currencyOptions}
                 value={selectedCurrencyOption}
-                onChange={option => setValue('currency_id', option ? option.value : '')}
+                onChange={option => setValue('currency_id', option ? option.value : '', { shouldDirty: true })}
                 placeholder='Select currency...'
               />
             </Col>

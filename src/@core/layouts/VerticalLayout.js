@@ -20,7 +20,6 @@ import themeConfig from '@configs/themeConfig'
 
 import Customizer from '@components/customizer'
 import ScrollToTop from '@components/scrolltop'
-import FooterComponent from './components/footer'
 import NavbarComponent from './components/navbar'
 import SidebarComponent from './components/menu/vertical-menu'
 
@@ -38,7 +37,7 @@ import '@styles/base/core/menu/menu-types/vertical-overlay-menu.scss'
 
 const VerticalLayout = props => {
   // ** Props
-  const { menu, navbar, footer, children, menuData } = props
+  const { menu, navbar, children, menuData } = props
 
   // ** Hooks
   const [isRtl, setIsRtl] = useRTL()
@@ -208,14 +207,6 @@ const VerticalLayout = props => {
           setMenuCollapsed={setMenuCollapsed}
         />
       ) : null}
-      <footer
-        className={classnames(`footer footer-light ${footerClasses[footerType] || 'footer-static'}`, {
-          'd-none': footerType === 'hidden'
-        })}
-      >
-        {footer ? footer : <FooterComponent footerType={footerType} footerClasses={footerClasses} />}
-      </footer>
-      
 
       {themeConfig.layout.scrollTop === true ? (
         <div className='scroll-to-top'>

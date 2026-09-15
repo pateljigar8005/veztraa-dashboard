@@ -4,8 +4,11 @@ import { Link } from 'react-router-dom'
 // ** Custom Components
 import Avatar from '@components/avatar'
 
-// ** Blank Avatar Image
-import blankAvatar from '@src/assets/images/avatars/avatar-blank.png'
+// ** Utils
+import { resolveAvatarUrl } from '@utils'
+
+// ** Store & Actions
+import { persistTaskOrder } from './store'
 
 // ** Third Party Components
 import classnames from 'classnames'
@@ -78,14 +81,12 @@ const Tasks = props => {
   // ** Renders Avatar
   const renderAvatar = obj => {
     const item = obj.assignee
+    const avatarUrl = resolveAvatarUrl(item.avatar)
 
-    if (item.avatar === undefined || item.avatar === null) {
-      return <Avatar img={blankAvatar} imgHeight='32' imgWidth='32' />
-    } else if (item.avatar !== '') {
-      return <Avatar img={item.avatar} imgHeight='32' imgWidth='32' />
-    } else {
-      return <Avatar color={resolveAvatarVariant(obj.tags)} content={item.fullName} initials />
+    if (avatarUrl) {
+      return <Avatar img={avatarUrl} imgHeight='32' imgWidth='32' />
     }
+    return <Avatar color={resolveAvatarVariant(obj.tags)} content={item.fullName} initials />
   }
 
   const renderTasks = () => {
@@ -111,7 +112,10 @@ const Tasks = props => {
             list={tasks}
             handle='.drag-icon'
             className='todo-task-list media-list'
-            setList={newState => dispatch(reOrderTasks(newState))}
+            setList={newState => {
+              dispatch(reOrderTasks(newState))
+              dispatch(persistTaskOrder(newState.map(task => task.id)))
+            }}
           >
             {tasks.map((item, index) => {
               return (
@@ -133,7 +137,7 @@ const Tasks = props => {
                           onClick={e => e.stopPropagation()}
                           onChange={e => {
                             e.stopPropagation()
-                            dispatch(updateTask({ ...item, isCompleted: e.target.checked }))
+                            dispatch(updateTask({ id: item.id, is_completed: e.target.checked }))
                           }}
                         />
                       </div>

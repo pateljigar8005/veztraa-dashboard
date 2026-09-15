@@ -36,11 +36,13 @@ export const columns = [
     sortField: 'name',
     selector: row => row.name,
     cell: row => (
-      <div className='d-flex flex-column'>
-        <Link to={`/service-item/edit/${row.id}`} className='user_name text-truncate text-body'>
+      <div className='d-flex flex-column overflow-hidden' style={{ minWidth: 0 }}>
+        <Link to={`/service-item/edit/${row.id}`} className='user_name text-truncate text-body' title={row.name}>
           <span className='fw-bolder'>{row.name}</span>
         </Link>
-        <small className='text-truncate text-muted mb-0'>{row.description || '-'}</small>
+        <small className='text-truncate text-muted mb-0' title={row.description || '-'}>
+          {row.description || '-'}
+        </small>
       </div>
     )
   },

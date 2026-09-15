@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import Avatar from '@components/avatar'
 
 // ** Utils
-import { isUserLoggedIn } from '@utils'
+import { isUserLoggedIn, resolveAvatarUrl } from '@utils'
 
 // ** Auth
 import useJwt from '@src/auth/jwt/useJwt'
@@ -46,7 +46,7 @@ const UserDropdown = () => {
           <span className='user-status'>{(userData && userData.role) || 'Admin'}</span>
         </div>
         {userData && userData.avatar ? (
-          <Avatar img={userData.avatar} imgHeight='40' imgWidth='40' />
+          <Avatar img={resolveAvatarUrl(userData.avatar)} imgHeight='40' imgWidth='40' />
         ) : (
           <Avatar initials content={displayName} color='light-primary' imgHeight='40' imgWidth='40' />
         )}

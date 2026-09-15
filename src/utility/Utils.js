@@ -1,7 +1,13 @@
 import { DefaultRoute } from '../router/routes'
+import axios from 'axios'
 
 // ** Checks if an object is empty (returns boolean)
 export const isObjEmpty = obj => Object.keys(obj).length === 0
+
+// ** Uploaded avatars/documents are stored as API-relative paths (e.g.
+// "/uploads/avatars/xxx.jpg") - resolve them against the API base URL so
+// <img> tags don't request them from the dashboard's own origin instead.
+export const resolveAvatarUrl = path => (path ? `${axios.defaults.baseURL}${path}` : null)
 
 // ** Returns K format from a number
 export const kFormatter = num => (num > 999 ? `${(num / 1000).toFixed(1)}k` : num)

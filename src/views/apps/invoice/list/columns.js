@@ -52,11 +52,13 @@ export const columns = [
     sortField: 'contact_name',
     selector: row => row.contact_name,
     cell: row => (
-      <div className='d-flex flex-column'>
-        <Link to={`/invoice/view/${row.id}`} className='user_name text-truncate text-body'>
+      <div className='d-flex flex-column overflow-hidden' style={{ minWidth: 0 }}>
+        <Link to={`/invoice/view/${row.id}`} className='user_name text-truncate text-body' title={row.contact_name}>
           <span className='fw-bolder'>{row.contact_name}</span>
         </Link>
-        <small className='text-truncate text-muted mb-0'>{row.company_name || '-'}</small>
+        <small className='text-truncate text-muted mb-0' title={row.company_name || '-'}>
+          {row.company_name || '-'}
+        </small>
       </div>
     )
   },

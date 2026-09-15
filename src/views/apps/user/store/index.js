@@ -14,7 +14,10 @@ export const getData = createAsyncThunk('appUsers/getData', async params => {
     params: {
       page: params.page || 1,
       perPage: params.perPage || 10,
-      q: params.q || ''
+      q: params.q || '',
+      sortColumn: params.sortColumn || 'id',
+      sortDirection: params.sort || 'desc',
+      ...params.filters
     }
   })
   return {
@@ -38,6 +41,15 @@ export const addUser = createAsyncThunk('appUsers/addUser', async (user, { dispa
 
 export const updateUser = createAsyncThunk('appUsers/updateUser', async ({ id, ...user }, { dispatch, getState }) => {
   const response = await axios.put(`/users/${id}`, user)
+  await dispatch(getData(getState().users.params))
+  await dispatch(getAllData())
+  return response.data.data
+})
+
+export const uploadAvatar = createAsyncThunk('appUsers/uploadAvatar', async ({ id, file }, { dispatch, getState }) => {
+  const formData = new FormData()
+  formData.append('avatar', file)
+  const response = await axios.post(`/users/${id}/avatar`, formData)
   await dispatch(getData(getState().users.params))
   await dispatch(getAllData())
   return response.data.data

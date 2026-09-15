@@ -17,7 +17,11 @@ import {
   Settings,
   DollarSign,
   Globe,
-  Layout
+  Layout,
+  Users,
+  Image,
+  Award,
+  List
 } from 'react-feather'
 
 export default [
@@ -96,6 +100,37 @@ export default [
     ]
   },
   {
+    id: 'website',
+    title: 'Website',
+    icon: <Globe />,
+    children: [
+      {
+        id: 'teamMembers',
+        title: 'Team',
+        icon: <Users />,
+        navLink: '/team-member'
+      },
+      {
+        id: 'portfolioItems',
+        title: 'Portfolio',
+        icon: <Image />,
+        navLink: '/portfolio'
+      },
+      {
+        id: 'caseStudies',
+        title: 'Case Studies',
+        icon: <Award />,
+        navLink: '/case-study'
+      },
+      {
+        id: 'jobListings',
+        title: 'Job Listings',
+        icon: <List />,
+        navLink: '/job-listing'
+      }
+    ]
+  },
+  {
     id: 'settings',
     title: 'Settings',
     icon: <Settings />,
@@ -147,6 +182,12 @@ export default [
         title: 'Currency',
         icon: <DollarSign />,
         navLink: '/currency'
+      },
+      {
+        id: 'industries',
+        title: 'Industry',
+        icon: <Briefcase />,
+        navLink: '/industry'
       }
     ]
   }

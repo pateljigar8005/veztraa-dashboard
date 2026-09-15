@@ -20,6 +20,15 @@ export const menuPermissionGroups = [
     ]
   },
   {
+    section: 'Website',
+    items: [
+      { id: 'teamMembers', title: 'Team' },
+      { id: 'portfolioItems', title: 'Portfolio' },
+      { id: 'caseStudies', title: 'Case Studies' },
+      { id: 'jobListings', title: 'Job Listings' }
+    ]
+  },
+  {
     section: 'Settings',
     items: [
       { id: 'company', title: 'Company' },
@@ -29,7 +38,8 @@ export const menuPermissionGroups = [
       { id: 'paymentMethods', title: 'Payment Methods' },
       { id: 'termsTemplates', title: 'Terms Templates' },
       { id: 'pdfDesignerTemplates', title: 'PDF Designer' },
-      { id: 'currencies', title: 'Currency' }
+      { id: 'currencies', title: 'Currency' },
+      { id: 'industries', title: 'Industry' }
     ]
   }
 ]

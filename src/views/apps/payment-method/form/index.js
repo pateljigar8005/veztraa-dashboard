@@ -2,6 +2,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
+// ** Hooks
+import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
+
 // ** Third Party Components
 import toast from 'react-hot-toast'
 import Select from 'react-select'
@@ -34,6 +37,9 @@ const PaymentMethodForm = () => {
   const store = useSelector(state => state.paymentMethods)
 
   const [description, setDescription] = useState('')
+  // Tracks edits to description, which isn't registered with react-hook-form
+  // so its own isDirty can't see it.
+  const [extraDirty, setExtraDirty] = useState(false)
 
   const {
     control,
@@ -42,8 +48,10 @@ const PaymentMethodForm = () => {
     setError,
     handleSubmit,
     watch,
-    formState: { errors }
+    formState: { errors, isDirty }
   } = useForm({ defaultValues })
+
+  useUnsavedChangesGuard(isDirty || extraDirty)
 
   const isActive = watch('is_active')
 
@@ -113,13 +121,20 @@ const PaymentMethodForm = () => {
                 theme={selectThemeColors}
                 options={statusOptions}
                 value={selectedStatusOption}
-                onChange={option => setValue('is_active', option.value)}
+                onChange={option => setValue('is_active', option.value, { shouldDirty: true })}
                 isSearchable={false}
               />
             </Col>
             <Col md={12}>
               <Label className='form-label'>Description</Label>
-              <Editor value={description} onChange={setDescription} height={500} />
+              <Editor
+                value={description}
+                onChange={value => {
+                  setDescription(value)
+                  setExtraDirty(true)
+                }}
+                height={500}
+              />
             </Col>
           </Row>
         </Form>

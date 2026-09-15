@@ -3,6 +3,7 @@ import { Fragment, useState, useEffect } from 'react'
 
 // ** Third Party Components
 import classnames from 'classnames'
+import { useNavigate } from 'react-router-dom'
 import { Row, Col } from 'reactstrap'
 
 // ** Calendar App Component Imports
@@ -15,7 +16,18 @@ import { useRTL } from '@hooks/useRTL'
 
 // ** Store & Actions
 import { useSelector, useDispatch } from 'react-redux'
-import { fetchEvents, selectEvent, updateEvent, updateFilter, updateAllFilters, addEvent, removeEvent } from './store'
+import {
+  fetchEvents,
+  fetchKanbanTaskEvents,
+  fetchTodoTaskEvents,
+  selectEvent,
+  updateEvent,
+  updateFilter,
+  updateAllFilters,
+  toggleTaskFilter,
+  addEvent,
+  removeEvent
+} from './store'
 
 // ** Styles
 import '@styles/react/apps/app-calendar.scss'
@@ -26,12 +38,15 @@ const calendarsColor = {
   Holiday: 'success',
   Personal: 'danger',
   Family: 'warning',
-  ETC: 'info'
+  ETC: 'info',
+  'Kanban Tasks': 'secondary',
+  'To-Do': 'dark'
 }
 
 const CalendarComponent = () => {
   // ** Variables
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const store = useSelector(state => state.calendar)
 
   // ** states
@@ -70,9 +85,16 @@ const CalendarComponent = () => {
     }
   }
 
+  // ** Function to navigate to the source task when a Kanban/Todo event is clicked
+  const handleTaskEventClick = source => {
+    navigate(source === 'kanban' ? '/kanban' : '/todo')
+  }
+
   // ** Fetch Events On Mount
   useEffect(() => {
     dispatch(fetchEvents(store.selectedCalendars))
+    dispatch(fetchKanbanTaskEvents())
+    dispatch(fetchTodoTaskEvents())
   }, [])
 
   return (
@@ -91,6 +113,7 @@ const CalendarComponent = () => {
               updateFilter={updateFilter}
               toggleSidebar={toggleSidebar}
               updateAllFilters={updateAllFilters}
+              toggleTaskFilter={toggleTaskFilter}
               handleAddEventSidebar={handleAddEventSidebar}
             />
           </Col>
@@ -107,6 +130,7 @@ const CalendarComponent = () => {
               calendarsColor={calendarsColor}
               setCalendarApi={setCalendarApi}
               handleAddEventSidebar={handleAddEventSidebar}
+              handleTaskEventClick={handleTaskEventClick}
             />
           </Col>
           <div

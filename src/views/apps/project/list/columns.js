@@ -19,6 +19,7 @@ import { confirmDelete } from '@src/utility/confirmDelete'
 
 // ** Options
 import { statusOptions } from '../statusOptions'
+import { budgetTypeOptions } from '../budgetTypeOptions'
 
 const statusColorObj = {
   planning: 'light-info',
@@ -29,6 +30,7 @@ const statusColorObj = {
 }
 
 const statusLabel = value => statusOptions.find(i => i.value === value)?.label || value || '-'
+const budgetTypeLabel = value => budgetTypeOptions.find(i => i.value === value)?.label || null
 
 export const columns = [
   {
@@ -38,11 +40,13 @@ export const columns = [
     sortField: 'name',
     selector: row => row.name,
     cell: row => (
-      <div className='d-flex flex-column'>
-        <Link to={`/project/edit/${row.id}`} className='user_name text-truncate text-body'>
+      <div className='d-flex flex-column overflow-hidden' style={{ minWidth: 0 }}>
+        <Link to={`/project/edit/${row.id}`} className='user_name text-truncate text-body' title={row.name}>
           <span className='fw-bolder'>{row.name}</span>
         </Link>
-        <small className='text-truncate text-muted mb-0'>{row.client_name || '-'}</small>
+        <small className='text-truncate text-muted mb-0' title={row.client_name || '-'}>
+          {row.client_name || '-'}
+        </small>
       </div>
     )
   },
@@ -60,7 +64,14 @@ export const columns = [
     sortable: true,
     sortField: 'budget',
     selector: row => row.budget,
-    cell: row => <span>{row.budget !== null ? `$${Number(row.budget).toFixed(2)}` : '-'}</span>
+    cell: row => (
+      <div className='d-flex flex-column' style={{ minWidth: 0 }}>
+        <span>{row.budget !== null ? `${row.currency || '$'} ${Number(row.budget).toFixed(2)}` : '-'}</span>
+        {row.budget !== null && budgetTypeLabel(row.budget_type) && (
+          <small className='text-muted'>{budgetTypeLabel(row.budget_type)}</small>
+        )}
+      </div>
+    )
   },
   {
     name: 'Status',

@@ -2,6 +2,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
+// ** Hooks
+import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
+
 // ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
@@ -24,7 +27,7 @@ import PaymentMethodSection from '../../shared/PaymentMethodSection'
 import { addContract, updateContract, getContract } from '../store'
 
 // ** Options
-import { frequencyOptions, contractStatusOptions } from '../contractOptions'
+import { frequencyOptions } from '../contractOptions'
 
 const defaultValues = {
   contact_name: '',
@@ -55,8 +58,9 @@ const ContractForm = () => {
   const [body, setBody] = useState('')
   const [termsContent, setTermsContent] = useState('')
   const [paymentMethodContent, setPaymentMethodContent] = useState('')
-  const [file, setFile] = useState(null)
-  const [existingDocPath, setExistingDocPath] = useState(null)
+  // Tracks edits to the state above, none of which is registered with
+  // react-hook-form, so its own isDirty can't see them.
+  const [extraDirty, setExtraDirty] = useState(false)
 
   const {
     control,
@@ -65,8 +69,10 @@ const ContractForm = () => {
     setError,
     handleSubmit,
     watch,
-    formState: { errors }
+    formState: { errors, isDirty }
   } = useForm({ defaultValues })
+
+  useUnsavedChangesGuard(isDirty || extraDirty)
 
   const clientId = watch('client_id')
   const frequency = watch('frequency')
@@ -133,22 +139,18 @@ const ContractForm = () => {
       setBody(ct.body || '')
       setTermsContent(ct.terms_content || '')
       setPaymentMethodContent(ct.payment_method_content || '')
-      // Signed documents can't be carried over client-side - a clone starts
-      // without one attached, same as isEdit's existingDocPath but only when
-      // actually editing the original record.
-      setExistingDocPath(isEdit ? ct.signed_document_path || null : null)
     }
   }, [store.selectedContract])
 
   // ** Quick Fill Customer
   const handleQuickFill = option => {
-    setValue('client_id', option ? option.value : '')
+    setValue('client_id', option ? option.value : '', { shouldDirty: true })
     if (option) {
-      setValue('contact_name', option.label)
-      setValue('company_name', option.company_name || '')
-      setValue('email', option.email || '')
-      setValue('phone', option.phone || '')
-      setValue('billing_address', option.address || '')
+      setValue('contact_name', option.label, { shouldDirty: true })
+      setValue('company_name', option.company_name || '', { shouldDirty: true })
+      setValue('email', option.email || '', { shouldDirty: true })
+      setValue('phone', option.phone || '', { shouldDirty: true })
+      setValue('billing_address', option.address || '', { shouldDirty: true })
     }
   }
 
@@ -177,19 +179,16 @@ const ContractForm = () => {
       internal_notes: data.internal_notes
     }
 
-    const action = isEdit
-      ? updateContract({ id: Number(id), contract: payload, file })
-      : addContract({ contract: payload, file })
+    const action = isEdit ? updateContract({ id: Number(id), contract: payload }) : addContract({ contract: payload })
 
-    dispatch(action).then(() => {
+    dispatch(action).then(result => {
       toast.success(isEdit ? 'Contract updated' : 'Contract added')
-      navigate('/contract')
+      navigate(`/contract/view/${result.payload.id}`)
     })
   }
 
   const selectedClientOption = clientOptions.find(i => i.value === clientId) || null
   const selectedFrequencyOption = frequencyOptions.find(i => i.value === frequency) || null
-  const selectedStatusOption = contractStatusOptions.find(i => i.value === status) || null
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
@@ -260,54 +259,15 @@ const ContractForm = () => {
             <hr className='invoice-spacing' />
 
             <CardBody>
-              <h6 className='invoice-to-title mb-2'>Contract Details</h6>
-              <Row>
-                <Col md={3} className='mb-1'>
-                  <Label className='form-label'>Frequency</Label>
-                  <Select
-                    className='react-select'
-                    classNamePrefix='select'
-                    theme={selectThemeColors}
-                    options={frequencyOptions}
-                    value={selectedFrequencyOption}
-                    onChange={option => setValue('frequency', option ? option.value : 'monthly')}
-                  />
-                </Col>
-                <Col md={3} className='mb-1'>
-                  <Label className='form-label'>Status</Label>
-                  <Select
-                    className='react-select'
-                    classNamePrefix='select'
-                    theme={selectThemeColors}
-                    options={contractStatusOptions}
-                    value={selectedStatusOption}
-                    onChange={option => setValue('status', option ? option.value : 'draft')}
-                  />
-                </Col>
-                <Col md={3} className='mb-1'>
-                  <Label className='form-label' for='start_date'>
-                    Start date
-                  </Label>
-                  <Controller
-                    name='start_date'
-                    control={control}
-                    render={({ field }) => <Input type='date' id='start_date' {...field} />}
-                  />
-                </Col>
-                <Col md={3} className='mb-1'>
-                  <Label className='form-label' for='end_date'>
-                    End date
-                  </Label>
-                  <Controller name='end_date' control={control} render={({ field }) => <Input type='date' id='end_date' {...field} />} />
-                </Col>
-              </Row>
-            </CardBody>
-
-            <hr className='invoice-spacing' />
-
-            <CardBody>
               <h6 className='invoice-to-title mb-2'>Contract Body</h6>
-              <Editor value={body} onChange={setBody} height={300} />
+              <Editor
+                value={body}
+                onChange={value => {
+                  setBody(value)
+                  setExtraDirty(true)
+                }}
+                height={300}
+              />
               <p className='text-muted small mt-1 mb-0'>
                 Write the full contract text — scope, deliverables, payment terms, responsibilities, etc.
               </p>
@@ -320,10 +280,13 @@ const ContractForm = () => {
               <TermsSection
                 templateOptions={templateOptions}
                 templateId={templateId}
-                onTemplateChange={value => setValue('terms_template_id', value)}
+                onTemplateChange={value => setValue('terms_template_id', value, { shouldDirty: true })}
                 content={termsContent}
-                onContentChange={setTermsContent}
-                defaultOpen={isEdit || Boolean(cloneId)}
+                onContentChange={value => {
+                  setTermsContent(value)
+                  setExtraDirty(true)
+                }}
+                defaultOpen
               />
             </CardBody>
 
@@ -333,10 +296,13 @@ const ContractForm = () => {
               <PaymentMethodSection
                 methodOptions={paymentMethodOptions}
                 methodId={paymentMethodId}
-                onMethodChange={value => setValue('payment_method_id', value)}
+                onMethodChange={value => setValue('payment_method_id', value, { shouldDirty: true })}
                 content={paymentMethodContent}
-                onContentChange={setPaymentMethodContent}
-                defaultOpen={isEdit || Boolean(cloneId)}
+                onContentChange={value => {
+                  setPaymentMethodContent(value)
+                  setExtraDirty(true)
+                }}
+                defaultOpen
               />
             </CardBody>
 
@@ -356,21 +322,34 @@ const ContractForm = () => {
         </Col>
 
         <Col lg='4'>
-          <Card>
+          <Card style={{ position: 'sticky', top: '7rem' }}>
             <CardHeader>
-              <CardTitle tag='h4'>Signed Document</CardTitle>
+              <CardTitle tag='h4'>Contract Details</CardTitle>
             </CardHeader>
             <CardBody>
-              <Label className='form-label'>Attach File (PDF, DOC, DOCX — max 10 MB)</Label>
-              <Input type='file' accept='.pdf,.doc,.docx' onChange={e => setFile(e.target.files[0] || null)} />
-              {existingDocPath && !file && (
-                <p className='mt-1 mb-0'>
-                  <a href={`${axios.defaults.baseURL}${existingDocPath}`} target='_blank' rel='noreferrer'>
-                    View current signed document
-                  </a>
-                </p>
-              )}
-              <p className='text-muted small mt-1 mb-0'>Upload the signed copy of this agreement.</p>
+              <Label className='form-label'>Frequency</Label>
+              <Select
+                className='react-select mb-1'
+                classNamePrefix='select'
+                theme={selectThemeColors}
+                options={frequencyOptions}
+                value={selectedFrequencyOption}
+                onChange={option => setValue('frequency', option ? option.value : 'monthly', { shouldDirty: true })}
+              />
+
+              <Label className='form-label' for='start_date'>
+                Start date
+              </Label>
+              <Controller
+                name='start_date'
+                control={control}
+                render={({ field }) => <Input type='date' id='start_date' className='mb-1' {...field} />}
+              />
+
+              <Label className='form-label' for='end_date'>
+                End date
+              </Label>
+              <Controller name='end_date' control={control} render={({ field }) => <Input type='date' id='end_date' {...field} />} />
             </CardBody>
           </Card>
         </Col>

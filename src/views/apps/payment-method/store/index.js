@@ -14,7 +14,10 @@ export const getData = createAsyncThunk('appPaymentMethods/getData', async param
     params: {
       page: params.page || 1,
       perPage: params.perPage || 10,
-      q: params.q || ''
+      q: params.q || '',
+      sortColumn: params.sortColumn || 'id',
+      sortDirection: params.sort || 'desc',
+      ...params.filters
     }
   })
   return {

@@ -22,7 +22,7 @@ import '@styles/react/libs/tables/react-dataTable-component.scss'
 // ** Table Header
 const CustomHeader = ({ rowsPerPage, handlePerPage, searchTerm, handleFilter }) => {
   return (
-    <div className='invoice-list-table-header w-100 me-1 ms-50 mt-2 mb-75'>
+    <div className='invoice-list-table-header w-100 me-1 ms-50 mt-1 mb-75'>
       <Row>
         <Col xl='6' className='d-flex align-items-center p-0'>
           <div className='d-flex align-items-center w-100'>
@@ -44,7 +44,7 @@ const CustomHeader = ({ rowsPerPage, handlePerPage, searchTerm, handleFilter }) 
         </Col>
         <Col
           xl='6'
-          className='d-flex align-items-sm-center justify-content-xl-end justify-content-start flex-xl-nowrap flex-wrap flex-sm-row flex-column pe-xl-1 p-0 mt-xl-0 mt-1'
+          className='d-flex align-items-sm-center justify-content-xl-end justify-content-start flex-xl-nowrap flex-wrap flex-sm-row flex-column  p-0 mt-xl-0 mt-1'
         >
           <div className='d-flex align-items-center mb-sm-0 mb-1'>
             <Input

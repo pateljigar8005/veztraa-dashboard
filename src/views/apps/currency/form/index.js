@@ -2,6 +2,9 @@
 import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
+// ** Hooks
+import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
+
 // ** Third Party Components
 import toast from 'react-hot-toast'
 import Select from 'react-select'
@@ -43,8 +46,10 @@ const CurrencyForm = () => {
     setError,
     handleSubmit,
     watch,
-    formState: { errors }
+    formState: { errors, isDirty }
   } = useForm({ defaultValues })
+
+  useUnsavedChangesGuard(isDirty)
 
   const isActive = watch('is_active')
 
@@ -146,7 +151,7 @@ const CurrencyForm = () => {
                 theme={selectThemeColors}
                 options={statusOptions}
                 value={selectedStatusOption}
-                onChange={option => setValue('is_active', option.value)}
+                onChange={option => setValue('is_active', option.value, { shouldDirty: true })}
                 isSearchable={false}
               />
             </Col>

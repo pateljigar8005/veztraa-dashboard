@@ -44,22 +44,80 @@ export const removeEvent = createAsyncThunk('appCalendar/removeEvent', async id 
   return id
 })
 
+// Read-only overlay events sourced from the real Kanban/Todo modules, so
+// upcoming due dates show up here without duplicating them into a real
+// calendar_events table - see [[kanban]]/[[todo]] due_date fields, the
+// actual source of truth. Only tasks that actually have a due date are
+// included; a task's own edit form (not this calendar) is still where its
+// due date gets changed, so these events are marked non-editable/non-draggable.
+export const fetchKanbanTaskEvents = createAsyncThunk('appCalendar/fetchKanbanTaskEvents', async () => {
+  const response = await axios.get('/kanban-tasks')
+  return response.data.data.tasks
+    .filter(task => task.due_date)
+    .map(task => ({
+      id: `kanban-${task.id}`,
+      title: task.title,
+      start: task.due_date,
+      allDay: true,
+      editable: false,
+      extendedProps: {
+        calendar: 'Kanban Tasks',
+        source: 'kanban',
+        taskId: task.id
+      }
+    }))
+})
+
+export const fetchTodoTaskEvents = createAsyncThunk('appCalendar/fetchTodoTaskEvents', async () => {
+  const response = await axios.get('/todos')
+  return response.data.data
+    .filter(task => task.dueDate && !task.isCompleted && !task.isDeleted)
+    .map(task => ({
+      id: `todo-${task.id}`,
+      title: task.title,
+      start: task.dueDate,
+      allDay: true,
+      editable: false,
+      extendedProps: {
+        calendar: 'To-Do',
+        source: 'todo',
+        taskId: task.id
+      }
+    }))
+})
+
 export const appCalendarSlice = createSlice({
   name: 'appCalendar',
   initialState: {
     events: [],
+    kanbanEvents: [],
+    todoEvents: [],
+    taskFilters: ['Kanban Tasks', 'To-Do'],
     selectedEvent: {},
     selectedCalendars: ['Personal', 'Business', 'Family', 'Holiday', 'ETC']
   },
   reducers: {
     selectEvent: (state, action) => {
       state.selectedEvent = action.payload
+    },
+    toggleTaskFilter: (state, action) => {
+      if (state.taskFilters.includes(action.payload)) {
+        state.taskFilters = state.taskFilters.filter(name => name !== action.payload)
+      } else {
+        state.taskFilters.push(action.payload)
+      }
     }
   },
   extraReducers: builder => {
     builder
       .addCase(fetchEvents.fulfilled, (state, action) => {
         state.events = action.payload
+      })
+      .addCase(fetchKanbanTaskEvents.fulfilled, (state, action) => {
+        state.kanbanEvents = action.payload
+      })
+      .addCase(fetchTodoTaskEvents.fulfilled, (state, action) => {
+        state.todoEvents = action.payload
       })
       .addCase(updateFilter.fulfilled, (state, action) => {
         if (state.selectedCalendars.includes(action.payload)) {
@@ -81,6 +139,6 @@ export const appCalendarSlice = createSlice({
   }
 })
 
-export const { selectEvent } = appCalendarSlice.actions
+export const { selectEvent, toggleTaskFilter } = appCalendarSlice.actions
 
 export default appCalendarSlice.reducer

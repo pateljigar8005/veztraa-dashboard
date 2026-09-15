@@ -2,6 +2,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
+// ** Hooks
+import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
+
 // ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
@@ -62,6 +65,9 @@ const InvoiceForm = () => {
   const [templateOptions, setTemplateOptions] = useState([])
   const [termsContent, setTermsContent] = useState('')
   const [paymentMethodContent, setPaymentMethodContent] = useState('')
+  // Tracks edits to the two content fields above, neither of which is
+  // registered with react-hook-form, so its own isDirty can't see them.
+  const [extraDirty, setExtraDirty] = useState(false)
   const [catalogOpen, setCatalogOpen] = useState(false)
   const [taxEnabled, setTaxEnabled] = useState(true)
   const [defaultDueDays, setDefaultDueDays] = useState(null)
@@ -73,8 +79,10 @@ const InvoiceForm = () => {
     setError,
     handleSubmit,
     watch,
-    formState: { errors }
+    formState: { errors, isDirty }
   } = useForm({ defaultValues })
+
+  useUnsavedChangesGuard(isDirty || extraDirty)
 
   const { fields, append, remove, move } = useFieldArray({ control, name: 'line_items' })
 
@@ -165,14 +173,14 @@ const InvoiceForm = () => {
   }, [store.selectedInvoice])
 
   const handleQuickFill = option => {
-    setValue('client_id', option ? option.value : '')
+    setValue('client_id', option ? option.value : '', { shouldDirty: true })
     if (option) {
-      setValue('contact_name', option.label)
-      setValue('company_name', option.company_name || '')
-      setValue('email', option.email || '')
-      setValue('phone', option.phone || '')
-      setValue('billing_address', option.address || '')
-      if (option.currency_icon) setValue('currency', option.currency_icon)
+      setValue('contact_name', option.label, { shouldDirty: true })
+      setValue('company_name', option.company_name || '', { shouldDirty: true })
+      setValue('email', option.email || '', { shouldDirty: true })
+      setValue('phone', option.phone || '', { shouldDirty: true })
+      setValue('billing_address', option.address || '', { shouldDirty: true })
+      if (option.currency_icon) setValue('currency', option.currency_icon, { shouldDirty: true })
     }
   }
 
@@ -193,7 +201,7 @@ const InvoiceForm = () => {
 
     due.setDate(due.getDate() + Number(defaultDueDays))
     const pad = n => String(n).padStart(2, '0')
-    setValue('due_date', `${due.getFullYear()}-${pad(due.getMonth() + 1)}-${pad(due.getDate())}`)
+    setValue('due_date', `${due.getFullYear()}-${pad(due.getMonth() + 1)}-${pad(due.getDate())}`, { shouldDirty: true })
   }
 
   const handleAddFromCatalog = items => {
@@ -258,45 +266,8 @@ const InvoiceForm = () => {
         <Row className='invoice-add'>
           <Col xl={9} md={8} sm={12}>
             <Card className='invoice-preview-card'>
-              {/* Header */}
-              <CardBody className='invoice-padding pb-0'>
-                <div className='d-flex justify-content-end invoice-spacing mt-0'>
-                  <div className='invoice-number-date'>
-                    <div className='d-flex align-items-center mb-1'>
-                      <span className='title me-1'>Issue Date:</span>
-                      <Controller
-                        name='issue_date'
-                        control={control}
-                        render={({ field }) => (
-                          <Input
-                            type='date'
-                            className='invoice-edit-input'
-                            invalid={errors.issue_date && true}
-                            {...field}
-                            onChange={handleIssueDateChange(field.onChange)}
-                          />
-                        )}
-                      />
-                    </div>
-                    <div className='d-flex align-items-center'>
-                      <span className='title me-1'>Due Date:</span>
-                      <Controller
-                        name='due_date'
-                        control={control}
-                        render={({ field }) => (
-                          <Input type='date' className='invoice-edit-input' invalid={errors.due_date && true} {...field} />
-                        )}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </CardBody>
-              {/* /Header */}
-
-              <hr className='invoice-spacing' />
-
               {/* Bill To & Details */}
-              <CardBody className='invoice-padding pt-0'>
+              <CardBody className='invoice-padding'>
                 <Row className='row-bill-to invoice-spacing'>
                   <Col className='col-bill-to ps-0' xl='12'>
                     <h6 className='invoice-to-title'>Bill To:</h6>
@@ -372,65 +343,6 @@ const InvoiceForm = () => {
               />
               {/* /Product Details */}
 
-              {/* Invoice Total */}
-              <CardBody className='invoice-padding'>
-                <Row className='invoice-sales-total-wrapper'>
-                  <Col md={12}>
-                    <div className='invoice-total-wrapper' style={{ width: '100%', maxWidth: 'none' }}>
-                      <div className='invoice-total-item'>
-                        <p className='invoice-total-title'>Subtotal:</p>
-                        <p className='invoice-total-amount'>${subtotal.toFixed(2)}</p>
-                      </div>
-                      {taxEnabled && (
-                        <>
-                          <div className='invoice-total-item align-items-center'>
-                            <p className='invoice-total-title mb-0'>Tax Rate (%):</p>
-                            <Controller
-                              name='tax_rate'
-                              control={control}
-                              render={({ field }) => <Input type='number' step='0.01' min='0' style={{ width: '90px' }} {...field} />}
-                            />
-                          </div>
-                          <div className='invoice-total-item'>
-                            <p className='invoice-total-title'>Tax Amount:</p>
-                            <p className='invoice-total-amount'>${taxAmount.toFixed(2)}</p>
-                          </div>
-                        </>
-                      )}
-                      <div className='invoice-total-item align-items-center'>
-                        <p className='invoice-total-title mb-0'>Discount:</p>
-                        <div className='d-flex'>
-                          <Controller
-                            name='discount_value'
-                            control={control}
-                            render={({ field }) => <Input type='number' step='0.01' min='0' style={{ width: '90px' }} {...field} />}
-                          />
-                          <Select
-                            className='react-select ms-1'
-                            classNamePrefix='select'
-                            theme={selectThemeColors}
-                            options={discountTypeOptions}
-                            value={selectedDiscountTypeOption}
-                            onChange={option => setValue('discount_type', option ? option.value : '$')}
-                            styles={{ container: base => ({ ...base, minWidth: '70px' }) }}
-                          />
-                        </div>
-                      </div>
-                      <div className='invoice-total-item'>
-                        <p className='invoice-total-title'>Discount Amount:</p>
-                        <p className='invoice-total-amount text-success'>-${discountAmount.toFixed(2)}</p>
-                      </div>
-                      <hr className='my-50' />
-                      <div className='invoice-total-item'>
-                        <p className='invoice-total-title'>Total:</p>
-                        <p className='invoice-total-amount'>${total.toFixed(2)}</p>
-                      </div>
-                    </div>
-                  </Col>
-                </Row>
-              </CardBody>
-              {/* /Invoice Total */}
-
               <hr className='invoice-spacing mt-0' />
 
               {/* Invoice Note & Terms */}
@@ -441,20 +353,26 @@ const InvoiceForm = () => {
                       <TermsSection
                         templateOptions={templateOptions}
                         templateId={templateId}
-                        onTemplateChange={value => setValue('terms_template_id', value)}
+                        onTemplateChange={value => setValue('terms_template_id', value, { shouldDirty: true })}
                         content={termsContent}
-                        onContentChange={setTermsContent}
-                        defaultOpen={isEdit || Boolean(cloneId)}
+                        onContentChange={value => {
+                          setTermsContent(value)
+                          setExtraDirty(true)
+                        }}
+                        defaultOpen
                       />
                     </div>
                     <div className='mb-2'>
                       <PaymentMethodSection
                         methodOptions={paymentMethodOptions}
                         methodId={paymentMethodId}
-                        onMethodChange={value => setValue('payment_method_id', value)}
+                        onMethodChange={value => setValue('payment_method_id', value, { shouldDirty: true })}
                         content={paymentMethodContent}
-                        onContentChange={setPaymentMethodContent}
-                        defaultOpen={isEdit || Boolean(cloneId)}
+                        onContentChange={value => {
+                          setPaymentMethodContent(value)
+                          setExtraDirty(true)
+                        }}
+                        defaultOpen
                       />
                     </div>
                   </Col>
@@ -465,22 +383,107 @@ const InvoiceForm = () => {
           </Col>
 
           <Col xl={3} md={4} sm={12}>
-            <Card style={{ position: 'sticky', top: '7rem' }}>
-              <CardHeader>
-                <CardTitle tag='h4'>Invoice Details</CardTitle>
-              </CardHeader>
-              <CardBody>
-                <Label className='form-label'>Currency</Label>
-                <Select
-                  className='react-select'
-                  classNamePrefix='select'
-                  theme={selectThemeColors}
-                  options={currencyOptions}
-                  value={selectedCurrencyOption}
-                  onChange={option => setValue('currency', option ? option.value : 'USD')}
-                />
-              </CardBody>
-            </Card>
+            <div style={{ position: 'sticky', top: '7rem' }}>
+              <Card>
+                <CardHeader>
+                  <CardTitle tag='h4'>Invoice Details</CardTitle>
+                </CardHeader>
+                <CardBody>
+                  <Label className='form-label'>Currency</Label>
+                  <Select
+                    className='react-select mb-1'
+                    classNamePrefix='select'
+                    theme={selectThemeColors}
+                    options={currencyOptions}
+                    value={selectedCurrencyOption}
+                    onChange={option => setValue('currency', option ? option.value : 'USD', { shouldDirty: true })}
+                  />
+
+                  <Label className='form-label' for='issue_date'>
+                    Issue Date
+                  </Label>
+                  <Controller
+                    name='issue_date'
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        type='date'
+                        id='issue_date'
+                        className='mb-1'
+                        invalid={errors.issue_date && true}
+                        {...field}
+                        onChange={handleIssueDateChange(field.onChange)}
+                      />
+                    )}
+                  />
+
+                  <Label className='form-label' for='due_date'>
+                    Due Date
+                  </Label>
+                  <Controller
+                    name='due_date'
+                    control={control}
+                    render={({ field }) => <Input type='date' id='due_date' invalid={errors.due_date && true} {...field} />}
+                  />
+                </CardBody>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle tag='h4'>Totals</CardTitle>
+                </CardHeader>
+                <CardBody>
+                  <div className='d-flex justify-content-between mb-1'>
+                    <span>Subtotal</span>
+                    <span>${subtotal.toFixed(2)}</span>
+                  </div>
+                  {taxEnabled && (
+                    <>
+                      <Label className='form-label' for='tax_rate'>
+                        Tax Rate (%)
+                      </Label>
+                      <Controller
+                        name='tax_rate'
+                        control={control}
+                        render={({ field }) => <Input type='number' step='0.01' min='0' id='tax_rate' className='mb-1' {...field} />}
+                      />
+                      <div className='d-flex justify-content-between mb-1'>
+                        <span>Tax Amount</span>
+                        <span>${taxAmount.toFixed(2)}</span>
+                      </div>
+                    </>
+                  )}
+
+                  <Label className='form-label'>Discount</Label>
+                  <div className='d-flex mb-1'>
+                    <Controller
+                      name='discount_value'
+                      control={control}
+                      render={({ field }) => <Input type='number' step='0.01' min='0' {...field} />}
+                    />
+                    <Select
+                      className='react-select ms-1'
+                      classNamePrefix='select'
+                      theme={selectThemeColors}
+                      options={discountTypeOptions}
+                      value={selectedDiscountTypeOption}
+                      onChange={option => setValue('discount_type', option ? option.value : '$', { shouldDirty: true })}
+                      styles={{ container: base => ({ ...base, minWidth: '70px' }) }}
+                    />
+                  </div>
+                  <div className='d-flex justify-content-between mb-2'>
+                    <span>Discount</span>
+                    <span className='text-success'>-${discountAmount.toFixed(2)}</span>
+                  </div>
+
+                  <hr />
+                  <div className='d-flex justify-content-between mb-2'>
+                    <h5 className='mb-0'>Total</h5>
+                    <h5 className='mb-0'>${total.toFixed(2)}</h5>
+                  </div>
+                </CardBody>
+              </Card>
+            </div>
           </Col>
         </Row>
 

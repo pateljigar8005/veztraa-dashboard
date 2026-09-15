@@ -60,7 +60,12 @@ const routeToMenuId = [
   { pattern: /^\/payment-method/, id: 'paymentMethods' },
   { pattern: /^\/terms-template/, id: 'termsTemplates' },
   { pattern: /^\/pdf-designer/, id: 'pdfDesignerTemplates' },
-  { pattern: /^\/currency/, id: 'currencies' }
+  { pattern: /^\/currency/, id: 'currencies' },
+  { pattern: /^\/industry/, id: 'industries' },
+  { pattern: /^\/team-member/, id: 'teamMembers' },
+  { pattern: /^\/portfolio/, id: 'portfolioItems' },
+  { pattern: /^\/case-study/, id: 'caseStudies' },
+  { pattern: /^\/job-listing/, id: 'jobListings' }
 ]
 
 // ** Whether the given pathname is permitted for this user (admins and

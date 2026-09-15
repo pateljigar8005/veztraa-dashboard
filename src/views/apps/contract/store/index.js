@@ -14,7 +14,10 @@ export const getData = createAsyncThunk('appContracts/getData', async params => 
     params: {
       page: params.page || 1,
       perPage: params.perPage || 10,
-      q: params.q || ''
+      q: params.q || '',
+      sortColumn: params.sortColumn || 'id',
+      sortDirection: params.sort || 'desc',
+      ...params.filters
     }
   })
   return {
@@ -31,18 +34,8 @@ export const getContract = createAsyncThunk('appContracts/getContract', async id
 
 export const addContract = createAsyncThunk(
   'appContracts/addContract',
-  async ({ contract, file }, { dispatch, getState }) => {
-    let response
-    if (file) {
-      const formData = new FormData()
-      Object.entries(contract).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) formData.append(key, value)
-      })
-      formData.append('signed_document', file)
-      response = await axios.post('/contracts', formData)
-    } else {
-      response = await axios.post('/contracts', contract)
-    }
+  async ({ contract }, { dispatch, getState }) => {
+    const response = await axios.post('/contracts', contract)
     await dispatch(getData(getState().contracts.params))
     await dispatch(getAllData())
     return response.data.data
@@ -51,13 +44,8 @@ export const addContract = createAsyncThunk(
 
 export const updateContract = createAsyncThunk(
   'appContracts/updateContract',
-  async ({ id, contract, file }, { dispatch, getState }) => {
+  async ({ id, contract }, { dispatch, getState }) => {
     const response = await axios.put(`/contracts/${id}`, contract)
-    if (file) {
-      const formData = new FormData()
-      formData.append('signed_document', file)
-      await axios.post(`/contracts/${id}/document`, formData)
-    }
     await dispatch(getData(getState().contracts.params))
     await dispatch(getAllData())
     return response.data.data

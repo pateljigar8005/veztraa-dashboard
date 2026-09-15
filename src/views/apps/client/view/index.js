@@ -13,9 +13,6 @@ import { Card, CardHeader, CardTitle, CardBody, Row, Col, Badge, Button, Table }
 // ** Store & Actions
 import { getClient } from '../store'
 
-// ** Industry Options
-import { industryOptions } from '../industryOptions'
-
 const statusColorObj = {
   draft: 'light-secondary',
   sent: 'light-info',
@@ -61,7 +58,6 @@ const ClientView = () => {
   }, [id])
 
   const client = store.selectedClient
-  const industryLabel = industryOptions.find(i => i.value === client?.industry)?.label || client?.industry || '-'
 
   if (!client || client.id !== Number(id)) {
     return null
@@ -77,7 +73,7 @@ const ClientView = () => {
             <p className='mb-0'>
               {client.email} {client.phone ? `• ${client.phone}` : ''}
             </p>
-            <p className='mb-0'>Industry: {industryLabel}</p>
+            <p className='mb-0'>Industry: {client.industry_name || '-'}</p>
           </div>
           <div className='d-flex flex-column align-items-md-end mt-md-0 mt-2'>
             <Badge className='text-capitalize mb-2' color={client.is_active ? 'light-success' : 'light-secondary'} pill>

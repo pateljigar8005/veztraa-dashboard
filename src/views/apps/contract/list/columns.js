@@ -8,7 +8,7 @@ import { store } from '@store/store'
 import { deleteContract } from '../store'
 
 // ** Icons Imports
-import { Copy, Edit2, Trash2 } from 'react-feather'
+import { Copy, FileText, Trash2 } from 'react-feather'
 
 // ** Reactstrap Imports
 import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
@@ -38,7 +38,7 @@ export const columns = [
     sortField: 'id',
     selector: row => row.contract_number,
     cell: row => (
-      <Link to={`/contract/edit/${row.id}`} className='text-body'>
+      <Link to={`/contract/view/${row.id}`} className='text-body'>
         <span className='fw-bolder'>{row.contract_number}</span>
       </Link>
     )
@@ -50,11 +50,17 @@ export const columns = [
     sortField: 'contact_name',
     selector: row => row.contact_name,
     cell: row => (
-      <div className='d-flex flex-column'>
-        <Link to={`/contract/edit/${row.id}`} className='user_name text-truncate text-body'>
+      <div className='d-flex flex-column overflow-hidden' style={{ minWidth: 0 }}>
+        <Link
+          to={`/contract/view/${row.id}`}
+          className='user_name text-truncate text-body'
+          title={row.contact_name || row.client_full_name || '-'}
+        >
           <span className='fw-bolder'>{row.contact_name || row.client_full_name || '-'}</span>
         </Link>
-        <small className='text-truncate text-muted mb-0'>{row.company_name || '-'}</small>
+        <small className='text-truncate text-muted mb-0' title={row.company_name || '-'}>
+          {row.company_name || '-'}
+        </small>
       </div>
     )
   },
@@ -92,24 +98,20 @@ export const columns = [
     minWidth: '130px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
-        {currentUserCan('/contract', 'edit') && (
-          <Fragment>
-            <Button
-              tag={Link}
-              to={`/contract/edit/${row.id}`}
-              id={`edit-tooltip-${row.id}`}
-              className='btn-icon me-1'
-              color='flat-primary'
-              size='sm'
-              style={{ borderRadius: '4px', backgroundColor: '#7367f01f' }}
-            >
-              <Edit2 size={16} className='text-primary' />
-            </Button>
-            <UncontrolledTooltip placement='top' target={`edit-tooltip-${row.id}`}>
-              Edit
-            </UncontrolledTooltip>
-          </Fragment>
-        )}
+        <Button
+          tag={Link}
+          to={`/contract/view/${row.id}`}
+          id={`details-tooltip-${row.id}`}
+          className='btn-icon me-1'
+          color='flat-secondary'
+          size='sm'
+          style={{ borderRadius: '4px', backgroundColor: '#82868b1f' }}
+        >
+          <FileText size={16} className='text-secondary' />
+        </Button>
+        <UncontrolledTooltip placement='top' target={`details-tooltip-${row.id}`}>
+          Details
+        </UncontrolledTooltip>
 
         {currentUserCan('/contract', 'add') && (
           <Fragment>

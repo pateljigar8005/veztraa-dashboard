@@ -2,6 +2,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
+// ** Hooks
+import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
+
 // ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
@@ -25,7 +28,7 @@ import LineItemsTable from '../../shared/LineItemsTable'
 import { addQuotation, updateQuotation, getQuotation } from '../store'
 
 // ** Options
-import { quotationStatusOptions, discountTypeOptions } from '../documentOptions'
+import { discountTypeOptions } from '../documentOptions'
 
 const defaultValues = {
   contact_name: '',
@@ -36,7 +39,6 @@ const defaultValues = {
   issue_date: new Date().toISOString().slice(0, 10),
   valid_until: '',
   status: 'draft',
-  rate_to_inr: '',
   notes: 'Thank you for considering us!',
   tax_rate: 0,
   discount_value: 0,
@@ -60,6 +62,9 @@ const QuotationForm = () => {
   const [templateOptions, setTemplateOptions] = useState([])
   const [termsContent, setTermsContent] = useState('')
   const [paymentMethodContent, setPaymentMethodContent] = useState('')
+  // Tracks edits to the two content fields above, neither of which is
+  // registered with react-hook-form, so its own isDirty can't see them.
+  const [extraDirty, setExtraDirty] = useState(false)
   const [catalogOpen, setCatalogOpen] = useState(false)
   const [taxEnabled, setTaxEnabled] = useState(true)
 
@@ -70,8 +75,10 @@ const QuotationForm = () => {
     setError,
     handleSubmit,
     watch,
-    formState: { errors }
+    formState: { errors, isDirty }
   } = useForm({ defaultValues })
+
+  useUnsavedChangesGuard(isDirty || extraDirty)
 
   const { fields, append, remove, move } = useFieldArray({ control, name: 'line_items' })
 
@@ -96,8 +103,7 @@ const QuotationForm = () => {
           email: c.email,
           phone: c.phone,
           address: c.address,
-          currency_icon: c.currency_icon,
-          currency_rate: c.currency_rate
+          currency_icon: c.currency_icon
         }))
       )
     })
@@ -149,7 +155,6 @@ const QuotationForm = () => {
         billing_address: q.billing_address || '',
         issue_date: q.issue_date || '',
         valid_until: q.valid_until || '',
-        rate_to_inr: q.rate_to_inr ?? '',
         notes: q.notes || '',
         tax_rate: q.tax_rate || 0,
         discount_value: q.discount_value || 0,
@@ -168,18 +173,38 @@ const QuotationForm = () => {
 
   // ** Quick Fill Customer
   const handleQuickFill = option => {
-    setValue('client_id', option ? option.value : '')
+    setValue('client_id', option ? option.value : '', { shouldDirty: true })
     if (option) {
-      setValue('contact_name', option.label)
-      setValue('company_name', option.company_name || '')
-      setValue('email', option.email || '')
-      setValue('phone', option.phone || '')
-      setValue('billing_address', option.address || '')
-      if (option.currency_icon) setValue('currency', option.currency_icon)
-      if (option.currency_rate !== null && option.currency_rate !== undefined) {
-        setValue('rate_to_inr', option.currency_rate)
-      }
+      setValue('contact_name', option.label, { shouldDirty: true })
+      setValue('company_name', option.company_name || '', { shouldDirty: true })
+      setValue('email', option.email || '', { shouldDirty: true })
+      setValue('phone', option.phone || '', { shouldDirty: true })
+      setValue('billing_address', option.address || '', { shouldDirty: true })
+      if (option.currency_icon) setValue('currency', option.currency_icon, { shouldDirty: true })
     }
+  }
+
+  // ** Auto-fill Valid Until as one month after whatever issue date the user
+  // picks - only on an explicit change, not while an existing/cloned
+  // quotation's dates are being loaded. Built from the y/m/d parts directly
+  // (rather than `new Date(str)` + `toISOString()`, which parses/formats in
+  // UTC) so it can't shift a day depending on the browser's local timezone.
+  const handleIssueDateChange = onChange => e => {
+    onChange(e)
+    const value = e.target.value
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+    if (!match) return
+
+    const validUntil = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+    if (isNaN(validUntil.getTime())) return
+
+    validUntil.setMonth(validUntil.getMonth() + 1)
+    const pad = n => String(n).padStart(2, '0')
+    setValue(
+      'valid_until',
+      `${validUntil.getFullYear()}-${pad(validUntil.getMonth() + 1)}-${pad(validUntil.getDate())}`,
+      { shouldDirty: true }
+    )
   }
 
   const handleAddFromCatalog = items => {
@@ -209,7 +234,6 @@ const QuotationForm = () => {
         billing_address: data.billing_address,
         status: status || 'draft',
         currency: currency || 'USD',
-        rate_to_inr: data.rate_to_inr === '' ? null : Number(data.rate_to_inr),
         issue_date: data.issue_date,
         valid_until: data.valid_until,
         line_items: data.line_items,
@@ -224,9 +248,9 @@ const QuotationForm = () => {
       }
 
       const action = isEdit ? updateQuotation({ id: Number(id), ...payload }) : addQuotation(payload)
-      dispatch(action).then(() => {
+      dispatch(action).then(result => {
         toast.success(isEdit ? 'Quotation updated' : 'Quotation added')
-        navigate('/quotation')
+        navigate(`/quotation/view/${result.payload.id}`)
       })
     } else {
       for (const key of ['contact_name', 'issue_date', 'valid_until']) {
@@ -238,7 +262,6 @@ const QuotationForm = () => {
   }
 
   const selectedClientOption = clientOptions.find(i => i.value === clientId) || null
-  const selectedStatusOption = quotationStatusOptions.find(i => i.value === status) || null
   const selectedCurrencyOption = currencyOptions.find(i => i.value === currency) || null
   const selectedDiscountTypeOption = discountTypeOptions.find(i => i.value === discountType) || null
 
@@ -339,10 +362,13 @@ const QuotationForm = () => {
               <TermsSection
                 templateOptions={templateOptions}
                 templateId={templateId}
-                onTemplateChange={value => setValue('terms_template_id', value)}
+                onTemplateChange={value => setValue('terms_template_id', value, { shouldDirty: true })}
                 content={termsContent}
-                onContentChange={setTermsContent}
-                defaultOpen={isEdit || Boolean(cloneId)}
+                onContentChange={value => {
+                  setTermsContent(value)
+                  setExtraDirty(true)
+                }}
+                defaultOpen
               />
             </CardBody>
 
@@ -352,31 +378,25 @@ const QuotationForm = () => {
               <PaymentMethodSection
                 methodOptions={paymentMethodOptions}
                 methodId={paymentMethodId}
-                onMethodChange={value => setValue('payment_method_id', value)}
+                onMethodChange={value => setValue('payment_method_id', value, { shouldDirty: true })}
                 content={paymentMethodContent}
-                onContentChange={setPaymentMethodContent}
-                defaultOpen={isEdit || Boolean(cloneId)}
+                onContentChange={value => {
+                  setPaymentMethodContent(value)
+                  setExtraDirty(true)
+                }}
+                defaultOpen
               />
             </CardBody>
           </Card>
         </Col>
 
         <Col lg='4'>
+          <div style={{ position: 'sticky', top: '7rem' }}>
           <Card>
             <CardHeader>
               <CardTitle tag='h4'>Quotation Details</CardTitle>
             </CardHeader>
             <CardBody>
-              <Label className='form-label'>Status</Label>
-              <Select
-                className='react-select mb-1'
-                classNamePrefix='select'
-                theme={selectThemeColors}
-                options={quotationStatusOptions}
-                value={selectedStatusOption}
-                onChange={option => setValue('status', option ? option.value : 'draft')}
-              />
-
               <Label className='form-label'>Currency</Label>
               <Select
                 className='react-select mb-1'
@@ -384,16 +404,8 @@ const QuotationForm = () => {
                 theme={selectThemeColors}
                 options={currencyOptions}
                 value={selectedCurrencyOption}
-                onChange={option => setValue('currency', option ? option.value : 'USD')}
+                onChange={option => setValue('currency', option ? option.value : 'USD', { shouldDirty: true })}
               />
-
-              <Label className='form-label'>Rate to INR ({`1 ${currency || 'USD'} = ? ₹`})</Label>
-              <Controller
-                name='rate_to_inr'
-                control={control}
-                render={({ field }) => <Input type='number' step='0.01' placeholder='e.g. 84.50' className='mb-1' {...field} />}
-              />
-              <p className='text-muted small mb-2'>Locked at the rate on this quotation.</p>
 
               <Label className='form-label' for='issue_date'>
                 Issue Date <span className='text-danger'>*</span>
@@ -401,7 +413,16 @@ const QuotationForm = () => {
               <Controller
                 name='issue_date'
                 control={control}
-                render={({ field }) => <Input type='date' id='issue_date' invalid={errors.issue_date && true} className='mb-1' {...field} />}
+                render={({ field }) => (
+                  <Input
+                    type='date'
+                    id='issue_date'
+                    invalid={errors.issue_date && true}
+                    className='mb-1'
+                    {...field}
+                    onChange={handleIssueDateChange(field.onChange)}
+                  />
+                )}
               />
 
               <Label className='form-label' for='valid_until'>
@@ -454,7 +475,7 @@ const QuotationForm = () => {
                   theme={selectThemeColors}
                   options={discountTypeOptions}
                   value={selectedDiscountTypeOption}
-                  onChange={option => setValue('discount_type', option ? option.value : '$')}
+                  onChange={option => setValue('discount_type', option ? option.value : '$', { shouldDirty: true })}
                   styles={{ container: base => ({ ...base, minWidth: '70px' }) }}
                 />
               </div>
@@ -470,6 +491,7 @@ const QuotationForm = () => {
               </div>
             </CardBody>
           </Card>
+          </div>
         </Col>
       </Row>
 

@@ -30,7 +30,8 @@ const Calendar = props => {
     blankEvent,
     toggleSidebar,
     selectEvent,
-    updateEvent
+    updateEvent,
+    handleTaskEventClick
   } = props
 
   // ** UseEffect checks for CalendarAPI Update
@@ -40,9 +41,15 @@ const Calendar = props => {
     }
   }, [calendarApi])
 
+  // ** Kanban/Todo due-date events, filterable via the sidebar's Tasks section
+  const taskEvents = [
+    ...(store.taskFilters.includes('Kanban Tasks') ? store.kanbanEvents : []),
+    ...(store.taskFilters.includes('To-Do') ? store.todoEvents : [])
+  ]
+
   // ** calendarOptions(Props)
   const calendarOptions = {
-    events: store.events.length ? store.events : [],
+    events: [...(store.events.length ? store.events : []), ...taskEvents],
     plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin],
     initialView: 'dayGridMonth',
     headerToolbar: {
@@ -90,6 +97,13 @@ const Calendar = props => {
     },
 
     eventClick({ event: clickedEvent }) {
+      // eslint-disable-next-line no-underscore-dangle
+      const source = clickedEvent._def.extendedProps.source
+      if (source === 'kanban' || source === 'todo') {
+        handleTaskEventClick(source)
+        return
+      }
+
       dispatch(selectEvent(clickedEvent))
       handleAddEventSidebar()
 

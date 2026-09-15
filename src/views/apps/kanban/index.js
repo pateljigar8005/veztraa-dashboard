@@ -25,15 +25,6 @@ const defaultValues = {
   boardTitle: ''
 }
 
-const labelColors = {
-  App: 'info',
-  UX: 'success',
-  Images: 'warning',
-  Forms: 'success',
-  'Code Review': 'danger',
-  'Charts & Maps': 'primary'
-}
-
 const KanbanBoard = () => {
   // ** States
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -60,7 +51,7 @@ const KanbanBoard = () => {
   }
 
   const handleAddBoardFormSubmit = data => {
-    dispatch(addBoard({ title: data.boardTitle, id: data.boardTitle.toLowerCase().replace(/ /g, '-') }))
+    dispatch(addBoard({ title: data.boardTitle }))
     handleAddBoardReset()
   }
 
@@ -74,7 +65,6 @@ const KanbanBoard = () => {
         <KanbanBoards
           store={store}
           board={board}
-          labelColors={labelColors}
           isLastBoard={isLastBoard}
           key={`${board.id}-${index}`}
           index={`${board.id}-${index}`}
@@ -142,12 +132,7 @@ const KanbanBoard = () => {
         )}
       </div>
 
-      <TaskSidebar
-        labelColors={labelColors}
-        sidebarOpen={sidebarOpen}
-        selectedTask={store.selectedTask}
-        handleTaskSidebarToggle={handleTaskSidebarToggle}
-      />
+      <TaskSidebar sidebarOpen={sidebarOpen} selectedTask={store.selectedTask} handleTaskSidebarToggle={handleTaskSidebarToggle} />
     </div>
   ) : null
 }
