@@ -4,7 +4,6 @@ import { useState, useEffect, Fragment } from 'react'
 // ** Third Party Components
 import axios from 'axios'
 import classnames from 'classnames'
-import Flatpickr from 'react-flatpickr'
 import { Editor } from '@veztraa/editor'
 import { X, Star, Trash } from 'react-feather'
 import Select, { components } from 'react-select' //eslint-disable-line
@@ -16,28 +15,16 @@ import { Modal, ModalBody, ModalFooter, Button, Form, Input, Label, FormFeedback
 // ** Custom Components
 import Avatar from '@components/avatar'
 import TaskAttachments from './TaskAttachments'
+import DateField from '../shared/DateField'
 
 // ** Utils
 import { isObjEmpty, selectThemeColors, resolveAvatarUrl } from '@utils'
 
 // ** Styles Imports
-import '@styles/react/libs/flatpickr/flatpickr.scss'
 import '@styles/react/libs/react-select/_react-select.scss'
 
 // ** Function to capitalize the first letter of string
 const capitalize = string => string.charAt(0).toUpperCase() + string.slice(1)
-
-// ** Turns a Flatpickr-selected Date into a plain 'YYYY-MM-DD' string using
-// local getters, not toISOString() (which is UTC and can shift a day
-// depending on the browser's timezone) - the only format this state ever
-// holds, so no conversion is needed anywhere else it's read.
-const toDateOnly = date => {
-  if (!date) return null
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
-}
 
 // ** Modal Header
 const ModalHeader = props => {
@@ -294,14 +281,7 @@ const TaskSidebar = props => {
             <Label className='form-label' for='due-date'>
               Due Date
             </Label>
-            <Flatpickr
-              id='due-date'
-              name='due-date'
-              className='form-control'
-              onChange={date => setDueDate(toDateOnly(date[0]))}
-              value={dueDate}
-              options={{ dateFormat: 'Y-m-d' }}
-            />
+            <DateField id='due-date' name='due-date' value={dueDate} onChange={setDueDate} />
           </div>
           <div className='mb-1'>
             <Label className='form-label' for='task-tags'>

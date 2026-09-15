@@ -10,6 +10,10 @@ import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Row, Col, Label, In
 // ** Utils
 import { selectThemeColors } from '@utils'
 
+// ** Shared Components
+import DateField from './DateField'
+import AmountField from './AmountField'
+
 // ** Generic "advanced search" popup, driven entirely by a `fields` config so
 // every list page can reuse the same component instead of hand-rolling its
 // own filter form. Supported field types:
@@ -79,17 +83,15 @@ const AdvancedSearchModal = ({ isOpen, toggle, title = 'Advanced Search', fields
           <Col md={6} className='mb-1' key={field.name}>
             <Label className='form-label'>{field.label}</Label>
             <div className='d-flex' style={{ gap: '0.5rem' }}>
-              <Input
-                type='date'
+              <DateField
                 style={{ minWidth: 0, flex: 1 }}
                 value={formValues[`${field.name}_from`] || ''}
-                onChange={e => setValue(`${field.name}_from`, e.target.value)}
+                onChange={value => setValue(`${field.name}_from`, value)}
               />
-              <Input
-                type='date'
+              <DateField
                 style={{ minWidth: 0, flex: 1 }}
                 value={formValues[`${field.name}_to`] || ''}
-                onChange={e => setValue(`${field.name}_to`, e.target.value)}
+                onChange={value => setValue(`${field.name}_to`, value)}
               />
             </div>
           </Col>
@@ -99,19 +101,17 @@ const AdvancedSearchModal = ({ isOpen, toggle, title = 'Advanced Search', fields
           <Col md={6} className='mb-1' key={field.name}>
             <Label className='form-label'>{field.label}</Label>
             <div className='d-flex' style={{ gap: '0.5rem' }}>
-              <Input
-                type='number'
+              <AmountField
                 placeholder='Min'
                 style={{ minWidth: 0, flex: 1 }}
                 value={formValues[`${field.name}_from`] || ''}
-                onChange={e => setValue(`${field.name}_from`, e.target.value)}
+                onChange={value => setValue(`${field.name}_from`, value)}
               />
-              <Input
-                type='number'
+              <AmountField
                 placeholder='Max'
                 style={{ minWidth: 0, flex: 1 }}
                 value={formValues[`${field.name}_to`] || ''}
-                onChange={e => setValue(`${field.name}_to`, e.target.value)}
+                onChange={value => setValue(`${field.name}_to`, value)}
               />
             </div>
           </Col>

@@ -13,6 +13,10 @@ import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Row, Col, Label, In
 // ** Utils
 import { selectThemeColors } from '@utils'
 
+// ** Shared Components
+import DateField from '../shared/DateField'
+import AmountField from '../shared/AmountField'
+
 const defaultValues = {
   amount: '',
   rate_to_inr: '',
@@ -126,14 +130,12 @@ const RecordPaymentModal = ({ isOpen, toggle, invoiceId, currency, balanceDue, p
               name='amount'
               control={control}
               render={({ field }) => (
-                <Input
+                <AmountField
                   id='payment-amount'
-                  type='number'
-                  step='0.01'
-                  min='0'
                   placeholder='0.00'
                   invalid={errors.amount && true}
-                  {...field}
+                  value={field.value}
+                  onChange={field.onChange}
                 />
               )}
             />
@@ -151,7 +153,14 @@ const RecordPaymentModal = ({ isOpen, toggle, invoiceId, currency, balanceDue, p
             <Controller
               name='payment_date'
               control={control}
-              render={({ field }) => <Input id='payment-date' type='date' invalid={errors.payment_date && true} {...field} />}
+              render={({ field }) => (
+                <DateField
+                  id='payment-date'
+                  value={field.value}
+                  onChange={field.onChange}
+                  invalid={errors.payment_date && true}
+                />
+              )}
             />
           </Col>
           <Col md={6} className='mb-1'>

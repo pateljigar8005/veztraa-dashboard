@@ -17,6 +17,9 @@ import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } f
 // ** Utils
 import { selectThemeColors } from '@utils'
 
+// ** Shared Components
+import AmountField from '../../shared/AmountField'
+
 // ** Store & Actions
 import { addServiceItem, updateServiceItem, getServiceItem } from '../store'
 
@@ -139,7 +142,9 @@ const ServiceItemForm = () => {
               <Controller
                 name='price'
                 control={control}
-                render={({ field }) => <Input type='number' step='0.01' id='price' placeholder='75.00' {...field} />}
+                render={({ field }) => (
+                  <AmountField id='price' placeholder='75.00' value={field.value} onChange={field.onChange} />
+                )}
               />
             </Col>
             <Col md={6} className='mb-1'>

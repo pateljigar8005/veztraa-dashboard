@@ -12,8 +12,29 @@ export const resolveAvatarUrl = path => (path ? `${axios.defaults.baseURL}${path
 // ** Returns K format from a number
 export const kFormatter = num => (num > 999 ? `${(num / 1000).toFixed(1)}k` : num)
 
+// ** Formats a money amount with thousand separators and 2 decimals
+// (1250000.5 -> '1,250,000.50') - the display-side counterpart to AmountField
+// (masked input) for every list/table column that shows a raw money value.
+export const formatAmount = value => {
+  const num = Number(value)
+  if (isNaN(num)) return '0.00'
+  return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
 // ** Converts HTML to string
 export const htmlToString = html => html.replace(/<\/?[^>]+(>|$)/g, '')
+
+// ** Turns a Flatpickr-selected Date into a plain 'YYYY-MM-DD' string using
+// local getters, not toISOString() (which is UTC and can shift a day
+// depending on the browser's timezone) - every date-only field in this app
+// stores/sends this format, so no further conversion is needed anywhere else.
+export const toDateOnly = date => {
+  if (!date) return null
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
 
 // ** Checks if the passed date is today
 const isToday = date => {

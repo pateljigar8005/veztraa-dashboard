@@ -15,6 +15,7 @@ import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } f
 
 // ** Custom Components
 import ImageUploadField from '../../shared/ImageUploadField'
+import DateField from '../../shared/DateField'
 
 // ** Utils
 import { resolveAvatarUrl } from '@utils'
@@ -193,7 +194,9 @@ const PortfolioForm = () => {
                   <Controller
                     name='completion_date'
                     control={control}
-                    render={({ field }) => <Input type='date' id='completion_date' {...field} />}
+                    render={({ field }) => (
+                      <DateField id='completion_date' value={field.value} onChange={field.onChange} />
+                    )}
                   />
                 </Col>
                 <Col md={6} className='mb-1'>

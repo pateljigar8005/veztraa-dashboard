@@ -7,7 +7,6 @@ import {
   Calendar,
   FileText,
   CheckSquare,
-  MessageSquare,
   Briefcase,
   CreditCard,
   Package,
@@ -21,7 +20,8 @@ import {
   Users,
   Image,
   Award,
-  List
+  List,
+  Clock
 } from 'react-feather'
 
 export default [
@@ -31,28 +31,16 @@ export default [
     icon: <Box />,
     children: [
       {
-        id: 'email',
-        title: 'Email',
-        icon: <Mail />,
-        navLink: '/email'
-      },
-      {
-        id: 'chat',
-        title: 'Chat',
-        icon: <MessageSquare />,
-        navLink: '/chat'
-      },
-      {
-        id: 'todo',
-        title: 'Todo',
-        icon: <CheckSquare />,
-        navLink: '/todo'
-      },
-      {
         id: 'calendar',
         title: 'Calendar',
         icon: <Calendar />,
         navLink: '/calendar'
+      },
+      {
+        id: 'email',
+        title: 'Email',
+        icon: <Mail />,
+        navLink: '/email'
       },
       {
         id: 'kanban',
@@ -61,10 +49,16 @@ export default [
         navLink: '/kanban'
       },
       {
-        id: 'projects',
-        title: 'Project',
-        icon: <Folder />,
-        navLink: '/project'
+        id: 'timesheets',
+        title: 'Timesheet',
+        icon: <Clock />,
+        navLink: '/timesheet'
+      },
+      {
+        id: 'todo',
+        title: 'Todo',
+        icon: <CheckSquare />,
+        navLink: '/todo'
       }
     ]
   },
@@ -105,18 +99,6 @@ export default [
     icon: <Globe />,
     children: [
       {
-        id: 'teamMembers',
-        title: 'Team',
-        icon: <Users />,
-        navLink: '/team-member'
-      },
-      {
-        id: 'portfolioItems',
-        title: 'Portfolio',
-        icon: <Image />,
-        navLink: '/portfolio'
-      },
-      {
         id: 'caseStudies',
         title: 'Case Studies',
         icon: <Award />,
@@ -127,6 +109,18 @@ export default [
         title: 'Job Listings',
         icon: <List />,
         navLink: '/job-listing'
+      },
+      {
+        id: 'portfolioItems',
+        title: 'Portfolio',
+        icon: <Image />,
+        navLink: '/portfolio'
+      },
+      {
+        id: 'teamMembers',
+        title: 'Team',
+        icon: <Users />,
+        navLink: '/team-member'
       }
     ]
   },
@@ -142,10 +136,34 @@ export default [
         navLink: '/company'
       },
       {
-        id: 'users',
-        title: 'User',
-        icon: <User />,
-        navLink: '/user'
+        id: 'currencies',
+        title: 'Currency',
+        icon: <DollarSign />,
+        navLink: '/currency'
+      },
+      {
+        id: 'industries',
+        title: 'Industry',
+        icon: <Briefcase />,
+        navLink: '/industry'
+      },
+      {
+        id: 'paymentMethods',
+        title: 'Payment Methods',
+        icon: <CreditCard />,
+        navLink: '/payment-method'
+      },
+      {
+        id: 'pdfDesignerTemplates',
+        title: 'PDF Designer',
+        icon: <Layout />,
+        navLink: '/pdf-designer'
+      },
+      {
+        id: 'projects',
+        title: 'Project',
+        icon: <Folder />,
+        navLink: '/project'
       },
       {
         id: 'roles-permissions',
@@ -160,34 +178,22 @@ export default [
         navLink: '/service-item'
       },
       {
-        id: 'paymentMethods',
-        title: 'Payment Methods',
-        icon: <CreditCard />,
-        navLink: '/payment-method'
-      },
-      {
         id: 'termsTemplates',
         title: 'Terms Templates',
         icon: <BookOpen />,
         navLink: '/terms-template'
       },
       {
-        id: 'pdfDesignerTemplates',
-        title: 'PDF Designer',
-        icon: <Layout />,
-        navLink: '/pdf-designer'
+        id: 'timesheetActivities',
+        title: 'Timesheet Activity',
+        icon: <Clock />,
+        navLink: '/timesheet-activity'
       },
       {
-        id: 'currencies',
-        title: 'Currency',
-        icon: <DollarSign />,
-        navLink: '/currency'
-      },
-      {
-        id: 'industries',
-        title: 'Industry',
-        icon: <Briefcase />,
-        navLink: '/industry'
+        id: 'users',
+        title: 'User',
+        icon: <User />,
+        navLink: '/user'
       }
     ]
   }

@@ -7,7 +7,8 @@ export const menuPermissionGroups = [
       { id: 'todo', title: 'Todo' },
       { id: 'calendar', title: 'Calendar' },
       { id: 'kanban', title: 'Kanban' },
-      { id: 'projects', title: 'Project' }
+      { id: 'projects', title: 'Project' },
+      { id: 'timesheets', title: 'Timesheet' }
     ]
   },
   {
@@ -39,7 +40,8 @@ export const menuPermissionGroups = [
       { id: 'termsTemplates', title: 'Terms Templates' },
       { id: 'pdfDesignerTemplates', title: 'PDF Designer' },
       { id: 'currencies', title: 'Currency' },
-      { id: 'industries', title: 'Industry' }
+      { id: 'industries', title: 'Industry' },
+      { id: 'timesheetActivities', title: 'Timesheet Activity' }
     ]
   }
 ]

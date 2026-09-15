@@ -24,6 +24,8 @@ import teamMembers from '@src/views/apps/team-member/store'
 import portfolioItems from '@src/views/apps/portfolio/store'
 import caseStudies from '@src/views/apps/case-study/store'
 import jobListings from '@src/views/apps/job-listing/store'
+import timesheets from '@src/views/apps/timesheet/store'
+import timesheetActivities from '@src/views/apps/timesheet-activity/store'
 
 const rootReducer = {
   auth,
@@ -50,7 +52,9 @@ const rootReducer = {
   teamMembers,
   portfolioItems,
   caseStudies,
-  jobListings
+  jobListings,
+  timesheets,
+  timesheetActivities
 }
 
 export default rootReducer

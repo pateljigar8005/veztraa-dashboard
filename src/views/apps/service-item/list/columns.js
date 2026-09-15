@@ -16,6 +16,7 @@ import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
 // ** Utils
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
+import { formatAmount } from '@utils'
 
 // ** Options
 import { categoryOptions, unitOptions } from '../serviceItemOptions'
@@ -62,7 +63,7 @@ export const columns = [
     selector: row => row.price,
     cell: row => (
       <span>
-        ${Number(row.price).toFixed(2)} <span className='text-muted'>/ {unitLabel(row.unit)}</span>
+        ${formatAmount(row.price)} <span className='text-muted'>/ {unitLabel(row.unit)}</span>
       </span>
     )
   },

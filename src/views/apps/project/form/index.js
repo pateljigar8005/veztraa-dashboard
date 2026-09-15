@@ -21,6 +21,8 @@ import { selectThemeColors } from '@utils'
 
 // ** Custom Components
 import ProjectDocuments from './ProjectDocuments'
+import DateField from '../../shared/DateField'
+import AmountField from '../../shared/AmountField'
 
 // ** Store & Actions
 import { addProject, updateProject, getProject } from '../store'
@@ -195,7 +197,7 @@ const ProjectForm = () => {
               <Controller
                 name='start_date'
                 control={control}
-                render={({ field }) => <Input type='date' id='start_date' {...field} />}
+                render={({ field }) => <DateField id='start_date' value={field.value} onChange={field.onChange} />}
               />
             </Col>
             <Col md={4} className='mb-1'>
@@ -205,7 +207,7 @@ const ProjectForm = () => {
               <Controller
                 name='end_date'
                 control={control}
-                render={({ field }) => <Input type='date' id='end_date' {...field} />}
+                render={({ field }) => <DateField id='end_date' value={field.value} onChange={field.onChange} />}
               />
             </Col>
             <Col md={4} className='mb-1'>
@@ -246,7 +248,9 @@ const ProjectForm = () => {
               <Controller
                 name='budget'
                 control={control}
-                render={({ field }) => <Input type='number' step='0.01' id='budget' placeholder='15000' {...field} />}
+                render={({ field }) => (
+                  <AmountField id='budget' placeholder='15000' value={field.value} onChange={field.onChange} />
+                )}
               />
             </Col>
             <Col md={12} className='mb-1'>

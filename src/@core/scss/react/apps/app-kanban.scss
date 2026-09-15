@@ -99,13 +99,6 @@
   }
 }
 
-// Wider than reactstrap's largest built-in Modal size ('xl' caps at
-// 1140px) - the task popup needs more room than that.
-.modal-dialog.kanban-task-modal {
-  max-width: 1200px;
-  width: 90%;
-}
-
 .sidebar-kanban-modal {
   .modal-body {
     height: calc(100vh - 9rem);

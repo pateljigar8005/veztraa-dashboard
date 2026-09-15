@@ -65,7 +65,9 @@ const routeToMenuId = [
   { pattern: /^\/team-member/, id: 'teamMembers' },
   { pattern: /^\/portfolio/, id: 'portfolioItems' },
   { pattern: /^\/case-study/, id: 'caseStudies' },
-  { pattern: /^\/job-listing/, id: 'jobListings' }
+  { pattern: /^\/job-listing/, id: 'jobListings' },
+  { pattern: /^\/timesheet-activity/, id: 'timesheetActivities' },
+  { pattern: /^\/timesheet/, id: 'timesheets' }
 ]
 
 // ** Whether the given pathname is permitted for this user (admins and

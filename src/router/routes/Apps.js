@@ -32,6 +32,12 @@ const ServiceItemForm = lazy(() => import('../../views/apps/service-item/form'))
 const ProjectList = lazy(() => import('../../views/apps/project/list'))
 const ProjectForm = lazy(() => import('../../views/apps/project/form'))
 
+const TimesheetList = lazy(() => import('../../views/apps/timesheet/list'))
+const TimesheetForm = lazy(() => import('../../views/apps/timesheet/form'))
+
+const TimesheetActivityList = lazy(() => import('../../views/apps/timesheet-activity/list'))
+const TimesheetActivityForm = lazy(() => import('../../views/apps/timesheet-activity/form'))
+
 const TermsTemplateList = lazy(() => import('../../views/apps/terms-template/list'))
 const TermsTemplateForm = lazy(() => import('../../views/apps/terms-template/form'))
 const PdfDesignerTemplateList = lazy(() => import('../../views/apps/pdf-designer/list'))
@@ -259,6 +265,30 @@ const AppRoutes = [
   {
     element: <ProjectForm />,
     path: '/project/edit/:id'
+  },
+  {
+    element: <TimesheetList />,
+    path: '/timesheet'
+  },
+  {
+    element: <TimesheetForm />,
+    path: '/timesheet/add'
+  },
+  {
+    element: <TimesheetForm />,
+    path: '/timesheet/edit/:id'
+  },
+  {
+    element: <TimesheetActivityList />,
+    path: '/timesheet-activity'
+  },
+  {
+    element: <TimesheetActivityForm />,
+    path: '/timesheet-activity/add'
+  },
+  {
+    element: <TimesheetActivityForm />,
+    path: '/timesheet-activity/edit/:id'
   },
   {
     element: <TermsTemplateList />,

@@ -23,6 +23,8 @@ import CatalogModal from '../../shared/CatalogModal'
 import TermsSection from '../../shared/TermsSection'
 import PaymentMethodSection from '../../shared/PaymentMethodSection'
 import LineItemsTable from '../../shared/LineItemsTable'
+import DateField from '../../shared/DateField'
+import AmountField from '../../shared/AmountField'
 
 // ** Store & Actions
 import { addInvoice, updateInvoice, getInvoice } from '../store'
@@ -190,10 +192,9 @@ const InvoiceForm = () => {
   // parts directly (rather than `new Date(str)` + `toISOString()`, which
   // parses/formats in UTC) so it can't shift a day depending on the
   // browser's local timezone.
-  const handleIssueDateChange = onChange => e => {
-    onChange(e)
-    const value = e.target.value
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+  const handleIssueDateChange = onChange => value => {
+    onChange(value)
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || '')
     if (defaultDueDays === null || defaultDueDays === undefined || !match) return
 
     const due = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
@@ -406,12 +407,11 @@ const InvoiceForm = () => {
                     name='issue_date'
                     control={control}
                     render={({ field }) => (
-                      <Input
-                        type='date'
+                      <DateField
                         id='issue_date'
                         className='mb-1'
                         invalid={errors.issue_date && true}
-                        {...field}
+                        value={field.value}
                         onChange={handleIssueDateChange(field.onChange)}
                       />
                     )}
@@ -423,7 +423,9 @@ const InvoiceForm = () => {
                   <Controller
                     name='due_date'
                     control={control}
-                    render={({ field }) => <Input type='date' id='due_date' invalid={errors.due_date && true} {...field} />}
+                    render={({ field }) => (
+                      <DateField id='due_date' value={field.value} onChange={field.onChange} invalid={errors.due_date && true} />
+                    )}
                   />
                 </CardBody>
               </Card>
@@ -459,7 +461,7 @@ const InvoiceForm = () => {
                     <Controller
                       name='discount_value'
                       control={control}
-                      render={({ field }) => <Input type='number' step='0.01' min='0' {...field} />}
+                      render={({ field }) => <AmountField value={field.value} onChange={field.onChange} />}
                     />
                     <Select
                       className='react-select ms-1'

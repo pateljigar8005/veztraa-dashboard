@@ -5,7 +5,7 @@ import toast from 'react-hot-toast'
 
 // ** Store & Actions
 import { store } from '@store/store'
-import { deleteProject } from '../store'
+import { deleteTimesheetActivity } from '../store'
 
 // ** Icons Imports
 import { Edit2, Trash2 } from 'react-feather'
@@ -16,75 +16,44 @@ import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
 // ** Utils
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
-import { formatAmount } from '@utils'
 
-// ** Options
-import { statusOptions } from '../statusOptions'
-import { budgetTypeOptions } from '../budgetTypeOptions'
-
-const statusColorObj = {
-  planning: 'light-info',
-  in_progress: 'light-warning',
-  on_hold: 'light-secondary',
-  completed: 'light-success',
-  cancelled: 'light-danger'
+const statusObj = {
+  active: 'light-success',
+  inactive: 'light-secondary'
 }
-
-const statusLabel = value => statusOptions.find(i => i.value === value)?.label || value || '-'
-const budgetTypeLabel = value => budgetTypeOptions.find(i => i.value === value)?.label || null
 
 export const columns = [
   {
-    name: 'Project',
+    name: 'Name',
     sortable: true,
-    minWidth: '240px',
+    minWidth: '260px',
     sortField: 'name',
     selector: row => row.name,
     cell: row => (
-      <div className='d-flex flex-column overflow-hidden' style={{ minWidth: 0 }}>
-        <Link to={`/project/edit/${row.id}`} className='user_name text-truncate text-body' title={row.name}>
-          <span className='fw-bolder'>{row.name}</span>
-        </Link>
-        <small className='text-truncate text-muted mb-0' title={row.client_name || '-'}>
-          {row.client_name || '-'}
-        </small>
-      </div>
-    )
-  },
-  {
-    name: 'Start Date',
-    minWidth: '140px',
-    sortable: true,
-    sortField: 'start_date',
-    selector: row => row.start_date,
-    cell: row => <span>{row.start_date || '-'}</span>
-  },
-  {
-    name: 'Budget',
-    minWidth: '140px',
-    sortable: true,
-    sortField: 'budget',
-    selector: row => row.budget,
-    cell: row => (
-      <div className='d-flex flex-column' style={{ minWidth: 0 }}>
-        <span>{row.budget !== null ? `${row.currency || '$'} ${formatAmount(row.budget)}` : '-'}</span>
-        {row.budget !== null && budgetTypeLabel(row.budget_type) && (
-          <small className='text-muted'>{budgetTypeLabel(row.budget_type)}</small>
-        )}
-      </div>
+      <Link to={`/timesheet-activity/edit/${row.id}`} className='user_name text-truncate text-body'>
+        <span className='fw-bolder'>{row.name}</span>
+      </Link>
     )
   },
   {
     name: 'Status',
-    minWidth: '140px',
+    minWidth: '120px',
     sortable: true,
     sortField: 'status',
     selector: row => row.status,
     cell: row => (
-      <Badge className='text-capitalize' color={statusColorObj[row.status] || 'light-secondary'} pill>
-        {statusLabel(row.status)}
+      <Badge className='text-capitalize' color={statusObj[row.status]} pill>
+        {row.status}
       </Badge>
     )
+  },
+  {
+    name: 'Created',
+    minWidth: '160px',
+    sortable: true,
+    sortField: 'created_at',
+    selector: row => row.created_at,
+    cell: row => <span>{row.created_at}</span>
   },
   {
     name: 'Actions',
@@ -92,11 +61,11 @@ export const columns = [
     minWidth: '90px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
-        {currentUserCan('/project', 'edit') && (
+        {currentUserCan('/timesheet-activity', 'edit') && (
           <Fragment>
             <Button
               tag={Link}
-              to={`/project/edit/${row.id}`}
+              to={`/timesheet-activity/edit/${row.id}`}
               id={`edit-tooltip-${row.id}`}
               className='btn-icon me-1'
               color='flat-primary'
@@ -111,7 +80,7 @@ export const columns = [
           </Fragment>
         )}
 
-        {currentUserCan('/project', 'delete') && (
+        {currentUserCan('/timesheet-activity', 'delete') && (
           <Fragment>
             <Button
               tag='a'
@@ -125,7 +94,8 @@ export const columns = [
                 e.preventDefault()
                 confirmDelete({
                   text: `This will permanently delete "${row.name}".`,
-                  onConfirm: () => store.dispatch(deleteProject(row.id)).then(() => toast.success('Project deleted'))
+                  onConfirm: () =>
+                    store.dispatch(deleteTimesheetActivity(row.id)).then(() => toast.success('Timesheet activity deleted'))
                 })
               }}
             >

@@ -23,6 +23,7 @@ import { taskTypeOptions, priorityOptions } from './kanbanOptions'
 // ** Custom Components
 import Avatar from '@components/avatar'
 import TaskAttachments from './TaskAttachments'
+import DateField from '../shared/DateField'
 
 // ** Utils
 import { isObjEmpty, selectThemeColors, resolveAvatarUrl } from '@utils'
@@ -157,7 +158,6 @@ const TaskSidebar = props => {
       isOpen={sidebarOpen}
       centered
       size='xl'
-      className='kanban-task-modal'
       onOpened={handleSidebarOpened}
       onClosed={handleSidebarClosed}
       toggle={handleTaskSidebarToggle}
@@ -236,7 +236,7 @@ const TaskSidebar = props => {
             <Label className='form-label' for='due-date'>
               Due Date
             </Label>
-            <Input id='due-date' type='date' value={dueDate} onChange={e => setDueDate(e.target.value)} />
+            <DateField id='due-date' value={dueDate} onChange={setDueDate} />
           </div>
 
           <div className='mb-1'>

@@ -16,6 +16,7 @@ import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
 // ** Utils
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
+import { formatAmount } from '@utils'
 
 const statusColorObj = {
   draft: 'light-secondary',
@@ -76,7 +77,7 @@ export const columns = [
     selector: row => row.total,
     cell: row => (
       <span>
-        {row.currency} {computeTotal(row).toFixed(2)}
+        {row.currency} {formatAmount(computeTotal(row))}
       </span>
     )
   },
@@ -86,7 +87,7 @@ export const columns = [
     selector: row => row.balance_due,
     cell: row => (
       <span className={Number(row.balance_due) > 0 ? 'text-danger' : 'text-success'}>
-        {row.currency} {Number(row.balance_due ?? computeTotal(row)).toFixed(2)}
+        {row.currency} {formatAmount(row.balance_due ?? computeTotal(row))}
       </span>
     )
   },

@@ -22,6 +22,7 @@ import { selectThemeColors } from '@utils'
 // ** Shared Components
 import TermsSection from '../../shared/TermsSection'
 import PaymentMethodSection from '../../shared/PaymentMethodSection'
+import DateField from '../../shared/DateField'
 
 // ** Store & Actions
 import { addContract, updateContract, getContract } from '../store'
@@ -343,13 +344,19 @@ const ContractForm = () => {
               <Controller
                 name='start_date'
                 control={control}
-                render={({ field }) => <Input type='date' id='start_date' className='mb-1' {...field} />}
+                render={({ field }) => (
+                  <DateField id='start_date' className='mb-1' value={field.value} onChange={field.onChange} />
+                )}
               />
 
               <Label className='form-label' for='end_date'>
                 End date
               </Label>
-              <Controller name='end_date' control={control} render={({ field }) => <Input type='date' id='end_date' {...field} />} />
+              <Controller
+                name='end_date'
+                control={control}
+                render={({ field }) => <DateField id='end_date' value={field.value} onChange={field.onChange} />}
+              />
             </CardBody>
           </Card>
         </Col>

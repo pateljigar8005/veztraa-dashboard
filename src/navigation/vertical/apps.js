@@ -1,7 +1,6 @@
 // ** Icons Import
 import {
   Mail,
-  MessageSquare,
   CheckSquare,
   Calendar,
   FileText,
@@ -19,30 +18,13 @@ import {
   Users,
   Image,
   Award,
-  List
+  List,
+  Clock
 } from 'react-feather'
 
 export default [
   {
     header: 'Apps & Pages'
-  },
-  {
-    id: 'email',
-    title: 'Email',
-    icon: <Mail size={20} />,
-    navLink: '/email'
-  },
-  {
-    id: 'chat',
-    title: 'Chat',
-    icon: <MessageSquare size={20} />,
-    navLink: '/chat'
-  },
-  {
-    id: 'todo',
-    title: 'Todo',
-    icon: <CheckSquare size={20} />,
-    navLink: '/todo'
   },
   {
     id: 'calendar',
@@ -51,16 +33,28 @@ export default [
     navLink: '/calendar'
   },
   {
+    id: 'email',
+    title: 'Email',
+    icon: <Mail size={20} />,
+    navLink: '/email'
+  },
+  {
     id: 'kanban',
     title: 'Kanban',
     icon: <CheckSquare size={20} />,
     navLink: '/kanban'
   },
   {
-    id: 'projects',
-    title: 'Project',
-    icon: <Folder size={20} />,
-    navLink: '/project'
+    id: 'timesheets',
+    title: 'Timesheet',
+    icon: <Clock size={20} />,
+    navLink: '/timesheet'
+  },
+  {
+    id: 'todo',
+    title: 'Todo',
+    icon: <CheckSquare size={20} />,
+    navLink: '/todo'
   },
   {
     header: 'Billing'
@@ -93,18 +87,6 @@ export default [
     header: 'Website'
   },
   {
-    id: 'teamMembers',
-    title: 'Team',
-    icon: <Users size={20} />,
-    navLink: '/team-member'
-  },
-  {
-    id: 'portfolioItems',
-    title: 'Portfolio',
-    icon: <Image size={20} />,
-    navLink: '/portfolio'
-  },
-  {
     id: 'caseStudies',
     title: 'Case Studies',
     icon: <Award size={20} />,
@@ -117,6 +99,18 @@ export default [
     navLink: '/job-listing'
   },
   {
+    id: 'portfolioItems',
+    title: 'Portfolio',
+    icon: <Image size={20} />,
+    navLink: '/portfolio'
+  },
+  {
+    id: 'teamMembers',
+    title: 'Team',
+    icon: <Users size={20} />,
+    navLink: '/team-member'
+  },
+  {
     header: 'Settings'
   },
   {
@@ -126,10 +120,34 @@ export default [
     navLink: '/company'
   },
   {
-    id: 'users',
-    title: 'User',
-    icon: <User size={20} />,
-    navLink: '/user'
+    id: 'currencies',
+    title: 'Currency',
+    icon: <DollarSign size={20} />,
+    navLink: '/currency'
+  },
+  {
+    id: 'industries',
+    title: 'Industry',
+    icon: <Briefcase size={20} />,
+    navLink: '/industry'
+  },
+  {
+    id: 'paymentMethods',
+    title: 'Payment Methods',
+    icon: <CreditCard size={20} />,
+    navLink: '/payment-method'
+  },
+  {
+    id: 'pdfDesignerTemplates',
+    title: 'PDF Designer',
+    icon: <Layout size={20} />,
+    navLink: '/pdf-designer'
+  },
+  {
+    id: 'projects',
+    title: 'Project',
+    icon: <Folder size={20} />,
+    navLink: '/project'
   },
   {
     id: 'roles-permissions',
@@ -144,33 +162,21 @@ export default [
     navLink: '/service-item'
   },
   {
-    id: 'paymentMethods',
-    title: 'Payment Methods',
-    icon: <CreditCard size={20} />,
-    navLink: '/payment-method'
-  },
-  {
     id: 'termsTemplates',
     title: 'Terms Templates',
     icon: <BookOpen size={20} />,
     navLink: '/terms-template'
   },
   {
-    id: 'pdfDesignerTemplates',
-    title: 'PDF Designer',
-    icon: <Layout size={20} />,
-    navLink: '/pdf-designer'
+    id: 'timesheetActivities',
+    title: 'Timesheet Activity',
+    icon: <Clock size={20} />,
+    navLink: '/timesheet-activity'
   },
   {
-    id: 'currencies',
-    title: 'Currency',
-    icon: <DollarSign size={20} />,
-    navLink: '/currency'
-  },
-  {
-    id: 'industries',
-    title: 'Industry',
-    icon: <Briefcase size={20} />,
-    navLink: '/industry'
+    id: 'users',
+    title: 'User',
+    icon: <User size={20} />,
+    navLink: '/user'
   }
 ]

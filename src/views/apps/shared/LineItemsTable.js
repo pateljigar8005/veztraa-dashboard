@@ -10,6 +10,9 @@ import { X } from 'react-feather'
 // ** Reactstrap Imports
 import { CardBody, Table, Input, Button } from 'reactstrap'
 
+// ** Shared Components
+import AmountField from './AmountField'
+
 // ** Drag Handle Icon (two columns of dots — a real grip handle, not a "more options" glyph)
 const GripIcon = ({ size = 14, className }) => (
   <svg width={size} height={size} viewBox='0 0 10 16' fill='currentColor' className={className}>
@@ -91,7 +94,7 @@ const LineItemsTable = ({ control, fields, lineItems, remove, move, onAddItem, o
                     <Controller
                       name={`line_items.${index}.rate`}
                       control={control}
-                      render={({ field }) => <Input type='number' step='0.01' min='0' {...field} />}
+                      render={({ field }) => <AmountField value={field.value} onChange={field.onChange} />}
                     />
                   </td>
                   <td className='fw-bolder align-middle'>${(qty * rate).toFixed(2)}</td>

@@ -23,6 +23,8 @@ import CatalogModal from '../../shared/CatalogModal'
 import TermsSection from '../../shared/TermsSection'
 import PaymentMethodSection from '../../shared/PaymentMethodSection'
 import LineItemsTable from '../../shared/LineItemsTable'
+import DateField from '../../shared/DateField'
+import AmountField from '../../shared/AmountField'
 
 // ** Store & Actions
 import { addQuotation, updateQuotation, getQuotation } from '../store'
@@ -189,10 +191,9 @@ const QuotationForm = () => {
   // quotation's dates are being loaded. Built from the y/m/d parts directly
   // (rather than `new Date(str)` + `toISOString()`, which parses/formats in
   // UTC) so it can't shift a day depending on the browser's local timezone.
-  const handleIssueDateChange = onChange => e => {
-    onChange(e)
-    const value = e.target.value
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+  const handleIssueDateChange = onChange => value => {
+    onChange(value)
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || '')
     if (!match) return
 
     const validUntil = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
@@ -414,12 +415,11 @@ const QuotationForm = () => {
                 name='issue_date'
                 control={control}
                 render={({ field }) => (
-                  <Input
-                    type='date'
+                  <DateField
                     id='issue_date'
                     invalid={errors.issue_date && true}
                     className='mb-1'
-                    {...field}
+                    value={field.value}
                     onChange={handleIssueDateChange(field.onChange)}
                   />
                 )}
@@ -431,7 +431,9 @@ const QuotationForm = () => {
               <Controller
                 name='valid_until'
                 control={control}
-                render={({ field }) => <Input type='date' id='valid_until' invalid={errors.valid_until && true} {...field} />}
+                render={({ field }) => (
+                  <DateField id='valid_until' value={field.value} onChange={field.onChange} invalid={errors.valid_until && true} />
+                )}
               />
             </CardBody>
           </Card>
@@ -467,7 +469,7 @@ const QuotationForm = () => {
                 <Controller
                   name='discount_value'
                   control={control}
-                  render={({ field }) => <Input type='number' step='0.01' min='0' {...field} />}
+                  render={({ field }) => <AmountField value={field.value} onChange={field.onChange} />}
                 />
                 <Select
                   className='react-select ms-1'
