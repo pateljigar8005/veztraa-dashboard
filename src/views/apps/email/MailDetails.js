@@ -1,206 +1,74 @@
 // ** React Imports
-import { Fragment, useState } from 'react'
+import { Fragment } from 'react'
 
 // ** Utils
 import { formatDate } from '@utils'
 
 // ** Custom Components
 import Avatar from '@components/avatar'
+import EmailBodyFrame from './EmailBodyFrame'
 
 // ** Third Party Components
 import classnames from 'classnames'
+import toast from 'react-hot-toast'
 
-import {
-  Star,
-  Tag,
-  Mail,
-  Info,
-  Trash,
-  Edit2,
-  Folder,
-  Trash2,
-  Paperclip,
-  ChevronLeft,
-  ChevronRight,
-  MoreVertical,
-  CornerUpLeft,
-  CornerUpRight
-} from 'react-feather'
+import { Mail, Paperclip, ChevronLeft, CornerUpLeft, CornerUpRight, Trash2, Folder } from 'react-feather'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // ** Reactstrap Imports
 import {
-  Row,
-  Col,
-  Badge,
   Card,
-  Table,
   CardBody,
   CardFooter,
   CardHeader,
   DropdownMenu,
   DropdownItem,
   DropdownToggle,
-  UncontrolledDropdown
+  UncontrolledDropdown,
+  Spinner
 } from 'reactstrap'
+
+// ** Store & Actions
+import { setMessageRead, moveMessage, deleteMessage } from './store'
+
+// ** Every real IMAP folder a message can be moved to (see backend
+// Mailbox::FOLDERS), keyed by the same folder key the API expects.
+const MOVE_TARGETS = [
+  { key: 'INBOX', label: 'Inbox' },
+  { key: 'Drafts', label: 'Drafts' },
+  { key: 'Trash', label: 'Trash' }
+]
 
 const MailDetails = props => {
   // ** Props
-  const {
-    mail,
-    openMail,
-    dispatch,
-    labelColors,
-    setOpenMail,
-    updateMails,
-    paginateMail,
-    handleMailToTrash,
-    handleFolderUpdate,
-    handleLabelsUpdate,
-    handleMailReadUpdate,
-    formatDateToMonthShort
-  } = props
+  const { mail, loading, folder, openMail, dispatch, setOpenMail, toggleCompose, setReplyTo } = props
 
-  // ** States
-  const [showReplies, setShowReplies] = useState(false)
+  const handleGoBack = () => setOpenMail(false)
 
-  // ** Renders Labels
-  const renderLabels = arr => {
-    if (arr && arr.length) {
-      return arr.map(label => (
-        <Badge key={label} color={`light-${labelColors[label]}`} className='me-50 text-capitalize' pill>
-          {label}
-        </Badge>
-      ))
-    }
+  const handleReply = () => {
+    setReplyTo(mail)
+    toggleCompose()
   }
 
-  // ** Renders Attachments
-  const renderAttachments = arr => {
-    return arr.map((item, index) => {
-      return (
-        <a
-          key={item.fileName}
-          href='/'
-          onClick={e => e.preventDefault()}
-          className={classnames({
-            'mb-50': index + 1 !== arr.length
-          })}
-        >
-          <img src={item.thumbnail} alt={item.fileName} width='16' className='me-50' />
-          <span className='text-muted fw-bolder align-text-top'>{item.fileName}</span>
-          <span className='text-muted font-small-2 ms-25'>{`(${item.size})`}</span>
-        </a>
-      )
+  const handleMove = to => {
+    dispatch(moveMessage({ folder, uid: mail.uid, to })).then(() => {
+      toast.success(`Moved to ${to}`)
+      handleGoBack()
     })
   }
 
-  // ** Renders Messages
-  const renderMessage = obj => {
-    return (
-      <Card>
-        <CardHeader className='email-detail-head'>
-          <div className='user-details d-flex justify-content-between align-items-center flex-wrap'>
-            <Avatar img={obj.from.avatar} className='me-75' imgHeight='48' imgWidth='48' />
-            <div className='mail-items'>
-              <h5 className='mb-0'>{obj.from.name}</h5>
-              <UncontrolledDropdown className='email-info-dropup'>
-                <DropdownToggle className='font-small-3 text-muted cursor-pointer' tag='span' caret>
-                  <span className='me-25'>{obj.from.email}</span>
-                </DropdownToggle>
-                <DropdownMenu>
-                  <Table className='font-small-3' size='sm' borderless>
-                    <tbody>
-                      <tr>
-                        <td className='text-end text-muted align-top'>From:</td>
-                        <td>{obj.from.email}</td>
-                      </tr>
-                      <tr>
-                        <td className='text-end text-muted align-top'>To:</td>
-                        <td>{obj.to[0].email}</td>
-                      </tr>
-                      <tr>
-                        <td className='text-end text-muted align-top'>Date:</td>
-                        <td>
-                          {formatDateToMonthShort(obj.time)}, {formatDateToMonthShort(obj.time, false)}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </Table>
-                </DropdownMenu>
-              </UncontrolledDropdown>
-            </div>
-          </div>
-          <div className='mail-meta-item d-flex align-items-center'>
-            <small className='mail-date-time text-muted'>{formatDate(obj.time)}</small>
-            <UncontrolledDropdown className='ms-50'>
-              <DropdownToggle className='cursor-pointer' tag='span'>
-                <MoreVertical size={14} />
-              </DropdownToggle>
-              <DropdownMenu end>
-                <DropdownItem className='d-flex align-items-center w-100'>
-                  <CornerUpLeft className='me-50' size={14} />
-                  Reply
-                </DropdownItem>
-                <DropdownItem className='d-flex align-items-center w-100'>
-                  <CornerUpRight className='me-50' size={14} />
-                  Forward
-                </DropdownItem>
-                <DropdownItem className='d-flex align-items-center w-100'>
-                  <Trash2 className='me-50' size={14} />
-                  Delete
-                </DropdownItem>
-              </DropdownMenu>
-            </UncontrolledDropdown>
-          </div>
-        </CardHeader>
-        <CardBody className='mail-message-wrapper pt-2'>
-          <div className='mail-message' dangerouslySetInnerHTML={{ __html: obj.message }}></div>
-        </CardBody>
-        {obj.attachments && obj.attachments.length ? (
-          <CardFooter>
-            <div className='mail-attachments'>
-              <div className='d-flex align-items-center mb-1'>
-                <Paperclip size={16} />
-                <h5 className='fw-bolder text-body mb-0 ms-50'>{obj.attachments.length} Attachment</h5>
-              </div>
-              <div className='d-flex flex-column'>{renderAttachments(obj.attachments)}</div>
-            </div>
-          </CardFooter>
-        ) : null}
-      </Card>
-    )
+  const handleDelete = () => {
+    // From Trash, "delete" is permanent - anywhere else it's the usual
+    // "move it out of my way" trash action.
+    const action = folder === 'Trash' ? deleteMessage({ folder, uid: mail.uid }) : moveMessage({ folder, uid: mail.uid, to: 'Trash' })
+    dispatch(action).then(() => {
+      toast.success(folder === 'Trash' ? 'Deleted' : 'Moved to Trash')
+      handleGoBack()
+    })
   }
 
-  // ** Renders Replies
-  const renderReplies = arr => {
-    if (arr.length && showReplies === true) {
-      return arr.map((obj, index) => (
-        <Row key={index}>
-          <Col sm='12'>{renderMessage(obj)}</Col>
-        </Row>
-      ))
-    }
-  }
-
-  // ** Handle show replies, go back, folder & read click functions
-  const handleShowReplies = e => {
-    e.preventDefault()
-    setShowReplies(true)
-  }
-
-  const handleGoBack = () => {
-    setOpenMail(false)
-  }
-
-  const handleFolderClick = (e, folder, id) => {
-    handleFolderUpdate(e, folder, [id])
-    handleGoBack()
-  }
-
-  const handleReadClick = () => {
-    handleMailReadUpdate([mail.id], false)
-    handleGoBack()
+  const handleMarkUnread = () => {
+    dispatch(setMessageRead({ folder, uid: mail.uid, read: false })).then(handleGoBack)
   }
 
   return (
@@ -209,7 +77,11 @@ const MailDetails = props => {
         show: openMail
       })}
     >
-      {mail !== null && mail !== undefined ? (
+      {loading ? (
+        <div className='d-flex justify-content-center align-items-center h-100'>
+          <Spinner color='primary' />
+        </div>
+      ) : mail !== null && mail !== undefined ? (
         <Fragment>
           <div className='email-detail-header'>
             <div className='email-header-left d-flex align-items-center'>
@@ -221,196 +93,102 @@ const MailDetails = props => {
             <div className='email-header-right ms-2 ps-1'>
               <ul className='list-inline m-0'>
                 <li className='list-inline-item me-1'>
-                  <span
-                    className='action-icon favorite'
-                    onClick={() => {
-                      dispatch(updateMails({ emailIds: [mail.id], dataToUpdate: { isStarred: !mail.isStarred } }))
-                    }}
-                  >
-                    <Star
-                      size={18}
-                      className={classnames({
-                        'text-warning fill-current': mail.isStarred
-                      })}
-                    />
-                  </span>
-                </li>
-                <li className='list-inline-item me-1'>
                   <UncontrolledDropdown>
                     <DropdownToggle tag='span'>
                       <Folder size={18} />
                     </DropdownToggle>
                     <DropdownMenu end>
-                      <DropdownItem
-                        tag='a'
-                        href='/'
-                        onClick={e => handleFolderClick(e, 'draft', mail.id)}
-                        className='d-flex align-items-center'
-                      >
-                        <Edit2 className='me-50' size={18} />
-                        <span>Draft</span>
-                      </DropdownItem>
-                      <DropdownItem
-                        tag='a'
-                        href='/'
-                        onClick={e => handleFolderClick(e, 'spam', mail.id)}
-                        className='d-flex align-items-center'
-                      >
-                        <Info className='me-50' size={18} />
-                        <span>Spam</span>
-                      </DropdownItem>
-                      <DropdownItem
-                        tag='a'
-                        href='/'
-                        onClick={e => handleFolderClick(e, 'trash', mail.id)}
-                        className='d-flex align-items-center'
-                      >
-                        <Trash className='me-50' size={18} />
-                        <span>Trash</span>
-                      </DropdownItem>
+                      {MOVE_TARGETS.filter(t => t.key !== folder).map(t => (
+                        <DropdownItem
+                          key={t.key}
+                          tag='a'
+                          href='/'
+                          onClick={e => {
+                            e.preventDefault()
+                            handleMove(t.key)
+                          }}
+                        >
+                          {t.label}
+                        </DropdownItem>
+                      ))}
                     </DropdownMenu>
                   </UncontrolledDropdown>
                 </li>
                 <li className='list-inline-item me-1'>
-                  <UncontrolledDropdown>
-                    <DropdownToggle tag='span'>
-                      <Tag size={18} />
-                    </DropdownToggle>
-                    <DropdownMenu end>
-                      <DropdownItem
-                        tag='a'
-                        href='/'
-                        onClick={e => handleLabelsUpdate(e, 'personal', [mail.id])}
-                        className='d-flex align-items-center'
-                      >
-                        <span className='bullet bullet-success bullet-sm me-50' />
-                        <span>Personal</span>
-                      </DropdownItem>
-                      <DropdownItem
-                        tag='a'
-                        href='/'
-                        onClick={e => handleLabelsUpdate(e, 'company', [mail.id])}
-                        className='d-flex align-items-center'
-                      >
-                        <span className='bullet bullet-primary bullet-sm me-50' />
-                        <span>Company</span>
-                      </DropdownItem>
-                      <DropdownItem
-                        tag='a'
-                        href='/'
-                        onClick={e => handleLabelsUpdate(e, 'important', [mail.id])}
-                        className='d-flex align-items-center'
-                      >
-                        <span className='bullet bullet-warning bullet-sm me-50' />
-                        <span>Important</span>
-                      </DropdownItem>
-                      <DropdownItem
-                        tag='a'
-                        href='/'
-                        onClick={e => handleLabelsUpdate(e, 'private', [mail.id])}
-                        className='d-flex align-items-center'
-                      >
-                        <span className='bullet bullet-danger bullet-sm me-50' />
-                        <span>Private</span>
-                      </DropdownItem>
-                    </DropdownMenu>
-                  </UncontrolledDropdown>
-                </li>
-                <li className='list-inline-item me-1'>
-                  <span className='action-icon' onClick={handleReadClick}>
+                  <span className='action-icon' onClick={handleMarkUnread} title='Mark as unread'>
                     <Mail size={18} />
                   </span>
                 </li>
                 <li className='list-inline-item me-1'>
-                  <span
-                    className='action-icon'
-                    onClick={() => {
-                      handleMailToTrash([mail.id])
-                      handleGoBack()
-                    }}
-                  >
-                    <Trash size={18} />
-                  </span>
-                </li>
-                <li className='list-inline-item email-prev'>
-                  <span
-                    className={classnames({
-                      'action-icon': mail.hasPreviousMail
-                    })}
-                    onClick={() => {
-                      return mail.hasPreviousMail ? dispatch(paginateMail({ dir: 'next', emailId: mail.id })) : null
-                    }}
-                  >
-                    <ChevronLeft
-                      size={18}
-                      className={classnames({
-                        'text-muted': !mail.hasPreviousMail
-                      })}
-                    />
-                  </span>
-                </li>
-                <li className='list-inline-item email-next'>
-                  <span
-                    className={classnames({
-                      'action-icon': mail.hasNextMail
-                    })}
-                    onClick={() => {
-                      return mail.hasNextMail ? dispatch(paginateMail({ dir: 'previous', emailId: mail.id })) : null
-                    }}
-                  >
-                    <ChevronRight
-                      size={18}
-                      className={classnames({
-                        'text-muted': !mail.hasNextMail
-                      })}
-                    />
+                  <span className='action-icon' onClick={handleDelete} title={folder === 'Trash' ? 'Delete permanently' : 'Move to Trash'}>
+                    <Trash2 size={18} />
                   </span>
                 </li>
               </ul>
             </div>
           </div>
           <PerfectScrollbar className='email-scroll-area' options={{ wheelPropagation: false }}>
-            <Row>
-              <Col sm='12'>
-                <div className='email-label'>{renderLabels(mail.labels)}</div>
-              </Col>
-            </Row>
-            {mail.replies && mail.replies.length ? (
-              <Fragment>
-                {showReplies === false ? (
-                  <Row className='mb-1'>
-                    <Col sm='12'>
-                      <a className='fw-bold' href='/' onClick={handleShowReplies}>
-                        View {mail.replies.length} Earlier Messages
-                      </a>
-                    </Col>
-                  </Row>
-                ) : null}
-
-                {renderReplies(mail.replies)}
-              </Fragment>
-            ) : null}
-            <Row>
-              <Col sm='12'>{renderMessage(mail)}</Col>
-            </Row>
-            <Row>
-              <Col sm='12'>
-                <Card>
-                  <CardBody>
-                    <h5 className='mb-0'>
-                      Click here to{' '}
-                      <a href='/' onClick={e => e.preventDefault()}>
-                        Reply
-                      </a>{' '}
-                      or{' '}
-                      <a href='/' onClick={e => e.preventDefault()}>
-                        Forward
-                      </a>
-                    </h5>
-                  </CardBody>
-                </Card>
-              </Col>
-            </Row>
+            <Card className='mb-2 mt-2'>
+              <CardHeader className='email-detail-head'>
+                <div className='user-details d-flex justify-content-between align-items-center flex-wrap'>
+                  <Avatar
+                    initials
+                    color='light-primary'
+                    className='me-75'
+                    imgHeight='48'
+                    imgWidth='48'
+                    content={mail.from?.name || mail.from?.email || '?'}
+                  />
+                  <div className='mail-items'>
+                    <h5 className='mb-0'>{mail.from?.name || mail.from?.email}</h5>
+                    <span className='font-small-3 text-muted'>{mail.from?.email}</span>
+                  </div>
+                </div>
+                <div className='mail-meta-item d-flex align-items-center'>
+                  <small className='mail-date-time text-muted'>{mail.date ? formatDate(mail.date) : ''}</small>
+                </div>
+              </CardHeader>
+              <CardBody className='mail-message-wrapper pt-2'>
+                {mail.bodyHtml ? (
+                  <div className='mail-message'>
+                    <EmailBodyFrame html={mail.bodyHtml} />
+                  </div>
+                ) : (
+                  <div className='mail-message'>
+                    <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>{mail.bodyPlain}</pre>
+                  </div>
+                )}
+              </CardBody>
+              {mail.attachments && mail.attachments.length ? (
+                <CardFooter>
+                  <div className='mail-attachments'>
+                    <div className='d-flex align-items-center mb-1'>
+                      <Paperclip size={16} />
+                      <h5 className='fw-bolder text-body mb-0 ms-50'>{mail.attachments.length} Attachment</h5>
+                    </div>
+                    <div className='d-flex flex-column'>
+                      {mail.attachments.map(a => (
+                        <span key={a.fileName} className='text-muted'>
+                          {a.fileName} <small>({Math.round(a.size / 1024)} KB)</small>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </CardFooter>
+              ) : null}
+            </Card>
+            <Card>
+              <CardBody className='d-flex' style={{ gap: '1rem' }}>
+                <span className='fw-bold cursor-pointer' onClick={handleReply}>
+                  <CornerUpLeft size={14} className='me-50' />
+                  Reply
+                </span>
+                <span className='fw-bold cursor-pointer' onClick={handleReply}>
+                  <CornerUpRight size={14} className='me-50' />
+                  Forward
+                </span>
+              </CardBody>
+            </Card>
           </PerfectScrollbar>
         </Fragment>
       ) : null}

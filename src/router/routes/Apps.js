@@ -86,18 +86,6 @@ const AppRoutes = [
     }
   },
   {
-    element: <Email />,
-    path: '/email/label/:label',
-    meta: {
-      appLayout: true,
-      className: 'email-application'
-    }
-  },
-  {
-    element: <Email />,
-    path: '/email/:filter'
-  },
-  {
     path: '/chat',
     element: <Chat />,
     meta: {
@@ -366,7 +354,11 @@ const AppRoutes = [
   },
   {
     element: <CompanySettings />,
-    path: '/company'
+    path: '/company',
+    meta: {
+      appLayout: true,
+      className: 'company-settings-application'
+    }
   },
   {
     element: <TeamMemberList />,

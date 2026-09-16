@@ -1,5 +1,6 @@
 // ** React Imports
 import { useEffect, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 
 // ** Third Party Components
 import axios from 'axios'
@@ -18,12 +19,10 @@ import {
   Form,
   Label,
   Input,
-  Nav,
-  NavItem,
-  NavLink,
+  ListGroup,
+  ListGroupItem,
   TabContent,
-  TabPane,
-  FormText
+  TabPane
 } from 'reactstrap'
 
 // ** Third Party Icons
@@ -38,6 +37,14 @@ const encryptionOptions = [
   { value: 'tls', label: 'TLS' }
 ]
 
+const syncIntervalOptions = [
+  { value: 1, label: 'Every 1 minute' },
+  { value: 2, label: 'Every 2 minutes' },
+  { value: 5, label: 'Every 5 minutes' },
+  { value: 10, label: 'Every 10 minutes' },
+  { value: 30, label: 'Every 30 minutes' }
+]
+
 const defaultValues = {
   legal_name: '',
   address: '',
@@ -48,11 +55,14 @@ const defaultValues = {
   smtp_username: '',
   smtp_password: '',
   smtp_from_email: '',
-  smtp_from_name: ''
+  smtp_from_name: '',
+  imap_host: '',
+  imap_port: ''
 }
 
 const CompanySettings = () => {
-  const [activeTab, setActiveTab] = useState('general')
+  const [searchParams] = useSearchParams()
+  const activeTab = searchParams.get('tab') === 'email' ? 'smtp' : 'general'
   const [taxEnabled, setTaxEnabled] = useState(false)
   const [currencyId, setCurrencyId] = useState('')
   const [invoicePdfTemplateId, setInvoicePdfTemplateId] = useState('')
@@ -63,7 +73,8 @@ const CompanySettings = () => {
   const [contractPdfOptions, setContractPdfOptions] = useState([])
   const [quotationPdfOptions, setQuotationPdfOptions] = useState([])
   const [smtpEncryption, setSmtpEncryption] = useState('')
-  const [smtpPasswordSet, setSmtpPasswordSet] = useState(false)
+  const [imapEncryption, setImapEncryption] = useState('')
+  const [syncIntervalMinutes, setSyncIntervalMinutes] = useState(5)
   const [loading, setLoading] = useState(true)
 
   const { control, reset, handleSubmit } = useForm({ defaultValues })
@@ -100,7 +111,9 @@ const CompanySettings = () => {
         smtp_username: data.smtp_username || '',
         smtp_password: '',
         smtp_from_email: data.smtp_from_email || '',
-        smtp_from_name: data.smtp_from_name || ''
+        smtp_from_name: data.smtp_from_name || '',
+        imap_host: data.imap_host || '',
+        imap_port: data.imap_port ?? ''
       })
       setTaxEnabled(data.tax_enabled)
       setCurrencyId(data.currency_id || '')
@@ -108,7 +121,8 @@ const CompanySettings = () => {
       setContractPdfTemplateId(data.contract_pdf_template_id || '')
       setQuotationPdfTemplateId(data.quotation_pdf_template_id || '')
       setSmtpEncryption(data.smtp_encryption || '')
-      setSmtpPasswordSet(data.smtp_password_set)
+      setImapEncryption(data.imap_encryption || '')
+      setSyncIntervalMinutes(data.mailbox_sync_interval_minutes || 5)
       setLoading(false)
     })
   }, [])
@@ -131,11 +145,14 @@ const CompanySettings = () => {
         smtp_password: data.smtp_password,
         smtp_encryption: smtpEncryption || null,
         smtp_from_email: data.smtp_from_email || null,
-        smtp_from_name: data.smtp_from_name || null
+        smtp_from_name: data.smtp_from_name || null,
+        imap_host: data.imap_host || null,
+        imap_port: data.imap_port === '' ? null : Number(data.imap_port),
+        imap_encryption: imapEncryption || null,
+        mailbox_sync_interval_minutes: syncIntervalMinutes
       })
       .then(() => {
         toast.success('Company settings updated')
-        if (data.smtp_password) setSmtpPasswordSet(true)
       })
       .catch(() => toast.error('Failed to update company settings'))
   }
@@ -143,27 +160,35 @@ const CompanySettings = () => {
   if (loading) return null
 
   return (
-    <Card>
+    <Card className='h-100 mb-0'>
+      <style>{`
+        .company-settings-sidebar { width: 100%; }
+        @media (min-width: 768px) {
+          .company-settings-sidebar { width: 260px; flex: 0 0 260px; }
+        }
+      `}</style>
       <CardHeader>
         <CardTitle tag='h4'>Company Settings</CardTitle>
       </CardHeader>
-      <CardBody>
-        <Nav tabs>
-          <NavItem>
-            <NavLink active={activeTab === 'general'} onClick={() => setActiveTab('general')} style={{ cursor: 'pointer' }}>
-              <Settings size={14} className='me-50' />
-              General
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink active={activeTab === 'smtp'} onClick={() => setActiveTab('smtp')} style={{ cursor: 'pointer' }}>
-              <Mail size={14} className='me-50' />
-              SMTP Settings
-            </NavLink>
-          </NavItem>
-        </Nav>
+      <CardBody className='d-flex flex-column flex-grow-1' style={{ minHeight: 0 }}>
+        <div className='d-flex flex-column flex-md-row flex-fill' style={{ minHeight: 0 }}>
+          <div className='company-settings-sidebar d-flex mb-2 mb-md-0 me-md-2'>
+            <div className='border rounded overflow-hidden flex-fill'>
+              <ListGroup flush tag='div'>
+                <ListGroupItem tag={Link} to='/company' action active={activeTab === 'general'}>
+                  <Settings size={16} className='me-75' />
+                  <span className='align-middle'>General</span>
+                </ListGroupItem>
+                <ListGroupItem tag={Link} to='/company?tab=email' action active={activeTab === 'smtp'}>
+                  <Mail size={16} className='me-75' />
+                  <span className='align-middle'>Email Settings</span>
+                </ListGroupItem>
+              </ListGroup>
+            </div>
+          </div>
+          <div className='flex-fill' style={{ minWidth: 0 }}>
         <Form onSubmit={handleSubmit(onSubmit)}>
-          <TabContent activeTab={activeTab} className='pt-2'>
+          <TabContent activeTab={activeTab}>
             <TabPane tabId='general'>
               <Row>
                 <Col md={6} className='mb-1'>
@@ -296,6 +321,85 @@ const CompanySettings = () => {
             </TabPane>
 
             <TabPane tabId='smtp'>
+              <h6 className='mb-1'>Incoming Mail (IMAP)</h6>
+              <p className='text-muted small'>
+                Used to let each user read their own mailbox in the Email app - see their own login under
+                User &rarr; Email Settings.
+              </p>
+              <Row>
+                <Col md={8} className='mb-1'>
+                  <Label className='form-label' for='imap_host'>
+                    IMAP Host
+                  </Label>
+                  <Controller
+                    name='imap_host'
+                    control={control}
+                    render={({ field }) => <Input id='imap_host' placeholder='imap.veztraa.com' {...field} />}
+                  />
+                </Col>
+                <Col md={4} className='mb-1'>
+                  <Label className='form-label' for='imap_port'>
+                    Port
+                  </Label>
+                  <Controller
+                    name='imap_port'
+                    control={control}
+                    render={({ field }) => <Input type='number' step='1' min='0' id='imap_port' placeholder='993' {...field} />}
+                  />
+                </Col>
+                <Col md={4} className='mb-1'>
+                  <Label className='form-label' for='imap_encryption'>
+                    Encryption
+                  </Label>
+                  <Select
+                    inputId='imap_encryption'
+                    className='react-select'
+                    classNamePrefix='select'
+                    theme={selectThemeColors}
+                    options={encryptionOptions}
+                    value={encryptionOptions.find(i => i.value === imapEncryption)}
+                    onChange={option => setImapEncryption(option ? option.value : '')}
+                    isSearchable={false}
+                  />
+                </Col>
+              </Row>
+
+              <hr className='my-2' />
+
+              <h6 className='mb-1'>Mailbox Sync</h6>
+              <p className='text-muted small'>
+                The Email app always shows mail from a local, instantly-loading cache instead of connecting to
+                the mail server on every page view. A scheduled job keeps that cache fresh - set it up once on
+                your hosting's cron/scheduled-task feature (e.g. cPanel's <em>Cron Jobs</em>) to run:
+              </p>
+              <p className='text-muted small'>
+                <code>php /path/to/veztraa-api/cron/sync-mailboxes.php</code> every 1-2 minutes.
+              </p>
+              <Row>
+                <Col md={4} className='mb-1'>
+                  <Label className='form-label' for='mailbox_sync_interval_minutes'>
+                    Sync Interval
+                  </Label>
+                  <Select
+                    inputId='mailbox_sync_interval_minutes'
+                    className='react-select'
+                    classNamePrefix='select'
+                    theme={selectThemeColors}
+                    options={syncIntervalOptions}
+                    value={syncIntervalOptions.find(i => i.value === syncIntervalMinutes)}
+                    onChange={option => setSyncIntervalMinutes(option ? option.value : 5)}
+                    isSearchable={false}
+                  />
+                  <p className='text-muted small mb-0 mt-25'>
+                    How often each user's Inbox is actually refreshed from the mail server. The cron job itself
+                    can run more often than this - it skips anyone not due yet.
+                  </p>
+                </Col>
+              </Row>
+
+              <hr className='my-2' />
+
+              <h6 className='mb-1'>Outgoing Mail (SMTP)</h6>
               <Row>
                 <Col md={8} className='mb-1'>
                   <Label className='form-label' for='smtp_host'>
@@ -317,37 +421,6 @@ const CompanySettings = () => {
                     render={({ field }) => <Input type='number' step='1' min='0' id='smtp_port' placeholder='587' {...field} />}
                   />
                 </Col>
-                <Col md={6} className='mb-1'>
-                  <Label className='form-label' for='smtp_username'>
-                    Username
-                  </Label>
-                  <Controller
-                    name='smtp_username'
-                    control={control}
-                    render={({ field }) => <Input id='smtp_username' placeholder='no-reply@veztraa.com' {...field} />}
-                  />
-                </Col>
-                <Col md={6} className='mb-1'>
-                  <Label className='form-label' for='smtp_password'>
-                    Password
-                  </Label>
-                  <Controller
-                    name='smtp_password'
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        type='password'
-                        id='smtp_password'
-                        placeholder={smtpPasswordSet ? '••••••••' : 'SMTP password'}
-                        autoComplete='new-password'
-                        {...field}
-                      />
-                    )}
-                  />
-                  <FormText color='muted'>
-                    {smtpPasswordSet ? 'Leave blank to keep the current password' : 'Not set yet'}
-                  </FormText>
-                </Col>
                 <Col md={4} className='mb-1'>
                   <Label className='form-label' for='smtp_encryption'>
                     Encryption
@@ -363,35 +436,19 @@ const CompanySettings = () => {
                     isSearchable={false}
                   />
                 </Col>
-                <Col md={4} className='mb-1'>
-                  <Label className='form-label' for='smtp_from_email'>
-                    From Email
-                  </Label>
-                  <Controller
-                    name='smtp_from_email'
-                    control={control}
-                    render={({ field }) => <Input type='email' id='smtp_from_email' placeholder='billing@veztraa.com' {...field} />}
-                  />
-                </Col>
-                <Col md={4} className='mb-1'>
-                  <Label className='form-label' for='smtp_from_name'>
-                    From Name
-                  </Label>
-                  <Controller
-                    name='smtp_from_name'
-                    control={control}
-                    render={({ field }) => <Input id='smtp_from_name' placeholder='Veztraa Solutions' {...field} />}
-                  />
-                </Col>
                 <Col md={12}>
                   <p className='text-muted small mb-0'>
-                    These credentials are used for outgoing email (invoice/quotation notifications, password resets, etc.).
+                    Login for outgoing mail also comes from each user's own Email Settings - a separate,
+                    dedicated section will cover transactional system email (invoice/quotation notifications,
+                    password resets, etc.).
                   </p>
                 </Col>
               </Row>
             </TabPane>
           </TabContent>
         </Form>
+          </div>
+        </div>
       </CardBody>
     </Card>
   )

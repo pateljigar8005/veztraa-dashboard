@@ -28,7 +28,9 @@ const defaultValues = {
   last_name: '',
   email: '',
   phone: '',
-  password: ''
+  password: '',
+  email_login: '',
+  email_login_password: ''
 }
 
 const UserForm = () => {
@@ -84,7 +86,9 @@ const UserForm = () => {
         last_name: user.last_name || '',
         email: user.email || '',
         phone: user.phone || '',
-        password: ''
+        password: '',
+        email_login: user.email_login || '',
+        email_login_password: ''
       })
       if (user.role_id) setRoleId(String(user.role_id))
       setAvatarPreview(resolveAvatarUrl(user.avatar))
@@ -120,9 +124,11 @@ const UserForm = () => {
         email: data.email,
         phone: data.phone,
         first_name: data.first_name,
-        last_name: data.last_name
+        last_name: data.last_name,
+        email_login: data.email_login
       }
       if (data.password.length) payload.password = data.password
+      if (data.email_login_password.length) payload.email_login_password = data.email_login_password
 
       const action = isEdit ? updateUser({ id: Number(id), ...payload }) : addUser(payload)
       dispatch(action).then(result => {
@@ -134,8 +140,10 @@ const UserForm = () => {
         }
       })
     } else {
+      const optionalKeys = ['email_login', 'email_login_password']
       for (const key in data) {
         if (key === 'password' && isEdit) continue
+        if (optionalKeys.includes(key)) continue
         if (data[key].length === 0) {
           setError(key, { type: 'manual' })
         }
@@ -265,6 +273,34 @@ const UserForm = () => {
                   </option>
                 ))}
               </Input>
+            </Col>
+          </Row>
+
+          <h5 className='mb-1 mt-2'>Email Settings</h5>
+          <p className='text-muted small'>Login details for this user's own email account.</p>
+          <Row>
+            <Col md={6} className='mb-1'>
+              <Label className='form-label' for='email_login'>
+                Email
+              </Label>
+              <Controller
+                name='email_login'
+                control={control}
+                render={({ field }) => (
+                  <Input type='email' id='email_login' placeholder='john.doe@example.com' {...field} />
+                )}
+              />
+            </Col>
+            <Col md={6} className='mb-1'>
+              <Label className='form-label' for='email_login_password'>
+                Password
+              </Label>
+              <Controller
+                name='email_login_password'
+                control={control}
+                render={({ field }) => <Input type='password' id='email_login_password' {...field} />}
+              />
+              <FormText color='muted'>Leave blank to keep the current email password</FormText>
             </Col>
           </Row>
         </Form>

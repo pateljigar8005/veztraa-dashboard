@@ -41,7 +41,7 @@ const Routes = [
 ]
 
 const getRouteMeta = route => {
-  if (isObjEmpty(route.element.props)) {
+  if (isObjEmpty((route.baseElement || route.element).props)) {
     if (route.meta) {
       return { routeMeta: route.meta }
     } else {
@@ -70,16 +70,29 @@ const MergeLayoutRoutes = (layout, defaultLayout) => {
           RouteTag = route.meta.publicRoute ? PublicRoute : PrivateRoute
         }
         if (route.element) {
+          // ** Capture the original, unwrapped element once. getRoutes() runs
+          // on every Router() re-render (including search-param-only
+          // navigations), and re-wrapping the already-wrapped route.element
+          // each time made the tree grow an extra layer per render - React
+          // then saw a structural mismatch at that position and fully
+          // remounted the page (visible as a data-refetch flicker on any
+          // in-page navigation, e.g. Company Settings' tab switch). Always
+          // wrapping from the same base element keeps the tree shape stable
+          // across renders so the page component is reused, not remounted.
+          if (!route.baseElement) {
+            route.baseElement = route.element
+          }
+
           const Wrapper =
             // eslint-disable-next-line multiline-ternary
-            isObjEmpty(route.element.props) && isBlank === false
+            isObjEmpty(route.baseElement.props) && isBlank === false
               ? // eslint-disable-next-line multiline-ternary
                 LayoutWrapper
               : Fragment
 
           route.element = (
             <Wrapper {...(isBlank === false ? getRouteMeta(route) : {})}>
-              <RouteTag route={route}>{route.element}</RouteTag>
+              <RouteTag route={route}>{route.baseElement}</RouteTag>
             </Wrapper>
           )
         }

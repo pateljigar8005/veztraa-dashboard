@@ -6,21 +6,15 @@ import { Fragment, useEffect, useState } from 'react'
 import Mails from './Mails'
 import Sidebar from './Sidebar'
 
+// ** Hooks
+import useDebounce from '@hooks/useDebounce'
+
 // ** Third Party Components
 import classnames from 'classnames'
 
 // ** Store & Actions
 import { useDispatch, useSelector } from 'react-redux'
-import {
-  getMails,
-  selectMail,
-  updateMails,
-  paginateMail,
-  selectAllMail,
-  updateMailLabel,
-  resetSelectedMail,
-  selectCurrentMail
-} from './store'
+import { getFolderView, getMessage, clearCurrentMessage } from './store'
 
 // ** Styles
 import '@styles/react/apps/app-email.scss'
@@ -31,9 +25,13 @@ const EmailApp = () => {
   const [openMail, setOpenMail] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [composeOpen, setComposeOpen] = useState(false)
+  const [replyTo, setReplyTo] = useState(null)
 
   // ** Toggle Compose Function
-  const toggleCompose = () => setComposeOpen(!composeOpen)
+  const toggleCompose = () => {
+    if (composeOpen) setReplyTo(null)
+    setComposeOpen(!composeOpen)
+  }
 
   // ** Store Variables
   const dispatch = useDispatch()
@@ -41,23 +39,34 @@ const EmailApp = () => {
 
   // ** Vars
   const params = useParams()
+  const folder = params.folder || 'INBOX'
+  const debouncedQuery = useDebounce(query, 400)
 
-  // ** UseEffect: GET initial data on Mount
+  // ** Fetch folders + this folder's messages together (one login instead of
+  // two - see getFolderView) whenever the folder or search changes, including
+  // on first mount.
   useEffect(() => {
-    dispatch(getMails({ q: query || '', folder: params.folder || 'inbox', label: params.label || '' }))
-  }, [query, params.folder, params.label])
+    dispatch(getFolderView({ folder, q: debouncedQuery }))
+    dispatch(clearCurrentMessage())
+    setOpenMail(false)
+  }, [folder, debouncedQuery])
+
+  // ** The navbar refresh icon forwards its click here instead of doing a
+  // full browser reload (see NavbarBookmarks.js's isEmailRoute handling) -
+  // re-fetches the current folder's messages and the folder/unread-count list.
+  const handleRefresh = () => {
+    dispatch(getFolderView({ folder, q: debouncedQuery }))
+  }
 
   return (
     <Fragment>
+      <button id='email-refresh-trigger' type='button' hidden onClick={handleRefresh} />
       <Sidebar
         store={store}
-        dispatch={dispatch}
-        getMails={getMails}
         setOpenMail={setOpenMail}
         sidebarOpen={sidebarOpen}
         toggleCompose={toggleCompose}
         setSidebarOpen={setSidebarOpen}
-        resetSelectedMail={resetSelectedMail}
       />
       <div className='content-right'>
         <div className='content-body'>
@@ -72,19 +81,14 @@ const EmailApp = () => {
             query={query}
             setQuery={setQuery}
             dispatch={dispatch}
-            getMails={getMails}
             openMail={openMail}
-            selectMail={selectMail}
             setOpenMail={setOpenMail}
-            updateMails={updateMails}
             composeOpen={composeOpen}
-            paginateMail={paginateMail}
-            selectAllMail={selectAllMail}
             toggleCompose={toggleCompose}
             setSidebarOpen={setSidebarOpen}
-            updateMailLabel={updateMailLabel}
-            selectCurrentMail={selectCurrentMail}
-            resetSelectedMail={resetSelectedMail}
+            getMessage={getMessage}
+            replyTo={replyTo}
+            setReplyTo={setReplyTo}
           />
         </div>
       </div>

@@ -44,8 +44,17 @@ const isPdfDesignerFormRoute = pathname => /^\/pdf-designer\/(add|edit\/[^/]+)$/
 
 // ** Company Settings is a single-record "edit" page that isn't part of the
 // add/edit list pattern above (there's no /company/add or /company/edit/:id -
-// just /company), but it's still a <form> the navbar Save icon should submit.
+// just /company; its sidebar tabs are managed via a ?tab= query param so the
+// pathname never changes), but it's still a <form> the navbar Save icon
+// should submit.
 const isCompanySettingsRoute = pathname => pathname === '/company'
+
+// ** The Email app fetches its data over live IMAP calls (see the webmail
+// feature) rather than a fast local DB query, so a full browser reload is a
+// needlessly heavy way to "refresh" it - forward the click into the page's
+// own hidden trigger instead, which just re-dispatches the same Redux thunks
+// the page uses on mount.
+const isEmailRoute = pathname => /^\/email(\/[^/]+)?$/.test(pathname)
 
 // ** The Invoice, Contract and Quotation Details pages each offer a PDF
 // download - they render it themselves (via @veztraa/report-renderer) and
@@ -102,6 +111,14 @@ const NavbarBookmarks = props => {
     if (form) form.requestSubmit()
   }
 
+  const handleRefresh = () => {
+    if (isEmailRoute(location.pathname)) {
+      document.getElementById('email-refresh-trigger')?.click()
+      return
+    }
+    window.location.reload()
+  }
+
   const downloadButtonId = findDownloadButtonId(location.pathname)
   const downloadEnabled = Boolean(downloadButtonId)
   const handleDownload = () => {
@@ -137,7 +154,7 @@ const NavbarBookmarks = props => {
           </UncontrolledTooltip>
         </NavItem>
         <NavItem className='d-none d-lg-block'>
-          <NavLink className='nav-link-style' id='navbar-refresh-btn' onClick={() => window.location.reload()}>
+          <NavLink className='nav-link-style' id='navbar-refresh-btn' onClick={handleRefresh}>
             <RefreshCw className='ficon' />
           </NavLink>
           <UncontrolledTooltip placement='bottom' target='navbar-refresh-btn'>
