@@ -5,13 +5,19 @@ import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { Editor, sanitizeHtml } from '@veztraa/editor'
 import { useDispatch } from 'react-redux'
-import { Minus, X } from 'react-feather'
+import { X, Paperclip } from 'react-feather'
 
 // ** Reactstrap Imports
-import { Form, Label, Input, Modal, Button, ModalBody } from 'reactstrap'
+import { Form, Label, Input, Modal, Button, ModalBody, ModalFooter } from 'reactstrap'
 
 // ** Store & Actions
 import { sendMessage } from './store'
+
+// ** Custom Components
+import EmailRecipientsInput from './EmailRecipientsInput'
+
+// ** Shared
+import { getFileTypeIcon } from '../shared/getFileTypeIcon'
 
 const blank = { to: '', cc: '', bcc: '', subject: '', body: '' }
 
@@ -23,6 +29,7 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo }) => {
   const [bccOpen, setBCCOpen] = useState(false)
   const [sending, setSending] = useState(false)
   const [fields, setFields] = useState(blank)
+  const [attachments, setAttachments] = useState([])
 
   // ** Pre-fill when opened as a Reply/Forward (see MailDetails)
   useEffect(() => {
@@ -46,9 +53,26 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo }) => {
     } else if (composeOpen) {
       setFields(blank)
     }
+    setAttachments([])
   }, [composeOpen, replyTo])
 
   const setField = (key, value) => setFields(prev => ({ ...prev, [key]: value }))
+
+  const handleAttachFiles = e => {
+    const files = Array.from(e.target.files || [])
+    setAttachments(prev => [...prev, ...files])
+    e.target.value = '' // allow re-selecting the same file after removing it
+  }
+
+  const removeAttachment = index => {
+    setAttachments(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const formatFileSize = bytes => {
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
 
   const handleClose = e => {
     e?.preventDefault()
@@ -70,7 +94,8 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo }) => {
         bcc: fields.bcc,
         subject: fields.subject,
         body: fields.body,
-        in_reply_to: replyTo?.messageId || null
+        in_reply_to: replyTo?.messageId || null,
+        attachments
       })
     )
       .unwrap()
@@ -87,44 +112,29 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo }) => {
 
   return (
     <Modal
-      scrollable
-      fade={false}
-      keyboard={false}
-      backdrop={false}
       id='compose-mail'
-      container='.content-body'
-      className='modal-lg'
       isOpen={composeOpen}
-      contentClassName='p-0'
+      centered
+      size='xl'
+      container='.content-body'
       toggle={toggleCompose}
-      modalClassName='modal-sticky'
     >
-      <div className='modal-header'>
+      <div className='modal-header d-flex align-items-center justify-content-between mb-1'>
         <h5 className='modal-title'>Compose Mail</h5>
-        <div className='modal-actions'>
-          <a href='/' className='text-body me-75' onClick={handleClose}>
-            <Minus size={14} />
-          </a>
-          <a href='/' className='text-body' onClick={handleClose}>
-            <X size={14} />
-          </a>
-        </div>
+        <X className='fw-normal cursor-pointer' size={16} onClick={handleClose} />
       </div>
-      <ModalBody className='flex-grow-1 p-0'>
-        <Form className='compose-form' onSubmit={handleSend}>
+      <Form className='compose-form' onSubmit={handleSend}>
+        <ModalBody style={{ maxHeight: '65vh', overflowY: 'auto' }}>
           <div className='compose-mail-form-field'>
-            <Label for='email-to' className='form-label'>
+            <Label for='email-to' className='form-label me-1 mb-0'>
               To:
             </Label>
-            <div className='flex-grow-1'>
-              <Input
-                id='email-to'
-                className='border-0'
-                placeholder='recipient@example.com, another@example.com'
-                value={fields.to}
-                onChange={e => setField('to', e.target.value)}
-              />
-            </div>
+            <EmailRecipientsInput
+              id='email-to'
+              placeholder='recipient@example.com, another@example.com'
+              value={fields.to}
+              onChange={val => setField('to', val)}
+            />
             <div>
               <a href='/' className='toggle-cc text-body me-1' onClick={e => { e.preventDefault(); setCCOpen(!ccOpen) }}>
                 Cc
@@ -136,17 +146,10 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo }) => {
           </div>
           {ccOpen && (
             <div className='compose-mail-form-field cc-wrapper'>
-              <Label for='email-cc' className='form-label'>
+              <Label for='email-cc' className='form-label me-1 mb-0'>
                 Cc:
               </Label>
-              <div className='flex-grow-1'>
-                <Input
-                  id='email-cc'
-                  className='border-0'
-                  value={fields.cc}
-                  onChange={e => setField('cc', e.target.value)}
-                />
-              </div>
+              <EmailRecipientsInput id='email-cc' value={fields.cc} onChange={val => setField('cc', val)} />
               <div>
                 <a href='/' className='toggle-cc text-body' onClick={e => { e.preventDefault(); setCCOpen(false) }}>
                   <X size={14} />
@@ -156,17 +159,10 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo }) => {
           )}
           {bccOpen && (
             <div className='compose-mail-form-field cc-wrapper'>
-              <Label for='email-bcc' className='form-label'>
+              <Label for='email-bcc' className='form-label me-1 mb-0'>
                 Bcc:
               </Label>
-              <div className='flex-grow-1'>
-                <Input
-                  id='email-bcc'
-                  className='border-0'
-                  value={fields.bcc}
-                  onChange={e => setField('bcc', e.target.value)}
-                />
-              </div>
+              <EmailRecipientsInput id='email-bcc' value={fields.bcc} onChange={val => setField('bcc', val)} />
               <div>
                 <a href='/' className='toggle-cc text-body' onClick={e => { e.preventDefault(); setBCCOpen(false) }}>
                   <X size={14} />
@@ -175,7 +171,7 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo }) => {
             </div>
           )}
           <div className='compose-mail-form-field'>
-            <Label for='email-subject' className='form-label'>
+            <Label for='email-subject' className='form-label me-1 mb-0'>
               Subject:
             </Label>
             <Input
@@ -186,17 +182,44 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo }) => {
             />
           </div>
           <div id='message-editor'>
-            <Editor value={fields.body} onChange={value => setField('body', value)} placeholder='Message' height={200} />
+            <Editor value={fields.body} onChange={value => setField('body', value)} placeholder='Message' height={400} />
           </div>
-          <div className='compose-footer-wrapper'>
-            <div className='btn-wrapper d-flex align-items-center'>
-              <Button type='submit' color='primary' disabled={sending}>
-                {sending ? 'Sending...' : 'Send'}
-              </Button>
+          {attachments.length > 0 && (
+            <div className='d-flex flex-wrap mt-1' style={{ gap: '0.5rem' }}>
+              {attachments.map((file, index) => {
+                const FileIcon = getFileTypeIcon(file.name)
+                return (
+                  <div
+                    key={`${file.name}-${index}`}
+                    className='d-flex align-items-center border rounded-pill ps-75 pe-50 py-25 bg-light-secondary'
+                    style={{ maxWidth: '260px' }}
+                  >
+                    <FileIcon size={13} className='me-50 flex-shrink-0' />
+                    <span className='text-truncate small'>{file.name}</span>
+                    <small className='text-muted ms-50 flex-shrink-0'>{formatFileSize(file.size)}</small>
+                    <X
+                      size={13}
+                      className='cursor-pointer ms-50 flex-shrink-0'
+                      onClick={() => removeAttachment(index)}
+                    />
+                  </div>
+                )
+              })}
             </div>
+          )}
+        </ModalBody>
+        <ModalFooter>
+          <div className='btn-wrapper d-flex align-items-center'>
+            <Button type='submit' color='primary' className='me-1' disabled={sending}>
+              {sending ? 'Sending...' : 'Send'}
+            </Button>
+            <Label for='email-attachment' className='attachment-icon mb-0 cursor-pointer'>
+              <Paperclip size={18} />
+            </Label>
+            <Input id='email-attachment' type='file' multiple hidden onChange={handleAttachFiles} />
           </div>
-        </Form>
-      </ModalBody>
+        </ModalFooter>
+      </Form>
     </Modal>
   )
 }

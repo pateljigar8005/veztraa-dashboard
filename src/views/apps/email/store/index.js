@@ -67,7 +67,21 @@ export const deleteMessage = createAsyncThunk(
 )
 
 export const sendMessage = createAsyncThunk('appEmail/sendMessage', async (message, { dispatch, getState }) => {
-  const response = await axios.post('/mailbox/send', message)
+  // Plain JSON when there's nothing to attach; multipart/form-data (which
+  // the backend's Request class auto-detects via Content-Type) only when
+  // there are real files to carry - see MailboxController::send().
+  let payload = message
+  if (message.attachments?.length) {
+    const formData = new FormData()
+    Object.entries(message).forEach(([key, value]) => {
+      if (key === 'attachments' || value === null || value === undefined) return
+      formData.append(key, value)
+    })
+    message.attachments.forEach(file => formData.append('attachments[]', file))
+    payload = formData
+  }
+
+  const response = await axios.post('/mailbox/send', payload)
   const params = getState().email.params
   if (params.folder === 'Sent') {
     await dispatch(getMessages(params))
