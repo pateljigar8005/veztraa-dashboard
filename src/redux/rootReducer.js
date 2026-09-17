@@ -18,6 +18,7 @@ import currencies from '@src/views/apps/currency/store'
 import industries from '@src/views/apps/industry/store'
 import serviceItems from '@src/views/apps/service-item/store'
 import termsTemplates from '@src/views/apps/terms-template/store'
+import emailTemplates from '@src/views/apps/email-template/store'
 import pdfDesignerTemplates from '@src/views/apps/pdf-designer/store'
 import roles from '@src/views/apps/roles-permissions/roles/store'
 import teamMembers from '@src/views/apps/team-member/store'
@@ -47,6 +48,7 @@ const rootReducer = {
   industries,
   serviceItems,
   termsTemplates,
+  emailTemplates,
   pdfDesignerTemplates,
   roles,
   teamMembers,

@@ -7,6 +7,9 @@ import axios from 'axios'
 // ** Reactstrap Imports
 import { Modal, ModalHeader, ModalBody, ModalFooter, Table, Button, Input } from 'reactstrap'
 
+// ** Utils
+import { formatAmount } from '@utils'
+
 const CatalogModal = ({ isOpen, toggle, onAdd }) => {
   const [items, setItems] = useState([])
   const [selectedIds, setSelectedIds] = useState([])
@@ -50,7 +53,7 @@ const CatalogModal = ({ isOpen, toggle, onAdd }) => {
                   </div>
                 </td>
                 <td>{item.name}</td>
-                <td>${Number(item.price).toFixed(2)}</td>
+                <td>${formatAmount(item.price)}</td>
               </tr>
             ))}
             {items.length === 0 && (

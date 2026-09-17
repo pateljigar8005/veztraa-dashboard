@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Row, Col, Card, CardHeader, CardTitle, CardBody, Form, Label, Input } from 'reactstrap'
 
 // ** Utils
-import { selectThemeColors } from '@utils'
+import { selectThemeColors, formatAmount } from '@utils'
 
 // ** Shared Components
 import CatalogModal from '../../shared/CatalogModal'
@@ -437,7 +437,7 @@ const InvoiceForm = () => {
                 <CardBody>
                   <div className='d-flex justify-content-between mb-1'>
                     <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>${formatAmount(subtotal)}</span>
                   </div>
                   {taxEnabled && (
                     <>
@@ -451,7 +451,7 @@ const InvoiceForm = () => {
                       />
                       <div className='d-flex justify-content-between mb-1'>
                         <span>Tax Amount</span>
-                        <span>${taxAmount.toFixed(2)}</span>
+                        <span>${formatAmount(taxAmount)}</span>
                       </div>
                     </>
                   )}
@@ -475,13 +475,13 @@ const InvoiceForm = () => {
                   </div>
                   <div className='d-flex justify-content-between mb-2'>
                     <span>Discount</span>
-                    <span className='text-success'>-${discountAmount.toFixed(2)}</span>
+                    <span className='text-success'>-${formatAmount(discountAmount)}</span>
                   </div>
 
                   <hr />
                   <div className='d-flex justify-content-between mb-2'>
                     <h5 className='mb-0'>Total</h5>
-                    <h5 className='mb-0'>${total.toFixed(2)}</h5>
+                    <h5 className='mb-0'>${formatAmount(total)}</h5>
                   </div>
                 </CardBody>
               </Card>

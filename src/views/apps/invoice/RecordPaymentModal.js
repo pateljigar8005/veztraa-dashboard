@@ -11,7 +11,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Row, Col, Label, Input, FormFeedback } from 'reactstrap'
 
 // ** Utils
-import { selectThemeColors } from '@utils'
+import { selectThemeColors, formatAmount } from '@utils'
 
 // ** Shared Components
 import DateField from '../shared/DateField'
@@ -78,8 +78,8 @@ const RecordPaymentModal = ({ isOpen, toggle, invoiceId, currency, balanceDue, p
       return
     }
     if (typeof balanceDue === 'number' && Number(data.amount) > balanceDue + 0.01) {
-      setError('amount', { type: 'manual', message: `Amount exceeds the balance due (${currency} ${balanceDue.toFixed(2)})` })
-      toast.error(`Amount exceeds the balance due (${currency} ${balanceDue.toFixed(2)})`)
+      setError('amount', { type: 'manual', message: `Amount exceeds the balance due (${currency} ${formatAmount(balanceDue)})` })
+      toast.error(`Amount exceeds the balance due (${currency} ${formatAmount(balanceDue)})`)
       return
     }
     if (!data.payment_date) {
@@ -142,7 +142,7 @@ const RecordPaymentModal = ({ isOpen, toggle, invoiceId, currency, balanceDue, p
             {errors.amount?.message && <FormFeedback>{errors.amount.message}</FormFeedback>}
             {typeof balanceDue === 'number' && (
               <p className='text-muted small mb-0 mt-25'>
-                Balance due: {currency} {balanceDue.toFixed(2)}
+                Balance due: {currency} {formatAmount(balanceDue)}
               </p>
             )}
           </Col>

@@ -23,14 +23,17 @@ import { invoiceStatusOptions } from '../../quotation/documentOptions'
 import RecordPaymentModal from '../RecordPaymentModal'
 
 // ** Utils
-import { selectThemeColors } from '@utils'
+import { selectThemeColors, formatAmount } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
 
 // ** Maps an invoice's real fields onto the field paths the selected PDF
 // template's elements bind to (see the "service_items" repeating container
-// and the client./invoice. bindings set up in the PDF Designer). Shared by
-// the live preview and the download button so they always render identically.
+// and the client./document. bindings set up in the PDF Designer) - "document"
+// rather than "invoice" since this same shape is shared across Invoice,
+// Quotation and Contract (see those modules' own buildPdfData()), so one PDF
+// template layout can realistically be reused across document types. Shared
+// by the live preview and the download button so they always render identically.
 const buildPdfData = invoice => ({
   client: {
     name: invoice.contact_name || '',
@@ -39,7 +42,7 @@ const buildPdfData = invoice => ({
     phone: invoice.phone || '',
     address: invoice.billing_address || ''
   },
-  invoice: {
+  document: {
     number: invoice.invoice_number,
     issue_date: invoice.issue_date,
     due_date: invoice.due_date
@@ -52,7 +55,7 @@ const buildPdfData = invoice => ({
   tax_rate: invoice.tax_rate,
   tax_amount: invoice.tax_amount,
   discount_amount: invoice.discount_amount,
-  total: Number(invoice.total).toFixed(2),
+  total: formatAmount(invoice.total),
   // Rich-text HTML straight from the Editor - bind these to a "richtext"
   // element (not a plain "text" one) in the PDF Designer so the formatting
   // actually renders instead of showing raw tags.
@@ -61,8 +64,8 @@ const buildPdfData = invoice => ({
   service_items: (invoice.line_items || []).map(item => ({
     name: item.description || '',
     qty: item.qty,
-    rate: Number(item.rate).toFixed(2),
-    amount: (Number(item.qty) * Number(item.rate)).toFixed(2)
+    rate: formatAmount(item.rate),
+    amount: formatAmount(Number(item.qty) * Number(item.rate))
   }))
 })
 
@@ -260,10 +263,10 @@ const InvoiceView = () => {
                   <td>{item.description || '-'}</td>
                   <td>{item.qty}</td>
                   <td>
-                    {invoice.currency} {Number(item.rate).toFixed(2)}
+                    {invoice.currency} {formatAmount(item.rate)}
                   </td>
                   <td className='text-end'>
-                    {invoice.currency} {(Number(item.qty) * Number(item.rate)).toFixed(2)}
+                    {invoice.currency} {formatAmount(Number(item.qty) * Number(item.rate))}
                   </td>
                 </tr>
               ))}
@@ -275,14 +278,14 @@ const InvoiceView = () => {
                 <div className='d-flex justify-content-between mb-50'>
                   <span>Subtotal</span>
                   <span>
-                    {invoice.currency} {Number(invoice.subtotal).toFixed(2)}
+                    {invoice.currency} {formatAmount(invoice.subtotal)}
                   </span>
                 </div>
                 {invoice.tax_amount > 0 && (
                   <div className='d-flex justify-content-between mb-50'>
                     <span>Tax ({invoice.tax_rate}%)</span>
                     <span>
-                      {invoice.currency} {Number(invoice.tax_amount).toFixed(2)}
+                      {invoice.currency} {formatAmount(invoice.tax_amount)}
                     </span>
                   </div>
                 )}
@@ -290,7 +293,7 @@ const InvoiceView = () => {
                   <div className='d-flex justify-content-between mb-50'>
                     <span>Discount</span>
                     <span className='text-success'>
-                      -{invoice.currency} {Number(invoice.discount_amount).toFixed(2)}
+                      -{invoice.currency} {formatAmount(invoice.discount_amount)}
                     </span>
                   </div>
                 )}
@@ -298,19 +301,19 @@ const InvoiceView = () => {
                 <div className='d-flex justify-content-between mb-50'>
                   <h5 className='mb-0'>Total</h5>
                   <h5 className='mb-0'>
-                    {invoice.currency} {Number(invoice.total).toFixed(2)}
+                    {invoice.currency} {formatAmount(invoice.total)}
                   </h5>
                 </div>
                 <div className='d-flex justify-content-between mb-50'>
                   <span>Paid</span>
                   <span className='text-success'>
-                    {invoice.currency} {Number(invoice.paid_amount).toFixed(2)}
+                    {invoice.currency} {formatAmount(invoice.paid_amount)}
                   </span>
                 </div>
                 <div className='d-flex justify-content-between'>
                   <span className='fw-bolder'>Balance Due</span>
                   <span className='fw-bolder'>
-                    {invoice.currency} {Number(invoice.balance_due).toFixed(2)}
+                    {invoice.currency} {formatAmount(invoice.balance_due)}
                   </span>
                 </div>
               </Col>
@@ -370,7 +373,7 @@ const InvoiceView = () => {
                     <tr key={p.id}>
                       <td>{p.payment_date}</td>
                       <td>
-                        {invoice.currency} {Number(p.amount).toFixed(2)}
+                        {invoice.currency} {formatAmount(p.amount)}
                       </td>
                       <td>{p.rate_to_inr ? `₹${Number(p.rate_to_inr).toFixed(2)}` : '-'}</td>
                       <td>{p.payment_method_name || '-'}</td>
@@ -393,7 +396,7 @@ const InvoiceView = () => {
                           size='sm'
                           onClick={() =>
                             confirmDelete({
-                              text: `This will permanently delete this payment of ${invoice.currency} ${Number(p.amount).toFixed(2)}.`,
+                              text: `This will permanently delete this payment of ${invoice.currency} ${formatAmount(p.amount)}.`,
                               onConfirm: () =>
                                 axios.delete(`/invoice-payments/${p.id}`).then(() => {
                                   toast.success('Payment deleted')

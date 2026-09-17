@@ -59,6 +59,7 @@ const routeToMenuId = [
   { pattern: /^\/service-item/, id: 'serviceItems' },
   { pattern: /^\/payment-method/, id: 'paymentMethods' },
   { pattern: /^\/terms-template/, id: 'termsTemplates' },
+  { pattern: /^\/email-template/, id: 'emailTemplates' },
   { pattern: /^\/pdf-designer/, id: 'pdfDesignerTemplates' },
   { pattern: /^\/currency/, id: 'currencies' },
   { pattern: /^\/industry/, id: 'industries' },

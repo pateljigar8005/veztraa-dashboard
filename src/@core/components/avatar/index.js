@@ -30,14 +30,20 @@ const Avatar = forwardRef((props, ref) => {
     ...rest
   } = props
 
-  // ** Function to extract initials from content
+  // ** Function to extract initials from content - the first LETTER of each
+  // word (not just index 0), so a name/company starting with a quote,
+  // number, or symbol (e.g. `"Acme Inc"`, `&Co`) doesn't leak that
+  // character into the avatar instead of a real initial. Uppercased since
+  // an initial from a lowercase word (e.g. "n8n") should still read as a
+  // capital, matching every other avatar around it.
   const getInitials = str => {
     const results = []
     const wordArray = str.split(' ')
     wordArray.forEach(e => {
-      results.push(e[0])
+      const letter = e.match(/[a-zA-Z]/)
+      if (letter) results.push(letter[0])
     })
-    return results.join('')
+    return results.join('').toUpperCase()
   }
 
   return (

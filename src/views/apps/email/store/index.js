@@ -4,8 +4,21 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 // ** Axios Imports
 import axios from 'axios'
 
+// ** Dispatched as a background badge-count refresh from several other
+// thunks below (getMessage, setMessageRead, moveMessage, ...) - getMessage's
+// case in particular is always immediately followed by a route change (see
+// index.js's own effect syncing the opened message's uid into the URL).
+// RouteRequestCanceller's own "abort every GET tagged with the path you just
+// left" (see axiosConfig.js) runs synchronously right after that navigation,
+// which reliably wins the race against this (network-bound) request still
+// being in flight - so this exact call would otherwise get cancelled on
+// nearly every message open, silently leaving the sidebar's unread badge
+// stale. Opting out with an explicit (never-aborted) signal - the same
+// escape hatch axiosConfig.js's own interceptor already exposes via its
+// `!config.signal` check - since this is a background refresh that should
+// always finish, not a page-load fetch tied to the page being left.
 export const getFolders = createAsyncThunk('appEmail/getFolders', async () => {
-  const response = await axios.get('/mailbox/folders')
+  const response = await axios.get('/mailbox/folders', { signal: new AbortController().signal })
   return response.data.data.folders
 })
 

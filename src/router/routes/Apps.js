@@ -41,6 +41,8 @@ const TimesheetActivityForm = lazy(() => import('../../views/apps/timesheet-acti
 
 const TermsTemplateList = lazy(() => import('../../views/apps/terms-template/list'))
 const TermsTemplateForm = lazy(() => import('../../views/apps/terms-template/form'))
+const EmailTemplateList = lazy(() => import('../../views/apps/email-template/list'))
+const EmailTemplateForm = lazy(() => import('../../views/apps/email-template/form'))
 const PdfDesignerTemplateList = lazy(() => import('../../views/apps/pdf-designer/list'))
 const PdfDesignerTemplateForm = lazy(() => import('../../views/apps/pdf-designer/form'))
 
@@ -297,6 +299,18 @@ const AppRoutes = [
   {
     element: <TermsTemplateForm />,
     path: '/terms-template/edit/:id'
+  },
+  {
+    element: <EmailTemplateList />,
+    path: '/email-template'
+  },
+  {
+    element: <EmailTemplateForm />,
+    path: '/email-template/add'
+  },
+  {
+    element: <EmailTemplateForm />,
+    path: '/email-template/edit/:id'
   },
   {
     element: <PdfDesignerTemplateList />,

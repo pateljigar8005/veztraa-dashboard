@@ -125,6 +125,37 @@ export default [
     ]
   },
   {
+    id: 'templates',
+    title: 'Templates',
+    icon: <Layout />,
+    children: [
+      {
+        id: 'termsTemplates',
+        title: 'Terms & Conditions',
+        icon: <BookOpen />,
+        navLink: '/terms-template'
+      },
+      {
+        id: 'emailTemplates',
+        title: 'Email Template',
+        icon: <Mail />,
+        navLink: '/email-template'
+      },
+      {
+        id: 'paymentMethods',
+        title: 'Payment Methods',
+        icon: <CreditCard />,
+        navLink: '/payment-method'
+      },
+      {
+        id: 'pdfDesignerTemplates',
+        title: 'PDF Designer',
+        icon: <Layout />,
+        navLink: '/pdf-designer'
+      }
+    ]
+  },
+  {
     id: 'settings',
     title: 'Settings',
     icon: <Settings />,
@@ -148,18 +179,6 @@ export default [
         navLink: '/industry'
       },
       {
-        id: 'paymentMethods',
-        title: 'Payment Methods',
-        icon: <CreditCard />,
-        navLink: '/payment-method'
-      },
-      {
-        id: 'pdfDesignerTemplates',
-        title: 'PDF Designer',
-        icon: <Layout />,
-        navLink: '/pdf-designer'
-      },
-      {
         id: 'projects',
         title: 'Project',
         icon: <Folder />,
@@ -176,12 +195,6 @@ export default [
         title: 'Service Item',
         icon: <Package />,
         navLink: '/service-item'
-      },
-      {
-        id: 'termsTemplates',
-        title: 'Terms Templates',
-        icon: <BookOpen />,
-        navLink: '/terms-template'
       },
       {
         id: 'timesheetActivities',

@@ -11,13 +11,17 @@ import { Input } from 'reactstrap'
 import { Star, Paperclip } from 'react-feather'
 
 // ** Utils
-import { formatRelativeDate } from '@utils'
+import { formatRelativeDate, formatRecipients } from '@utils'
 
 const MailCard = props => {
   // ** Props
-  const { mail, handleMailClick, selected, onToggleSelect, onContextMenu, onToggleFlag } = props
+  const { mail, folder, handleMailClick, selected, onToggleSelect, onContextMenu, onToggleFlag } = props
 
-  const fromName = mail.from?.name || mail.from?.email || 'Unknown'
+  // In Sent, "From" is always yourself - who this went TO is the useful
+  // correspondent to show instead, same as Gmail/Roundcube's own list.
+  const isSent = folder === 'Sent'
+  const recipients = isSent ? formatRecipients(mail.to) : ''
+  const displayName = isSent ? recipients || 'No recipients' : mail.from?.name || mail.from?.email || 'Unknown'
 
   return (
     <li
@@ -26,7 +30,7 @@ const MailCard = props => {
       className={classnames('d-flex user-mail', { 'mail-read': mail.isRead })}
     >
       <div className={classnames('mail-left pe-50 mail-select-toggle', { selected })}>
-        <Avatar initials color='light-primary' content={fromName} className='mail-avatar' />
+        <Avatar initials color='light-primary' content={displayName} className='mail-avatar' />
         <div className='form-check mail-select-checkbox rounded-circle bg-light-primary'>
           <Input
             type='checkbox'
@@ -40,7 +44,10 @@ const MailCard = props => {
       <div className='mail-body'>
         <div className='mail-details'>
           <div className='mail-items'>
-            <h5 className='mb-25'>{fromName}</h5>
+            <h5 className='mb-25'>
+              {isSent && <span className='text-muted fw-normal'>To: </span>}
+              {displayName}
+            </h5>
             <div className='d-flex align-items-center' style={{ gap: '0.35rem', minWidth: 0 }}>
               <span className='text-truncate'>{mail.subject}</span>
               {mail.hasAttachments && <Paperclip size={13} className='text-muted flex-shrink-0' />}

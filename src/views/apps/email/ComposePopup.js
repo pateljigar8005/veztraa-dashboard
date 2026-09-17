@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 
 // ** Third Party Components
 import axios from 'axios'
+import Select from 'react-select'
 import Swal from 'sweetalert2'
 import toast from 'react-hot-toast'
 import withReactContent from 'sweetalert2-react-content'
@@ -25,7 +26,7 @@ import EmailRecipientsInput from './EmailRecipientsInput'
 import { getFileTypeIcon } from '../shared/getFileTypeIcon'
 
 // ** Utils
-import { getUserData, uploadEditorImage } from '@utils'
+import { getUserData, uploadEditorImage, selectThemeColors } from '@utils'
 
 const blank = { to: '', cc: '', bcc: '', subject: '', body: '' }
 
@@ -46,6 +47,12 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo }) => {
   const [initialFields, setInitialFields] = useState(blank)
   const [attachments, setAttachments] = useState([])
   const [contactOptions, setContactOptions] = useState([])
+  // Canned emails (see the Email Template module under Templates in the
+  // sidebar) to load Subject + body from - fetched fresh per open, same
+  // reasoning as the signature fetch below (a template added/edited on
+  // another tab shouldn't need a full page reload to show up here).
+  const [templateOptions, setTemplateOptions] = useState([])
+  const [selectedTemplate, setSelectedTemplate] = useState(null)
   // The currently-open draft's own uid, if this session started from
   // editing one (see the pre-fill effect below) or has been saved at least
   // once since - each save replaces the previous copy and returns a NEW uid
@@ -87,6 +94,19 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo }) => {
     })
   }, [composeOpen])
 
+  useEffect(() => {
+    if (!composeOpen || templateOptions.length) return
+    axios
+      .get('/email-templates', { params: { perPage: 100 } })
+      .then(response => {
+        const templates = response.data?.data?.emailTemplates || []
+        setTemplateOptions(
+          templates.map(t => ({ value: t.id, label: t.name, subject: t.subject, content: t.content }))
+        )
+      })
+      .catch(() => {})
+  }, [composeOpen])
+
   // Own signature + auto-append setting - both come straight from the User
   // module's Email Settings (see UserForm's own email_signature_auto_append
   // switch), there's no in-Compose control. Re-fetched on every open rather
@@ -121,6 +141,7 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo }) => {
       setInitialFields(blank)
       setDraftUid(null)
       setAttachments([])
+      setSelectedTemplate(null)
       return
     }
     if (composeOpen && replyTo?.mode === 'draft') {
@@ -171,6 +192,7 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo }) => {
       setDraftUid(null)
     }
     setAttachments([])
+    setSelectedTemplate(null)
   }, [composeOpen, replyTo])
 
   // Actually injects the signature into the visible body (not just appended
@@ -208,6 +230,16 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo }) => {
   }, [composeOpen, replyTo, signature, autoAppendSignature])
 
   const setField = (key, value) => setFields(prev => ({ ...prev, [key]: value }))
+
+  // Loading a template replaces Subject + body outright (same as the
+  // Terms & Conditions picker elsewhere in the app - see TermsSection.js),
+  // not appended - picking a different one afterward just replaces it
+  // again rather than stacking multiple templates' content together.
+  const handleTemplateSelect = option => {
+    setSelectedTemplate(option || null)
+    if (!option) return
+    setFields(prev => ({ ...prev, subject: option.subject || prev.subject, body: option.content || '' }))
+  }
 
   const handleAttachFiles = e => {
     const files = Array.from(e.target.files || [])
@@ -463,8 +495,21 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo }) => {
           </>
           )}
         </ModalBody>
-        <ModalFooter>
-          <div className='btn-wrapper d-flex align-items-center'>
+        <ModalFooter className='d-flex align-items-center justify-content-between flex-nowrap'>
+          <Select
+            isClearable
+            className='react-select me-1'
+            classNamePrefix='select'
+            theme={selectThemeColors}
+            options={templateOptions}
+            value={selectedTemplate}
+            onChange={handleTemplateSelect}
+            isDisabled={replyTo?.loading}
+            placeholder='Load from template...'
+            menuPlacement='top'
+            styles={{ container: base => ({ ...base, width: '250px', maxWidth: '250px' }) }}
+          />
+          <div className='btn-wrapper d-flex align-items-center flex-shrink-0'>
             <Button
               type='button'
               color='secondary'

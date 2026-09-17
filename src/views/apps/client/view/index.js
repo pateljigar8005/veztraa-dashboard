@@ -13,6 +13,9 @@ import { Card, CardHeader, CardTitle, CardBody, Row, Col, Badge, Button, Table }
 // ** Store & Actions
 import { getClient } from '../store'
 
+// ** Utils
+import { formatAmount } from '@utils'
+
 const statusColorObj = {
   draft: 'light-secondary',
   sent: 'light-info',
@@ -115,7 +118,7 @@ const ClientView = () => {
                     <td>{q.issue_date}</td>
                     <td>{q.valid_until}</td>
                     <td>
-                      {q.currency} {computeTotal(q).toFixed(2)}
+                      {q.currency} {formatAmount(computeTotal(q))}
                     </td>
                     <td>
                       <Badge className='text-capitalize' color={statusColorObj[q.status] || 'light-secondary'} pill>
@@ -209,7 +212,7 @@ const ClientView = () => {
                     <td>{i.issue_date}</td>
                     <td>{i.due_date}</td>
                     <td>
-                      {i.currency} {computeTotal(i).toFixed(2)}
+                      {i.currency} {formatAmount(computeTotal(i))}
                     </td>
                     <td>
                       <Badge className='text-capitalize' color={statusColorObj[i.status] || 'light-secondary'} pill>

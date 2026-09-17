@@ -22,8 +22,8 @@ import { getFolderView, getMessage, clearCurrentMessage } from './store'
 // ** Styles
 import '@styles/react/apps/app-email.scss'
 
-// ** Advanced search fields - From/To/Subject go to the same live IMAP TEXT/
-// FROM/TO/SUBJECT search the plain search box already uses (see
+// ** Advanced search fields - From/To/Subject match the same cached
+// subject/from/to columns the plain search box already searches (see
 // MailboxController::buildMessagesList()), so these combine with each other
 // (and with whatever's typed in the search box) rather than replacing it.
 const searchFields = [

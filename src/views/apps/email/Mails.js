@@ -167,11 +167,9 @@ const Mails = props => {
               />
             </InputGroup>
             {/* When this folder's cache was last actually refreshed from the
-                mail server (see MailboxCache::getLastSyncedAt()) - always
-                shown regardless of search state. A live search bypasses the
-                cache for its own results, but this still reflects a real,
-                meaningful fact (when the cache was last refreshed), so
-                there's no reason to hide it just because a search is active. */}
+                mail server (see MailboxCache::getLastSyncedAt()) - a search
+                (see the box above) also reads from this same cache, so this
+                stays just as meaningful/relevant while one's active. */}
             {store.lastSyncedAt && (
               <span className='text-muted text-nowrap ms-1' style={{ fontSize: '0.75rem' }}>
                 Synced {formatRelativeDate(store.lastSyncedAt)}
@@ -216,6 +214,7 @@ const Mails = props => {
                 <MailCard
                   key={mail.uid}
                   mail={mail}
+                  folder={store.params.folder}
                   handleMailClick={handleMailClick}
                   selected={selectedUids.includes(mail.uid)}
                   onToggleSelect={toggleSelect}

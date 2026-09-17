@@ -5,7 +5,7 @@ import toast from 'react-hot-toast'
 
 // ** Store & Actions
 import { store } from '@store/store'
-import { deleteTermsTemplate } from '../store'
+import { deleteEmailTemplate } from '../store'
 
 // ** Icons Imports
 import { Edit2, Trash2 } from 'react-feather'
@@ -21,14 +21,20 @@ export const columns = [
   {
     name: 'Name',
     sortable: true,
-    minWidth: '300px',
+    minWidth: '250px',
     sortField: 'name',
     selector: row => row.name,
     cell: row => (
-      <Link to={`/terms-template/edit/${row.id}`} className='user_name text-truncate text-body'>
+      <Link to={`/email-template/edit/${row.id}`} className='user_name text-truncate text-body'>
         <span className='fw-bolder'>{row.name}</span>
       </Link>
     )
+  },
+  {
+    name: 'Subject',
+    minWidth: '260px',
+    selector: row => row.subject,
+    cell: row => <span className='text-truncate'>{row.subject || '-'}</span>
   },
   {
     name: 'Created',
@@ -44,11 +50,11 @@ export const columns = [
     minWidth: '90px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
-        {currentUserCan('/terms-template', 'edit') && (
+        {currentUserCan('/email-template', 'edit') && (
           <Fragment>
             <Button
               tag={Link}
-              to={`/terms-template/edit/${row.id}`}
+              to={`/email-template/edit/${row.id}`}
               id={`edit-tooltip-${row.id}`}
               className='btn-icon me-1'
               color='flat-primary'
@@ -63,7 +69,7 @@ export const columns = [
           </Fragment>
         )}
 
-        {currentUserCan('/terms-template', 'delete') && (
+        {currentUserCan('/email-template', 'delete') && (
           <Fragment>
             <Button
               tag='a'
@@ -78,7 +84,7 @@ export const columns = [
                 confirmDelete({
                   text: `This will permanently delete "${row.name}".`,
                   onConfirm: () =>
-                    store.dispatch(deleteTermsTemplate(row.id)).then(() => toast.success('Terms & Conditions deleted'))
+                    store.dispatch(deleteEmailTemplate(row.id)).then(() => toast.success('Email template deleted'))
                 })
               }}
             >

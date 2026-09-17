@@ -13,6 +13,9 @@ import { CardBody, Table, Input, Button } from 'reactstrap'
 // ** Shared Components
 import AmountField from './AmountField'
 
+// ** Utils
+import { formatAmount } from '@utils'
+
 // ** Drag Handle Icon (two columns of dots — a real grip handle, not a "more options" glyph)
 const GripIcon = ({ size = 14, className }) => (
   <svg width={size} height={size} viewBox='0 0 10 16' fill='currentColor' className={className}>
@@ -97,7 +100,7 @@ const LineItemsTable = ({ control, fields, lineItems, remove, move, onAddItem, o
                       render={({ field }) => <AmountField value={field.value} onChange={field.onChange} />}
                     />
                   </td>
-                  <td className='fw-bolder align-middle'>${(qty * rate).toFixed(2)}</td>
+                  <td className='fw-bolder align-middle'>${formatAmount(qty * rate)}</td>
                   <td className='align-middle'>
                     <Button
                       color='flat-danger'

@@ -25,12 +25,15 @@ import { Editor } from '@veztraa/editor'
 // ** Utils
 import { getUserData, resolveAvatarUrl, uploadEditorImage } from '@utils'
 
-// ** The real password (login or email account) is never sent back from the
-// API (see UserController::serialize()'s own comment on this) - this is
+// ** The login password is one-way bcrypt-hashed (see User::update()) and
+// can never be sent back from the API under any circumstance - this is
 // purely a visual stand-in so an existing edit doesn't look like there's no
 // password set at all. Treated as "unchanged" on submit, same as an empty
 // field used to be - only a value that DIFFERS from this exact placeholder
-// counts as the user actually typing a new password.
+// counts as the user actually typing a new password. The email account
+// password (email_login_password) is reversibly encrypted server-side and
+// IS sent back in full to an admin viewer (see UserController::serialize()),
+// so that field shows the real current value instead of this placeholder.
 const PASSWORD_PLACEHOLDER = '••••••••'
 
 const defaultValues = {
@@ -126,7 +129,7 @@ const UserForm = () => {
         phone: user.phone || '',
         password: PASSWORD_PLACEHOLDER,
         email_login: user.email_login || '',
-        email_login_password: user.email_login ? PASSWORD_PLACEHOLDER : '',
+        email_login_password: user.email_login_password || '',
         email_signature: user.email_signature || ''
       })
       setAutoAppendSignature(user.email_signature_auto_append !== false)
@@ -180,7 +183,11 @@ const UserForm = () => {
         email_signature_auto_append: autoAppendSignature
       }
       if (data.password.length && data.password !== PASSWORD_PLACEHOLDER) payload.password = data.password
-      if (data.email_login_password.length && data.email_login_password !== PASSWORD_PLACEHOLDER) {
+      // Unlike the login password above, this field now shows the real
+      // current value (see the populate effect) rather than a placeholder -
+      // resending it unchanged is harmless (the API just re-encrypts the
+      // same plaintext), so there's no placeholder-diff check needed here.
+      if (data.email_login_password.length) {
         payload.email_login_password = data.email_login_password
       }
 
@@ -395,19 +402,9 @@ const UserForm = () => {
                 <Controller
                   name='email_login_password'
                   control={control}
-                  render={({ field }) => (
-                    <InputPasswordToggle
-                      id='email_login_password'
-                      {...field}
-                      onFocus={e => {
-                        if (field.value === PASSWORD_PLACEHOLDER) e.target.select()
-                      }}
-                    />
-                  )}
+                  render={({ field }) => <InputPasswordToggle id='email_login_password' {...field} />}
                 />
-                <FormText color='muted'>
-                  Leave as-is to keep the current email password - the eye icon reveals what you type, not the existing one
-                </FormText>
+                <FormText color='muted'>The eye icon reveals this mailbox account's real, current password.</FormText>
               </Col>
             )}
             <Col md={12} className='mb-1'>

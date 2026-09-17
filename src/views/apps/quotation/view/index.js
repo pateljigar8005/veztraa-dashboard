@@ -20,12 +20,12 @@ import { getQuotation, updateQuotation } from '../store'
 import { quotationStatusOptions } from '../documentOptions'
 
 // ** Utils
-import { selectThemeColors } from '@utils'
+import { selectThemeColors, formatAmount } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 
 // ** Maps a quotation's real fields onto the field paths the selected PDF
 // template's elements bind to - same shape as the Invoice template's
-// bindings (client./invoice./service_items), since Quotation carries the
+// bindings (client./document./service_items), since Quotation carries the
 // same pricing model as Invoice.
 const buildPdfData = quotation => ({
   client: {
@@ -35,7 +35,7 @@ const buildPdfData = quotation => ({
     phone: quotation.phone || '',
     address: quotation.billing_address || ''
   },
-  invoice: {
+  document: {
     number: quotation.quotation_number,
     issue_date: quotation.issue_date,
     due_date: quotation.valid_until
@@ -47,14 +47,14 @@ const buildPdfData = quotation => ({
   tax_rate: quotation.tax_rate,
   tax_amount: quotation.tax_amount,
   discount_amount: quotation.discount_amount,
-  total: Number(quotation.total).toFixed(2),
+  total: formatAmount(quotation.total),
   terms_conditions: quotation.terms_content || '',
   payment_method: quotation.payment_method_content || '',
   service_items: (quotation.line_items || []).map(item => ({
     name: item.description || '',
     qty: item.qty,
-    rate: Number(item.rate).toFixed(2),
-    amount: (Number(item.qty) * Number(item.rate)).toFixed(2)
+    rate: formatAmount(item.rate),
+    amount: formatAmount(Number(item.qty) * Number(item.rate))
   }))
 })
 
@@ -233,10 +233,10 @@ const QuotationView = () => {
                   <td>{item.description || '-'}</td>
                   <td>{item.qty}</td>
                   <td>
-                    {quotation.currency} {Number(item.rate).toFixed(2)}
+                    {quotation.currency} {formatAmount(item.rate)}
                   </td>
                   <td className='text-end'>
-                    {quotation.currency} {(Number(item.qty) * Number(item.rate)).toFixed(2)}
+                    {quotation.currency} {formatAmount(Number(item.qty) * Number(item.rate))}
                   </td>
                 </tr>
               ))}
@@ -248,14 +248,14 @@ const QuotationView = () => {
                 <div className='d-flex justify-content-between mb-50'>
                   <span>Subtotal</span>
                   <span>
-                    {quotation.currency} {Number(quotation.subtotal).toFixed(2)}
+                    {quotation.currency} {formatAmount(quotation.subtotal)}
                   </span>
                 </div>
                 {quotation.tax_amount > 0 && (
                   <div className='d-flex justify-content-between mb-50'>
                     <span>Tax ({quotation.tax_rate}%)</span>
                     <span>
-                      {quotation.currency} {Number(quotation.tax_amount).toFixed(2)}
+                      {quotation.currency} {formatAmount(quotation.tax_amount)}
                     </span>
                   </div>
                 )}
@@ -263,7 +263,7 @@ const QuotationView = () => {
                   <div className='d-flex justify-content-between mb-50'>
                     <span>Discount</span>
                     <span className='text-success'>
-                      -{quotation.currency} {Number(quotation.discount_amount).toFixed(2)}
+                      -{quotation.currency} {formatAmount(quotation.discount_amount)}
                     </span>
                   </div>
                 )}
@@ -271,7 +271,7 @@ const QuotationView = () => {
                 <div className='d-flex justify-content-between'>
                   <h5 className='mb-0'>Total</h5>
                   <h5 className='mb-0'>
-                    {quotation.currency} {Number(quotation.total).toFixed(2)}
+                    {quotation.currency} {formatAmount(quotation.total)}
                   </h5>
                 </div>
               </Col>

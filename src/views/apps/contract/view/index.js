@@ -39,7 +39,7 @@ const buildPdfData = contract => ({
     phone: contract.phone || '',
     address: contract.billing_address || ''
   },
-  invoice: {
+  document: {
     number: contract.contract_number,
     issue_date: contract.start_date,
     due_date: contract.end_date

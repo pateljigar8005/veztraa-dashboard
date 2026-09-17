@@ -6,7 +6,7 @@ import axios from 'axios'
 import toast from 'react-hot-toast'
 
 // ** Utils
-import { formatDate } from '@utils'
+import { formatDate, formatRecipients } from '@utils'
 
 // ** Custom Components
 import Avatar from '@components/avatar'
@@ -27,6 +27,12 @@ const MailDetails = props => {
   const { mail, loading, folder, openMail, dispatch, setOpenMail, toggleCompose, setReplyTo } = props
 
   const [downloadingIndex, setDownloadingIndex] = useState(null)
+
+  // In Sent, "From" is always yourself - who this went TO is the useful
+  // correspondent to show instead, same reasoning as MailCard.js's own list.
+  const isSent = folder === 'Sent'
+  const recipients = isSent ? formatRecipients(mail?.to) : ''
+  const correspondentName = isSent ? recipients || 'No recipients' : mail?.from?.name || mail?.from?.email || '?'
 
   const handleGoBack = () => setOpenMail(false)
 
@@ -100,17 +106,10 @@ const MailDetails = props => {
             <Card className='mb-2 mt-2'>
               <CardHeader className='email-detail-head'>
                 <div className='user-details d-flex justify-content-between align-items-center flex-wrap'>
-                  <Avatar
-                    initials
-                    color='light-primary'
-                    className='me-75'
-                    imgHeight='48'
-                    imgWidth='48'
-                    content={mail.from?.name || mail.from?.email || '?'}
-                  />
+                  <Avatar initials color='light-primary' className='me-75' imgHeight='48' imgWidth='48' content={correspondentName} />
                   <div className='mail-items'>
-                    <h5 className='mb-0'>{mail.from?.name || mail.from?.email}</h5>
-                    <span className='font-small-3 text-muted'>{mail.from?.email}</span>
+                    <h5 className='mb-0'>{correspondentName}</h5>
+                    <span className='font-small-3 text-muted'>{isSent ? 'To' : mail.from?.email}</span>
                   </div>
                 </div>
                 <div className='mail-meta-item d-flex align-items-center'>

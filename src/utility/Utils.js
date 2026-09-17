@@ -105,6 +105,18 @@ export const formatRelativeDate = value => {
   return formatDateToMonthShort(value)
 }
 
+// ** A mail's `to` list is shaped inconsistently depending on where it came
+// from: regular synced folders and live IMAP fetches use {name, email}
+// objects (see Mailbox::addressToArray()), but a Sent-folder cache row
+// written right after composing stores plain email strings instead (see
+// MailboxOutbox::processOne() / MailboxController::splitAddresses()) -
+// handles both shapes rather than assuming one.
+export const formatRecipients = to =>
+  (Array.isArray(to) ? to : [])
+    .map(r => (typeof r === 'string' ? r : r?.name || r?.email || ''))
+    .filter(Boolean)
+    .join(', ')
+
 /**
  ** Return if user is logged in
  ** This is completely up to you and how you want to store the token in your frontend application
