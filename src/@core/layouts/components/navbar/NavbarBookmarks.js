@@ -2,6 +2,7 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 
 // ** Third Party Components
+import { useDispatch, useStore } from 'react-redux'
 import { Menu, CornerDownLeft, RefreshCw, PlusCircle, Search, Save, Download } from 'react-feather'
 
 // ** Reactstrap Imports
@@ -9,6 +10,7 @@ import { NavItem, NavLink, UncontrolledTooltip } from 'reactstrap'
 
 // ** Utils
 import { hasActionPermission, inferRouteAction } from '@src/utility/navPermissions'
+import { refetchForRoute } from '@src/utility/refreshRegistry'
 
 // ** List pages that have a matching "/add" route
 const listToAddRoute = {
@@ -79,6 +81,8 @@ const NavbarBookmarks = props => {
   // ** Hooks
   const location = useLocation()
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const store = useStore()
 
   let userData = null
   try {
@@ -92,11 +96,16 @@ const NavbarBookmarks = props => {
   const addEnabled = Boolean(addRoute) && hasActionPermission(location.pathname, 'add', userData)
 
   // ** A list page that supports advanced search renders a hidden button
-  // with this id (see AdvancedSearchModal usage in each module's Table.js);
-  // pages that don't (e.g. Roles, which has no server-side search) simply
-  // don't render one, so the click silently no-ops.
+  // with this id (see AdvancedSearchModal usage in each module's Table.js,
+  // or email/index.js's own AdvancedSearchModal for the Email app); pages
+  // that don't (e.g. Roles, which has no server-side search) simply don't
+  // render one, so the click silently no-ops. Email isn't in listToAddRoute
+  // (it has no /add route) but does support its own advanced search, so
+  // it's included here separately rather than folded into isListRoute,
+  // which also drives the unrelated Add-button enable state.
+  const isSearchRoute = isListRoute || isEmailRoute(location.pathname)
   const handleSearch = () => {
-    if (!isListRoute) return
+    if (!isSearchRoute) return
     document.getElementById('navbar-advanced-search-trigger')?.click()
   }
 
@@ -124,6 +133,12 @@ const NavbarBookmarks = props => {
       document.getElementById('email-refresh-trigger')?.click()
       return
     }
+    if (refetchForRoute(location.pathname, dispatch, store.getState)) {
+      return
+    }
+    // No registered module for this route (e.g. an /add or /edit form,
+    // where a real reload would discard unsaved input anyway) - only here
+    // does a full reload still make sense.
     window.location.reload()
   }
 
@@ -173,13 +188,13 @@ const NavbarBookmarks = props => {
           <NavLink
             className='nav-link-style'
             id='navbar-search-btn'
-            style={{ opacity: isListRoute ? 1 : 0.35, pointerEvents: isListRoute ? 'auto' : 'none' }}
+            style={{ opacity: isSearchRoute ? 1 : 0.35, pointerEvents: isSearchRoute ? 'auto' : 'none' }}
             onClick={handleSearch}
           >
             <Search className='ficon' />
           </NavLink>
           <UncontrolledTooltip placement='bottom' target='navbar-search-btn'>
-            {isListRoute ? 'Advanced Search' : 'Search (open a list page first)'}
+            {isSearchRoute ? 'Advanced Search' : 'Search (open a list page first)'}
           </UncontrolledTooltip>
         </NavItem>
         <NavItem className='d-none d-lg-block'>

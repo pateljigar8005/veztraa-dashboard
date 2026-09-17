@@ -9,11 +9,10 @@ import { X } from 'react-feather'
 import toast from 'react-hot-toast'
 import Flatpickr from 'react-flatpickr'
 import Select, { components } from 'react-select' // eslint-disable-line
-import PerfectScrollbar from 'react-perfect-scrollbar'
 import { useForm, Controller } from 'react-hook-form'
 
 // ** Reactstrap Imports
-import { Button, Modal, ModalHeader, ModalBody, Label, Input, Form } from 'reactstrap'
+import { Button, Modal, ModalBody, ModalFooter, Label, Input, Form } from 'reactstrap'
 
 // ** Utils
 import { selectThemeColors, isObjEmpty } from '@utils'
@@ -268,45 +267,34 @@ const AddEventSidebar = props => {
     }
   }
 
-  // ** Close BTN
-  const CloseBtn = <X className='cursor-pointer' size={15} onClick={handleAddEventSidebar} />
-
   return (
-    <Modal
-      isOpen={open}
-      className='sidebar-lg'
-      toggle={handleAddEventSidebar}
-      onOpened={handleSelectedEvent}
-      onClosed={handleResetInputValues}
-      contentClassName='p-0 overflow-hidden'
-      modalClassName='modal-slide-in event-sidebar'
-    >
-      <ModalHeader className='mb-1' toggle={handleAddEventSidebar} close={CloseBtn} tag='div'>
+    <Modal isOpen={open} centered size='xl' toggle={handleAddEventSidebar} onOpened={handleSelectedEvent} onClosed={handleResetInputValues}>
+      <div className='modal-header d-flex align-items-center justify-content-between'>
         <h5 className='modal-title'>
           {selectedEvent && selectedEvent.title && selectedEvent.title.length ? 'Update' : 'Add'} Event
         </h5>
-      </ModalHeader>
-      <PerfectScrollbar options={{ wheelPropagation: false }}>
-        <ModalBody className='flex-grow-1 pb-sm-0 pb-3'>
-          <Form
-            onSubmit={handleSubmit(data => {
-              if (data.title.length) {
-                if (isObjEmpty(errors)) {
-                  if (isObjEmpty(selectedEvent) || (!isObjEmpty(selectedEvent) && !selectedEvent.title.length)) {
-                    handleAddEvent()
-                  } else {
-                    handleUpdateEvent()
-                  }
-                  handleAddEventSidebar()
-                }
+        <X className='fw-normal cursor-pointer' size={16} onClick={handleAddEventSidebar} />
+      </div>
+      <Form
+        onSubmit={handleSubmit(data => {
+          if (data.title.length) {
+            if (isObjEmpty(errors)) {
+              if (isObjEmpty(selectedEvent) || (!isObjEmpty(selectedEvent) && !selectedEvent.title.length)) {
+                handleAddEvent()
               } else {
-                setError('title', {
-                  type: 'manual'
-                })
+                handleUpdateEvent()
               }
-            })}
-          >
-            <div className='mb-1'>
+              handleAddEventSidebar()
+            }
+          } else {
+            setError('title', {
+              type: 'manual'
+            })
+          }
+        })}
+      >
+        <ModalBody style={{ maxHeight: '65vh', overflowY: 'auto' }}>
+          <div className='mb-1'>
               <Label className='form-label' for='title'>
                 Title <span className='text-danger'>*</span>
               </Label>
@@ -429,26 +417,25 @@ const AddEventSidebar = props => {
               <Input id='location' value={location} onChange={e => setLocation(e.target.value)} placeholder='Office' />
             </div>
 
-            <div className='mb-1'>
-              <Label className='form-label' for='description'>
-                Description
-              </Label>
-              <Input
-                type='textarea'
-                name='text'
-                id='description'
-                rows='3'
-                value={desc}
-                onChange={e => setDesc(e.target.value)}
-                placeholder='Description'
-              />
-            </div>
-            <div className='d-flex mb-1'>
-              <EventActions />
-            </div>
-          </Form>
+          <div className='mb-1'>
+            <Label className='form-label' for='description'>
+              Description
+            </Label>
+            <Input
+              type='textarea'
+              name='text'
+              id='description'
+              rows='3'
+              value={desc}
+              onChange={e => setDesc(e.target.value)}
+              placeholder='Description'
+            />
+          </div>
         </ModalBody>
-      </PerfectScrollbar>
+        <ModalFooter>
+          <EventActions />
+        </ModalFooter>
+      </Form>
     </Modal>
   )
 }

@@ -52,7 +52,8 @@ export const removeEvent = createAsyncThunk('appCalendar/removeEvent', async id 
 // due date gets changed, so these events are marked non-editable/non-draggable.
 export const fetchKanbanTaskEvents = createAsyncThunk('appCalendar/fetchKanbanTaskEvents', async () => {
   const response = await axios.get('/kanban-tasks')
-  return response.data.data.tasks
+  const tasks = response.data.data.tasks
+  const events = tasks
     .filter(task => task.due_date)
     .map(task => ({
       id: `kanban-${task.id}`,
@@ -66,11 +67,17 @@ export const fetchKanbanTaskEvents = createAsyncThunk('appCalendar/fetchKanbanTa
         taskId: task.id
       }
     }))
+  // Keep the full task objects too (not just the trimmed calendar-event
+  // shape) - clicking one of these events opens the real Kanban Task
+  // Details popup, which needs the whole task, not a re-fetch by id (there
+  // is no GET /kanban-tasks/{id} - the list endpoint is the only source).
+  return { events, tasks }
 })
 
 export const fetchTodoTaskEvents = createAsyncThunk('appCalendar/fetchTodoTaskEvents', async () => {
   const response = await axios.get('/todos')
-  return response.data.data
+  const tasks = response.data.data
+  const events = tasks
     .filter(task => task.dueDate && !task.isCompleted && !task.isDeleted)
     .map(task => ({
       id: `todo-${task.id}`,
@@ -84,6 +91,7 @@ export const fetchTodoTaskEvents = createAsyncThunk('appCalendar/fetchTodoTaskEv
         taskId: task.id
       }
     }))
+  return { events, tasks }
 })
 
 export const appCalendarSlice = createSlice({
@@ -91,7 +99,9 @@ export const appCalendarSlice = createSlice({
   initialState: {
     events: [],
     kanbanEvents: [],
+    kanbanTasks: [],
     todoEvents: [],
+    todoTasks: [],
     taskFilters: ['Kanban Tasks', 'To-Do'],
     selectedEvent: {},
     selectedCalendars: ['Personal', 'Business', 'Family', 'Holiday', 'ETC']
@@ -114,10 +124,12 @@ export const appCalendarSlice = createSlice({
         state.events = action.payload
       })
       .addCase(fetchKanbanTaskEvents.fulfilled, (state, action) => {
-        state.kanbanEvents = action.payload
+        state.kanbanEvents = action.payload.events
+        state.kanbanTasks = action.payload.tasks
       })
       .addCase(fetchTodoTaskEvents.fulfilled, (state, action) => {
-        state.todoEvents = action.payload
+        state.todoEvents = action.payload.events
+        state.todoTasks = action.payload.tasks
       })
       .addCase(updateFilter.fulfilled, (state, action) => {
         if (state.selectedCalendars.includes(action.payload)) {

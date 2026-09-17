@@ -45,16 +45,16 @@ export default [
     navLink: '/kanban'
   },
   {
-    id: 'timesheets',
-    title: 'Timesheet',
-    icon: <Clock size={20} />,
-    navLink: '/timesheet'
-  },
-  {
     id: 'todo',
     title: 'Todo',
     icon: <CheckSquare size={20} />,
     navLink: '/todo'
+  },
+  {
+    id: 'timesheets',
+    title: 'Timesheet',
+    icon: <Clock size={20} />,
+    navLink: '/timesheet'
   },
   {
     header: 'Billing'

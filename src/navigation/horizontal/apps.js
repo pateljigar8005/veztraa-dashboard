@@ -49,16 +49,16 @@ export default [
         navLink: '/kanban'
       },
       {
-        id: 'timesheets',
-        title: 'Timesheet',
-        icon: <Clock />,
-        navLink: '/timesheet'
-      },
-      {
         id: 'todo',
         title: 'Todo',
         icon: <CheckSquare />,
         navLink: '/todo'
+      },
+      {
+        id: 'timesheets',
+        title: 'Timesheet',
+        icon: <Clock />,
+        navLink: '/timesheet'
       }
     ]
   },

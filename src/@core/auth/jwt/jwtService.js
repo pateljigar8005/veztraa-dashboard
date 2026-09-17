@@ -40,25 +40,42 @@ export default class JwtService {
 
         // ** if (status === 401) {
         if (response && response.status === 401) {
+          // ** A 401 from the refresh call itself means the session is
+          // genuinely over - retrying it or queuing more requests behind it
+          // would just hang forever, since no valid token will ever arrive.
+          if (originalRequest.url === this.jwtConfig.refreshEndpoint) {
+            this.isAlreadyFetchingAccessToken = false
+            this.onAccessTokenFetchFailed()
+            return Promise.reject(error)
+          }
+
           if (!this.isAlreadyFetchingAccessToken) {
             this.isAlreadyFetchingAccessToken = true
-            this.refreshToken().then(r => {
-              this.isAlreadyFetchingAccessToken = false
+            this.refreshToken()
+              .then(r => {
+                this.isAlreadyFetchingAccessToken = false
 
-              // ** Update accessToken in localStorage
-              this.setToken(r.data.accessToken)
-              this.setRefreshToken(r.data.refreshToken)
+                // ** Update accessToken in localStorage
+                this.setToken(r.data.accessToken)
+                this.setRefreshToken(r.data.refreshToken)
 
-              this.onAccessTokenFetched(r.data.accessToken)
-            })
+                this.onAccessTokenFetched(r.data.accessToken)
+              })
+              .catch(() => {
+                this.isAlreadyFetchingAccessToken = false
+                this.onAccessTokenFetchFailed()
+              })
           }
-          const retryOriginalRequest = new Promise(resolve => {
-            this.addSubscriber(accessToken => {
-              // ** Make sure to assign accessToken according to your response.
-              // ** Check: https://pixinvent.ticksy.com/ticket/2413870
-              // ** Change Authorization header
-              originalRequest.headers.Authorization = `${this.jwtConfig.tokenType} ${accessToken}`
-              resolve(this.axios(originalRequest))
+          const retryOriginalRequest = new Promise((resolve, reject) => {
+            this.addSubscriber({
+              onSuccess: accessToken => {
+                // ** Make sure to assign accessToken according to your response.
+                // ** Check: https://pixinvent.ticksy.com/ticket/2413870
+                // ** Change Authorization header
+                originalRequest.headers.Authorization = `${this.jwtConfig.tokenType} ${accessToken}`
+                resolve(axios(originalRequest))
+              },
+              onFailure: () => reject(error)
             })
           })
           return retryOriginalRequest
@@ -69,11 +86,23 @@ export default class JwtService {
   }
 
   onAccessTokenFetched(accessToken) {
-    this.subscribers = this.subscribers.filter(callback => callback(accessToken))
+    this.subscribers.forEach(subscriber => subscriber.onSuccess(accessToken))
+    this.subscribers = []
   }
 
-  addSubscriber(callback) {
-    this.subscribers.push(callback)
+  // ** Refresh token itself is invalid/expired - nothing queued behind it
+  // can ever succeed, so reject them all and force a clean re-login instead
+  // of leaving the app hung on a token that will never arrive.
+  onAccessTokenFetchFailed() {
+    this.subscribers.forEach(subscriber => subscriber.onFailure())
+    this.subscribers = []
+    localStorage.removeItem(this.jwtConfig.storageTokenKeyName)
+    localStorage.removeItem(this.jwtConfig.storageRefreshTokenKeyName)
+    window.location.href = '/login'
+  }
+
+  addSubscriber(subscriber) {
+    this.subscribers.push(subscriber)
   }
 
   getToken() {

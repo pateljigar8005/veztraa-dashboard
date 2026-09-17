@@ -100,7 +100,7 @@ const Calendar = props => {
       // eslint-disable-next-line no-underscore-dangle
       const source = clickedEvent._def.extendedProps.source
       if (source === 'kanban' || source === 'todo') {
-        handleTaskEventClick(source)
+        handleTaskEventClick(source, clickedEvent._def.extendedProps.taskId)
         return
       }
 

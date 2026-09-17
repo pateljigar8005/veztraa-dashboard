@@ -3,13 +3,18 @@ import { Fragment, useState, useEffect } from 'react'
 
 // ** Third Party Components
 import classnames from 'classnames'
-import { useNavigate } from 'react-router-dom'
 import { Row, Col } from 'reactstrap'
 
 // ** Calendar App Component Imports
 import Calendar from './Calendar'
 import SidebarLeft from './SidebarLeft'
 import AddEventSidebar from './AddEventSidebar'
+
+// ** Kanban/Todo Task Details popups - a Kanban/Todo-sourced calendar event
+// opens the real task in the same popup those modules use themselves,
+// instead of navigating away to /kanban or /todo.
+import KanbanTaskSidebar from '../kanban/TaskSidebar'
+import TodoTaskSidebar from '../todo/TaskSidebar'
 
 // ** Custom Hooks
 import { useRTL } from '@hooks/useRTL'
@@ -28,6 +33,8 @@ import {
   addEvent,
   removeEvent
 } from './store'
+import { handleSelectTask } from '../kanban/store'
+import { selectTask, updateTask as updateTodoTask, addTask as addTodoTask, deleteTask as deleteTodoTask } from '../todo/store'
 
 // ** Styles
 import '@styles/react/apps/app-calendar.scss'
@@ -46,13 +53,16 @@ const calendarsColor = {
 const CalendarComponent = () => {
   // ** Variables
   const dispatch = useDispatch()
-  const navigate = useNavigate()
   const store = useSelector(state => state.calendar)
+  const kanbanStore = useSelector(state => state.kanban)
+  const todoStore = useSelector(state => state.todo)
 
   // ** states
   const [calendarApi, setCalendarApi] = useState(null)
   const [addSidebarOpen, setAddSidebarOpen] = useState(false)
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false)
+  const [kanbanTaskSidebarOpen, setKanbanTaskSidebarOpen] = useState(false)
+  const [todoTaskSidebarOpen, setTodoTaskSidebarOpen] = useState(false)
 
   // ** Hooks
   const [isRtl] = useRTL()
@@ -85,9 +95,21 @@ const CalendarComponent = () => {
     }
   }
 
-  // ** Function to navigate to the source task when a Kanban/Todo event is clicked
-  const handleTaskEventClick = source => {
-    navigate(source === 'kanban' ? '/kanban' : '/todo')
+  // ** Opens the real Kanban/Todo Task Details popup (same component those
+  // modules render themselves) for the task behind a clicked calendar event,
+  // instead of navigating away to /kanban or /todo.
+  const handleTaskEventClick = (source, taskId) => {
+    if (source === 'kanban') {
+      const task = store.kanbanTasks.find(t => t.id === taskId)
+      if (!task) return
+      dispatch(handleSelectTask(task))
+      setKanbanTaskSidebarOpen(true)
+    } else {
+      const task = store.todoTasks.find(t => t.id === taskId)
+      if (!task) return
+      dispatch(selectTask(task))
+      setTodoTaskSidebarOpen(true)
+    }
   }
 
   // ** Fetch Events On Mount
@@ -153,6 +175,21 @@ const CalendarComponent = () => {
         refetchEvents={refetchEvents}
         calendarsColor={calendarsColor}
         handleAddEventSidebar={handleAddEventSidebar}
+      />
+      <KanbanTaskSidebar
+        sidebarOpen={kanbanTaskSidebarOpen}
+        selectedTask={kanbanStore.selectedTask}
+        handleTaskSidebarToggle={() => setKanbanTaskSidebarOpen(false)}
+      />
+      <TodoTaskSidebar
+        open={todoTaskSidebarOpen}
+        handleTaskSidebar={() => setTodoTaskSidebarOpen(false)}
+        store={todoStore}
+        dispatch={dispatch}
+        updateTask={updateTodoTask}
+        selectTask={selectTask}
+        addTask={addTodoTask}
+        deleteTask={deleteTodoTask}
       />
     </Fragment>
   )
