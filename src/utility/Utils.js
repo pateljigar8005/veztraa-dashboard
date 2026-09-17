@@ -9,6 +9,19 @@ export const isObjEmpty = obj => Object.keys(obj).length === 0
 // <img> tags don't request them from the dashboard's own origin instead.
 export const resolveAvatarUrl = path => (path ? `${axios.defaults.baseURL}${path}` : null)
 
+// ** @veztraa/editor's onImageUpload prop (a dropped/pasted/picked image ->
+// a real hosted URL, instead of the editor's own default of inlining it as
+// base64 or a client-side blob: URL that dies once the tab closes) - every
+// Editor instance across the app passes this same handler (see
+// UploadController::image() on the API side) so an embedded image survives
+// a page reload and is never duplicated as base64 inside the stored HTML.
+export const uploadEditorImage = async file => {
+  const formData = new FormData()
+  formData.append('file', file)
+  const response = await axios.post('/uploads/image', formData)
+  return resolveAvatarUrl(response.data.data.url)
+}
+
 // ** Returns K format from a number
 export const kFormatter = num => (num > 999 ? `${(num / 1000).toFixed(1)}k` : num)
 
@@ -70,6 +83,26 @@ export const formatDateToMonthShort = (value, toTimeForCurrentDay = true) => {
   }
 
   return new Intl.DateTimeFormat('en-US', formatting).format(new Date(value))
+}
+
+// ** Relative time ("Just now" / "5 mins ago" / "3 hours ago") for anything
+// within the last 24h, falling back to formatDateToMonthShort beyond that -
+// matches Gmail's own list behavior of only using relative time for recent items.
+export const formatRelativeDate = value => {
+  const date = new Date(value)
+  const diffSeconds = Math.floor((Date.now() - date.getTime()) / 1000)
+
+  if (diffSeconds < 60) return 'Just now'
+  if (diffSeconds < 3600) {
+    const mins = Math.floor(diffSeconds / 60)
+    return `${mins} min${mins === 1 ? '' : 's'} ago`
+  }
+  if (diffSeconds < 86400 && isToday(date)) {
+    const hours = Math.floor(diffSeconds / 3600)
+    return `${hours} hour${hours === 1 ? '' : 's'} ago`
+  }
+
+  return formatDateToMonthShort(value)
 }
 
 /**

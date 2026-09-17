@@ -18,7 +18,7 @@ import TaskAttachments from './TaskAttachments'
 import DateField from '../shared/DateField'
 
 // ** Utils
-import { isObjEmpty, selectThemeColors, resolveAvatarUrl } from '@utils'
+import { isObjEmpty, selectThemeColors, resolveAvatarUrl, uploadEditorImage } from '@utils'
 
 // ** Styles Imports
 import '@styles/react/libs/react-select/_react-select.scss'
@@ -38,7 +38,7 @@ const ModalHeader = props => {
   }
 
   return (
-    <div className='modal-header d-flex align-items-center justify-content-between mb-1'>
+    <div className='modal-header d-flex align-items-center justify-content-between'>
       <h5 className='modal-title'>{children}</h5>
       <div className='todo-item-action d-flex align-items-center'>
         {store && !isObjEmpty(store.selectedTask) ? (
@@ -305,7 +305,7 @@ const TaskSidebar = props => {
             <Label for='task-desc' className='form-label'>
               Description
             </Label>
-            <Editor value={desc} onChange={setDesc} height={300} />
+            <Editor value={desc} onChange={setDesc} height={300} onImageUpload={uploadEditorImage} />
           </div>
           <div>
             <Label className='form-label'>Attachments</Label>

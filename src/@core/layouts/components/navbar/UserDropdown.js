@@ -16,7 +16,7 @@ import { useDispatch } from 'react-redux'
 import { handleLogout } from '@store/authentication'
 
 // ** Third Party Components
-import { Mail, CheckSquare, MessageSquare, Power } from 'react-feather'
+import { Settings, Lock, Power } from 'react-feather'
 
 // ** Reactstrap Imports
 import { UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem } from 'reactstrap'
@@ -52,17 +52,13 @@ const UserDropdown = () => {
         )}
       </DropdownToggle>
       <DropdownMenu end>
-        <DropdownItem tag={Link} to='/email'>
-          <Mail size={14} className='me-75' />
-          <span className='align-middle'>Inbox</span>
+        <DropdownItem tag={Link} to='/account-settings'>
+          <Settings size={14} className='me-75' />
+          <span className='align-middle'>Account Settings</span>
         </DropdownItem>
-        <DropdownItem tag={Link} to='/todo'>
-          <CheckSquare size={14} className='me-75' />
-          <span className='align-middle'>Tasks</span>
-        </DropdownItem>
-        <DropdownItem tag={Link} to='/chat'>
-          <MessageSquare size={14} className='me-75' />
-          <span className='align-middle'>Chats</span>
+        <DropdownItem tag={Link} to='/change-password'>
+          <Lock size={14} className='me-75' />
+          <span className='align-middle'>Change Password</span>
         </DropdownItem>
         <DropdownItem divider />
         <DropdownItem

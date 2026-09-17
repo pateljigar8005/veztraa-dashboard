@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
 
 // ** Utils
-import { selectThemeColors } from '@utils'
+import { selectThemeColors, uploadEditorImage } from '@utils'
 
 // ** Store & Actions
 import { addPaymentMethod, updatePaymentMethod, getPaymentMethod } from '../store'
@@ -134,6 +134,7 @@ const PaymentMethodForm = () => {
                   setExtraDirty(true)
                 }}
                 height={500}
+                onImageUpload={uploadEditorImage}
               />
             </Col>
           </Row>

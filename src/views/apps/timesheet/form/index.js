@@ -17,7 +17,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
 
 // ** Utils
-import { selectThemeColors, getUserData } from '@utils'
+import { selectThemeColors, getUserData, uploadEditorImage } from '@utils'
 
 // ** Shared Components
 import DateField from '../../shared/DateField'
@@ -241,6 +241,7 @@ const TimesheetForm = () => {
                   setExtraDirty(true)
                 }}
                 height={400}
+                onImageUpload={uploadEditorImage}
               />
             </Col>
           </Row>

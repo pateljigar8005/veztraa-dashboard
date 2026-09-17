@@ -8,6 +8,9 @@ import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
 // ** Third Party Components
 import toast from 'react-hot-toast'
 import { Editor } from '@veztraa/editor'
+
+// ** Utils
+import { uploadEditorImage } from '@utils'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -96,6 +99,7 @@ const TermsTemplateForm = () => {
                   setExtraDirty(true)
                 }}
                 height={500}
+                onImageUpload={uploadEditorImage}
               />
             </Col>
           </Row>

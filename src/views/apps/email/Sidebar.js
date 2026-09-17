@@ -1,29 +1,31 @@
 // ** React Imports
-import { Link, useParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 // ** Third Party Components
 import classnames from 'classnames'
 import PerfectScrollbar from 'react-perfect-scrollbar'
-import { Mail, Send, Edit2, Trash } from 'react-feather'
+import { Mail, Send, Edit2, Trash, AlertTriangle, Archive } from 'react-feather'
 
 // ** Reactstrap Imports
-import { Button, ListGroup, ListGroupItem, Badge, Spinner } from 'reactstrap'
+import { Button, ListGroup, ListGroupItem, Badge } from 'reactstrap'
 
-// ** Icon per real IMAP folder key (see backend Mailbox::FOLDERS)
-const folderIcons = {
-  INBOX: Mail,
-  Sent: Send,
-  Drafts: Edit2,
-  Trash: Trash
-}
+// ** Mirrors the backend's Mailbox::FOLDERS exactly (key = real IMAP folder
+// name, label = what's shown) - the set of folders is fixed, never changes
+// at runtime, so the sidebar renders this immediately instead of waiting on
+// the first /mailbox/folders response just to know what folders exist. Only
+// each folder's unreadCount badge actually depends on that response.
+const FOLDERS = [
+  { key: 'INBOX', label: 'Inbox', icon: Mail },
+  { key: 'Sent', label: 'Sent', icon: Send },
+  { key: 'Drafts', label: 'Drafts', icon: Edit2 },
+  { key: 'spam', label: 'Junk', icon: AlertTriangle },
+  { key: 'Trash', label: 'Trash', icon: Trash },
+  { key: 'Archive', label: 'Archive', icon: Archive }
+]
 
 const Sidebar = props => {
   // ** Props
-  const { store, sidebarOpen, toggleCompose, setOpenMail, setSidebarOpen } = props
-
-  // ** Vars
-  const params = useParams()
-  const activeFolder = params.folder || 'INBOX'
+  const { store, activeFolder, sidebarOpen, toggleCompose, setOpenMail, setSidebarOpen } = props
 
   // ** The Link's route change alone already triggers index.js's effect to
   // fetch this folder (via getFolderView) - dispatching a fetch here too
@@ -54,35 +56,30 @@ const Sidebar = props => {
               </Button>
             </div>
             <PerfectScrollbar className='sidebar-menu-list' options={{ wheelPropagation: false }}>
-              {store.foldersLoading && !store.folders.length ? (
-                <div className='d-flex justify-content-center py-2'>
-                  <Spinner size='sm' color='primary' />
-                </div>
-              ) : (
-                <ListGroup tag='div' className='list-group-messages'>
-                  {store.folders.map(folder => {
-                    const Icon = folderIcons[folder.key] || Mail
-                    return (
-                      <ListGroupItem
-                        key={folder.key}
-                        tag={Link}
-                        to={`/email/${folder.key}`}
-                        onClick={handleFolder}
-                        action
-                        active={activeFolder === folder.key}
-                      >
-                        <Icon size={18} className='me-75' />
-                        <span className='align-middle'>{folder.label}</span>
-                        {folder.unreadCount > 0 ? (
-                          <Badge className='float-end' color='light-primary' pill>
-                            {folder.unreadCount}
-                          </Badge>
-                        ) : null}
-                      </ListGroupItem>
-                    )
-                  })}
-                </ListGroup>
-              )}
+              <ListGroup tag='div' className='list-group-messages'>
+                {FOLDERS.map(folder => {
+                  const Icon = folder.icon
+                  const unreadCount = store.folders.find(f => f.key === folder.key)?.unreadCount || 0
+                  return (
+                    <ListGroupItem
+                      key={folder.key}
+                      tag={Link}
+                      to={`/email/${folder.key}`}
+                      onClick={handleFolder}
+                      action
+                      active={activeFolder === folder.key}
+                    >
+                      <Icon size={18} className='me-75' />
+                      <span className='align-middle'>{folder.label}</span>
+                      {unreadCount > 0 ? (
+                        <Badge className='float-end' color='light-primary' pill>
+                          {unreadCount}
+                        </Badge>
+                      ) : null}
+                    </ListGroupItem>
+                  )
+                })}
+              </ListGroup>
             </PerfectScrollbar>
           </div>
         </div>

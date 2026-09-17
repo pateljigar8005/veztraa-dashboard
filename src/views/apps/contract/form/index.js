@@ -17,7 +17,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
 
 // ** Utils
-import { selectThemeColors } from '@utils'
+import { selectThemeColors, uploadEditorImage } from '@utils'
 
 // ** Shared Components
 import TermsSection from '../../shared/TermsSection'
@@ -268,6 +268,7 @@ const ContractForm = () => {
                   setExtraDirty(true)
                 }}
                 height={300}
+                onImageUpload={uploadEditorImage}
               />
               <p className='text-muted small mt-1 mb-0'>
                 Write the full contract text — scope, deliverables, payment terms, responsibilities, etc.

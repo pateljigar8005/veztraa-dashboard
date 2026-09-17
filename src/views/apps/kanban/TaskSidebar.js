@@ -163,7 +163,7 @@ const TaskSidebar = props => {
       toggle={handleTaskSidebarToggle}
     >
       <Form id='form-modal-kanban' onSubmit={handleSubmit(onSubmit)}>
-        <div className='modal-header d-flex align-items-center justify-content-between mb-1'>
+        <div className='modal-header d-flex align-items-center justify-content-between'>
           <h5 className='modal-title'>Task Details</h5>
           <X className='fw-normal cursor-pointer' size={16} onClick={handleTaskSidebarToggle} />
         </div>

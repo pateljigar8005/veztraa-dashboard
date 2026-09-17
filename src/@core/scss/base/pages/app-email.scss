@@ -7,8 +7,8 @@
 // 	Author URL: http://www.themeforest.net/user/pixinvent
 // ================================================================================================
 
-@import '../bootstrap-extended/include'; // Bootstrap includes
-@import '../components/include'; // Components includes
+@import "../bootstrap-extended/include"; // Bootstrap includes
+@import "../components/include"; // Components includes
 
 $email_read: $body-bg;
 $email_selected_border: #e4e1e8;
@@ -123,7 +123,7 @@ $email_details_header_height: 5rem;
           position: relative;
           background: $white;
           &.user-mail {
-            padding: ($spacer + 0.5);
+            padding: 14px;
             &:hover {
               transform: translateY(-2px);
               box-shadow: 0 3px 10px 0 $border-color;
@@ -141,12 +141,63 @@ $email_details_header_height: 5rem;
           }
           // Email avatar style
           .avatar {
-            margin-bottom: 0.65rem;
+            margin-bottom: 0rem;
+            // .avatar-content has its own fixed $avatar-size box - since this
+            // rule makes the outer circle 8px bigger than that, it has to
+            // explicitly center that smaller content itself, or flexbox's
+            // default start-alignment leaves the initials sitting in the
+            // top-left of the circle instead of centered.
+            display: flex;
+            align-items: center;
+            justify-content: center;
           }
           .avatar,
           .avatar img {
             height: $avatar-size + 8;
             width: $avatar-size + 8;
+          }
+
+          // Bulk-select checkbox swaps in over the avatar on hover (or stays
+          // shown once a row is actually selected) instead of taking up its
+          // own permanent column - matches Gmail's own list behavior. Sized
+          // and shaped to match the avatar circle exactly (same
+          // width/height/border-radius) so the circle itself stays put and
+          // only its content (initials vs. checkbox) changes, rather than
+          // the whole circle disappearing and leaving a bare checkbox.
+          .mail-select-toggle {
+            position: relative;
+            .mail-select-checkbox {
+              display: none;
+              align-items: center;
+              justify-content: center;
+              position: absolute;
+              // The avatar is a plain flow element sitting flush at the
+              // container's top-left (the trailing pe-50 padding is just
+              // whitespace after it, not centering space) - since this is
+              // sized identically to the avatar, flush top-left makes it
+              // land in exactly the same spot rather than centering within
+              // the padded box, which would drift a few px right of it.
+              top: 0;
+              left: 0;
+              width: $avatar-size + 8;
+              height: $avatar-size + 8;
+              margin: 0;
+              padding-left: 0;
+              min-height: 0;
+              cursor: pointer;
+              .form-check-input {
+                margin: 0;
+                cursor: pointer;
+              }
+            }
+            &:hover .mail-avatar,
+            &.selected .mail-avatar {
+              visibility: hidden;
+            }
+            &:hover .mail-select-checkbox,
+            &.selected .mail-select-checkbox {
+              display: flex;
+            }
           }
 
           // read email
@@ -166,7 +217,7 @@ $email_details_header_height: 5rem;
           .mail-details {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 0.55rem;
+            margin-bottom: 0rem;
           }
           .mail-date {
             color: $text-muted;
@@ -211,7 +262,7 @@ $email_details_header_height: 5rem;
   }
   // Action area of email list section
   .app-action {
-    padding: 0.9rem ($spacer + 0.5);
+    padding: 0.3rem 14px;
     display: flex;
     justify-content: space-between;
     border-bottom: 1px solid $border-color;
@@ -296,7 +347,11 @@ $email_details_header_height: 5rem;
         .dropdown-toggle::after {
           left: -2px;
           margin: 0;
-          background-image: url(str-replace(str-replace($chevron-down, 'currentColor', $text-muted), '#', '%23'));
+          background-image: url(str-replace(
+            str-replace($chevron-down, "currentColor", $text-muted),
+            "#",
+            "%23"
+          ));
           background-size: 0.857rem;
         }
         .dropdown-menu {
@@ -483,7 +538,7 @@ $email_details_header_height: 5rem;
 }
 
 // RTL Style
-html[data-textdirection='rtl'] {
+html[data-textdirection="rtl"] {
   .email-application {
     .email-app-details {
       .email-prev,

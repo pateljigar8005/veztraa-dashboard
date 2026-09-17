@@ -1,5 +1,9 @@
 // ** React Imports
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
+
+// ** Third Party Components
+import axios from 'axios'
+import toast from 'react-hot-toast'
 
 // ** Utils
 import { formatDate } from '@utils'
@@ -8,67 +12,59 @@ import { formatDate } from '@utils'
 import Avatar from '@components/avatar'
 import EmailBodyFrame from './EmailBodyFrame'
 
-// ** Third Party Components
 import classnames from 'classnames'
-import toast from 'react-hot-toast'
-
-import { Mail, Paperclip, ChevronLeft, CornerUpLeft, CornerUpRight, Trash2, Folder } from 'react-feather'
+import { Paperclip, ChevronLeft, CornerUpLeft, CornerUpRight, Star, Download } from 'react-feather'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // ** Reactstrap Imports
-import {
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  DropdownMenu,
-  DropdownItem,
-  DropdownToggle,
-  UncontrolledDropdown,
-  Spinner
-} from 'reactstrap'
+import { Card, CardBody, CardFooter, CardHeader, Spinner } from 'reactstrap'
 
 // ** Store & Actions
-import { setMessageRead, moveMessage, deleteMessage } from './store'
-
-// ** Every real IMAP folder a message can be moved to (see backend
-// Mailbox::FOLDERS), keyed by the same folder key the API expects.
-const MOVE_TARGETS = [
-  { key: 'INBOX', label: 'Inbox' },
-  { key: 'Drafts', label: 'Drafts' },
-  { key: 'Trash', label: 'Trash' }
-]
+import { toggleFlag, updateMessageFlag } from './store'
 
 const MailDetails = props => {
   // ** Props
   const { mail, loading, folder, openMail, dispatch, setOpenMail, toggleCompose, setReplyTo } = props
 
+  const [downloadingIndex, setDownloadingIndex] = useState(null)
+
   const handleGoBack = () => setOpenMail(false)
 
-  const handleReply = () => {
-    setReplyTo(mail)
+  const handleReply = mode => {
+    setReplyTo({ ...mail, mode })
     toggleCompose()
   }
 
-  const handleMove = to => {
-    dispatch(moveMessage({ folder, uid: mail.uid, to })).then(() => {
-      toast.success(`Moved to ${to}`)
-      handleGoBack()
-    })
+  const handleToggleFlag = () => {
+    const flagged = !mail.isFlagged
+    dispatch(updateMessageFlag({ uid: mail.uid, flagged }))
+    dispatch(toggleFlag({ folder, uid: mail.uid, flagged }))
   }
 
-  const handleDelete = () => {
-    // From Trash, "delete" is permanent - anywhere else it's the usual
-    // "move it out of my way" trash action.
-    const action = folder === 'Trash' ? deleteMessage({ folder, uid: mail.uid }) : moveMessage({ folder, uid: mail.uid, to: 'Trash' })
-    dispatch(action).then(() => {
-      toast.success(folder === 'Trash' ? 'Deleted' : 'Moved to Trash')
-      handleGoBack()
-    })
-  }
-
-  const handleMarkUnread = () => {
-    dispatch(setMessageRead({ folder, uid: mail.uid, read: false })).then(handleGoBack)
+  // Attachments are never cached (same as the body - see
+  // MailboxController::downloadAttachment()), so this always hits IMAP live
+  // - a blob response + synthetic <a> click, same pattern as Kanban's own
+  // task attachment download, since a plain <a href> wouldn't carry the
+  // JWT this endpoint needs.
+  const handleDownloadAttachment = async (index, fileName) => {
+    setDownloadingIndex(index)
+    try {
+      const response = await axios.get(`/mailbox/${folder}/messages/${mail.uid}/attachments/${index}`, {
+        responseType: 'blob'
+      })
+      const url = URL.createObjectURL(response.data)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = fileName
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      toast.error('Failed to download attachment')
+    } finally {
+      setDownloadingIndex(null)
+    }
   }
 
   return (
@@ -93,35 +89,8 @@ const MailDetails = props => {
             <div className='email-header-right ms-2 ps-1'>
               <ul className='list-inline m-0'>
                 <li className='list-inline-item me-1'>
-                  <UncontrolledDropdown>
-                    <DropdownToggle tag='span'>
-                      <Folder size={18} />
-                    </DropdownToggle>
-                    <DropdownMenu end>
-                      {MOVE_TARGETS.filter(t => t.key !== folder).map(t => (
-                        <DropdownItem
-                          key={t.key}
-                          tag='a'
-                          href='/'
-                          onClick={e => {
-                            e.preventDefault()
-                            handleMove(t.key)
-                          }}
-                        >
-                          {t.label}
-                        </DropdownItem>
-                      ))}
-                    </DropdownMenu>
-                  </UncontrolledDropdown>
-                </li>
-                <li className='list-inline-item me-1'>
-                  <span className='action-icon' onClick={handleMarkUnread} title='Mark as unread'>
-                    <Mail size={18} />
-                  </span>
-                </li>
-                <li className='list-inline-item me-1'>
-                  <span className='action-icon' onClick={handleDelete} title={folder === 'Trash' ? 'Delete permanently' : 'Move to Trash'}>
-                    <Trash2 size={18} />
+                  <span className='action-icon' onClick={handleToggleFlag} title={mail.isFlagged ? 'Unflag' : 'Flag'}>
+                    <Star size={18} className={mail.isFlagged ? 'text-warning' : ''} fill={mail.isFlagged ? 'currentColor' : 'none'} />
                   </span>
                 </li>
               </ul>
@@ -145,7 +114,9 @@ const MailDetails = props => {
                   </div>
                 </div>
                 <div className='mail-meta-item d-flex align-items-center'>
-                  <small className='mail-date-time text-muted'>{mail.date ? formatDate(mail.date) : ''}</small>
+                  <small className='mail-date-time text-muted'>
+                    {mail.date ? formatDate(mail.date, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric' }) : ''}
+                  </small>
                 </div>
               </CardHeader>
               <CardBody className='mail-message-wrapper pt-2'>
@@ -166,11 +137,24 @@ const MailDetails = props => {
                       <Paperclip size={16} />
                       <h5 className='fw-bolder text-body mb-0 ms-50'>{mail.attachments.length} Attachment</h5>
                     </div>
-                    <div className='d-flex flex-column'>
-                      {mail.attachments.map(a => (
-                        <span key={a.fileName} className='text-muted'>
-                          {a.fileName} <small>({Math.round(a.size / 1024)} KB)</small>
-                        </span>
+                    <div className='d-flex flex-column' style={{ gap: '0.4rem' }}>
+                      {mail.attachments.map((a, index) => (
+                        <div
+                          key={`${a.fileName}-${index}`}
+                          className='d-flex align-items-center justify-content-between border rounded p-50'
+                          style={{ maxWidth: '360px' }}
+                        >
+                          <span className='text-truncate' title={a.fileName}>
+                            {a.fileName} <small className='text-muted'>({Math.round(a.size / 1024)} KB)</small>
+                          </span>
+                          <span
+                            className='cursor-pointer flex-shrink-0 ms-1'
+                            onClick={() => handleDownloadAttachment(index, a.fileName)}
+                            title='Download'
+                          >
+                            {downloadingIndex === index ? <Spinner size='sm' /> : <Download size={16} />}
+                          </span>
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -179,11 +163,11 @@ const MailDetails = props => {
             </Card>
             <Card>
               <CardBody className='d-flex' style={{ gap: '1rem' }}>
-                <span className='fw-bold cursor-pointer' onClick={handleReply}>
+                <span className='fw-bold cursor-pointer' onClick={() => handleReply('reply')}>
                   <CornerUpLeft size={14} className='me-50' />
                   Reply
                 </span>
-                <span className='fw-bold cursor-pointer' onClick={handleReply}>
+                <span className='fw-bold cursor-pointer' onClick={() => handleReply('forward')}>
                   <CornerUpRight size={14} className='me-50' />
                   Forward
                 </span>

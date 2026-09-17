@@ -49,6 +49,11 @@ const isPdfDesignerFormRoute = pathname => /^\/pdf-designer\/(add|edit\/[^/]+)$/
 // should submit.
 const isCompanySettingsRoute = pathname => pathname === '/company'
 
+// ** Same idea as Company Settings above - the navbar dropdown's own
+// "Account Settings" link (see UserDropdown.js), a single self-service
+// record with no /add or /edit/:id in its path.
+const isAccountSettingsRoute = pathname => pathname === '/account-settings'
+
 // ** The Email app fetches its data over live IMAP calls (see the webmail
 // feature) rather than a fast local DB query, so a full browser reload is a
 // needlessly heavy way to "refresh" it - forward the click into the page's
@@ -96,7 +101,10 @@ const NavbarBookmarks = props => {
   }
 
   const saveRouteAction = inferRouteAction(location.pathname)
-  const isSaveRoute = addOrEditRoutePattern.test(location.pathname) || isCompanySettingsRoute(location.pathname)
+  const isSaveRoute =
+    addOrEditRoutePattern.test(location.pathname) ||
+    isCompanySettingsRoute(location.pathname) ||
+    isAccountSettingsRoute(location.pathname)
   const saveEnabled = isSaveRoute && (!saveRouteAction || hasActionPermission(location.pathname, saveRouteAction, userData))
   const handleSave = () => {
     if (!saveEnabled) return

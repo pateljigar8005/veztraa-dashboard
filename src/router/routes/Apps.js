@@ -13,6 +13,7 @@ const InvoiceView = lazy(() => import('../../views/apps/invoice/view'))
 
 const UserList = lazy(() => import('../../views/apps/user/list'))
 const UserForm = lazy(() => import('../../views/apps/user/form'))
+const ChangePassword = lazy(() => import('../../views/apps/change-password'))
 
 const ClientList = lazy(() => import('../../views/apps/client/list'))
 const ClientForm = lazy(() => import('../../views/apps/client/form'))
@@ -70,16 +71,15 @@ const JobListingForm = lazy(() => import('../../views/apps/job-listing/form'))
 
 const AppRoutes = [
   {
+    // A single route with a splat, not two+ separate route config entries
+    // for /email, /email/:folder, /email/:folder/:uid - useRoutes() matching
+    // two different config objects for what's logically the same page has
+    // itself been a remount-trigger before (see Company Settings' tab
+    // history), and stacked optional segments (":folder?/:uid?") turned out
+    // not to reliably match even the bare /email case in this router
+    // version. The page itself splits `params['*']` into folder/uid.
     element: <Email />,
-    path: '/email',
-    meta: {
-      appLayout: true,
-      className: 'email-application'
-    }
-  },
-  {
-    element: <Email />,
-    path: '/email/:folder',
+    path: '/email/*',
     meta: {
       appLayout: true,
       className: 'email-application'
@@ -165,6 +165,14 @@ const AppRoutes = [
   {
     element: <UserForm />,
     path: '/user/edit/:id'
+  },
+  {
+    element: <UserForm />,
+    path: '/account-settings'
+  },
+  {
+    element: <ChangePassword />,
+    path: '/change-password'
   },
   {
     element: <Roles />,

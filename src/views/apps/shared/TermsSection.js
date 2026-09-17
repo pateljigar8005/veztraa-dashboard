@@ -11,7 +11,7 @@ import { ChevronDown, ChevronRight } from 'react-feather'
 import { Label, Button, Collapse } from 'reactstrap'
 
 // ** Utils
-import { selectThemeColors } from '@utils'
+import { selectThemeColors, uploadEditorImage } from '@utils'
 
 // `defaultOpen` (edit/clone) skips the collapse UI entirely - existing
 // content should just be visible, not hidden behind a click. Only a fresh
@@ -44,7 +44,7 @@ const TermsSection = ({ templateOptions, templateId, onTemplateChange, content, 
         onChange={handleTemplateSelect}
         placeholder='— Load from template —'
       />
-      <Editor value={content} onChange={onContentChange} height={500} />
+      <Editor value={content} onChange={onContentChange} height={500} onImageUpload={uploadEditorImage} />
     </>
   )
 

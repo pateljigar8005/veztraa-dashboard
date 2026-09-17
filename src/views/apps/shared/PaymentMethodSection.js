@@ -11,7 +11,7 @@ import { ChevronDown, ChevronRight } from 'react-feather'
 import { Label, Button, Collapse } from 'reactstrap'
 
 // ** Utils
-import { selectThemeColors } from '@utils'
+import { selectThemeColors, uploadEditorImage } from '@utils'
 
 // `defaultOpen` (edit/clone) skips the collapse UI entirely - existing
 // content should just be visible, not hidden behind a click. Only a fresh
@@ -44,7 +44,7 @@ const PaymentMethodSection = ({ methodOptions, methodId, onMethodChange, content
         onChange={handleMethodSelect}
         placeholder='— Load from payment method —'
       />
-      <Editor value={content} onChange={onContentChange} height={300} />
+      <Editor value={content} onChange={onContentChange} height={300} onImageUpload={uploadEditorImage} />
     </>
   )
 

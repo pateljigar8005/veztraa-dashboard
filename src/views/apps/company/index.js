@@ -74,7 +74,7 @@ const CompanySettings = () => {
   const [quotationPdfOptions, setQuotationPdfOptions] = useState([])
   const [smtpEncryption, setSmtpEncryption] = useState('')
   const [imapEncryption, setImapEncryption] = useState('')
-  const [syncIntervalMinutes, setSyncIntervalMinutes] = useState(5)
+  const [syncIntervalMinutes, setSyncIntervalMinutes] = useState(1)
   const [loading, setLoading] = useState(true)
 
   const { control, reset, handleSubmit } = useForm({ defaultValues })
@@ -122,7 +122,7 @@ const CompanySettings = () => {
       setQuotationPdfTemplateId(data.quotation_pdf_template_id || '')
       setSmtpEncryption(data.smtp_encryption || '')
       setImapEncryption(data.imap_encryption || '')
-      setSyncIntervalMinutes(data.mailbox_sync_interval_minutes || 5)
+      setSyncIntervalMinutes(data.mailbox_sync_interval_minutes || 1)
       setLoading(false)
     })
   }, [])
@@ -387,7 +387,7 @@ const CompanySettings = () => {
                     theme={selectThemeColors}
                     options={syncIntervalOptions}
                     value={syncIntervalOptions.find(i => i.value === syncIntervalMinutes)}
-                    onChange={option => setSyncIntervalMinutes(option ? option.value : 5)}
+                    onChange={option => setSyncIntervalMinutes(option ? option.value : 1)}
                     isSearchable={false}
                   />
                   <p className='text-muted small mb-0 mt-25'>

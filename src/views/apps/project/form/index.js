@@ -17,7 +17,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
 
 // ** Utils
-import { selectThemeColors } from '@utils'
+import { selectThemeColors, uploadEditorImage } from '@utils'
 
 // ** Custom Components
 import ProjectDocuments from './ProjectDocuments'
@@ -262,6 +262,7 @@ const ProjectForm = () => {
                   setExtraDirty(true)
                 }}
                 height={400}
+                onImageUpload={uploadEditorImage}
               />
             </Col>
             <Col md={12}>
