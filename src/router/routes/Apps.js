@@ -43,6 +43,10 @@ const TermsTemplateList = lazy(() => import('../../views/apps/terms-template/lis
 const TermsTemplateForm = lazy(() => import('../../views/apps/terms-template/form'))
 const EmailTemplateList = lazy(() => import('../../views/apps/email-template/list'))
 const EmailTemplateForm = lazy(() => import('../../views/apps/email-template/form'))
+const HolidayList = lazy(() => import('../../views/apps/holiday/list'))
+const HolidayForm = lazy(() => import('../../views/apps/holiday/form'))
+const InvoiceReport = lazy(() => import('../../views/apps/reports/invoice-report'))
+const TimesheetReport = lazy(() => import('../../views/apps/reports/timesheet-report'))
 const PdfDesignerTemplateList = lazy(() => import('../../views/apps/pdf-designer/list'))
 const PdfDesignerTemplateForm = lazy(() => import('../../views/apps/pdf-designer/form'))
 
@@ -313,6 +317,26 @@ const AppRoutes = [
     path: '/email-template/edit/:id'
   },
   {
+    element: <HolidayList />,
+    path: '/holiday'
+  },
+  {
+    element: <HolidayForm />,
+    path: '/holiday/add'
+  },
+  {
+    element: <HolidayForm />,
+    path: '/holiday/edit/:id'
+  },
+  {
+    element: <InvoiceReport />,
+    path: '/reports/invoice'
+  },
+  {
+    element: <TimesheetReport />,
+    path: '/reports/timesheet'
+  },
+  {
     element: <PdfDesignerTemplateList />,
     path: '/pdf-designer'
   },
@@ -376,11 +400,7 @@ const AppRoutes = [
   },
   {
     element: <CompanySettings />,
-    path: '/company',
-    meta: {
-      appLayout: true,
-      className: 'company-settings-application'
-    }
+    path: '/company'
   },
   {
     element: <TeamMemberList />,

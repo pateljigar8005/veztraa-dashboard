@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 // ** Hooks
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
+import useHolidayDates from '@hooks/useHolidayDates'
 
 // ** Third Party Components
 import axios from 'axios'
@@ -14,7 +15,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 
 // ** Reactstrap Imports
-import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
+import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormText } from 'reactstrap'
 
 // ** Utils
 import { selectThemeColors, getUserData, uploadEditorImage } from '@utils'
@@ -60,6 +61,18 @@ const TimesheetForm = () => {
   } = useForm({ defaultValues })
 
   useUnsavedChangesGuard(isDirty || extraDirty)
+
+  // Only an admin may log time against someone else's name - matches the
+  // backend's own enforcement in TimesheetController (this alone would just
+  // be a UI nicety; the real restriction has to live server-side too, since
+  // a disabled field here is trivial to bypass with a raw request).
+  const isAdmin = (getUserData()?.role || '').toLowerCase() === 'admin'
+
+  // Only holidays block a timesheet date - unlike Todo/Kanban due dates,
+  // logging hours worked over a weekend is normal (overtime, on-call,
+  // catching up), so weekend days are deliberately NOT disabled here (see
+  // useWeekendDays() in those two forms for the contrast).
+  const { holidayDates } = useHolidayDates()
 
   const userId = watch('user_id')
   const projectId = watch('project_id')
@@ -123,10 +136,18 @@ const TimesheetForm = () => {
       }
 
       const action = isEdit ? updateTimesheet({ id: Number(id), ...payload }) : addTimesheet(payload)
-      dispatch(action).then(() => {
-        toast.success(isEdit ? 'Timesheet entry updated' : 'Timesheet entry added')
-        navigate('/timesheet')
-      })
+      dispatch(action)
+        .unwrap()
+        .then(() => {
+          toast.success(isEdit ? 'Timesheet entry updated' : 'Timesheet entry added')
+          navigate('/timesheet')
+        })
+        .catch(err => {
+          // The one real failure this form can hit that isn't already
+          // caught by checkIsValid() above - trying to edit someone else's
+          // entry as a non-admin (see TimesheetController::update()).
+          toast.error(err?.message || (isEdit ? 'Failed to update timesheet entry' : 'Failed to add timesheet entry'))
+        })
     } else {
       if (!userId) setError('user_id', { type: 'manual' })
       if (!projectId) setError('project_id', { type: 'manual' })
@@ -161,7 +182,11 @@ const TimesheetForm = () => {
                 value={selectedUserOption}
                 onChange={option => setValue('user_id', option ? option.value : '', { shouldDirty: true })}
                 placeholder='Select user...'
+                isDisabled={!isAdmin}
               />
+              {!isAdmin && (
+                <FormText color='muted'>Only an admin can log time against someone else.</FormText>
+              )}
               {errors.user_id && <small className='text-danger'>Please select a user</small>}
             </Col>
             <Col md={6} className='mb-1'>
@@ -188,7 +213,13 @@ const TimesheetForm = () => {
                 name='date'
                 control={control}
                 render={({ field }) => (
-                  <DateField id='date' value={field.value} onChange={field.onChange} invalid={errors.date && true} />
+                  <DateField
+                    id='date'
+                    value={field.value}
+                    onChange={field.onChange}
+                    invalid={errors.date && true}
+                    options={{ disable: holidayDates }}
+                  />
                 )}
               />
             </Col>

@@ -88,18 +88,26 @@ export const formatDateToMonthShort = (value, toTimeForCurrentDay = true) => {
 // ** Relative time ("Just now" / "5 mins ago" / "3 hours ago") for anything
 // within the last 24h, falling back to formatDateToMonthShort beyond that -
 // matches Gmail's own list behavior of only using relative time for recent items.
+// Also handles a FUTURE value (e.g. a Schedule Send date - see the Email
+// app's Scheduled folder) as "in 5 mins"/"in 3 hours" the same way - this
+// used to only ever be called with past dates (a message already received),
+// so a future one made diffSeconds negative, which is always < 60, and
+// this unconditionally (and wrongly) returned "Just now" no matter how far
+// off the actual scheduled time was.
 export const formatRelativeDate = value => {
   const date = new Date(value)
   const diffSeconds = Math.floor((Date.now() - date.getTime()) / 1000)
+  const isFuture = diffSeconds < 0
+  const absSeconds = Math.abs(diffSeconds)
 
-  if (diffSeconds < 60) return 'Just now'
-  if (diffSeconds < 3600) {
-    const mins = Math.floor(diffSeconds / 60)
-    return `${mins} min${mins === 1 ? '' : 's'} ago`
+  if (absSeconds < 60) return 'Just now'
+  if (absSeconds < 3600) {
+    const mins = Math.floor(absSeconds / 60)
+    return isFuture ? `in ${mins} min${mins === 1 ? '' : 's'}` : `${mins} min${mins === 1 ? '' : 's'} ago`
   }
-  if (diffSeconds < 86400 && isToday(date)) {
-    const hours = Math.floor(diffSeconds / 3600)
-    return `${hours} hour${hours === 1 ? '' : 's'} ago`
+  if (absSeconds < 86400 && isToday(date)) {
+    const hours = Math.floor(absSeconds / 3600)
+    return isFuture ? `in ${hours} hour${hours === 1 ? '' : 's'}` : `${hours} hour${hours === 1 ? '' : 's'} ago`
   }
 
   return formatDateToMonthShort(value)

@@ -26,7 +26,8 @@ import { currentUserCan } from '@src/utility/navPermissions'
 // ** Maps a quotation's real fields onto the field paths the selected PDF
 // template's elements bind to - same shape as the Invoice template's
 // bindings (client./document./service_items), since Quotation carries the
-// same pricing model as Invoice.
+// same pricing model as Invoice. document.valid_until rather than due_date -
+// a quotation is VALID until a date, not due like an invoice payment.
 const buildPdfData = quotation => ({
   client: {
     name: quotation.contact_name || '',
@@ -38,7 +39,7 @@ const buildPdfData = quotation => ({
   document: {
     number: quotation.quotation_number,
     issue_date: quotation.issue_date,
-    due_date: quotation.valid_until
+    valid_until: quotation.valid_until
   },
   currency: quotation.currency,
   // Raw numbers (not .toFixed(2) strings) so the template's conditional
@@ -47,9 +48,11 @@ const buildPdfData = quotation => ({
   tax_rate: quotation.tax_rate,
   tax_amount: quotation.tax_amount,
   discount_amount: quotation.discount_amount,
+  subtotal: formatAmount(quotation.subtotal),
   total: formatAmount(quotation.total),
   terms_conditions: quotation.terms_content || '',
   payment_method: quotation.payment_method_content || '',
+  notes: quotation.notes || '',
   service_items: (quotation.line_items || []).map(item => ({
     name: item.description || '',
     qty: item.qty,

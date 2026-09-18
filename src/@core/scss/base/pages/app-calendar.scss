@@ -173,6 +173,16 @@ $fc-day-toggle-btn-padding: 0.55rem 1.5rem;
     background: $body-bg !important;
     background-color: $body-bg !important;
   }
+  // Company holiday (see the Holidays settings module) - greyed out and
+  // non-clickable, same as Calendar.js's own dateClick handler blocking
+  // event creation on these dates.
+  .fc-day-holiday {
+    background-color: rgba($black, 0.06) !important;
+    cursor: not-allowed;
+    .fc-daygrid-day-number {
+      color: $text-muted;
+    }
+  }
 
   // Timegrid
   .fc-timegrid {

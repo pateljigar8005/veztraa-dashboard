@@ -21,7 +21,9 @@ import {
   Image,
   Award,
   List,
-  Clock
+  Clock,
+  Sun,
+  BarChart2
 } from 'react-feather'
 
 export default [
@@ -156,10 +158,35 @@ export default [
     ]
   },
   {
+    id: 'reports',
+    title: 'Reports',
+    icon: <BarChart2 />,
+    children: [
+      {
+        id: 'invoiceReports',
+        title: 'Invoice Report',
+        icon: <BarChart2 />,
+        navLink: '/reports/invoice'
+      },
+      {
+        id: 'timesheetReports',
+        title: 'Timesheet Report',
+        icon: <Clock />,
+        navLink: '/reports/timesheet'
+      }
+    ]
+  },
+  {
     id: 'settings',
     title: 'Settings',
     icon: <Settings />,
     children: [
+      {
+        id: 'holidays',
+        title: 'Holidays',
+        icon: <Sun />,
+        navLink: '/holiday'
+      },
       {
         id: 'company',
         title: 'Company',

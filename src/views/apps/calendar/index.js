@@ -18,6 +18,8 @@ import TodoTaskSidebar from '../todo/TaskSidebar'
 
 // ** Custom Hooks
 import { useRTL } from '@hooks/useRTL'
+import useHolidayDates from '@hooks/useHolidayDates'
+import useWeekendDays from '@hooks/useWeekendDays'
 
 // ** Store & Actions
 import { useSelector, useDispatch } from 'react-redux'
@@ -66,6 +68,8 @@ const CalendarComponent = () => {
 
   // ** Hooks
   const [isRtl] = useRTL()
+  const { holidayDates, isHoliday, getHolidayName } = useHolidayDates()
+  const { isWeekend } = useWeekendDays()
 
   // ** AddEventSidebar Toggle Function
   const handleAddEventSidebar = () => setAddSidebarOpen(!addSidebarOpen)
@@ -153,6 +157,9 @@ const CalendarComponent = () => {
               setCalendarApi={setCalendarApi}
               handleAddEventSidebar={handleAddEventSidebar}
               handleTaskEventClick={handleTaskEventClick}
+              isHoliday={isHoliday}
+              getHolidayName={getHolidayName}
+              isWeekend={isWeekend}
             />
           </Col>
           <div
@@ -175,6 +182,10 @@ const CalendarComponent = () => {
         refetchEvents={refetchEvents}
         calendarsColor={calendarsColor}
         handleAddEventSidebar={handleAddEventSidebar}
+        holidayDates={holidayDates}
+        isHoliday={isHoliday}
+        getHolidayName={getHolidayName}
+        isWeekend={isWeekend}
       />
       <KanbanTaskSidebar
         sidebarOpen={kanbanTaskSidebarOpen}

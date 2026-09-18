@@ -23,9 +23,19 @@ export const getFolders = createAsyncThunk('appEmail/getFolders', async () => {
 })
 
 export const getMessages = createAsyncThunk('appEmail/getMessages', async params => {
-  const response = await axios.get(`/mailbox/${params.folder}/messages`, {
-    params: { page: params.page || 1, perPage: params.perPage || 20, q: params.q || '', ...params.filters }
-  })
+  // Admin "browse as" mode (see Sidebar.js's own mailbox picker, admin-only)
+  // - reads from AdminMailboxCache instead of the current user's own
+  // MailboxCache (see that class's own note on how the two differ). Plain
+  // text search is supported the same way (q, matched against the cache's
+  // subject/from/to) - Advanced Search's own extra filters aren't, so
+  // those are left out of this branch's params.
+  const response = params.adminMailboxId
+    ? await axios.get(`/admin-mailbox/${params.adminMailboxId}/${params.folder}/messages`, {
+        params: { page: params.page || 1, perPage: params.perPage || 20, q: params.q || '' }
+      })
+    : await axios.get(`/mailbox/${params.folder}/messages`, {
+        params: { page: params.page || 1, perPage: params.perPage || 20, q: params.q || '', ...params.filters }
+      })
   return { params, data: response.data.data }
 })
 
@@ -38,13 +48,35 @@ export const getMessages = createAsyncThunk('appEmail/getMessages', async params
 // directly into the query params, the same convention every other module's
 // getData() thunk already uses.
 export const getFolderView = createAsyncThunk('appEmail/getFolderView', async params => {
+  // Same admin "browse as" branch as getMessages above - AdminMailboxController
+  // has no folders/unread-count concept at all (see Sidebar.js, which
+  // renders its own fixed folder list client-side regardless), so this
+  // synthesizes an empty folders array rather than fetching one.
+  if (params.adminMailboxId) {
+    const response = await axios.get(`/admin-mailbox/${params.adminMailboxId}/${params.folder}/messages`, {
+      params: { page: params.page || 1, perPage: params.perPage || 20, q: params.q || '' }
+    })
+    return {
+      params,
+      data: {
+        folders: [],
+        messages: response.data.data.messages,
+        total: response.data.data.total,
+        lastSyncedAt: response.data.data.lastSyncedAt
+      }
+    }
+  }
   const response = await axios.get(`/mailbox/${params.folder}/view`, {
     params: { page: params.page || 1, perPage: params.perPage || 20, q: params.q || '', ...params.filters }
   })
   return { params, data: response.data.data }
 })
 
-export const getMessage = createAsyncThunk('appEmail/getMessage', async ({ folder, uid }, { dispatch }) => {
+export const getMessage = createAsyncThunk('appEmail/getMessage', async ({ folder, uid, adminMailboxId }, { dispatch }) => {
+  if (adminMailboxId) {
+    const response = await axios.get(`/admin-mailbox/${adminMailboxId}/${folder}/messages/${uid}`)
+    return response.data.data
+  }
   const response = await axios.get(`/mailbox/${folder}/messages/${uid}`)
   // Opening a message can flip its unread status server-side - refresh the
   // folder badge counts so the sidebar stays in sync.
@@ -96,7 +128,7 @@ export const bulkDeleteMessages = createAsyncThunk(
   }
 )
 
-export const sendMessage = createAsyncThunk('appEmail/sendMessage', async message => {
+export const sendMessage = createAsyncThunk('appEmail/sendMessage', async (message, { dispatch, getState }) => {
   // Plain JSON when there's nothing to attach; multipart/form-data (which
   // the backend's Request class auto-detects via Content-Type) only when
   // there are real files to carry - see MailboxController::send().
@@ -118,6 +150,19 @@ export const sendMessage = createAsyncThunk('appEmail/sendMessage', async messag
   // up on its own the next time its cache goes stale (or sooner, since the
   // background worker updates the Sent cache directly once it finishes).
   const response = await axios.post('/mailbox/send', payload)
+
+  // A Schedule Send row, unlike an immediate send above, is written to
+  // mailbox_outbox synchronously and is queryable the instant this
+  // response comes back (see MailboxOutbox::enqueue() - there's no
+  // background delay to wait out) - if the Scheduled folder is what's
+  // currently open, refresh it right away instead of leaving the
+  // just-scheduled message invisible until the next unrelated
+  // refetch/reload, same pattern saveDraft() below already uses for Drafts.
+  const params = getState().email.params
+  if (message.scheduled_at && params.folder === 'Scheduled') {
+    await dispatch(getMessages(params))
+  }
+
   return response.data
 })
 

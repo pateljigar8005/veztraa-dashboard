@@ -55,7 +55,10 @@ const buildPdfData = invoice => ({
   tax_rate: invoice.tax_rate,
   tax_amount: invoice.tax_amount,
   discount_amount: invoice.discount_amount,
+  subtotal: formatAmount(invoice.subtotal),
   total: formatAmount(invoice.total),
+  paid_amount: formatAmount(invoice.paid_amount),
+  balance_due: formatAmount(invoice.balance_due),
   // Rich-text HTML straight from the Editor - bind these to a "richtext"
   // element (not a plain "text" one) in the PDF Designer so the formatting
   // actually renders instead of showing raw tags.

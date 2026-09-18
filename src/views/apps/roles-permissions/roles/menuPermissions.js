@@ -30,6 +30,13 @@ export const menuPermissionGroups = [
     ]
   },
   {
+    section: 'Reports',
+    items: [
+      { id: 'invoiceReports', title: 'Invoice Report' },
+      { id: 'timesheetReports', title: 'Timesheet Report' }
+    ]
+  },
+  {
     section: 'Settings',
     items: [
       { id: 'company', title: 'Company' },
@@ -39,6 +46,7 @@ export const menuPermissionGroups = [
       { id: 'paymentMethods', title: 'Payment Methods' },
       { id: 'termsTemplates', title: 'Terms & Conditions' },
       { id: 'emailTemplates', title: 'Email Template' },
+      { id: 'holidays', title: 'Holidays' },
       { id: 'pdfDesignerTemplates', title: 'PDF Designer' },
       { id: 'currencies', title: 'Currency' },
       { id: 'industries', title: 'Industry' },

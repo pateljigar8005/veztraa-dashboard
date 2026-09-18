@@ -111,7 +111,15 @@ const EmailRecipientsInput = ({ id, value, onChange, placeholder, options = [] }
       onKeyDown={handleKeyDown}
       onPaste={handlePaste}
       onBlur={handleBlur}
-      onChange={opts => onChange((opts || []).map(o => o.value).join(','))}
+      onChange={opts => {
+        onChange((opts || []).map(o => o.value).join(','))
+        // Picking a suggestion from the dropdown doesn't go through
+        // commit() above (that's only the free-text Enter/Tab/comma/paste/
+        // blur path, which already clears this itself) - without this, the
+        // search text typed to find that suggestion just sits there in the
+        // box, unselected and unremovable, right next to the new chip.
+        setInputValue('')
+      }}
     />
   )
 }

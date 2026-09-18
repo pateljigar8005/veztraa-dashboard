@@ -44,7 +44,9 @@ const Mails = props => {
     setSidebarOpen,
     getMessage,
     replyTo,
-    setReplyTo
+    setReplyTo,
+    viewingMailboxId,
+    viewingMailboxEmail
   } = props
 
   const { messages, messagesLoading } = store
@@ -57,9 +59,12 @@ const Mails = props => {
   }, [store.params.folder, store.params.q])
 
   // ** Right-click context menu (Reply/Forward/Archive/Delete) - null when
-  // closed, otherwise the cursor position plus which mail it's for.
+  // closed, otherwise the cursor position plus which mail it's for. Never
+  // opens at all while browsing an admin mailbox (see AdminMailboxController)
+  // - that whole view is read-only, nothing in this menu applies to it.
   const [contextMenu, setContextMenu] = useState(null)
   const handleContextMenu = (e, mail) => {
+    if (viewingMailboxId) return
     e.preventDefault()
     setContextMenu({ x: e.clientX, y: e.clientY, mail })
   }
@@ -74,15 +79,20 @@ const Mails = props => {
 
   const handleBulkDelete = () => {
     const folder = store.params.folder
+    const isScheduled = folder === 'Scheduled'
     confirmDelete({
-      title: `Delete ${selectedUids.length} email${selectedUids.length === 1 ? '' : 's'}?`,
-      text: folder === 'Trash' ? 'This permanently deletes them.' : "They'll be moved to Trash.",
+      title: isScheduled
+        ? `Cancel ${selectedUids.length} scheduled email${selectedUids.length === 1 ? '' : 's'}?`
+        : `Delete ${selectedUids.length} email${selectedUids.length === 1 ? '' : 's'}?`,
+      text: isScheduled
+        ? "They won't be sent."
+        : folder === 'Trash' ? 'This permanently deletes them.' : "They'll be moved to Trash.",
       onConfirm: () => {
         dispatch(removeMessageFromList(selectedUids))
         dispatch(bulkDeleteMessages({ folder, uids: selectedUids }))
           .unwrap()
           .then(() => {
-            toast.success(folder === 'Trash' ? 'Deleted' : 'Moved to Trash')
+            toast.success(isScheduled ? 'Scheduled sends cancelled' : folder === 'Trash' ? 'Deleted' : 'Moved to Trash')
             setSelectedUids([])
           })
           .catch(err => toast.error(err?.message || 'Failed to delete'))
@@ -109,20 +119,25 @@ const Mails = props => {
   }
 
   // A draft isn't something you read - clicking one reopens it for editing
-  // instead of the read-only detail view every other folder uses.
+  // instead of the read-only detail view every other folder uses. Not while
+  // browsing an admin mailbox though (see AdminMailboxController) - that
+  // whole view is read-only, so even a draft there just opens for viewing.
   const handleMailClick = uid => {
-    if (store.params.folder === 'Drafts') {
+    if (store.params.folder === 'Drafts' && !viewingMailboxId) {
       openComposeFor(uid, 'draft')
       return
     }
 
     dispatch(clearCurrentMessage())
-    dispatch(getMessage({ folder: store.params.folder, uid }))
+    dispatch(getMessage({ folder: store.params.folder, uid, adminMailboxId: viewingMailboxId }))
     setOpenMail(true)
   }
 
   // ** Context menu actions - same folder-aware "Trash = permanent delete,
   // anywhere else = move to Trash" logic as MailDetails' own delete button.
+  // Scheduled is the third permanent case (alongside Trash) - there's no
+  // real IMAP message behind it to move anywhere, "deleting" it just
+  // cancels the pending send outright (see MailboxOutbox::cancelScheduled()).
   // The backend now only ever updates its cache + queues the real IMAP
   // change before responding (see MailboxActions) rather than waiting on a
   // live connection, but removing it from the list here too, immediately,
@@ -130,8 +145,12 @@ const Mails = props => {
   const handleContextDelete = mail => {
     const folder = store.params.folder
     dispatch(removeMessageFromList(mail.uid))
-    const action = folder === 'Trash' ? deleteMessage({ folder, uid: mail.uid }) : moveMessage({ folder, uid: mail.uid, to: 'Trash' })
-    dispatch(action).then(() => toast.success(folder === 'Trash' ? 'Deleted' : 'Moved to Trash'))
+    const action = folder === 'Trash' || folder === 'Scheduled'
+      ? deleteMessage({ folder, uid: mail.uid })
+      : moveMessage({ folder, uid: mail.uid, to: 'Trash' })
+    dispatch(action).then(() =>
+      toast.success(folder === 'Scheduled' ? 'Scheduled send cancelled' : folder === 'Trash' ? 'Deleted' : 'Moved to Trash')
+    )
   }
 
   const handleContextArchive = mail => {
@@ -154,6 +173,11 @@ const Mails = props => {
           <div className='sidebar-toggle d-block d-lg-none ms-1' onClick={() => setSidebarOpen(true)}>
             <Menu size='21' />
           </div>
+          {/* Works the same in both modes now - an admin mailbox reads from
+              its own AdminMailboxCache (see that class), just like this
+              search box already reads from the current user's own
+              MailboxCache otherwise (see MailboxController::
+              buildMessagesList()). */}
           <div className='d-flex align-items-center justify-content-between w-100'>
             <InputGroup className='input-group-merge flex-grow-1'>
               <InputGroupText>
@@ -178,7 +202,7 @@ const Mails = props => {
           </div>
         </div>
 
-        {messages.length > 0 && (
+        {messages.length > 0 && !viewingMailboxId && (
           <div className='app-action'>
             <div className='form-check d-flex align-items-center' style={{ gap: '0.75rem' }}>
               <Input
@@ -220,6 +244,7 @@ const Mails = props => {
                   onToggleSelect={toggleSelect}
                   onContextMenu={handleContextMenu}
                   onToggleFlag={handleToggleFlag}
+                  readOnly={Boolean(viewingMailboxId)}
                 />
               ))}
             </ul>
@@ -239,16 +264,37 @@ const Mails = props => {
         setOpenMail={setOpenMail}
         toggleCompose={toggleCompose}
         setReplyTo={setReplyTo}
+        viewingMailboxId={viewingMailboxId}
       />
-      <ComposePopUp composeOpen={composeOpen} toggleCompose={toggleCompose} replyTo={replyTo} />
+      <ComposePopUp
+        composeOpen={composeOpen}
+        toggleCompose={toggleCompose}
+        replyTo={replyTo}
+        adminMailboxId={viewingMailboxId}
+        adminMailboxEmail={viewingMailboxEmail}
+      />
       {contextMenu && (
         <MailCardContextMenu
           x={contextMenu.x}
           y={contextMenu.y}
-          deleteLabel={store.params.folder === 'Trash' ? 'Delete permanently' : 'Move to Trash'}
-          onReply={() => openComposeFor(contextMenu.mail.uid, 'reply')}
-          onForward={() => openComposeFor(contextMenu.mail.uid, 'forward')}
-          onArchive={store.params.folder !== 'Archive' ? () => handleContextArchive(contextMenu.mail) : null}
+          deleteLabel={
+            store.params.folder === 'Scheduled'
+              ? 'Cancel send'
+              : store.params.folder === 'Trash'
+              ? 'Delete permanently'
+              : 'Move to Trash'
+          }
+          // Replying to/forwarding/archiving your own not-yet-sent draft
+          // doesn't mean anything - Scheduled only gets the delete/cancel
+          // action (see MailCardContextMenu, where a null handler hides an
+          // item entirely).
+          onReply={store.params.folder !== 'Scheduled' ? () => openComposeFor(contextMenu.mail.uid, 'reply') : null}
+          onForward={store.params.folder !== 'Scheduled' ? () => openComposeFor(contextMenu.mail.uid, 'forward') : null}
+          onArchive={
+            store.params.folder !== 'Archive' && store.params.folder !== 'Scheduled'
+              ? () => handleContextArchive(contextMenu.mail)
+              : null
+          }
           onDelete={() => handleContextDelete(contextMenu.mail)}
           onClose={() => setContextMenu(null)}
         />

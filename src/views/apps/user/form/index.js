@@ -12,7 +12,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 
 // ** Reactstrap Imports
-import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormText } from 'reactstrap'
+import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormText, InputGroup, InputGroupText } from 'reactstrap'
 
 // ** Store & Actions
 import { addUser, updateUser, getUser, uploadAvatar } from '../store'
@@ -90,6 +90,24 @@ const UserForm = () => {
   // per-email toggle, so it lives here as a plain switch rather than
   // through react-hook-form like the signature content itself.
   const [autoAppendSignature, setAutoAppendSignature] = useState(true)
+  // Company-wide mailbox domain (see Company Settings > Mailbox
+  // Provisioning) - when set, the single Email field above doubles as the
+  // mailbox name too (just a username, with this domain fixed as a
+  // suffix), and saving provisions a real mailbox via cPanel with that
+  // same address - no separate mailbox address field. When it's not
+  // configured, Email stays a normal full address used only for login,
+  // and the old separate free-text mailbox address field (email_login)
+  // is back in the Email Settings section for legacy IMAP/SMTP setups.
+  const [mailDomain, setMailDomain] = useState('')
+  const [mailDomainLoaded, setMailDomainLoaded] = useState(false)
+  const [emailUsernameMode, setEmailUsernameMode] = useState(false)
+  // Whether the mailbox password should just mirror the login password
+  // field above instead of being set independently - defaults on since
+  // that's the common case, and it's always safe to leave on: it only
+  // actually sends a new mailbox password when a new LOGIN password is
+  // typed (see onSubmit) - the bcrypt-hashed login password can't be read
+  // back to "keep them in sync" any other way.
+  const [samePasswordAsLogin, setSamePasswordAsLogin] = useState(true)
   // Tracks edits to the state above (role, avatar), none of which is
   // registered with react-hook-form, so its own isDirty can't see them.
   const [extraDirty, setExtraDirty] = useState(false)
@@ -99,8 +117,11 @@ const UserForm = () => {
     reset,
     setError,
     handleSubmit,
+    watch,
     formState: { errors, isDirty }
   } = useForm({ defaultValues })
+
+  const watchedPassword = watch('password')
 
   useUnsavedChangesGuard(isDirty || extraDirty)
 
@@ -113,19 +134,46 @@ const UserForm = () => {
     })
   }, [])
 
+  // ** Fetch the company's mailbox domain, if mailbox provisioning is set up
+  useEffect(() => {
+    axios.get('/company').then(response => {
+      setMailDomain(response.data.data.mail_domain || '')
+      setMailDomainLoaded(true)
+    })
+  }, [])
+
   // ** Fetch the user being edited
   useEffect(() => {
     if (isEdit) dispatch(getUser(id))
   }, [id])
 
-  // ** Populate the form once the user loads
+  // ** Decide username-vs-plain mode as soon as the mail domain is known -
+  // for a new user there's no existing address to check against, so
+  // provisioning being configured at all is enough to switch the Email
+  // field over.
   useEffect(() => {
-    if (isEdit && store.selectedUser && store.selectedUser.id === Number(id)) {
+    if (mailDomainLoaded && !isEdit) setEmailUsernameMode(Boolean(mailDomain))
+  }, [mailDomainLoaded, mailDomain, isEdit])
+
+  // ** Populate the form once the user loads (and, since it decides
+  // username-vs-plain mode for the Email field below, the mail domain has
+  // loaded too)
+  useEffect(() => {
+    if (isEdit && store.selectedUser && store.selectedUser.id === Number(id) && mailDomainLoaded) {
       const user = store.selectedUser
+      const email = user.email || ''
+      const suffix = mailDomain ? `@${mailDomain}` : ''
+      // Only switches to username mode when the existing login address
+      // actually ends in the currently-configured domain - an address on
+      // some other domain (or set before provisioning was configured)
+      // falls back to the old plain full-address field instead of
+      // showing a wrong/truncated guess.
+      const usernameMode = Boolean(mailDomain) && email.endsWith(suffix)
+      setEmailUsernameMode(usernameMode)
       reset({
         first_name: user.first_name || '',
         last_name: user.last_name || '',
-        email: user.email || '',
+        email: usernameMode ? email.slice(0, -suffix.length) : email,
         phone: user.phone || '',
         password: PASSWORD_PLACEHOLDER,
         email_login: user.email_login || '',
@@ -133,10 +181,11 @@ const UserForm = () => {
         email_signature: user.email_signature || ''
       })
       setAutoAppendSignature(user.email_signature_auto_append !== false)
+      setSamePasswordAsLogin(user.email_login_password_synced !== false)
       if (user.role_id) setRoleId(String(user.role_id))
       setAvatarPreview(resolveAvatarUrl(user.avatar))
     }
-  }, [store.selectedUser])
+  }, [store.selectedUser, mailDomainLoaded, mailDomain])
 
   // ** Edit mode: upload immediately since the user already has an id.
   // Add mode: just stage the file - it's uploaded right after the new
@@ -174,20 +223,45 @@ const UserForm = () => {
     if (checkIsValid(data) && roleId) {
       const payload = {
         role_id: Number(roleId),
-        email: data.email,
         phone: data.phone,
         first_name: data.first_name,
         last_name: data.last_name,
-        email_login: data.email_login,
         email_signature: data.email_signature,
-        email_signature_auto_append: autoAppendSignature
+        email_signature_auto_append: autoAppendSignature,
+        // Persisted so the switch's state survives a reload/reopen instead
+        // of always resetting to its default - see the populate effect's
+        // own setSamePasswordAsLogin(user.email_login_password_synced).
+        email_login_password_synced: samePasswordAsLogin
       }
-      if (data.password.length && data.password !== PASSWORD_PLACEHOLDER) payload.password = data.password
-      // Unlike the login password above, this field now shows the real
-      // current value (see the populate effect) rather than a placeholder -
-      // resending it unchanged is harmless (the API just re-encrypts the
-      // same plaintext), so there's no placeholder-diff check needed here.
-      if (data.email_login_password.length) {
+      // Mailbox provisioning configured (see Company Settings) - a single
+      // Email field doubles as both the login identity and the mailbox
+      // name, so login email and mailbox address are always the same
+      // address rather than two separately-typed fields. Otherwise, same
+      // plain full-address login field (and separately-typed mailbox
+      // address) this always was.
+      if (emailUsernameMode) {
+        payload.email = `${data.email}@${mailDomain}`
+        payload.email_login_username = data.email
+      } else {
+        payload.email = data.email
+        payload.email_login = data.email_login
+      }
+      const newLoginPassword = data.password.length && data.password !== PASSWORD_PLACEHOLDER ? data.password : null
+      if (newLoginPassword) payload.password = newLoginPassword
+
+      if (samePasswordAsLogin) {
+        // Mirrors the login password exactly - only when a NEW one was
+        // actually typed above. There's no plaintext to mirror otherwise
+        // (the stored login password is one-way hashed), so leaving the
+        // login password untouched here also leaves the mailbox password
+        // untouched, same as toggling this off and leaving that field blank.
+        if (newLoginPassword) payload.email_login_password = newLoginPassword
+      } else if (data.email_login_password.length) {
+        // Unlike the login password above, this field shows the real
+        // current value (see the populate effect) rather than a
+        // placeholder - resending it unchanged is harmless (the API just
+        // re-encrypts the same plaintext), so there's no placeholder-diff
+        // check needed here.
         payload.email_login_password = data.email_login_password
       }
 
@@ -283,21 +357,37 @@ const UserForm = () => {
               <Label className='form-label' for='email'>
                 Email <span className='text-danger'>*</span>
               </Label>
-              <Controller
-                name='email'
-                control={control}
-                render={({ field }) => (
-                  <Input
-                    type='email'
-                    id='email'
-                    placeholder='john.doe@example.com'
-                    invalid={errors.email && true}
-                    disabled={selfMode}
-                    {...field}
-                  />
-                )}
-              />
+              {emailUsernameMode ? (
+                <Controller
+                  name='email'
+                  control={control}
+                  render={({ field }) => (
+                    <InputGroup>
+                      <Input id='email' placeholder='dhruvit' invalid={errors.email && true} disabled={selfMode} {...field} />
+                      <InputGroupText>{`@${mailDomain}`}</InputGroupText>
+                    </InputGroup>
+                  )}
+                />
+              ) : (
+                <Controller
+                  name='email'
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      type='email'
+                      id='email'
+                      placeholder='john.doe@example.com'
+                      invalid={errors.email && true}
+                      disabled={selfMode}
+                      {...field}
+                    />
+                  )}
+                />
+              )}
               {selfMode && <FormText color='muted'>Contact an admin to change your login email.</FormText>}
+              {!selfMode && emailUsernameMode && (
+                <FormText color='muted'>Also this user's company mailbox - creates it on save if it doesn't exist yet.</FormText>
+              )}
             </Col>
             <Col md={6} className='mb-1'>
               <Label className='form-label' for='phone'>
@@ -376,14 +466,42 @@ const UserForm = () => {
               ? 'Your email signature and how Compose uses it.'
               : "Login details for this user's own email account."}
           </p>
+          {/* Its own full-width row rather than sharing a row with either
+              column's label below - this theme's switch control is taller
+              than a line of label text (see _variables.scss's
+              $form-switch-height), so squeezing it inline next to the
+              "Password" label threw off the label/input alignment between
+              the two columns below it. */}
+          {!selfMode && (
+            <div className='d-flex align-items-center mb-1' style={{ gap: '0.5rem' }}>
+              <div className='form-switch'>
+                <Input
+                  type='switch'
+                  id='same_password_as_login'
+                  checked={samePasswordAsLogin}
+                  onChange={e => {
+                    setSamePasswordAsLogin(e.target.checked)
+                    setExtraDirty(true)
+                  }}
+                />
+              </div>
+              <Label className='form-label mb-0' htmlFor='same_password_as_login'>
+                Use the same password for the company mailbox as the login password
+              </Label>
+            </div>
+          )}
           <Row>
             {/* Only visible on the admin User module's own edit page, not
                 self-service Account Settings - this mailbox account's
-                credentials aren't something a user manages themselves here. */}
-            {!selfMode && (
+                credentials aren't something a user manages themselves here.
+                Hidden entirely once the Email field above already doubles
+                as the mailbox address (emailUsernameMode) - shown only as
+                a fallback for a legacy address that predates provisioning,
+                or when provisioning isn't configured at all. */}
+            {!selfMode && !emailUsernameMode && (
               <Col md={6} className='mb-1'>
                 <Label className='form-label' for='email_login'>
-                  Email
+                  {mailDomain ? 'Company Mailbox' : 'Email'}
                 </Label>
                 <Controller
                   name='email_login'
@@ -392,19 +510,37 @@ const UserForm = () => {
                     <Input type='email' id='email_login' placeholder='john.doe@example.com' {...field} />
                   )}
                 />
+                {mailDomain && (
+                  <FormText color='muted'>Leave blank if this user doesn't need a company mailbox.</FormText>
+                )}
               </Col>
             )}
             {!selfMode && (
               <Col md={6} className='mb-1'>
                 <Label className='form-label' for='email_login_password'>
-                  Password
+                  {emailUsernameMode ? 'Mailbox Password' : 'Password'}
                 </Label>
-                <Controller
-                  name='email_login_password'
-                  control={control}
-                  render={({ field }) => <InputPasswordToggle id='email_login_password' {...field} />}
-                />
-                <FormText color='muted'>The eye icon reveals this mailbox account's real, current password.</FormText>
+                {samePasswordAsLogin ? (
+                  <InputPasswordToggle
+                    id='email_login_password'
+                    value={watchedPassword}
+                    disabled
+                    onChange={() => {}}
+                  />
+                ) : (
+                  <Controller
+                    name='email_login_password'
+                    control={control}
+                    render={({ field }) => <InputPasswordToggle id='email_login_password' {...field} />}
+                  />
+                )}
+                <FormText color='muted'>
+                  {samePasswordAsLogin
+                    ? 'Mirrors the login password above - type a new login password to change this too.'
+                    : emailUsernameMode
+                    ? "The eye icon reveals this mailbox's real, current password. Required to create the mailbox above on save; changing it here updates the real mailbox's password too."
+                    : "The eye icon reveals this mailbox account's real, current password."}
+                </FormText>
               </Col>
             )}
             <Col md={12} className='mb-1'>

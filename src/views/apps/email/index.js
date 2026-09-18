@@ -10,6 +10,7 @@ import Sidebar from './Sidebar'
 import useDebounce from '@hooks/useDebounce'
 
 // ** Third Party Components
+import axios from 'axios'
 import classnames from 'classnames'
 
 // ** Shared Components
@@ -18,6 +19,9 @@ import AdvancedSearchModal from '../shared/AdvancedSearchModal'
 // ** Store & Actions
 import { useDispatch, useSelector } from 'react-redux'
 import { getFolderView, getMessage, clearCurrentMessage } from './store'
+
+// ** Utils
+import { getUserData } from '@utils'
 
 // ** Styles
 import '@styles/react/apps/app-email.scss'
@@ -57,6 +61,14 @@ const EmailApp = () => {
   const [replyTo, setReplyTo] = useState(null)
   const [filters, setFilters] = useState({})
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false)
+  // Admin-only "browse as" mailbox picker (see Sidebar.js and
+  // AdminMailboxController) - null means the normal "my own mailbox" view.
+  // Deliberately kept as plain local state, not reflected in the URL/route
+  // the way folder/uid are - this is a temporary browsing session, not
+  // something meant to be bookmarked or deep-linked.
+  const isAdmin = (getUserData()?.role || '').toLowerCase() === 'admin'
+  const [viewingMailboxId, setViewingMailboxId] = useState(null)
+  const [mailboxOptions, setMailboxOptions] = useState([])
 
   // ** Toggle Compose Function
   const toggleCompose = () => {
@@ -67,6 +79,23 @@ const EmailApp = () => {
   // ** Store Variables
   const dispatch = useDispatch()
   const store = useSelector(state => state.email)
+
+  // ** Admin Emails (see Company Settings) for the sidebar's mailbox picker -
+  // fetched once, admin only.
+  useEffect(() => {
+    if (!isAdmin) return
+    axios.get('/company-mailboxes').then(response => {
+      const mailboxes = response.data?.data?.companyMailboxes || []
+      setMailboxOptions(
+        mailboxes.map(m => ({ value: m.id, label: m.label ? `${m.label} (${m.email})` : m.email, email: m.email }))
+      )
+    })
+  }, [])
+
+  // The picked option's own real address - threaded down to Compose (see
+  // ComposePopup's own adminMailboxId/adminMailboxEmail props) so it can
+  // show which identity a reply/forward/new message will actually send as.
+  const viewingMailboxEmail = mailboxOptions.find(o => o.value === viewingMailboxId)?.email || null
 
   // ** Vars - route is '/email/*' (see Apps.js), so folder/uid come from
   // splitting the splat rather than named path params.
@@ -85,15 +114,22 @@ const EmailApp = () => {
   // plain /email/:folder path with no uid segment, so this only ever fires
   // the restore branch on an actual page load.
   useEffect(() => {
-    dispatch(getFolderView({ folder, q: debouncedQuery, filters }))
-    if (routeUid) {
+    dispatch(getFolderView({ folder, q: debouncedQuery, filters, adminMailboxId: viewingMailboxId }))
+    // A uid restored from the URL only makes sense for the normal "my own
+    // mailbox" view - viewingMailboxId is plain local state (see its own
+    // note above), so it's already lost by the time a reload gets here,
+    // and trying to reopen that uid would silently fetch a same-numbered
+    // but unrelated message from the wrong mailbox instead. See the
+    // URL-sync effect below, which matches this by never writing a uid
+    // into the URL while an admin mailbox is selected in the first place.
+    if (routeUid && !viewingMailboxId) {
       dispatch(getMessage({ folder, uid: Number(routeUid) }))
       setOpenMail(true)
     } else {
       dispatch(clearCurrentMessage())
       setOpenMail(false)
     }
-  }, [folder, debouncedQuery, filters])
+  }, [folder, debouncedQuery, filters, viewingMailboxId])
 
   // ** Keeps the URL's uid segment in sync with whatever message is
   // actually open, so a reload can restore it (see the effect above).
@@ -101,8 +137,10 @@ const EmailApp = () => {
   // loaded yet, rather than stripping the uid the moment currentMessage is
   // momentarily null - that would erase the very param this is meant to
   // preserve during the fetch that follows a reload. `replace: true` avoids
-  // stacking a history entry per email opened.
+  // stacking a history entry per email opened. Skipped entirely while
+  // browsing an admin mailbox (see the effect above's own note).
   useEffect(() => {
+    if (viewingMailboxId) return
     if (!openMail) {
       if (routeUid) navigate(`/email/${folder}`, { replace: true })
       return
@@ -110,13 +148,24 @@ const EmailApp = () => {
     if (store.currentMessage?.uid && String(store.currentMessage.uid) !== routeUid) {
       navigate(`/email/${folder}/${store.currentMessage.uid}`, { replace: true })
     }
-  }, [openMail, store.currentMessage])
+  }, [openMail, store.currentMessage, viewingMailboxId])
 
   // ** The navbar refresh icon forwards its click here instead of doing a
   // full browser reload (see NavbarBookmarks.js's isEmailRoute handling) -
   // re-fetches the current folder's messages and the folder/unread-count list.
   const handleRefresh = () => {
-    dispatch(getFolderView({ folder, q: debouncedQuery, filters }))
+    dispatch(getFolderView({ folder, q: debouncedQuery, filters, adminMailboxId: viewingMailboxId }))
+  }
+
+  // ** Sidebar's mailbox picker - switching (or clearing back to "My
+  // Mailbox") always lands back on Inbox, since 'Scheduled' isn't a real
+  // IMAP folder AdminMailboxController supports (see its own guardFolder()),
+  // and whatever folder was open otherwise may not mean much in a different
+  // mailbox's context either.
+  const handleSelectMailbox = option => {
+    setViewingMailboxId(option ? option.value : null)
+    setOpenMail(false)
+    if (folder !== 'INBOX') navigate('/email/INBOX')
   }
 
   return (
@@ -144,6 +193,10 @@ const EmailApp = () => {
         sidebarOpen={sidebarOpen}
         toggleCompose={toggleCompose}
         setSidebarOpen={setSidebarOpen}
+        isAdmin={isAdmin}
+        mailboxOptions={mailboxOptions}
+        viewingMailboxId={viewingMailboxId}
+        onSelectMailbox={handleSelectMailbox}
       />
       <div className='content-right'>
         <div className='content-body'>
@@ -166,6 +219,8 @@ const EmailApp = () => {
             getMessage={getMessage}
             replyTo={replyTo}
             setReplyTo={setReplyTo}
+            viewingMailboxId={viewingMailboxId}
+            viewingMailboxEmail={viewingMailboxEmail}
           />
         </div>
       </div>

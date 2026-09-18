@@ -5,74 +5,45 @@ import toast from 'react-hot-toast'
 
 // ** Store & Actions
 import { store } from '@store/store'
-import { deleteEmailTemplate } from '../store'
+import { deleteHoliday } from '../store'
 
 // ** Icons Imports
 import { Edit2, Trash2 } from 'react-feather'
 
 // ** Reactstrap Imports
-import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
+import { Button, UncontrolledTooltip } from 'reactstrap'
 
 // ** Utils
+import { formatDate } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
-
-const statusObj = {
-  active: 'light-success',
-  inactive: 'light-secondary'
-}
 
 export const columns = [
   {
     name: 'Name',
     sortable: true,
-    minWidth: '250px',
+    minWidth: '280px',
     sortField: 'name',
     selector: row => row.name,
     cell: row => (
-      <Link to={`/email-template/edit/${row.id}`} className='user_name text-truncate text-body'>
+      <Link to={`/holiday/edit/${row.id}`} className='user_name text-truncate text-body'>
         <span className='fw-bolder'>{row.name}</span>
       </Link>
     )
   },
   {
-    name: 'Subject',
-    minWidth: '260px',
-    selector: row => row.subject,
-    cell: row => <span className='text-truncate'>{row.subject || '-'}</span>
-  },
-  {
-    name: 'Visibility',
-    minWidth: '130px',
-    selector: row => row.visible_role_ids?.length || 0,
-    cell: row =>
-      row.visible_role_ids?.length ? (
-        <Badge color='light-warning' pill>
-          Restricted
-        </Badge>
-      ) : (
-        <span className='text-muted'>Everyone</span>
-      )
-  },
-  {
-    name: 'Status',
-    minWidth: '110px',
+    name: 'Date',
+    minWidth: '180px',
     sortable: true,
-    sortField: 'status',
-    selector: row => row.status,
-    cell: row => (
-      <Badge className='text-capitalize' color={statusObj[row.status]} pill>
-        {row.status}
-      </Badge>
-    )
-  },
-  {
-    name: 'Created',
-    minWidth: '160px',
-    sortable: true,
-    sortField: 'created_at',
-    selector: row => row.created_at,
-    cell: row => <span>{row.created_at}</span>
+    sortField: 'date',
+    selector: row => row.date,
+    // Date-only string parsed from its own Y-m-d parts (not `new Date(str)`,
+    // which reads as UTC and can silently shift a day depending on the
+    // browser's local timezone - same reasoning as elsewhere in this app).
+    cell: row => {
+      const [y, m, d] = row.date.split('-').map(Number)
+      return <span>{formatDate(new Date(y, m - 1, d), { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+    }
   },
   {
     name: 'Actions',
@@ -80,11 +51,11 @@ export const columns = [
     minWidth: '90px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
-        {currentUserCan('/email-template', 'edit') && (
+        {currentUserCan('/holiday', 'edit') && (
           <Fragment>
             <Button
               tag={Link}
-              to={`/email-template/edit/${row.id}`}
+              to={`/holiday/edit/${row.id}`}
               id={`edit-tooltip-${row.id}`}
               className='btn-icon me-1'
               color='flat-primary'
@@ -99,7 +70,7 @@ export const columns = [
           </Fragment>
         )}
 
-        {currentUserCan('/email-template', 'delete') && (
+        {currentUserCan('/holiday', 'delete') && (
           <Fragment>
             <Button
               tag='a'
@@ -113,8 +84,7 @@ export const columns = [
                 e.preventDefault()
                 confirmDelete({
                   text: `This will permanently delete "${row.name}".`,
-                  onConfirm: () =>
-                    store.dispatch(deleteEmailTemplate(row.id)).then(() => toast.success('Email template deleted'))
+                  onConfirm: () => store.dispatch(deleteHoliday(row.id)).then(() => toast.success('Holiday deleted'))
                 })
               }}
             >

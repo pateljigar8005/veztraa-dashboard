@@ -62,8 +62,8 @@ const MailCardContextMenu = ({ x, y, deleteLabel, onReply, onForward, onArchive,
       className='dropdown-menu show'
       style={{ position: 'fixed', top: y, left: x, zIndex: 1090, transform: 'scale(1, 1)' }}
     >
-      {item(CornerUpLeft, 'Reply', onReply)}
-      {item(CornerUpRight, 'Forward', onForward)}
+      {onReply && item(CornerUpLeft, 'Reply', onReply)}
+      {onForward && item(CornerUpRight, 'Forward', onForward)}
       {onArchive && item(Archive, 'Archive', onArchive)}
       {item(Trash2, deleteLabel, onDelete)}
     </div>

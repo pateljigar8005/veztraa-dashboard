@@ -51,9 +51,12 @@ const getSampleDataForType = type => {
       document: { number: 'INV-2026-0042', issue_date: '2026-09-01', due_date: '2026-09-30' },
       currency: '$',
       tax_rate: 10,
-      tax_amount: '150.00',
+      tax_amount: '165.00',
       discount_amount: '50.00',
-      total: '1,600.00',
+      subtotal: '1,650.00',
+      total: '1,765.00',
+      paid_amount: '500.00',
+      balance_due: '1,265.00',
       terms_conditions: '<p>Payment is due within 30 days of the invoice date. Late payments may be subject to a 1.5% monthly interest charge.</p>',
       payment_method: '<p>Bank Transfer<br>Account Name: Veztraa Solutions Pvt. Ltd.<br>Account Number: 1234567890<br>IFSC: ABCD0123456</p>',
       service_items: [
@@ -66,14 +69,16 @@ const getSampleDataForType = type => {
   if (type === 'quotation') {
     return {
       client: sampleClient,
-      document: { number: 'QUO-2026-0018', issue_date: '2026-09-01', due_date: '2026-09-15' },
+      document: { number: 'QUO-2026-0018', issue_date: '2026-09-01', valid_until: '2026-09-15' },
       currency: '$',
       tax_rate: 10,
       tax_amount: '500.00',
       discount_amount: '0.00',
+      subtotal: '5,000.00',
       total: '5,500.00',
       terms_conditions: '<p>This quotation is valid for 14 days from the issue date. Prices are subject to change after expiry.</p>',
       payment_method: '<p>50% advance to begin work, remaining 50% due on project completion.</p>',
+      notes: 'Please review and let us know if you have any questions - happy to walk through anything before you decide.',
       service_items: [
         { name: 'Mobile App Development - iOS & Android', qty: 1, rate: '4,500.00', amount: '4,500.00' },
         { name: 'UI/UX Design', qty: 1, rate: '500.00', amount: '500.00' }
@@ -83,7 +88,8 @@ const getSampleDataForType = type => {
   if (type === 'contract') {
     return {
       client: sampleClient,
-      document: { number: 'CON-2026-0007', issue_date: '2026-09-01', due_date: '2027-09-01' },
+      document: { number: 'CON-2026-0007', start_date: '2026-09-01', end_date: '2027-09-01' },
+      frequency: 'Monthly',
       currency: '',
       tax_rate: 0,
       tax_amount: '0.00',

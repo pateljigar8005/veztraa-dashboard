@@ -19,6 +19,7 @@ import {
   Form,
   Label,
   Input,
+  FormText,
   ListGroup,
   ListGroupItem,
   TabContent,
@@ -26,7 +27,11 @@ import {
 } from 'reactstrap'
 
 // ** Third Party Icons
-import { Settings, Mail } from 'react-feather'
+import { Settings, Mail, FileText, Sun, Server } from 'react-feather'
+
+// ** Custom Components
+import InputPasswordToggle from '@components/input-password-toggle'
+import AdminEmailsTab from './AdminEmailsTab'
 
 // ** Utils
 import { selectThemeColors } from '@utils'
@@ -57,12 +62,29 @@ const defaultValues = {
   smtp_from_email: '',
   smtp_from_name: '',
   imap_host: '',
-  imap_port: ''
+  imap_port: '',
+  cpanel_host: '',
+  cpanel_port: 2083,
+  cpanel_username: '',
+  cpanel_api_token: '',
+  mail_domain: ''
 }
 
 const CompanySettings = () => {
   const [searchParams] = useSearchParams()
-  const activeTab = searchParams.get('tab') === 'email' ? 'smtp' : 'general'
+  const tabParam = searchParams.get('tab')
+  const activeTab =
+    tabParam === 'email'
+      ? 'smtp'
+      : tabParam === 'pdf'
+      ? 'pdf'
+      : tabParam === 'weekend'
+      ? 'weekend'
+      : tabParam === 'mailbox'
+      ? 'mailbox'
+      : tabParam === 'admin-emails'
+      ? 'admin-emails'
+      : 'general'
   const [taxEnabled, setTaxEnabled] = useState(false)
   const [currencyId, setCurrencyId] = useState('')
   const [invoicePdfTemplateId, setInvoicePdfTemplateId] = useState('')
@@ -75,6 +97,9 @@ const CompanySettings = () => {
   const [smtpEncryption, setSmtpEncryption] = useState('')
   const [imapEncryption, setImapEncryption] = useState('')
   const [syncIntervalMinutes, setSyncIntervalMinutes] = useState(1)
+  const [weekendSaturday, setWeekendSaturday] = useState(true)
+  const [weekendSunday, setWeekendSunday] = useState(true)
+  const [cpanelApiTokenSet, setCpanelApiTokenSet] = useState(false)
   const [loading, setLoading] = useState(true)
 
   const { control, reset, handleSubmit } = useForm({ defaultValues })
@@ -113,7 +138,16 @@ const CompanySettings = () => {
         smtp_from_email: data.smtp_from_email || '',
         smtp_from_name: data.smtp_from_name || '',
         imap_host: data.imap_host || '',
-        imap_port: data.imap_port ?? ''
+        imap_port: data.imap_port ?? '',
+        cpanel_host: data.cpanel_host || '',
+        cpanel_port: data.cpanel_port ?? 2083,
+        cpanel_username: data.cpanel_username || '',
+        // Unlike smtp_password (write-only, "leave blank to keep"), the API
+        // only decrypts this back for an admin requester - shows the real
+        // current value here, same as the mailbox password on the User
+        // form, rather than a blank/placeholder field.
+        cpanel_api_token: data.cpanel_api_token || '',
+        mail_domain: data.mail_domain || ''
       })
       setTaxEnabled(data.tax_enabled)
       setCurrencyId(data.currency_id || '')
@@ -123,6 +157,9 @@ const CompanySettings = () => {
       setSmtpEncryption(data.smtp_encryption || '')
       setImapEncryption(data.imap_encryption || '')
       setSyncIntervalMinutes(data.mailbox_sync_interval_minutes || 1)
+      setWeekendSaturday(data.weekend_saturday !== false)
+      setWeekendSunday(data.weekend_sunday !== false)
+      setCpanelApiTokenSet(data.cpanel_api_token_set)
       setLoading(false)
     })
   }, [])
@@ -149,7 +186,14 @@ const CompanySettings = () => {
         imap_host: data.imap_host || null,
         imap_port: data.imap_port === '' ? null : Number(data.imap_port),
         imap_encryption: imapEncryption || null,
-        mailbox_sync_interval_minutes: syncIntervalMinutes
+        mailbox_sync_interval_minutes: syncIntervalMinutes,
+        weekend_saturday: weekendSaturday,
+        weekend_sunday: weekendSunday,
+        cpanel_host: data.cpanel_host || null,
+        cpanel_port: data.cpanel_port === '' ? null : Number(data.cpanel_port),
+        cpanel_username: data.cpanel_username || null,
+        cpanel_api_token: data.cpanel_api_token,
+        mail_domain: data.mail_domain || null
       })
       .then(() => {
         toast.success('Company settings updated')
@@ -182,6 +226,22 @@ const CompanySettings = () => {
                 <ListGroupItem tag={Link} to='/company?tab=email' action active={activeTab === 'smtp'}>
                   <Mail size={16} className='me-75' />
                   <span className='align-middle'>Email Settings</span>
+                </ListGroupItem>
+                <ListGroupItem tag={Link} to='/company?tab=pdf' action active={activeTab === 'pdf'}>
+                  <FileText size={16} className='me-75' />
+                  <span className='align-middle'>PDF Templates</span>
+                </ListGroupItem>
+                <ListGroupItem tag={Link} to='/company?tab=weekend' action active={activeTab === 'weekend'}>
+                  <Sun size={16} className='me-75' />
+                  <span className='align-middle'>Weekends</span>
+                </ListGroupItem>
+                <ListGroupItem tag={Link} to='/company?tab=mailbox' action active={activeTab === 'mailbox'}>
+                  <Server size={16} className='me-75' />
+                  <span className='align-middle'>Mailbox Provisioning</span>
+                </ListGroupItem>
+                <ListGroupItem tag={Link} to='/company?tab=admin-emails' action active={activeTab === 'admin-emails'}>
+                  <Mail size={16} className='me-75' />
+                  <span className='align-middle'>Admin Emails</span>
                 </ListGroupItem>
               </ListGroup>
             </div>
@@ -269,7 +329,16 @@ const CompanySettings = () => {
                     <Col md={8} />
                   </>
                 )}
-                <Col md={4}>
+              </Row>
+            </TabPane>
+
+            <TabPane tabId='pdf'>
+              <h6 className='mb-1'>PDF Templates</h6>
+              <p className='text-muted small'>
+                Which PDF Designer template each document type uses when generating or downloading a PDF.
+              </p>
+              <Row>
+                <Col md={4} className='mb-1'>
                   <Label className='form-label' for='invoice_pdf_template_id'>
                     Invoice PDF
                   </Label>
@@ -285,7 +354,7 @@ const CompanySettings = () => {
                     placeholder='Select PDF template...'
                   />
                 </Col>
-                <Col md={4}>
+                <Col md={4} className='mb-1'>
                   <Label className='form-label' for='contract_pdf_template_id'>
                     Contract PDF
                   </Label>
@@ -301,7 +370,7 @@ const CompanySettings = () => {
                     placeholder='Select PDF template...'
                   />
                 </Col>
-                <Col md={4}>
+                <Col md={4} className='mb-1'>
                   <Label className='form-label' for='quotation_pdf_template_id'>
                     Quotation PDF
                   </Label>
@@ -318,6 +387,123 @@ const CompanySettings = () => {
                   />
                 </Col>
               </Row>
+            </TabPane>
+
+            <TabPane tabId='weekend'>
+              <h6 className='mb-1'>Weekend Days</h6>
+              <p className='text-muted small mb-2'>
+                Same "grey out and block" treatment as a Holiday (see the Holidays settings page) on the Calendar
+                and Todo/Kanban due-date pickers, every week instead of a one-time date.
+              </p>
+              <Row>
+                <Col md={12}>
+                  <div className='d-flex' style={{ gap: '2rem' }}>
+                    <div className='d-flex align-items-center' style={{ gap: '0.5rem' }}>
+                      <div className='form-switch'>
+                        <Input
+                          type='switch'
+                          id='weekend_saturday'
+                          checked={weekendSaturday}
+                          onChange={e => setWeekendSaturday(e.target.checked)}
+                        />
+                      </div>
+                      <Label className='form-label mb-0' htmlFor='weekend_saturday'>
+                        Saturday
+                      </Label>
+                    </div>
+                    <div className='d-flex align-items-center' style={{ gap: '0.5rem' }}>
+                      <div className='form-switch'>
+                        <Input
+                          type='switch'
+                          id='weekend_sunday'
+                          checked={weekendSunday}
+                          onChange={e => setWeekendSunday(e.target.checked)}
+                        />
+                      </div>
+                      <Label className='form-label mb-0' htmlFor='weekend_sunday'>
+                        Sunday
+                      </Label>
+                    </div>
+                  </div>
+                </Col>
+              </Row>
+            </TabPane>
+
+            <TabPane tabId='mailbox'>
+              <h6 className='mb-1'>Mailbox Provisioning</h6>
+              <p className='text-muted small'>
+                Lets the User form take just a mailbox name (e.g. "dhruvit") instead of a full address, and
+                creates the real mailbox on your mail server automatically via cPanel - no need to go into cPanel
+                by hand. Changing a user's mailbox password from the User form also updates the real mailbox's
+                password to match. Requires a cPanel API token: in cPanel, go to <em>Security &rarr; Manage API
+                Tokens</em>, create one, and paste it below. Leave this whole section empty to keep the User
+                form's plain email field instead.
+              </p>
+              <Row>
+                <Col md={4} className='mb-1'>
+                  <Label className='form-label' for='mail_domain'>
+                    Mailbox Domain
+                  </Label>
+                  <Controller
+                    name='mail_domain'
+                    control={control}
+                    render={({ field }) => <Input id='mail_domain' placeholder='veztraa.com' {...field} />}
+                  />
+                  <p className='text-muted small mb-0 mt-25'>Appended to every mailbox name the User form creates.</p>
+                </Col>
+                <Col md={5} className='mb-1'>
+                  <Label className='form-label' for='cpanel_host'>
+                    cPanel Host
+                  </Label>
+                  <Controller
+                    name='cpanel_host'
+                    control={control}
+                    render={({ field }) => <Input id='cpanel_host' placeholder='server.yourhost.com' {...field} />}
+                  />
+                </Col>
+                <Col md={3} className='mb-1'>
+                  <Label className='form-label' for='cpanel_port'>
+                    Port
+                  </Label>
+                  <Controller
+                    name='cpanel_port'
+                    control={control}
+                    render={({ field }) => <Input type='number' step='1' min='0' id='cpanel_port' placeholder='2083' {...field} />}
+                  />
+                </Col>
+                <Col md={6} className='mb-1'>
+                  <Label className='form-label' for='cpanel_username'>
+                    cPanel Account Username
+                  </Label>
+                  <Controller
+                    name='cpanel_username'
+                    control={control}
+                    render={({ field }) => <Input id='cpanel_username' placeholder='veztraa' {...field} />}
+                  />
+                </Col>
+                <Col md={6} className='mb-1'>
+                  <Label className='form-label' for='cpanel_api_token'>
+                    cPanel API Token
+                  </Label>
+                  <Controller
+                    name='cpanel_api_token'
+                    control={control}
+                    render={({ field }) => (
+                      <InputPasswordToggle
+                        id='cpanel_api_token'
+                        placeholder={cpanelApiTokenSet ? 'Leave blank to keep the current token' : 'Paste API token'}
+                        autoComplete='new-password'
+                        {...field}
+                      />
+                    )}
+                  />
+                  <FormText color='muted'>The eye icon reveals the real, current token - same as a mailbox password on the User form.</FormText>
+                </Col>
+              </Row>
+            </TabPane>
+
+            <TabPane tabId='admin-emails'>
+              <AdminEmailsTab />
             </TabPane>
 
             <TabPane tabId='smtp'>
@@ -374,6 +560,12 @@ const CompanySettings = () => {
               </p>
               <p className='text-muted small'>
                 <code>php /path/to/veztraa-api/cron/sync-mailboxes.php</code> every 1-2 minutes.
+              </p>
+              <p className='text-muted small'>
+                A second job, <code>php /path/to/veztraa-api/cron/process-outbox.php</code>, should run on the
+                same schedule - normal sends don't depend on it (they go out immediately), but{' '}
+                <strong>Schedule Send</strong> in Compose does: a scheduled email only actually goes out once this
+                job notices its time has arrived.
               </p>
               <Row>
                 <Col md={4} className='mb-1'>

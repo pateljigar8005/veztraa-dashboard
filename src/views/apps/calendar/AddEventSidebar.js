@@ -15,7 +15,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { Button, Modal, ModalBody, ModalFooter, Label, Input, Form } from 'reactstrap'
 
 // ** Utils
-import { selectThemeColors, isObjEmpty } from '@utils'
+import { selectThemeColors, isObjEmpty, toDateOnly } from '@utils'
 
 // ** Avatar Images
 import img1 from '@src/assets/images/avatars/1-small.png'
@@ -42,7 +42,10 @@ const AddEventSidebar = props => {
     removeEvent,
     refetchEvents,
     calendarsColor,
-    handleAddEventSidebar
+    handleAddEventSidebar,
+    holidayDates,
+    getHolidayName,
+    isWeekend
   } = props
 
   // ** Vars & Hooks
@@ -107,8 +110,29 @@ const AddEventSidebar = props => {
     )
   }
 
+  // ** Company-wide holidays and weekend days (see the Holidays and Company
+  // Settings modules) - this form's own Start/End Date pickers used to have
+  // no awareness of either at all, unlike the Calendar's own click-to-create
+  // (see Calendar.js's dateClick), which is how an event could still end up
+  // on a blocked date despite that check existing. Checked again here at
+  // submit time (not just via the pickers' own `disable` option below) since
+  // a date can still be typed directly into a Flatpickr text input.
+  const blockReasonForDate = date => {
+    if (!date) return null
+    const holidayName = getHolidayName(toDateOnly(date))
+    if (holidayName) return `${holidayName} - no events can be added on a holiday`
+    if (isWeekend(date)) return 'Weekend - no events can be added on this date'
+    return null
+  }
+
   // ** Adds New Event
   const handleAddEvent = () => {
+    const blockReason = blockReasonForDate(startPicker) || blockReasonForDate(endPicker)
+    if (blockReason) {
+      toast.error(blockReason)
+      return
+    }
+
     const obj = {
       title: getValues('title'),
       start: startPicker,
@@ -198,6 +222,12 @@ const AddEventSidebar = props => {
   // ** Updates Event in Store
   const handleUpdateEvent = () => {
     if (getValues('title').length) {
+      const blockReason = blockReasonForDate(startPicker) || blockReasonForDate(endPicker)
+      if (blockReason) {
+        toast.error(blockReason)
+        return
+      }
+
       const eventToUpdate = {
         id: selectedEvent.id,
         title: getValues('title'),
@@ -339,7 +369,13 @@ const AddEventSidebar = props => {
                 value={startPicker}
                 options={{
                   enableTime: allDay === false,
-                  dateFormat: 'Y-m-d H:i'
+                  dateFormat: 'Y-m-d H:i',
+                  // Same holiday/weekend blocking as the Calendar's own
+                  // click-to-create (see Calendar.js's dayCellClassNames) -
+                  // this picker had none at all before, which is how an
+                  // event could still be added on a blocked date via this
+                  // form even though clicking the day cell directly refused.
+                  disable: [...holidayDates, isWeekend]
                 }}
               />
             </div>
@@ -358,7 +394,8 @@ const AddEventSidebar = props => {
                 value={endPicker}
                 options={{
                   enableTime: allDay === false,
-                  dateFormat: 'Y-m-d H:i'
+                  dateFormat: 'Y-m-d H:i',
+                  disable: [...holidayDates, isWeekend]
                 }}
               />
             </div>

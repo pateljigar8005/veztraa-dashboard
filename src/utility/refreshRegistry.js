@@ -18,6 +18,8 @@ import { getData as getPaymentMethodData } from '@src/views/apps/payment-method/
 import { getData as getProjectData } from '@src/views/apps/project/store'
 import { getData as getServiceItemData } from '@src/views/apps/service-item/store'
 import { getData as getTermsTemplateData } from '@src/views/apps/terms-template/store'
+import { getData as getEmailTemplateData } from '@src/views/apps/email-template/store'
+import { getData as getHolidayData } from '@src/views/apps/holiday/store'
 import { getData as getTimesheetData } from '@src/views/apps/timesheet/store'
 import { getData as getTimesheetActivityData } from '@src/views/apps/timesheet-activity/store'
 import { getData as getTeamMemberData } from '@src/views/apps/team-member/store'
@@ -48,6 +50,8 @@ const registry = [
   { pattern: /^\/project$/, refetch: (d, g) => d(getProjectData(g().projects.params)) },
   { pattern: /^\/service-item$/, refetch: (d, g) => d(getServiceItemData(g().serviceItems.params)) },
   { pattern: /^\/terms-template$/, refetch: (d, g) => d(getTermsTemplateData(g().termsTemplates.params)) },
+  { pattern: /^\/email-template$/, refetch: (d, g) => d(getEmailTemplateData(g().emailTemplates.params)) },
+  { pattern: /^\/holiday$/, refetch: (d, g) => d(getHolidayData(g().holidays.params)) },
   { pattern: /^\/timesheet$/, refetch: (d, g) => d(getTimesheetData(g().timesheets.params)) },
   { pattern: /^\/timesheet-activity$/, refetch: (d, g) => d(getTimesheetActivityData(g().timesheetActivities.params)) },
   { pattern: /^\/team-member$/, refetch: (d, g) => d(getTeamMemberData(g().teamMembers.params)) },

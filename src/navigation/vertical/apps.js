@@ -19,7 +19,9 @@ import {
   Image,
   Award,
   List,
-  Clock
+  Clock,
+  Sun,
+  BarChart2
 } from 'react-feather'
 
 export default [
@@ -138,7 +140,28 @@ export default [
     navLink: '/pdf-designer'
   },
   {
+    header: 'Reports'
+  },
+  {
+    id: 'invoiceReports',
+    title: 'Invoice Report',
+    icon: <BarChart2 size={20} />,
+    navLink: '/reports/invoice'
+  },
+  {
+    id: 'timesheetReports',
+    title: 'Timesheet Report',
+    icon: <Clock size={20} />,
+    navLink: '/reports/timesheet'
+  },
+  {
     header: 'Settings'
+  },
+  {
+    id: 'holidays',
+    title: 'Holidays',
+    icon: <Sun size={20} />,
+    navLink: '/holiday'
   },
   {
     id: 'company',

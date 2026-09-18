@@ -17,6 +17,10 @@ import Avatar from '@components/avatar'
 import TaskAttachments from './TaskAttachments'
 import DateField from '../shared/DateField'
 
+// ** Hooks
+import useHolidayDates from '@hooks/useHolidayDates'
+import useWeekendDays from '@hooks/useWeekendDays'
+
 // ** Utils
 import { isObjEmpty, selectThemeColors, resolveAvatarUrl, uploadEditorImage } from '@utils'
 
@@ -71,6 +75,8 @@ const TaskSidebar = props => {
   const [completed, setCompleted] = useState(false)
   const [important, setImportant] = useState(false)
   const [dueDate, setDueDate] = useState(null)
+  const { holidayDates } = useHolidayDates()
+  const { isWeekend } = useWeekendDays()
 
   const {
     control,
@@ -281,7 +287,13 @@ const TaskSidebar = props => {
             <Label className='form-label' for='due-date'>
               Due Date
             </Label>
-            <DateField id='due-date' name='due-date' value={dueDate} onChange={setDueDate} />
+            <DateField
+              id='due-date'
+              name='due-date'
+              value={dueDate}
+              onChange={setDueDate}
+              options={{ disable: [...holidayDates, isWeekend] }}
+            />
           </div>
           <div className='mb-1'>
             <Label className='form-label' for='task-tags'>

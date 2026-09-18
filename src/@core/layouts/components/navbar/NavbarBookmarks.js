@@ -24,6 +24,7 @@ const listToAddRoute = {
   '/invoice': '/invoice/add',
   '/terms-template': '/terms-template/add',
   '/email-template': '/email-template/add',
+  '/holiday': '/holiday/add',
   '/pdf-designer': '/pdf-designer/add',
   '/currency': '/currency/add',
   '/industry': '/industry/add',
@@ -38,7 +39,7 @@ const listToAddRoute = {
 
 // ** Matches any module's "/add" or "/edit/:id" form route
 const addOrEditRoutePattern =
-  /^\/(user|client|payment-method|service-item|project|quotation|contract|invoice|terms-template|email-template|roles|pdf-designer|currency|industry|team-member|portfolio|case-study|job-listing|timesheet-activity|timesheet)\/(add|edit\/[^/]+)$/
+  /^\/(user|client|payment-method|service-item|project|quotation|contract|invoice|terms-template|email-template|holiday|roles|pdf-designer|currency|industry|team-member|portfolio|case-study|job-listing|timesheet-activity|timesheet)\/(add|edit\/[^/]+)$/
 
 // ** The PDF Designer page has no <form> - only the widget's own toolbar Save
 // button can hand back the current design (see its form/index.js). So on that

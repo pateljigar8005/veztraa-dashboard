@@ -31,6 +31,9 @@ const frequencyLabel = value => frequencyOptions.find(i => i.value === value)?.l
 // don't track amounts), so those are sent as zero/empty here - editing that
 // template to bind a "body" richtext element is what would make the
 // generated PDF show the actual agreement text.
+// document.{start_date,end_date} rather than {issue_date,due_date} - a
+// contract runs for a PERIOD, not issued-then-due like an invoice/quotation,
+// so it gets its own date field names within the shared "document" shape.
 const buildPdfData = contract => ({
   client: {
     name: contract.contact_name || '',
@@ -41,9 +44,10 @@ const buildPdfData = contract => ({
   },
   document: {
     number: contract.contract_number,
-    issue_date: contract.start_date,
-    due_date: contract.end_date
+    start_date: contract.start_date,
+    end_date: contract.end_date
   },
+  frequency: frequencyLabel(contract.frequency),
   currency: '',
   tax_rate: 0,
   tax_amount: 0,
