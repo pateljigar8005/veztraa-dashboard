@@ -7,7 +7,7 @@ import axios from 'axios'
 import classnames from 'classnames'
 import AdvancedSearchModal from '../shared/AdvancedSearchModal'
 import { useDispatch, useSelector } from 'react-redux'
-import { getFolderView, getMessage, clearCurrentMessage } from './store'
+import { getFolderView, getMessage, clearCurrentMessage, readStoredMailboxId, storeMailboxId } from './store'
 import { getUserData } from '@utils'
 import '@styles/react/apps/app-email.scss'
 
@@ -32,26 +32,6 @@ const searchFields = [
     options: [{ value: '1', label: 'Flagged only' }]
   }
 ]
-
-const MAILBOX_STORAGE_KEY = 'email.viewingMailboxId'
-
-const readStoredMailboxId = () => {
-  try {
-    const value = Number(localStorage.getItem(MAILBOX_STORAGE_KEY))
-    return value > 0 ? value : null
-  } catch (e) {
-    return null
-  }
-}
-
-const storeMailboxId = id => {
-  try {
-    if (id) localStorage.setItem(MAILBOX_STORAGE_KEY, String(id))
-    else localStorage.removeItem(MAILBOX_STORAGE_KEY)
-  } catch (e) {
-    // storage unavailable - selection just won't survive a reload
-  }
-}
 
 const EmailApp = () => {
   const [query, setQuery] = useState('')
@@ -86,7 +66,13 @@ const EmailApp = () => {
         mailboxes.map(m => ({ value: m.id, label: m.label ? `${m.label} (${m.email})` : m.email, email: m.email }))
       )
       // A remembered mailbox that's since been deleted falls back to My Mailbox.
-      setViewingMailboxId(current => (current && !mailboxes.some(m => m.id === current) ? null : current))
+      setViewingMailboxId(current => {
+        if (current && !mailboxes.some(m => m.id === current)) {
+          storeMailboxId(null)
+          return null
+        }
+        return current
+      })
     })
   }, [])
 

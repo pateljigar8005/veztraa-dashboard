@@ -6,10 +6,44 @@ export const getFolders = createAsyncThunk('appEmail/getFolders', async () => {
   return response.data.data.folders
 })
 
+// The admin's "Browse Mailbox" choice is remembered across reloads (see the
+// Email page) and read here too, so the menu badge can follow it on any page.
+const MAILBOX_STORAGE_KEY = 'email.viewingMailboxId'
+
+export const readStoredMailboxId = () => {
+  try {
+    const isAdmin = (JSON.parse(localStorage.getItem('userData'))?.role || '').toLowerCase() === 'admin'
+    const value = Number(localStorage.getItem(MAILBOX_STORAGE_KEY))
+    return isAdmin && value > 0 ? value : null
+  } catch (e) {
+    return null
+  }
+}
+
+export const storeMailboxId = id => {
+  try {
+    if (id) localStorage.setItem(MAILBOX_STORAGE_KEY, String(id))
+    else localStorage.removeItem(MAILBOX_STORAGE_KEY)
+  } catch (e) {
+    // storage unavailable - selection just won't survive a reload
+  }
+}
+
+// Unread INBOX count of the mailbox currently selected (own or an admin one).
 export const getUnreadCount = createAsyncThunk('appEmail/getUnreadCount', async () => {
-  const response = await axios.get('/mailbox/unread-count')
+  const mailboxId = readStoredMailboxId()
+  const response = await axios.get(mailboxId ? `/admin-mailbox/${mailboxId}/unread-count` : '/mailbox/unread-count')
   return response.data.data.unreadCount
 })
+
+// Adjusts the INBOX unread count shown in the Email sidebar and the menu
+// badge (both follow the selected mailbox) without a server round trip.
+const adjustInboxUnread = (state, delta) => {
+  if (state.params.folder !== 'INBOX' || !delta) return
+  const inbox = state.folders.find(f => f.key === 'INBOX')
+  if (inbox) inbox.unreadCount = Math.max(0, (inbox.unreadCount || 0) + delta)
+  state.unreadCount = Math.max(0, state.unreadCount + delta)
+}
 
 const inboxUnread = folders => folders?.find(f => f.key === 'INBOX')?.unreadCount
 
@@ -17,7 +51,7 @@ const inboxUnread = folders => folders?.find(f => f.key === 'INBOX')?.unreadCoun
 export const getMessages = createAsyncThunk('appEmail/getMessages', async ({ silent, ...params }) => {
   const response = params.adminMailboxId
     ? await axios.get(`/admin-mailbox/${params.adminMailboxId}/${params.folder}/messages`, {
-        params: { page: params.page || 1, perPage: params.perPage || 20, q: params.q || '' }
+        params: { page: params.page || 1, perPage: params.perPage || 20, q: params.q || '', ...params.filters }
       })
     : await axios.get(`/mailbox/${params.folder}/messages`, {
         params: { page: params.page || 1, perPage: params.perPage || 20, q: params.q || '', ...params.filters }
@@ -28,12 +62,12 @@ export const getMessages = createAsyncThunk('appEmail/getMessages', async ({ sil
 export const getFolderView = createAsyncThunk('appEmail/getFolderView', async params => {
   if (params.adminMailboxId) {
     const response = await axios.get(`/admin-mailbox/${params.adminMailboxId}/${params.folder}/messages`, {
-      params: { page: params.page || 1, perPage: params.perPage || 20, q: params.q || '' }
+      params: { page: params.page || 1, perPage: params.perPage || 20, q: params.q || '', ...params.filters }
     })
     return {
       params,
       data: {
-        folders: [],
+        folders: response.data.data.folders || [],
         messages: response.data.data.messages,
         total: response.data.data.total,
         lastSyncedAt: response.data.data.lastSyncedAt
@@ -175,7 +209,7 @@ export const appEmailSlice = createSlice({
     currentMessage: null,
     messageLoading: false,
     lastSyncedAt: null,
-    // Unread INBOX count of the user's OWN mailbox - drives the sidebar badge.
+    // Unread INBOX count of the selected mailbox - drives the menu badge.
     unreadCount: 0
   },
   reducers: {
@@ -184,10 +218,7 @@ export const appEmailSlice = createSlice({
     },
     removeMessageFromList: (state, action) => {
       const uids = new Set([].concat(action.payload))
-      if (state.params.folder === 'INBOX' && !state.params.adminMailboxId) {
-        const removedUnread = state.messages.filter(m => uids.has(m.uid) && !m.isRead).length
-        state.unreadCount = Math.max(0, state.unreadCount - removedUnread)
-      }
+      adjustInboxUnread(state, -state.messages.filter(m => uids.has(m.uid) && !m.isRead).length)
       const before = state.messages.length
       state.messages = state.messages.filter(m => !uids.has(m.uid))
       state.total = Math.max(0, state.total - (before - state.messages.length))
@@ -221,6 +252,12 @@ export const appEmailSlice = createSlice({
       })
       .addCase(getMessages.fulfilled, (state, action) => {
         state.messagesLoading = false
+        // Only an admin mailbox's list response carries folder counts.
+        if (action.payload.data.folders) {
+          state.folders = action.payload.data.folders
+          const unread = inboxUnread(action.payload.data.folders)
+          if (unread !== undefined) state.unreadCount = unread
+        }
         state.params = action.payload.params
         state.messages = action.payload.data.messages
         state.total = action.payload.data.total
@@ -255,9 +292,7 @@ export const appEmailSlice = createSlice({
         state.messageLoading = false
         state.currentMessage = action.payload
         const inList = state.messages.find(m => m.uid === action.payload.uid)
-        if (inList && !inList.isRead && state.params.folder === 'INBOX' && !state.params.adminMailboxId) {
-          state.unreadCount = Math.max(0, state.unreadCount - 1)
-        }
+        if (inList && !inList.isRead) adjustInboxUnread(state, -1)
         if (inList) inList.isRead = true
       })
       .addCase(getMessage.rejected, state => {

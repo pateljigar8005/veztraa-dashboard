@@ -74,6 +74,15 @@ export const formatRelativeDate = value => {
   return formatDateToMonthShort(value)
 }
 
+// Avatar's `initials` mode takes one letter from EVERY word, so a long name
+// overflows the circle - keep only the first two words that have a letter.
+export const initialsSource = (name, max = 2) =>
+  String(name || '')
+    .split(' ')
+    .filter(word => /[a-zA-Z]/.test(word))
+    .slice(0, max)
+    .join(' ')
+
 export const formatRecipients = to =>
   (Array.isArray(to) ? to : [])
     .map(r => (typeof r === 'string' ? r : r?.name || r?.email || ''))

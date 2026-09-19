@@ -2,7 +2,7 @@ import classnames from 'classnames'
 import Avatar from '@components/avatar'
 import { Input } from 'reactstrap'
 import { Star, Paperclip } from 'react-feather'
-import { formatRelativeDate, formatRecipients } from '@utils'
+import { formatRelativeDate, formatRecipients, initialsSource } from '@utils'
 
 const MailCard = props => {
   const { mail, folder, handleMailClick, selected, onToggleSelect, onContextMenu, onToggleFlag, readOnly } = props
@@ -19,7 +19,7 @@ const MailCard = props => {
       className={classnames('d-flex user-mail', { 'mail-read': mail.isRead })}
     >
       <div className={classnames('mail-left pe-50 mail-select-toggle', { selected })}>
-        <Avatar initials color='light-primary' content={displayName} className='mail-avatar' />
+        <Avatar initials color='light-primary' content={initialsSource(displayName)} className='mail-avatar' />
         {
                                                    }
         <div className='form-check mail-select-checkbox rounded-circle bg-light-primary'>
