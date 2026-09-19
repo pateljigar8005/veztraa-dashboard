@@ -20,6 +20,7 @@ import {
 } from 'reactstrap'
 import InputPasswordToggle from '@components/input-password-toggle'
 import { confirmDelete } from '@src/utility/confirmDelete'
+import { currentUserCan } from '@src/utility/navPermissions'
 
 const defaultValues = { local_part: '', label: '', password: '' }
 
@@ -129,7 +130,7 @@ const AdminEmailsTab = () => {
             anything on the mail server itself.
           </p>
         </div>
-        {mailDomain && (
+        {mailDomain && currentUserCan('/company', 'add') && (
           <Button color='primary' size='sm' onClick={openAddModal}>
             <Plus size={14} className='me-50' />
             Add Mailbox
@@ -159,17 +160,21 @@ const AdminEmailsTab = () => {
                 </td>
                 <td>{mailbox.label || <span className='text-muted'>-</span>}</td>
                 <td className='text-end'>
-                  <Button
-                    color='flat-primary'
-                    size='sm'
-                    className='btn-icon'
-                    onClick={() => openEditModal(mailbox)}
-                  >
-                    <Edit2 size={14} />
-                  </Button>
-                  <Button color='flat-danger' size='sm' className='btn-icon' onClick={() => handleDelete(mailbox)}>
-                    <Trash2 size={14} />
-                  </Button>
+                  {currentUserCan('/company', 'edit') && (
+                    <Button
+                      color='flat-primary'
+                      size='sm'
+                      className='btn-icon'
+                      onClick={() => openEditModal(mailbox)}
+                    >
+                      <Edit2 size={14} />
+                    </Button>
+                  )}
+                  {currentUserCan('/company', 'delete') && (
+                    <Button color='flat-danger' size='sm' className='btn-icon' onClick={() => handleDelete(mailbox)}>
+                      <Trash2 size={14} />
+                    </Button>
+                  )}
                 </td>
               </tr>
             ))}
