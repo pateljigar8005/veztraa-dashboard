@@ -4,7 +4,7 @@ import { getUnreadCount } from '@src/views/apps/email/store'
 import useJwt from '@src/auth/jwt/useJwt'
 import { currentUserCan } from '@src/utility/navPermissions'
 
-const POLL_INTERVAL_MS = 30000
+const POLL_INTERVAL_MS = 15000
 
 const hasSession = () => Boolean(localStorage.getItem('userData') && useJwt.getToken())
 

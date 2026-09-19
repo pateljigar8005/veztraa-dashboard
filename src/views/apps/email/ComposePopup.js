@@ -55,16 +55,16 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo, adminMailboxId, adm
         options.push({ value: email, label })
       }
 
-      ;(usersRes?.data?.data?.users || [])
-        .filter(u => u.is_active && u.email)
-        .forEach(u => addOption(u.email, `${u.fullName} <${u.email}>`))
+        ; (usersRes?.data?.data?.users || [])
+          .filter(u => u.is_active && u.email)
+          .forEach(u => addOption(u.email, `${u.fullName} <${u.email}>`))
 
-      ;(clientsRes?.data?.data?.clients || [])
-        .filter(c => c.is_active && c.email)
-        .forEach(c => addOption(c.email, `${c.company_name || c.fullName} <${c.email}>`))
+        ; (clientsRes?.data?.data?.clients || [])
+          .filter(c => c.is_active && c.email)
+          .forEach(c => addOption(c.email, `${c.company_name || c.fullName} <${c.email}>`))
 
-      ;(contactsRes?.data?.data?.contacts || [])
-        .forEach(c => addOption(c.email, c.name ? `${c.name} <${c.email}>` : c.email))
+        ; (contactsRes?.data?.data?.contacts || [])
+          .forEach(c => addOption(c.email, c.name ? `${c.name} <${c.email}>` : c.email))
 
       setContactOptions(options)
     })
@@ -349,7 +349,7 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo, adminMailboxId, adm
         <h5 className='modal-title'>Compose Mail</h5>
         <X className='fw-normal cursor-pointer' size={16} onClick={handleClose} />
       </div>
-      <Form className='compose-form' onSubmit={handleSend}>
+      <Form className='compose-form' onSubmit={handleSend} noValidate>
         <ModalBody style={{ maxHeight: '65vh', overflowY: 'auto' }}>
           {replyTo?.loading ? (
             <div className='placeholder-glow' aria-hidden='true'>
@@ -368,7 +368,7 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo, adminMailboxId, adm
           ) : (
             <>
               {
-                                                                          }
+              }
               {adminMailboxId && (
                 <div className='alert alert-primary d-flex align-items-center py-50 px-1 mb-1'>
                   <span>
@@ -515,11 +515,18 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo, adminMailboxId, adm
               </ButtonGroup>
               <DropdownMenu end className='p-1 schedule-send-menu' style={{ minWidth: '260px' }}>
                 {
-                                          }
+                }
                 <style>{`
                   .schedule-send-menu .flatpickr-calendar.static {
                     top: auto;
                     bottom: calc(100% + 2px);
+                  }
+                  .schedule-send-menu .flatpickr-wrapper {
+                    display: block;
+                    width: 100%;
+                  }
+                  .schedule-send-menu .flatpickr-wrapper .form-control {
+                    width: 100%;
                   }
                 `}</style>
                 <p className='fw-bold mb-50 d-flex align-items-center'>

@@ -164,8 +164,10 @@ export const sendMessage = createAsyncThunk('appEmail/sendMessage', async (messa
 
   const response = await axios.post('/mailbox/send', payload)
 
+  // The message is already listed (Scheduled, or Sent under a temporary row
+  // until the background send finishes) - refresh if that's the open folder.
   const params = getState().email.params
-  if (message.scheduled_at && params.folder === 'Scheduled') {
+  if (params.folder === (message.scheduled_at ? 'Scheduled' : 'Sent')) {
     await dispatch(getMessages(params))
   }
 

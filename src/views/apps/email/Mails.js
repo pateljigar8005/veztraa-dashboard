@@ -22,10 +22,18 @@ import {
 } from './store'
 
 // Mail just moved (e.g. to Trash) shows in the destination folder under a
-// temporary id until the background move finishes - it can't be acted on yet.
+// temporary id until the background move finishes. The API resolves that to
+// the real message (waiting for the move if needed), so it can be opened,
+// deleted or moved like any other - the list just refreshes itself until the
+// real rows arrive.
 const PLACEHOLDER_UID_MIN = 4000000000
+// Just-sent mail (Sent list) uses a higher band; it CAN be opened - the API
+// serves its details from the queued message - but not deleted/moved until
+// the send finishes.
+const SENDING_UID_MIN = 4200000000
 const isMoving = uid => uid >= PLACEHOLDER_UID_MIN
-const MOVING_MESSAGE = 'Still being moved - try again in a few seconds.'
+const isSending = uid => uid >= SENDING_UID_MIN
+const SENDING_MESSAGE = 'Still sending - try again in a few seconds.'
 
 const Mails = props => {
   const {
@@ -111,9 +119,9 @@ const Mails = props => {
   const handleBulkDelete = () => {
     const folder = store.params.folder
     const isScheduled = folder === 'Scheduled'
-    const actionable = selectedUids.filter(uid => !isMoving(uid))
+    const actionable = selectedUids.filter(uid => !isSending(uid))
     if (!actionable.length) {
-      toast.error(MOVING_MESSAGE)
+      toast.error(SENDING_MESSAGE)
       return
     }
     confirmDelete({
@@ -126,7 +134,7 @@ const Mails = props => {
       onConfirm: () => {
         const uids = actionable
         setSelectedUids([])
-        if (actionable.length < selectedUids.length) toast.error('Some emails are still being moved and were skipped.')
+        if (actionable.length < selectedUids.length) toast.error('Some emails are still sending and were skipped.')
         dispatch(removeMessageFromList(uids))
         dispatch(bulkDeleteMessages({ folder, uids }))
           .unwrap()
@@ -139,10 +147,6 @@ const Mails = props => {
   }
 
   const openComposeFor = (uid, mode) => {
-    if (isMoving(uid)) {
-      toast.error(MOVING_MESSAGE)
-      return
-    }
     setReplyTo({ uid, mode, loading: true })
     toggleCompose()
     dispatch(getMessage({ folder: store.params.folder, uid, adminMailboxId: viewingMailboxId }))
@@ -155,10 +159,6 @@ const Mails = props => {
   }
 
   const handleMailClick = uid => {
-    if (isMoving(uid)) {
-      toast.error(MOVING_MESSAGE)
-      return
-    }
     if (store.params.folder === 'Drafts' && !viewingMailboxId) {
       openComposeFor(uid, 'draft')
       return
@@ -170,8 +170,8 @@ const Mails = props => {
   }
 
   const handleContextDelete = mail => {
-    if (isMoving(mail.uid)) {
-      toast.error(MOVING_MESSAGE)
+    if (isSending(mail.uid)) {
+      toast.error(SENDING_MESSAGE)
       return
     }
     const folder = store.params.folder
@@ -185,8 +185,8 @@ const Mails = props => {
   }
 
   const handleContextArchive = mail => {
-    if (isMoving(mail.uid)) {
-      toast.error(MOVING_MESSAGE)
+    if (isSending(mail.uid)) {
+      toast.error(SENDING_MESSAGE)
       return
     }
     const folder = store.params.folder

@@ -589,7 +589,7 @@ const CompanySettings = () => {
                     isSearchable={false}
                   />
                   <p className='text-muted small mb-0 mt-25'>
-                    How often each user's Inbox is actually refreshed from the mail server. The cron job itself
+                    How often each user's Inbox - and each Admin Email mailbox - is actually refreshed from the mail server. The cron job itself
                     can run more often than this - it skips anyone not due yet.
                   </p>
                 </Col>
