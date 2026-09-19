@@ -18,12 +18,15 @@ import {
   ListGroup,
   ListGroupItem,
   TabContent,
-  TabPane
+  TabPane,
+  Button,
+  Spinner
 } from 'reactstrap'
-import { Settings, Mail, FileText, Sun, Server } from 'react-feather'
+import { Settings, Mail, FileText, Sun, Server, Trash2 } from 'react-feather'
 import InputPasswordToggle from '@components/input-password-toggle'
 import AdminEmailsTab from './AdminEmailsTab'
-import { selectThemeColors } from '@utils'
+import { selectThemeColors, getUserData } from '@utils'
+import { confirmDelete } from '@src/utility/confirmDelete'
 
 const encryptionOptions = [
   { value: '', label: 'None' },
@@ -90,6 +93,27 @@ const CompanySettings = () => {
   const [weekendSunday, setWeekendSunday] = useState(true)
   const [cpanelApiTokenSet, setCpanelApiTokenSet] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [flushingCache, setFlushingCache] = useState(false)
+  const isAdmin = (getUserData()?.role || '').toLowerCase() === 'admin'
+
+  const handleFlushEmailCache = () => {
+    confirmDelete({
+      title: 'Flush email cache?',
+      text: "This clears every user's and every Admin Email mailbox's cached mail. Nothing on the mail server is deleted - the Email app just rebuilds it from there, so mailboxes may take a moment to refill.",
+      confirmButtonText: 'Yes, flush it',
+      onConfirm: () => {
+        setFlushingCache(true)
+        axios
+          .post('/company/flush-email-cache')
+          .then(response => {
+            const count = response.data?.data?.messagesCleared ?? 0
+            toast.success(`Email cache flushed (${count} cached message${count === 1 ? '' : 's'} cleared)`)
+          })
+          .catch(err => toast.error(err?.response?.data?.message || 'Failed to flush email cache'))
+          .finally(() => setFlushingCache(false))
+      }
+    })
+  }
 
   const { control, reset, handleSubmit } = useForm({ defaultValues })
 
@@ -570,6 +594,27 @@ const CompanySettings = () => {
                   </p>
                 </Col>
               </Row>
+
+              {isAdmin && (
+                <div className='mb-1'>
+                  <Label className='form-label d-block'>Email Cache</Label>
+                  <Button
+                    type='button'
+                    color='outline-danger'
+                    size='sm'
+                    onClick={handleFlushEmailCache}
+                    disabled={flushingCache}
+                  >
+                    {flushingCache ? <Spinner size='sm' className='me-50' /> : <Trash2 size={14} className='me-50' />}
+                    Flush Email Cache
+                  </Button>
+                  <p className='text-muted small mb-0 mt-25'>
+                    Clears the locally cached mail for all users and Admin Email mailboxes - useful if the Email app
+                    ever shows something out of step with the mail server. Never deletes real mail, scheduled
+                    sends, or pending deletes.
+                  </p>
+                </div>
+              )}
 
               <hr className='my-2' />
 

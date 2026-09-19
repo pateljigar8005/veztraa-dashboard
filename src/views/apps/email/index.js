@@ -33,6 +33,26 @@ const searchFields = [
   }
 ]
 
+const MAILBOX_STORAGE_KEY = 'email.viewingMailboxId'
+
+const readStoredMailboxId = () => {
+  try {
+    const value = Number(localStorage.getItem(MAILBOX_STORAGE_KEY))
+    return value > 0 ? value : null
+  } catch (e) {
+    return null
+  }
+}
+
+const storeMailboxId = id => {
+  try {
+    if (id) localStorage.setItem(MAILBOX_STORAGE_KEY, String(id))
+    else localStorage.removeItem(MAILBOX_STORAGE_KEY)
+  } catch (e) {
+    // storage unavailable - selection just won't survive a reload
+  }
+}
+
 const EmailApp = () => {
   const [query, setQuery] = useState('')
   const [openMail, setOpenMail] = useState(false)
@@ -42,7 +62,12 @@ const EmailApp = () => {
   const [filters, setFilters] = useState({})
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false)
   const isAdmin = (getUserData()?.role || '').toLowerCase() === 'admin'
-  const [viewingMailboxId, setViewingMailboxId] = useState(null)
+  const params = useParams()
+  const [viewingMailboxId, setViewingMailboxId] = useState(() => {
+    const [initialFolder] = (params['*'] || '').split('/').filter(Boolean)
+    // Scheduled belongs to the user's own mailbox only.
+    return isAdmin && initialFolder !== 'Scheduled' ? readStoredMailboxId() : null
+  })
   const [mailboxOptions, setMailboxOptions] = useState([])
 
   const toggleCompose = () => {
@@ -60,12 +85,13 @@ const EmailApp = () => {
       setMailboxOptions(
         mailboxes.map(m => ({ value: m.id, label: m.label ? `${m.label} (${m.email})` : m.email, email: m.email }))
       )
+      // A remembered mailbox that's since been deleted falls back to My Mailbox.
+      setViewingMailboxId(current => (current && !mailboxes.some(m => m.id === current) ? null : current))
     })
   }, [])
 
   const viewingMailboxEmail = mailboxOptions.find(o => o.value === viewingMailboxId)?.email || null
 
-  const params = useParams()
   const navigate = useNavigate()
   const [routeFolder, routeUid] = (params['*'] || '').split('/').filter(Boolean)
   const folder = routeFolder || 'INBOX'
@@ -99,6 +125,7 @@ const EmailApp = () => {
 
   const handleSelectMailbox = option => {
     setViewingMailboxId(option ? option.value : null)
+    storeMailboxId(option ? option.value : null)
     setOpenMail(false)
     if (folder !== 'INBOX') navigate('/email/INBOX')
   }

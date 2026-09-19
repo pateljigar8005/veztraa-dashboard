@@ -22,17 +22,15 @@ const MailCard = props => {
         <Avatar initials color='light-primary' content={displayName} className='mail-avatar' />
         {
                                                    }
-        {!readOnly && (
-          <div className='form-check mail-select-checkbox rounded-circle bg-light-primary'>
-            <Input
-              type='checkbox'
-              id={`mail-select-${mail.uid}`}
-              checked={selected}
-              onClick={e => e.stopPropagation()}
-              onChange={() => onToggleSelect(mail.uid)}
-            />
-          </div>
-        )}
+        <div className='form-check mail-select-checkbox rounded-circle bg-light-primary'>
+          <Input
+            type='checkbox'
+            id={`mail-select-${mail.uid}`}
+            checked={selected}
+            onClick={e => e.stopPropagation()}
+            onChange={() => onToggleSelect(mail.uid)}
+          />
+        </div>
       </div>
       <div className='mail-body'>
         <div className='mail-details'>

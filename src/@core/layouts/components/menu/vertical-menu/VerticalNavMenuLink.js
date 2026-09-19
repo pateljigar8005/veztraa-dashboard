@@ -1,9 +1,11 @@
 import { NavLink } from 'react-router-dom'
 import classnames from 'classnames'
+import { useSelector } from 'react-redux'
 import { Badge } from 'reactstrap'
 
 const VerticalNavMenuLink = ({ item, activeItem }) => {
   const LinkTag = item.externalLink ? 'a' : NavLink
+  const emailUnread = useSelector(state => (item.id === 'email' ? state.email.unreadCount : 0))
 
   return (
     <li
@@ -26,6 +28,11 @@ const VerticalNavMenuLink = ({ item, activeItem }) => {
                 if (isActive && !item.disabled) {
                   return 'd-flex align-items-center active'
                 }
+                // An inactive link isn't a flex row by default, which the
+                // right-aligned badge (ms-auto) needs.
+                if (emailUnread > 0) {
+                  return 'd-flex align-items-center'
+                }
               }
             })}
         onClick={e => {
@@ -36,6 +43,12 @@ const VerticalNavMenuLink = ({ item, activeItem }) => {
       >
         {item.icon}
         <span className='menu-item text-truncate'>{item.title}</span>
+
+        {emailUnread > 0 ? (
+          <Badge className='menu-unread-badge ms-auto me-1' color='danger' pill>
+            {emailUnread > 99 ? '99+' : emailUnread}
+          </Badge>
+        ) : null}
 
         {item.badge && item.badgeText ? (
           <Badge className='ms-auto me-1' color={item.badge} pill>

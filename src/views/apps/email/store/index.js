@@ -6,7 +6,15 @@ export const getFolders = createAsyncThunk('appEmail/getFolders', async () => {
   return response.data.data.folders
 })
 
-export const getMessages = createAsyncThunk('appEmail/getMessages', async params => {
+export const getUnreadCount = createAsyncThunk('appEmail/getUnreadCount', async () => {
+  const response = await axios.get('/mailbox/unread-count')
+  return response.data.data.unreadCount
+})
+
+const inboxUnread = folders => folders?.find(f => f.key === 'INBOX')?.unreadCount
+
+// params.silent: background refresh - updates the list without the spinner.
+export const getMessages = createAsyncThunk('appEmail/getMessages', async ({ silent, ...params }) => {
   const response = params.adminMailboxId
     ? await axios.get(`/admin-mailbox/${params.adminMailboxId}/${params.folder}/messages`, {
         params: { page: params.page || 1, perPage: params.perPage || 20, q: params.q || '' }
@@ -58,11 +66,19 @@ export const setMessageRead = createAsyncThunk(
   }
 )
 
+const adminBase = (params, folder) => `/admin-mailbox/${params.adminMailboxId}/${folder}/messages`
+
 export const moveMessage = createAsyncThunk(
   'appEmail/moveMessage',
   async ({ folder, uid, to }, { dispatch, getState }) => {
+    const params = getState().email.params
+    if (params.adminMailboxId) {
+      await axios.post(`${adminBase(params, folder)}/${uid}/move`, { to })
+      await dispatch(getMessages(params))
+      return uid
+    }
     await axios.post(`/mailbox/${folder}/messages/${uid}/move`, { to })
-    await dispatch(getMessages(getState().email.params))
+    await dispatch(getMessages(params))
     dispatch(getFolders())
     return uid
   }
@@ -71,8 +87,14 @@ export const moveMessage = createAsyncThunk(
 export const deleteMessage = createAsyncThunk(
   'appEmail/deleteMessage',
   async ({ folder, uid }, { dispatch, getState }) => {
+    const params = getState().email.params
+    if (params.adminMailboxId) {
+      await axios.delete(`${adminBase(params, folder)}/${uid}`)
+      await dispatch(getMessages(params))
+      return uid
+    }
     await axios.delete(`/mailbox/${folder}/messages/${uid}`)
-    await dispatch(getMessages(getState().email.params))
+    await dispatch(getMessages(params))
     dispatch(getFolders())
     return uid
   }
@@ -81,8 +103,14 @@ export const deleteMessage = createAsyncThunk(
 export const bulkDeleteMessages = createAsyncThunk(
   'appEmail/bulkDeleteMessages',
   async ({ folder, uids }, { dispatch, getState }) => {
+    const params = getState().email.params
+    if (params.adminMailboxId) {
+      await axios.post(`${adminBase(params, folder)}/bulk-delete`, { uids })
+      await dispatch(getMessages(params))
+      return uids
+    }
     await axios.post(`/mailbox/${folder}/messages/bulk-delete`, { uids })
-    await dispatch(getMessages(getState().email.params))
+    await dispatch(getMessages(params))
     dispatch(getFolders())
     return uids
   }
@@ -146,7 +174,9 @@ export const appEmailSlice = createSlice({
     params: { folder: 'INBOX' },
     currentMessage: null,
     messageLoading: false,
-    lastSyncedAt: null
+    lastSyncedAt: null,
+    // Unread INBOX count of the user's OWN mailbox - drives the sidebar badge.
+    unreadCount: 0
   },
   reducers: {
     clearCurrentMessage: state => {
@@ -154,6 +184,10 @@ export const appEmailSlice = createSlice({
     },
     removeMessageFromList: (state, action) => {
       const uids = new Set([].concat(action.payload))
+      if (state.params.folder === 'INBOX' && !state.params.adminMailboxId) {
+        const removedUnread = state.messages.filter(m => uids.has(m.uid) && !m.isRead).length
+        state.unreadCount = Math.max(0, state.unreadCount - removedUnread)
+      }
       const before = state.messages.length
       state.messages = state.messages.filter(m => !uids.has(m.uid))
       state.total = Math.max(0, state.total - (before - state.messages.length))
@@ -173,12 +207,17 @@ export const appEmailSlice = createSlice({
       .addCase(getFolders.fulfilled, (state, action) => {
         state.foldersLoading = false
         state.folders = action.payload
+        const unread = inboxUnread(action.payload)
+        if (unread !== undefined) state.unreadCount = unread
+      })
+      .addCase(getUnreadCount.fulfilled, (state, action) => {
+        state.unreadCount = action.payload
       })
       .addCase(getFolders.rejected, state => {
         state.foldersLoading = false
       })
-      .addCase(getMessages.pending, state => {
-        state.messagesLoading = true
+      .addCase(getMessages.pending, (state, action) => {
+        if (!action.meta.arg?.silent) state.messagesLoading = true
       })
       .addCase(getMessages.fulfilled, (state, action) => {
         state.messagesLoading = false
@@ -198,6 +237,8 @@ export const appEmailSlice = createSlice({
         state.foldersLoading = false
         state.messagesLoading = false
         state.folders = action.payload.data.folders
+        const unread = inboxUnread(action.payload.data.folders)
+        if (unread !== undefined) state.unreadCount = unread
         state.params = action.payload.params
         state.messages = action.payload.data.messages
         state.total = action.payload.data.total
@@ -214,6 +255,9 @@ export const appEmailSlice = createSlice({
         state.messageLoading = false
         state.currentMessage = action.payload
         const inList = state.messages.find(m => m.uid === action.payload.uid)
+        if (inList && !inList.isRead && state.params.folder === 'INBOX' && !state.params.adminMailboxId) {
+          state.unreadCount = Math.max(0, state.unreadCount - 1)
+        }
         if (inList) inList.isRead = true
       })
       .addCase(getMessage.rejected, state => {

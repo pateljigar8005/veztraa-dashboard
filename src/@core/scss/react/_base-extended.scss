@@ -218,3 +218,8 @@ body #root .wrapper .ps__rail-y {
     left: 0 !important;
   }
 }
+
+// Icon-only (collapsed) menu has no room for the count.
+.menu-collapsed .main-menu:not(.expanded) .menu-unread-badge {
+  display: none;
+}

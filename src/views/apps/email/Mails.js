@@ -1,16 +1,18 @@
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import MailCard from './MailCard'
 import MailDetails from './MailDetails'
 import ComposePopUp from './ComposePopup'
 import MailCardContextMenu from './MailCardContextMenu'
 import toast from 'react-hot-toast'
 import PerfectScrollbar from 'react-perfect-scrollbar'
+import ReactPaginate from 'react-paginate'
 import { Menu, Search, Trash2, X } from 'react-feather'
 import { Input, InputGroup, InputGroupText, Spinner, Button } from 'reactstrap'
 import { confirmDelete } from '@src/utility/confirmDelete'
 import { formatRelativeDate } from '@utils'
 import {
   clearCurrentMessage,
+  getMessages,
   bulkDeleteMessages,
   moveMessage,
   deleteMessage,
@@ -18,6 +20,12 @@ import {
   toggleFlag,
   updateMessageFlag
 } from './store'
+
+// Mail just moved (e.g. to Trash) shows in the destination folder under a
+// temporary id until the background move finishes - it can't be acted on yet.
+const PLACEHOLDER_UID_MIN = 4000000000
+const isMoving = uid => uid >= PLACEHOLDER_UID_MIN
+const MOVING_MESSAGE = 'Still being moved - try again in a few seconds.'
 
 const Mails = props => {
   const {
@@ -44,9 +52,50 @@ const Mails = props => {
     setSelectedUids([])
   }, [store.params.folder, store.params.q])
 
+  useEffect(() => {
+    setSelectedUids(prev => {
+      const next = prev.filter(uid => messages.some(m => m.uid === uid))
+      return next.length === prev.length ? prev : next
+    })
+  }, [messages])
+
+  const page = store.params.page || 1
+  const perPage = store.params.perPage || 20
+  const totalPages = Math.max(1, Math.ceil((store.total || 0) / perPage))
+
+  const goToPage = target => {
+    setSelectedUids([])
+    dispatch(getMessages({ ...store.params, page: target }))
+  }
+
+  // Deleting the last item on a later page leaves it empty - step back to
+  // the last page that still has mail instead of showing "No Items Found".
+  useEffect(() => {
+    if (messagesLoading || messages.length > 0 || !store.total || page <= 1) return
+    const target = Math.min(page, totalPages)
+    if (target !== page) goToPage(target)
+  }, [messages, messagesLoading, store.total])
+
+  // While moved mail is still under its temporary id, quietly re-read the
+  // list every few seconds so the real rows replace it. Capped in case the
+  // background move failed and the placeholder never resolves.
+  const hasMoving = messages.some(m => isMoving(m.uid))
+  const refreshAttempts = useRef(0)
+  useEffect(() => {
+    if (!hasMoving) {
+      refreshAttempts.current = 0
+      return
+    }
+    if (messagesLoading || refreshAttempts.current >= 15) return
+    const timer = setTimeout(() => {
+      refreshAttempts.current += 1
+      dispatch(getMessages({ ...store.params, silent: true }))
+    }, 3000)
+    return () => clearTimeout(timer)
+  }, [hasMoving, messages, messagesLoading])
+
   const [contextMenu, setContextMenu] = useState(null)
   const handleContextMenu = (e, mail) => {
-    if (viewingMailboxId) return
     e.preventDefault()
     setContextMenu({ x: e.clientX, y: e.clientY, mail })
   }
@@ -62,20 +111,27 @@ const Mails = props => {
   const handleBulkDelete = () => {
     const folder = store.params.folder
     const isScheduled = folder === 'Scheduled'
+    const actionable = selectedUids.filter(uid => !isMoving(uid))
+    if (!actionable.length) {
+      toast.error(MOVING_MESSAGE)
+      return
+    }
     confirmDelete({
       title: isScheduled
-        ? `Cancel ${selectedUids.length} scheduled email${selectedUids.length === 1 ? '' : 's'}?`
-        : `Delete ${selectedUids.length} email${selectedUids.length === 1 ? '' : 's'}?`,
+        ? `Cancel ${actionable.length} scheduled email${actionable.length === 1 ? '' : 's'}?`
+        : `Delete ${actionable.length} email${actionable.length === 1 ? '' : 's'}?`,
       text: isScheduled
         ? "They won't be sent."
         : folder === 'Trash' ? 'This permanently deletes them.' : "They'll be moved to Trash.",
       onConfirm: () => {
-        dispatch(removeMessageFromList(selectedUids))
-        dispatch(bulkDeleteMessages({ folder, uids: selectedUids }))
+        const uids = actionable
+        setSelectedUids([])
+        if (actionable.length < selectedUids.length) toast.error('Some emails are still being moved and were skipped.')
+        dispatch(removeMessageFromList(uids))
+        dispatch(bulkDeleteMessages({ folder, uids }))
           .unwrap()
           .then(() => {
             toast.success(isScheduled ? 'Scheduled sends cancelled' : folder === 'Trash' ? 'Deleted' : 'Moved to Trash')
-            setSelectedUids([])
           })
           .catch(err => toast.error(err?.message || 'Failed to delete'))
       }
@@ -83,9 +139,13 @@ const Mails = props => {
   }
 
   const openComposeFor = (uid, mode) => {
+    if (isMoving(uid)) {
+      toast.error(MOVING_MESSAGE)
+      return
+    }
     setReplyTo({ uid, mode, loading: true })
     toggleCompose()
-    dispatch(getMessage({ folder: store.params.folder, uid }))
+    dispatch(getMessage({ folder: store.params.folder, uid, adminMailboxId: viewingMailboxId }))
       .unwrap()
       .then(msg => setReplyTo({ ...msg, mode }))
       .catch(err => {
@@ -95,6 +155,10 @@ const Mails = props => {
   }
 
   const handleMailClick = uid => {
+    if (isMoving(uid)) {
+      toast.error(MOVING_MESSAGE)
+      return
+    }
     if (store.params.folder === 'Drafts' && !viewingMailboxId) {
       openComposeFor(uid, 'draft')
       return
@@ -106,6 +170,10 @@ const Mails = props => {
   }
 
   const handleContextDelete = mail => {
+    if (isMoving(mail.uid)) {
+      toast.error(MOVING_MESSAGE)
+      return
+    }
     const folder = store.params.folder
     dispatch(removeMessageFromList(mail.uid))
     const action = folder === 'Trash' || folder === 'Scheduled'
@@ -117,6 +185,10 @@ const Mails = props => {
   }
 
   const handleContextArchive = mail => {
+    if (isMoving(mail.uid)) {
+      toast.error(MOVING_MESSAGE)
+      return
+    }
     const folder = store.params.folder
     dispatch(removeMessageFromList(mail.uid))
     dispatch(moveMessage({ folder, uid: mail.uid, to: 'Archive' })).then(() => toast.success('Archived'))
@@ -160,7 +232,7 @@ const Mails = props => {
           </div>
         </div>
 
-        {messages.length > 0 && !viewingMailboxId && (
+        {messages.length > 0 && (
           <div className='app-action'>
             <div className='form-check d-flex align-items-center' style={{ gap: '0.75rem' }}>
               <Input
@@ -212,6 +284,26 @@ const Mails = props => {
             </div>
           )}
         </PerfectScrollbar>
+
+        {store.total > perPage && (
+          <div className='email-pager'>
+            <ReactPaginate
+              previousLabel={''}
+              nextLabel={''}
+              pageCount={totalPages}
+              activeClassName='active'
+              forcePage={page - 1}
+              onPageChange={({ selected }) => goToPage(selected + 1)}
+              pageClassName={'page-item'}
+              nextLinkClassName={'page-link'}
+              nextClassName={'page-item next'}
+              previousClassName={'page-item prev'}
+              previousLinkClassName={'page-link'}
+              pageLinkClassName={'page-link'}
+              containerClassName={'pagination react-paginate justify-content-end my-50 pe-1'}
+            />
+          </div>
+        )}
       </div>
       <MailDetails
         openMail={openMail}

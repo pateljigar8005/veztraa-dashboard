@@ -7,6 +7,15 @@
   }
 }
 
+// The static footer isn't rendered in this app, but the stock height still
+// reserves room for it - leaving an empty strip under the email panel.
+@media (min-width: 576px) {
+  .navbar-floating.footer-static .app-content.email-application .content-area-wrapper {
+    height: calc(100vh - (#{$content-padding} + #{$navbar-height} + #{$floating-nav-margin} + 1rem));
+    height: calc(var(--vh, 1vh) * 100 - (#{$content-padding} + #{$navbar-height} + #{$floating-nav-margin} + 1rem));
+  }
+}
+
 .email-application .content-area-wrapper .sidebar .email-app-sidebar .email-app-menu {
   display: flex;
   flex-direction: column;
@@ -20,8 +29,31 @@
   }
 }
 
+.email-application .content-area-wrapper .content-right .email-app-list {
+  display: flex;
+  flex-direction: column;
+  .email-user-list {
+    height: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .email-pager {
+    // Own stacking context: the active page button's z-index (3) would
+    // otherwise rise above the open message panel (z-index 2).
+    position: relative;
+    z-index: 0;
+    flex-shrink: 0;
+    border-top: 1px solid $border-color;
+    background-color: $white;
+  }
+}
+
 .dark-layout {
   .email-application {
+    .email-app-list .email-pager {
+      border-color: $theme-dark-border-color;
+      background-color: $theme-dark-card-bg;
+    }
     .email-app-menu {
       .list-group-item {
         &.list-group-item-action:not(.active):not(:active) {

@@ -15,6 +15,7 @@ import { useSkin } from '@hooks/useSkin'
 import { useLayout } from '@hooks/useLayout'
 import { useNavbarType } from '@hooks/useNavbarType'
 import { useFooterType } from '@hooks/useFooterType'
+import { useEmailUnreadPolling } from '@hooks/useEmailUnreadPolling'
 import { useNavbarColor } from '@hooks/useNavbarColor'
 import '@styles/base/core/menu/menu-types/vertical-menu.scss'
 import '@styles/base/core/menu/menu-types/vertical-overlay-menu.scss'
@@ -32,6 +33,8 @@ const VerticalLayout = props => {
   const [isMounted, setIsMounted] = useState(false)
   const [menuVisibility, setMenuVisibility] = useState(false)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+
+  useEmailUnreadPolling()
 
   const dispatch = useDispatch()
   const layoutStore = useSelector(state => state.layout)
