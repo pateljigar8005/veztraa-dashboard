@@ -1,5 +1,5 @@
-@import '../../bootstrap-extended/include'; // Bootstrap includes
-@import '../../components/include'; // Components includes
+@import '../../bootstrap-extended/include';
+@import '../../components/include';
 
 .jstree > .jstree-container-ul .jstree-loading > .jstree-ocl,
 .jstree > .jstree-container-ul .jstree-loading > .jstree-ocl,
@@ -51,7 +51,6 @@
   background: transparent !important;
 }
 
-// Light Layout
 .jstree {
   .jstree-container-ul {
     .jstree-anchor {
@@ -73,7 +72,6 @@
   }
 }
 
-// Context Menu Styling
 .vakata-context.jstree-contextmenu {
   background: $white;
   border: 0;
@@ -117,9 +115,7 @@
   }
 }
 
-// Dark Layout
 .dark-layout {
-  // Folder Icons and text colors
   .jstree {
     .jstree-container-ul {
       .jstree-anchor {
@@ -128,7 +124,6 @@
     }
   }
 
-  // Context Menu Styling
   .vakata-context.jstree-contextmenu {
     background: $theme-dark-card-bg;
     box-shadow: $theme-dark-box-shadow;

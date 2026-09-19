@@ -1,4 +1,3 @@
-// ** Menu Components Imports
 import HorizontalNavMenuLink from './HorizontalNavMenuLink'
 import HorizontalNavMenuGroup from './HorizontalNavMenuGroup'
 import {
@@ -8,13 +7,11 @@ import {
 } from '@layouts/utils'
 
 const HorizontalNavMenuItems = props => {
-  // ** Components Object
   const Components = {
     HorizontalNavMenuGroup,
     HorizontalNavMenuLink
   }
 
-  // ** Render Nav Items
   const RenderNavItems = props.items.map((item, index) => {
     const TagName = Components[resolveNavItemComponent(item)]
     if (item.children) {

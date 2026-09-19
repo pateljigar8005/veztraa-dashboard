@@ -1,33 +1,18 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-
-// ** Hooks
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
-
-// ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { Editor } from '@veztraa/editor'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
-
-// ** Utils
 import { selectThemeColors, uploadEditorImage } from '@utils'
-
-// ** Shared Components
 import TermsSection from '../../shared/TermsSection'
 import PaymentMethodSection from '../../shared/PaymentMethodSection'
 import DateField from '../../shared/DateField'
-
-// ** Store & Actions
 import { addContract, updateContract, getContract } from '../store'
-
-// ** Options
 import { frequencyOptions } from '../contractOptions'
 
 const defaultValues = {
@@ -43,7 +28,6 @@ const defaultValues = {
 }
 
 const ContractForm = () => {
-  // ** Hooks & Vars
   const { id } = useParams()
   const [searchParams] = useSearchParams()
   const preselectedClientId = searchParams.get('client_id')
@@ -59,8 +43,6 @@ const ContractForm = () => {
   const [body, setBody] = useState('')
   const [termsContent, setTermsContent] = useState('')
   const [paymentMethodContent, setPaymentMethodContent] = useState('')
-  // Tracks edits to the state above, none of which is registered with
-  // react-hook-form, so its own isDirty can't see them.
   const [extraDirty, setExtraDirty] = useState(false)
 
   const {
@@ -112,7 +94,6 @@ const ContractForm = () => {
     }
   }, [preselectedClientId])
 
-  // ** Fetch the contract being edited, or the source contract being cloned
   useEffect(() => {
     if (isEdit) dispatch(getContract(id))
     else if (cloneId) dispatch(getContract(cloneId))
@@ -143,7 +124,6 @@ const ContractForm = () => {
     }
   }, [store.selectedContract])
 
-  // ** Quick Fill Customer
   const handleQuickFill = option => {
     setValue('client_id', option ? option.value : '', { shouldDirty: true })
     if (option) {

@@ -1,14 +1,4 @@
-// =========================================================================================
-//   File Name: timeline.scss
-//   Description: Timeline style.
-//   ----------------------------------------------------------------------------------------
-//   Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-//   Author: PIXINVENT
-//   Author URL: http://www.themeforest.net/user/pixinvent
-// ==========================================================================================
 
-// Component: Timeline
-// ========================================================================
 
 .timeline {
   padding: 0;
@@ -16,7 +6,6 @@
   margin-left: 1rem;
   list-style: none;
 
-  // Timeline Item
   .timeline-item {
     position: relative;
     padding-left: 2.5rem;
@@ -26,7 +15,6 @@
       padding-bottom: 1.8rem;
     }
 
-    // Timeline Point
     .timeline-point {
       position: absolute;
       left: -0.85rem;
@@ -42,7 +30,6 @@
       border: 1px solid $timeline-point-indicator-color;
       background-color: $white;
 
-      // Timeline Point Indicator
       &.timeline-point-indicator {
         left: -0.412rem;
         top: 0.07rem;
@@ -64,7 +51,6 @@
         }
       }
 
-      // Icons
       i,
       svg {
         color: $timeline-point-indicator-color;
@@ -77,7 +63,6 @@
       position: relative;
       width: 100%;
       min-height: $timeline-item-min-height;
-      // background-color: transparent;
 
       .timeline-event-time {
         font-size: $timeline-event-time-size;

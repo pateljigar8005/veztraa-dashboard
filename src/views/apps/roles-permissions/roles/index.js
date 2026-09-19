@@ -1,7 +1,4 @@
-// ** React Imports
 import { Fragment } from 'react'
-
-// ** Roles Components
 import Table from './list/Table'
 
 const Roles = () => {

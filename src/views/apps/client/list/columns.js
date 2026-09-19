@@ -1,26 +1,14 @@
-// ** React Imports
 import { Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
-
-// ** Custom Components
 import Avatar from '@components/avatar'
-
-// ** Store & Actions
 import { store } from '@store/store'
 import { deleteClient } from '../store'
-
-// ** Icons Imports
 import { Edit2, FileText, Trash2 } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
-
-// ** Utils
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
 
-// ** Renders Client Column
 const renderClient = row => (
   <Avatar
     initials

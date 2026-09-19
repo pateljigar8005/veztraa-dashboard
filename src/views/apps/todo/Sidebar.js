@@ -1,19 +1,12 @@
-// ** React Imports
 import { Link } from 'react-router-dom'
-
-// ** Third Party Components
 import classnames from 'classnames'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 import { Mail, Star, Check, Trash, Plus } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Button, ListGroup, ListGroupItem } from 'reactstrap'
 
 const TodoSidebar = props => {
-  // ** Props
   const { handleTaskSidebar, setMainSidebar, mainSidebar, dispatch, getTasks, params } = props
 
-  // ** Functions To Handle List Item Filter
   const handleFilter = filter => {
     dispatch(getTasks({ ...params, filter }))
   }
@@ -22,7 +15,6 @@ const TodoSidebar = props => {
     dispatch(getTasks({ ...params, tag }))
   }
 
-  // ** Functions To Active List Item
   const handleActiveItem = value => {
     if ((params.filter && params.filter === value) || (params.tag && params.tag === value)) {
       return true
@@ -31,7 +23,6 @@ const TodoSidebar = props => {
     }
   }
 
-  // ** Functions To Handle Add Task Click
   const handleAddClick = () => {
     handleTaskSidebar()
     setMainSidebar()

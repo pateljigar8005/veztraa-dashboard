@@ -1,7 +1,6 @@
-@import '../../bootstrap-extended/include'; // Bootstrap includes
-@import '../../components/include'; // Components includes
+@import '../../bootstrap-extended/include';
+@import '../../components/include';
 
-/* Set dropdown font-families */
 .ql-toolbar .ql-font span[data-label='Sailec Light']::before {
   font-family: 'Sailec Light';
 }
@@ -21,7 +20,6 @@
   font-family: 'Ubuntu Mono';
 }
 
-/* Set content font-families */
 .ql-font-sofia {
   font-family: 'Sofia';
 }
@@ -38,7 +36,6 @@
   font-family: 'Ubuntu Mono';
 }
 
-// Quill Editor
 .ql-toolbar {
   border-color: $input-border-color !important;
   .ql-formats {
@@ -46,7 +43,6 @@
     *:focus {
       outline: 0;
     }
-    // button and label hover
     .ql-picker-label,
     button {
       &:hover,
@@ -66,7 +62,6 @@
     .ql-picker-item.ql-selected {
       color: $primary !important;
     }
-    // quill dropdown item hover
     .ql-picker-options {
       .ql-picker-item:hover {
         color: $primary !important;
@@ -81,11 +76,9 @@
   .ql-picker {
     color: $white !important;
   }
-  // stroke options color
   .ql-stroke {
     stroke: $white !important;
   }
-  // fill options color
   .ql-fill {
     fill: $white !important;
   }
@@ -99,11 +92,9 @@
     color: $primary;
   }
 }
-// default picker options
 .ql-picker {
   color: $headings-color !important;
 }
-// stroke options color
 .ql-stroke {
   stroke: $headings-color !important;
 }
@@ -115,11 +106,9 @@
     fill: $primary !important;
   }
 }
-// fill options color
 .ql-fill {
   fill: $headings-color !important;
 }
-// Border rounded for editor
 .ql-toolbar,
 .ql-container {
   border-top-right-radius: $border-radius;
@@ -128,24 +117,19 @@
 .ql-toolbar {
   + .ql-container,
   .ql-container + & {
-    // ? If container/toolbar is below container/toolbar add bottom radius
     border-bottom-right-radius: $border-radius;
     border-bottom-left-radius: $border-radius;
-    // ? If container/toolbar is above container/toolbar remove top radius
     border-top-right-radius: unset;
     border-top-left-radius: unset;
   }
 }
 
-// Dark Layout
 .dark-layout {
-  // Quill Editor
   .quill-toolbar,
   .ql-toolbar {
     background-color: $theme-dark-input-bg;
     border-color: $theme-dark-border-color !important;
 
-    // toolbar color
     .ql-picker {
       color: $white !important;
     }
@@ -158,7 +142,6 @@
       fill: $white !important;
     }
 
-    // toolbar options colors
     .ql-picker-options,
     .ql-picker-label {
       background-color: $theme-dark-input-bg;
@@ -187,7 +170,6 @@
     background-color: $theme-dark-input-bg;
   }
 
-  // syntax color
   .ql-editor {
     .ql-syntax {
       background-color: $theme-dark-body-bg;
@@ -201,7 +183,6 @@
   }
 }
 
-// RTL
 [data-textdirection='rtl'] {
   .ql-snow .ql-picker:not(.ql-color-picker):not(.ql-icon-picker) {
     i,

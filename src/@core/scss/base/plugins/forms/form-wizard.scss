@@ -1,5 +1,5 @@
-@import '../../bootstrap-extended/include'; // Bootstrap includes
-@import '../../components/include'; // Components includes
+@import '../../bootstrap-extended/include';
+@import '../../components/include';
 
 $header-padding-y: 1.5rem;
 $header-padding-x: 1.5rem;
@@ -107,16 +107,6 @@ $step-box-width: 38px;
         }
       }
 
-      // &:first-child {
-      //   .step-trigger {
-      //     padding-left: 0;
-      //   }
-      // }
-      // &:last-child {
-      //   .step-trigger {
-      //     padding-right: 0;
-      //   }
-      // }
     }
   }
   .bs-stepper-content {
@@ -181,7 +171,6 @@ $step-box-width: 38px;
   margin-bottom: 2.2rem;
 }
 
-// Dark Layout
 .dark-layout {
   .bs-stepper {
     background-color: $theme-dark-card-bg;
@@ -255,7 +244,6 @@ $step-box-width: 38px;
   }
 }
 
-// RTl
 html[data-textdirection='rtl'] {
   .btn-prev,
   .btn-next {
@@ -267,7 +255,6 @@ html[data-textdirection='rtl'] {
   }
 }
 
-// Media Queries
 @media (max-width: 992px) {
   .bs-stepper {
     .bs-stepper-header {

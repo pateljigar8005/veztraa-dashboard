@@ -1,4 +1,3 @@
-// ** Area Chart Common Options
 export const areaChartOptions = {
   chart: {
     toolbar: {
@@ -46,7 +45,6 @@ export const areaChartOptions = {
   }
 }
 
-// ** Line Chart Common Options
 export const lineChartOptions = {
   chart: {
     toolbar: {

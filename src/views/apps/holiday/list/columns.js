@@ -1,19 +1,10 @@
-// ** React Imports
 import { Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
-
-// ** Store & Actions
 import { store } from '@store/store'
 import { deleteHoliday } from '../store'
-
-// ** Icons Imports
 import { Edit2, Trash2 } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Button, UncontrolledTooltip } from 'reactstrap'
-
-// ** Utils
 import { formatDate } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
@@ -37,9 +28,6 @@ export const columns = [
     sortable: true,
     sortField: 'date',
     selector: row => row.date,
-    // Date-only string parsed from its own Y-m-d parts (not `new Date(str)`,
-    // which reads as UTC and can silently shift a day depending on the
-    // browser's local timezone - same reasoning as elsewhere in this app).
     cell: row => {
       const [y, m, d] = row.date.split('-').map(Number)
       return <span>{formatDate(new Date(y, m - 1, d), { month: 'short', day: 'numeric', year: 'numeric' })}</span>

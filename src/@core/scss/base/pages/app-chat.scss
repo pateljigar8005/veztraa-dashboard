@@ -1,21 +1,12 @@
-// ================================================================================================
-//   File Name: app-chat.scss
-//   Description: SCC file for chat application page.
-//   ----------------------------------------------------------------------------------------------
-//   Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-//   Author: PIXINVENT
-//   Author URL: http://www.themeforest.net/user/pixinvent
-// ================================================================================================
+@import '../bootstrap-extended/include';
+@import '../components/include';
 
-@import '../bootstrap-extended/include'; // Bootstrap includes
-@import '../components/include'; // Components includes
 
 @import '../core/colors/palette-variables';
 
 @import 'bootstrap/scss/mixins/_gradients';
 @import 'bootstrap/scss/mixins/gradients';
 
-//Variables
 $chat-image-back-color: #f2f0f7;
 $chat-head-footer-height: 65px;
 $chat-profile-sidebar-head-height: 200px;
@@ -26,7 +17,6 @@ $chat-profile-sidebar-head-height: 200px;
     border-radius: $card-border-radius;
   }
 
-  // chat admin profile sidebar
   .chat-profile-sidebar {
     border-right: 1px solid $border-color;
     height: inherit;
@@ -44,7 +34,6 @@ $chat-profile-sidebar-head-height: 200px;
       transition: all 0.3s ease, background 0s, border 0s, color 0s;
     }
 
-    // admin profile header section
     .chat-profile-header {
       display: flex;
       align-items: center;
@@ -56,7 +45,6 @@ $chat-profile-sidebar-head-height: 200px;
       }
     }
 
-    //  Admin profile scroll area
     .profile-sidebar-area {
       height: calc(100% - #{$chat-profile-sidebar-head-height});
       position: relative;
@@ -64,7 +52,6 @@ $chat-profile-sidebar-head-height: 200px;
     }
   }
 
-  // close icon style for all chat sidebars
   .close-icon {
     position: absolute;
     top: 0.85rem;
@@ -81,14 +68,12 @@ $chat-profile-sidebar-head-height: 200px;
     }
   }
 
-  // for avatar border
   .avatar-border {
     img {
       border: 2px solid $white;
     }
   }
 
-  // Main Sidebar Content
   .sidebar-content {
     background-color: $white;
     border-right: 1px solid $border-color;
@@ -99,7 +84,6 @@ $chat-profile-sidebar-head-height: 200px;
     border-bottom-right-radius: 0;
     margin: 0;
     box-shadow: none;
-    // Close Icon
     .sidebar-close-icon {
       position: absolute;
       right: 0.25rem;
@@ -109,7 +93,6 @@ $chat-profile-sidebar-head-height: 200px;
       cursor: pointer;
       visibility: hidden;
     }
-    // Chat search area
     .chat-fixed-search {
       width: $chat-sidebar-width;
       border-bottom: 1px solid $border-color;
@@ -132,13 +115,11 @@ $chat-profile-sidebar-head-height: 200px;
       color: $primary;
       margin: 2rem 1.286rem 0.5rem;
     }
-    // Sidebar chat list
     .chat-user-list-wrapper {
       position: relative;
       height: calc(100% - #{$chat-head-footer-height});
       width: $chat-sidebar-width;
       border-radius: 0;
-      // Specific alignment for avatar status
       .avatar {
         height: 42px;
         [class*='avatar-status-'] {
@@ -148,7 +129,7 @@ $chat-profile-sidebar-head-height: 200px;
       }
       .contact-list {
         .chat-info {
-          width: calc(100% - 46px); // ? avatar size with 2px border = 42+2+2 =46px
+          width: calc(100% - 46px);
           padding-right: 0;
         }
       }
@@ -168,7 +149,7 @@ $chat-profile-sidebar-head-height: 200px;
         padding: 0.786rem 1.286rem;
         .chat-info {
           margin-top: 0.3rem;
-          width: calc(100% - 46px - 46px); // ? avatar size with 2px border = 42+2+2 =46px & date area width = 46px
+          width: calc(100% - 46px - 46px);
           padding: 0 0.75rem;
           .card-text,
           p {
@@ -203,11 +184,9 @@ $chat-profile-sidebar-head-height: 200px;
     }
   }
 
-  // User chat window css
   .chat-app-window {
     height: 100%;
 
-    // Before starting chat
     .start-chat-area,
     .user-chats {
       background-image: url($chat-bg-light);
@@ -245,7 +224,6 @@ $chat-profile-sidebar-head-height: 200px;
     }
   }
 
-  // User Profile right sidebar
   .user-profile-sidebar {
     width: $chat-sidebar-width;
     border-radius: $border-radius-sm;

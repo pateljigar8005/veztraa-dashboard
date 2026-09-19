@@ -1,25 +1,12 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
-// ** Hooks
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
-
-// ** Third Party Components
 import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
-
-// ** Custom Components
 import ImageUploadField from '../../shared/ImageUploadField'
-
-// ** Utils
 import { resolveAvatarUrl } from '@utils'
-
-// ** Store & Actions
 import { addTeamMember, updateTeamMember, getTeamMember, uploadTeamMemberPhoto } from '../store'
 
 const defaultValues = {
@@ -32,7 +19,6 @@ const defaultValues = {
 }
 
 const TeamMemberForm = () => {
-  // ** Hooks & Vars
   const { id } = useParams()
   const isEdit = Boolean(id)
   const navigate = useNavigate()
@@ -42,8 +28,6 @@ const TeamMemberForm = () => {
   const [isActive, setIsActive] = useState(true)
   const [photoFile, setPhotoFile] = useState(null)
   const [photoPreview, setPhotoPreview] = useState(null)
-  // Tracks edits to the state above (active toggle, photo), none of which is
-  // registered with react-hook-form, so its own isDirty can't see them.
   const [extraDirty, setExtraDirty] = useState(false)
 
   const {
@@ -59,12 +43,10 @@ const TeamMemberForm = () => {
 
   const introduction = watch('introduction')
 
-  // ** Fetch the team member being edited
   useEffect(() => {
     if (isEdit) dispatch(getTeamMember(id))
   }, [id])
 
-  // ** Populate the form once the team member loads
   useEffect(() => {
     if (isEdit && store.selectedTeamMember && store.selectedTeamMember.id === Number(id)) {
       const member = store.selectedTeamMember
@@ -81,9 +63,6 @@ const TeamMemberForm = () => {
     }
   }, [store.selectedTeamMember])
 
-  // ** Edit mode: upload immediately since the member already has an id.
-  // Add mode: just stage the file - it's uploaded right after the new
-  // member is created, once a real id exists to attach it to.
   const handlePhotoChange = file => {
     setPhotoPreview(URL.createObjectURL(file))
     if (isEdit) {
@@ -94,8 +73,6 @@ const TeamMemberForm = () => {
     }
   }
 
-  // ** Add mode: nothing saved yet, just clear the staged file. Edit mode:
-  // the photo is already persisted, so clearing it is a real update.
   const handleRemovePhoto = () => {
     setPhotoPreview(null)
     setPhotoFile(null)

@@ -1,14 +1,9 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-
-// ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useForm, Controller } from 'react-hook-form'
-
-// ** Reactstrap Imports
 import {
   Card,
   CardHeader,
@@ -25,15 +20,9 @@ import {
   TabContent,
   TabPane
 } from 'reactstrap'
-
-// ** Third Party Icons
 import { Settings, Mail, FileText, Sun, Server } from 'react-feather'
-
-// ** Custom Components
 import InputPasswordToggle from '@components/input-password-toggle'
 import AdminEmailsTab from './AdminEmailsTab'
-
-// ** Utils
 import { selectThemeColors } from '@utils'
 
 const encryptionOptions = [
@@ -104,7 +93,6 @@ const CompanySettings = () => {
 
   const { control, reset, handleSubmit } = useForm({ defaultValues })
 
-  // ** Fetch currencies and PDF templates for the selects
   useEffect(() => {
     axios.get('/currencies', { params: { perPage: 100 } }).then(response => {
       const active = response.data.data.currencies.filter(c => c.is_active)
@@ -112,8 +100,6 @@ const CompanySettings = () => {
     })
 
     axios.get('/pdf-designer-templates', { params: { perPage: 100 } }).then(response => {
-      // Any active template can be picked for any of the three slots below -
-      // the template's own "type" tag isn't used to narrow these lists.
       const options = response.data.data.pdfDesignerTemplates
         .filter(t => t.is_active)
         .map(t => ({ value: t.id, label: t.name }))
@@ -142,10 +128,6 @@ const CompanySettings = () => {
         cpanel_host: data.cpanel_host || '',
         cpanel_port: data.cpanel_port ?? 2083,
         cpanel_username: data.cpanel_username || '',
-        // Unlike smtp_password (write-only, "leave blank to keep"), the API
-        // only decrypts this back for an admin requester - shows the real
-        // current value here, same as the mailbox password on the User
-        // form, rather than a blank/placeholder field.
         cpanel_api_token: data.cpanel_api_token || '',
         mail_domain: data.mail_domain || ''
       })

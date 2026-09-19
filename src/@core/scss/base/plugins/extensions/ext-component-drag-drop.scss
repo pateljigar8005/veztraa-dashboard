@@ -1,7 +1,6 @@
-@import '../../bootstrap-extended/include'; // Bootstrap includes
-@import '../../components/include'; // Components includes
+@import '../../bootstrap-extended/include';
+@import '../../components/include';
 
-// draggable cursor - grab
 .draggable {
   cursor: grab;
   .gu-unselectable & {
@@ -9,13 +8,11 @@
   }
 }
 
-// For Multi List
 #multiple-list-group-a,
 #multiple-list-group-b {
   min-height: 5.714rem;
 }
 
-// For Handle
 #dd-with-handle {
   .list-group {
     min-height: 5.714rem;
@@ -41,9 +38,7 @@
   }
 }
 
-// Dak Layout
 .dark-layout {
-  // Drag & drop moving element
   .gu-mirror {
     color: $theme-dark-body-color;
     &:not(.badge):not([class*='col-']) {

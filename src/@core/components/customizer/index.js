@@ -1,20 +1,12 @@
-// ** React Imports
 import { useState } from 'react'
-
-// ** Third Party Components
 import Select from 'react-select'
 import classnames from 'classnames'
 import { Settings, X } from 'react-feather'
 import PerfectScrollbar from 'react-perfect-scrollbar'
-
-// ** Reactstrap Imports
 import { Input, Label } from 'reactstrap'
-
-// ** Styles
 import '@styles/react/libs/react-select/_react-select.scss'
 
 const Customizer = props => {
-  // ** Props
   const {
     skin,
     isRtl,
@@ -37,16 +29,13 @@ const Customizer = props => {
     setMenuCollapsed
   } = props
 
-  // ** State
   const [openCustomizer, setOpenCustomizer] = useState(false)
 
-  // ** Toggles Customizer
   const handleToggle = e => {
     e.preventDefault()
     setOpenCustomizer(!openCustomizer)
   }
 
-  // ** Render Layout Skin Options
   const renderSkinsRadio = () => {
     const skinsArr = [
       {
@@ -89,7 +78,6 @@ const Customizer = props => {
     })
   }
 
-  // ** Render Navbar Colors Options
   const renderNavbarColors = () => {
     const colorsArr = ['white', 'primary', 'secondary', 'success', 'danger', 'info', 'warning', 'dark']
 
@@ -105,7 +93,6 @@ const Customizer = props => {
     ))
   }
 
-  // ** Render Navbar Type Options
   const renderNavbarTypeRadio = () => {
     const navbarTypeArr = [
       {
@@ -148,7 +135,6 @@ const Customizer = props => {
     })
   }
 
-  // ** Render Footer Type Options
   const renderFooterTypeRadio = () => {
     const footerTypeArr = [
       {

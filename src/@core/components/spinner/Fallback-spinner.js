@@ -1,4 +1,3 @@
-// ** Logo
 import logo from '@src/assets/images/logo/logo.svg'
 
 const SpinnerComponent = () => {

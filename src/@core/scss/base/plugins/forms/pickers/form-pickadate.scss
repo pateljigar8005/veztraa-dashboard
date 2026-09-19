@@ -1,11 +1,9 @@
-@import '../../../bootstrap-extended/include'; // Bootstrap includes
-@import '../../../components/include'; // Components includes
+@import '../../../bootstrap-extended/include';
+@import '../../../components/include';
 
-// remove picker outline
 .picker__holder {
   outline: none;
 }
-// Updated picker  color as per theme color
 .picker__day--today:before,
 .picker__button--today:before {
   border-top: 6px solid $primary;
@@ -21,7 +19,6 @@
 .picker--focused .picker__list-item--selected {
   background-color: $primary;
 }
-// Updated picker svg icons
 .picker__nav--prev:before,
 .picker__nav--next:before,
 .picker__button--close:before {
@@ -44,9 +41,7 @@
   height: 10px !important;
 }
 
-// Dark layout style
 .dark-layout {
-  // date picker
   .picker__holder {
     background-color: $theme-dark-body-bg;
     border-color: $theme-dark-border-color;
@@ -91,7 +86,6 @@
               color: $theme-dark-body-color;
               &.picker__day--selected {
                 color: $white;
-                // color: $theme-dark-body-color;
               }
               &.picker__day--outfocus {
                 opacity: 0.65;
@@ -133,7 +127,6 @@
     }
   }
 
-  // time picker
   .picker--time {
     .picker__holder {
       .picker__list {
@@ -160,7 +153,6 @@
   }
 }
 
-//RTL Style
 [dir='rtl'] {
   .picker__nav--prev:before {
     background-image: url(str-replace(str-replace($chevron-right, 'currentColor', $body-color), '#', '%23'));

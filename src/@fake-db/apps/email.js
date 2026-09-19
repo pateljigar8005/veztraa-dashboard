@@ -1,6 +1,4 @@
 import mock from '../mock'
-
-// Avatars Imports
 import avatar1 from '@src/assets/images/avatars/1.png'
 import avatar2 from '@src/assets/images/avatars/2.png'
 import avatar3 from '@src/assets/images/avatars/3.png'
@@ -12,14 +10,11 @@ import avatar9 from '@src/assets/images/avatars/9.png'
 import avatar10 from '@src/assets/images/avatars/10.png'
 import avatar11 from '@src/assets/images/avatars/11.png'
 import avatarSmall9 from '@src/assets/images/portrait/small/avatar-s-9.jpg'
-
-// Icons Imports
 import jsIcon from '@src/assets/images/icons/js.png'
 import txtIcon from '@src/assets/images/icons/txt.png'
 import xlsIcon from '@src/assets/images/icons/xls.png'
 import docIcon from '@src/assets/images/icons/doc.png'
 
-/* eslint-disable */
 const data = {
   emails: [
     {
@@ -761,9 +756,6 @@ const data = {
   ]
 }
 
-// ------------------------------------------------
-// GET: Return Emails
-// ------------------------------------------------
 mock.onGet('/apps/email/emails').reply(config => {
   const { q = '', folder = 'inbox', label } = config.params
 
@@ -777,16 +769,11 @@ mock.onGet('/apps/email/emails').reply(config => {
 
   const filteredData = data.emails.filter(
     email =>
-      /* eslint-disable operator-linebreak, implicit-arrow-linebreak */
       (email.from.name.toLowerCase().includes(queryLowered) || email.subject.toLowerCase().includes(queryLowered)) &&
       isInFolder(email) &&
       (label ? email.labels.includes(label) : true)
   )
-  /* eslint-enable  */
 
-  // ------------------------------------------------
-  // Email Meta
-  // ------------------------------------------------
   const emailsMeta = {
     inbox: data.emails.filter(email => !email.isDeleted && !email.isRead && email.folder === 'inbox').length,
     draft: data.emails.filter(email => email.folder === 'draft').length,
@@ -802,9 +789,6 @@ mock.onGet('/apps/email/emails').reply(config => {
   ]
 })
 
-// ------------------------------------------------
-// POST: Update Email
-// ------------------------------------------------
 mock.onPost('/apps/email/update-emails').reply(config => {
   const { emailIds, dataToUpdate } = JSON.parse(config.data)
   function updateMailData(email) {
@@ -818,9 +802,6 @@ mock.onPost('/apps/email/update-emails').reply(config => {
   return [200]
 })
 
-// ------------------------------------------------
-// POST: Update Emails Label
-// ------------------------------------------------
 mock.onPost('/apps/email/update-emails-label').reply(config => {
   const { emailIds, label } = JSON.parse(config.data)
 
@@ -838,9 +819,6 @@ mock.onPost('/apps/email/update-emails-label').reply(config => {
   return [200]
 })
 
-// ------------------------------------------------
-// GET: GET Single Email
-// ------------------------------------------------
 mock.onGet('/apps/email/get-email').reply(config => {
   const { id } = config
 
@@ -854,9 +832,6 @@ mock.onGet('/apps/email/get-email').reply(config => {
   return mail ? [200, mail] : [404]
 })
 
-// ------------------------------------------------
-// GET: Paginate Existing Email
-// ------------------------------------------------
 mock.onGet('/apps/email/paginate-email').reply(config => {
   const { dir, emailId } = config.params
 
@@ -868,4 +843,3 @@ mock.onGet('/apps/email/paginate-email').reply(config => {
 
   return newEmail ? [200, newEmail] : [404]
 })
-/* eslint-enable */

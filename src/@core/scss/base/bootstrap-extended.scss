@@ -1,20 +1,9 @@
-// ================================================================================================
-//  File Name: bootstrap-extended.scss
-//  Description: List of modified Bootstrap files. This is an actual copy of bootstrap.scss
-//                excluding files that have not been modified.
-//  ----------------------------------------------------------------------------------------------
-//  Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-//  Author: PIXINVENT
-//  Author URL: http://www.themeforest.net/user/pixinvent
-// ================================================================================================
+@import 'bootstrap-extended/include';
+@import 'components/include';
+@import 'core/mixins/alert';
 
-@import 'bootstrap-extended/include'; // Bootstrap includes
-@import 'components/include'; // Components includes
 
-// Custom template mixins
-@import 'core/mixins/alert'; // Template custom mixins
 
-// Core CSS
 @import 'bootstrap-extended/reboot';
 @import 'bootstrap-extended/helper';
 @import 'bootstrap-extended/type';
@@ -24,7 +13,6 @@
 @import 'bootstrap-extended/buttons';
 @import 'bootstrap-extended/button-group';
 
-// Components
 @import 'bootstrap-extended/dropdown';
 @import 'bootstrap-extended/navbar';
 @import 'bootstrap-extended/card';
@@ -39,9 +27,7 @@
 @import 'bootstrap-extended/accordion';
 @import 'bootstrap-extended/pagination';
 
-// Components w/ JavaScript
 @import 'bootstrap-extended/modal';
 @import 'bootstrap-extended/popover';
 
-// Utility classes
 @import 'bootstrap-extended/utilities';

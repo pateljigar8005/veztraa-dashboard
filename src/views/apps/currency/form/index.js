@@ -1,23 +1,12 @@
-// ** React Imports
 import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
-// ** Hooks
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
-
-// ** Third Party Components
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
-
-// ** Utils
 import { selectThemeColors } from '@utils'
-
-// ** Store & Actions
 import { addCurrency, updateCurrency, getCurrency } from '../store'
 
 const statusOptions = [
@@ -32,7 +21,6 @@ const defaultValues = {
 }
 
 const CurrencyForm = () => {
-  // ** Hooks & Vars
   const { id } = useParams()
   const isEdit = Boolean(id)
   const navigate = useNavigate()
@@ -53,12 +41,10 @@ const CurrencyForm = () => {
 
   const isActive = watch('is_active')
 
-  // ** Fetch the currency being edited
   useEffect(() => {
     if (isEdit) dispatch(getCurrency(id))
   }, [id])
 
-  // ** Populate the form once the currency loads
   useEffect(() => {
     if (isEdit && store.selectedCurrency && store.selectedCurrency.id === Number(id)) {
       const currency = store.selectedCurrency

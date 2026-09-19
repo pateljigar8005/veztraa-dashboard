@@ -1,24 +1,14 @@
-// ** React Imports
 import { Fragment } from 'react'
-
-// ** Third Party Components
 import Proptypes from 'prop-types'
 import classnames from 'classnames'
-
-// ** Reactstrap Imports
 import { UncontrolledTooltip } from 'reactstrap'
-
-// ** Custom Components Imports
 import Avatar from '@components/avatar'
 
 const AvatarGroup = props => {
-  // ** Props
   const { data, tag, className } = props
 
-  // ** Conditional Tag
   const Tag = tag ? tag : 'div'
 
-  // ** Render Data
   const renderData = () => {
     return data.map((item, i) => {
       const ItemTag = item.tag ? item.tag : 'div'
@@ -60,7 +50,6 @@ const AvatarGroup = props => {
 
 export default AvatarGroup
 
-// ** PropTypes
 AvatarGroup.propTypes = {
   data: Proptypes.array.isRequired,
   tag: Proptypes.oneOfType([Proptypes.func, Proptypes.string])

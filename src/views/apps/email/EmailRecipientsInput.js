@@ -1,28 +1,14 @@
-// ** React Imports
 import { useState } from 'react'
-
-// ** Third Party Components
 import Select from 'react-select'
 import toast from 'react-hot-toast'
-
-// ** Utils
 import { selectThemeColors } from '@utils'
 
 const isValidEmail = str => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str.trim())
 
-// A free-text, multi-value "chip" input for To/Cc/Bcc - type an address and
-// press Enter/Tab/comma (or paste a comma/semicolon/space-separated list) to
-// turn it into a removable tag, matching how Gmail's own recipient fields
-// work. Built on the same react-select already used everywhere else in this
-// app rather than a new dependency, just with no dropdown/options list -
-// it's used purely for its multi-value chip UI plus free-text entry.
 const EmailRecipientsInput = ({ id, value, onChange, placeholder, options = [] }) => {
   const [inputValue, setInputValue] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
 
-  // The rest of the compose form (and the backend) works with a single
-  // comma-separated string, so that stays the source of truth here too -
-  // only converted to {value,label} options for react-select's own sake.
   const selected = (value ? value.split(/[,;]+/) : [])
     .map(v => v.trim())
     .filter(Boolean)
@@ -47,11 +33,6 @@ const EmailRecipientsInput = ({ id, value, onChange, placeholder, options = [] }
   }
 
   const handleKeyDown = e => {
-    // Only defer to react-select's own Enter/Tab (pick the highlighted
-    // suggestion) when there's an actual suggestion matching what's typed -
-    // the menu can be "open" while showing nothing but a "No options"
-    // message, and that shouldn't swallow the keystroke that would otherwise
-    // commit free-typed text (an address not in the contacts list) as a chip.
     const hasMatchingOption =
       menuOpen &&
       inputValue.trim() &&
@@ -75,7 +56,6 @@ const EmailRecipientsInput = ({ id, value, onChange, placeholder, options = [] }
     if (inputValue.trim() && commit(inputValue)) setInputValue('')
   }
 
-  // Existing chips shouldn't also show up as pickable suggestions.
   const selectedValues = new Set(selected.map(o => o.value.toLowerCase()))
   const availableOptions = options.filter(o => !selectedValues.has(o.value.toLowerCase()))
 
@@ -89,14 +69,7 @@ const EmailRecipientsInput = ({ id, value, onChange, placeholder, options = [] }
       classNamePrefix='select'
       theme={selectThemeColors}
       styles={{
-        // The row itself (.compose-mail-form-field) already draws a
-        // border-bottom for visual separation - react-select's own control
-        // border is a nested internal element, so a plain border-0 class on
-        // the outer wrapper never reaches it. Removing it here instead.
         control: base => ({ ...base, border: 'none', boxShadow: 'none', backgroundColor: 'transparent' }),
-        // Rendered inline, the suggestions menu sits underneath the rich-text
-        // editor below it (a later, higher stacking context) - portaling it
-        // to <body> escapes that entirely instead of fighting z-index.
         menuPortal: base => ({ ...base, zIndex: 9999 })
       }}
       menuPortalTarget={document.body}
@@ -113,11 +86,6 @@ const EmailRecipientsInput = ({ id, value, onChange, placeholder, options = [] }
       onBlur={handleBlur}
       onChange={opts => {
         onChange((opts || []).map(o => o.value).join(','))
-        // Picking a suggestion from the dropdown doesn't go through
-        // commit() above (that's only the free-text Enter/Tab/comma/paste/
-        // blur path, which already clears this itself) - without this, the
-        // search text typed to find that suggestion just sits there in the
-        // box, unselected and unremovable, right next to the new chip.
         setInputValue('')
       }}
     />

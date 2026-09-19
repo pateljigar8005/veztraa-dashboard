@@ -1,17 +1,7 @@
-// ================================================================================================
-//  File Name: custom-rtl.scss
-//  Description: RTL support SCSS file.
-//  ----------------------------------------------------------------------------------------------
-//  Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-//  Author: PIXINVENT
-//  Author URL: http://www.themeforest.net/user/pixinvent
-// ================================================================================================
+@import 'bootstrap-extended/include';
+@import 'components/include';
 
-// Variables
-// ------------------------------
 
-@import 'bootstrap-extended/include'; // Bootstrap includes
-@import 'components/include'; // Components includes
 
 pre,
 code,
@@ -19,7 +9,6 @@ kbd,
 samp {
   direction: ltr;
 }
-// Align icons position
 .main-menu {
   .navigation li > a > svg,
   .navigation li > a > i,
@@ -44,7 +33,6 @@ samp {
   direction: rtl;
 }
 
-// Transformed menu icons
 .vertical-layout.vertical-menu-modern.menu-expanded .main-menu .navigation li.has-sub > a:after,
 .vertical-layout.vertical-overlay-menu.menu-open .main-menu .navigation li.has-sub > a:after {
   transform: rotate(180deg);
@@ -57,12 +45,10 @@ samp {
   transform: rotate(90deg);
 }
 
-// Horizontal menu
 .horizontal-menu .header-navbar.navbar-horizontal .dropdown-menu .dropdown-toggle::after {
   background-image: url(str-replace(str-replace($chevron-left, 'currentColor', $body-color), '#', '%23'));
 }
 
-// Dropdown RTL Changes
 .header-navbar .navbar-container ul.nav li.dropdown {
   .dropdown-menu {
     &::before {
@@ -122,12 +108,10 @@ samp {
   }
 }
 
-// BS Toast
 .toast {
   right: auto;
 }
 
-// Select2
 .select2-container--default .select2-selection--single .select2-selection__arrow {
   left: 1px;
 }
@@ -146,12 +130,10 @@ samp {
   transform: translate(14px, 0);
 }
 
-// Chartist
 .chartjs-render-monitor {
   margin-right: 1rem;
 }
 
-// Datatable
 div.dataTables_wrapper div.dataTables_filter {
   text-align: left !important;
 }
@@ -161,15 +143,12 @@ table.dataTable thead .sorting_desc:before {
   right: 0.45rem;
 }
 
-// Datatable responsive modal
 .dtr-modal .dtr-modal-close {
   left: 6px;
   right: auto !important;
 }
 
-// Avatar group
 .avatar-group {
-  // Avatar Group Sizings
   .avatar {
     margin-right: -0.785rem;
     margin-left: 0;
@@ -185,7 +164,6 @@ table.dataTable thead .sorting_desc:before {
   }
 }
 
-// Breadcrumb
 .breadcrumb:not([class*='breadcrumb-']),
 .breadcrumb.breadcrumb-chevron {
   .breadcrumb-item + .breadcrumb-item {
@@ -195,7 +173,6 @@ table.dataTable thead .sorting_desc:before {
   }
 }
 
-// Pagination
 .pagination .page-item {
   &.prev-item,
   &.prev,
@@ -255,7 +232,6 @@ pre[class*='language-'] {
   }
 }
 
-// Calendar
 .fc .fc-header-toolbar .fc-right .fc-button.fc-prev-button .fc-icon {
   right: 4px !important;
 }
@@ -264,7 +240,6 @@ pre[class*='language-'] {
   left: -3px !important;
 }
 
-// Popover & Tooltip
 .bs-popover-start .popover-arrow::before,
 .bs-tooltip-start .tooltip-arrow::before,
 .bs-popover-auto[data-popper-placement^='left'] .popover-arrow::before {
@@ -311,13 +286,11 @@ pre[class*='language-'] {
   right: 100%;
 }
 
-// Perfect scrollbar RTL fix
 body .ps__rail-y {
   right: auto !important;
   left: 1px !important;
 }
 
-// FAQ and Pricing page
 .faq-navigation img,
 .pricing-free-trial .pricing-trial-img {
   transform: scaleX(-1);
@@ -328,7 +301,6 @@ body .ps__rail-y {
   transform: rotate(-180deg) !important;
 }
 
-// Kanban
 .kanban-application {
   .kanban-container {
     .kanban-item {
@@ -341,7 +313,6 @@ body .ps__rail-y {
   }
 }
 
-// Invoice List
 .invoice-list-wrapper {
   .dataTables_filter {
     input {
@@ -355,7 +326,6 @@ body .ps__rail-y {
   }
 }
 
-// File Manager
 .file-manager-application {
   .sidebar-file-manager {
     .sidebar-inner {

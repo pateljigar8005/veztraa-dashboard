@@ -1,13 +1,8 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
-
-// ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
 import { Plus, Edit2, Trash2, Mail } from 'react-feather'
-
-// ** Reactstrap Imports
 import {
   Button,
   Table,
@@ -23,22 +18,11 @@ import {
   FormText,
   Spinner
 } from 'reactstrap'
-
-// ** Custom Components
 import InputPasswordToggle from '@components/input-password-toggle'
-
-// ** Utils
 import { confirmDelete } from '@src/utility/confirmDelete'
 
 const defaultValues = { local_part: '', label: '', password: '' }
 
-// ** Company Settings > Admin Emails - functional mailboxes not tied to any
-// one User (sales@, no-reply@, inquiry@, ...), provisioned via the same
-// cPanel connection configured on the Mailbox Provisioning tab (see
-// CompanyMailboxController on the API side). A self-contained sub-component
-// with its own fetch/save/delete rather than folded into the big
-// react-hook-form the rest of this page shares - this is a list with its
-// own add/edit/delete flow, not one more field on a single settings form.
 const AdminEmailsTab = () => {
   const [mailDomain, setMailDomain] = useState('')
   const [mailboxes, setMailboxes] = useState([])

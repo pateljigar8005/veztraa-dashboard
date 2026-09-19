@@ -1,13 +1,9 @@
-// Layout
-// ========================================================================
 body,
 #root,
 .wrapper {
   height: 100%;
 }
 
-// Vertical Menu
-// ========================================================================
 .vertical-layout .main-menu {
   &.expanded {
     .navigation {
@@ -49,8 +45,6 @@ body #root .wrapper .ps__rail-y {
   right: 1px !important;
 }
 
-// Profile Dropdown (Common)
-// ========================================================================
 .vertical-layout,
 .horizontal-layout {
   .header-navbar:not(.navbar-horizontal) .navbar-container ul.navbar-nav {
@@ -67,15 +61,12 @@ body #root .wrapper .ps__rail-y {
   }
 }
 
-// Horizontal Menu
-// ========================================================================
 .horizontal-layout {
   &.navbar-static .header-navbar.navbar-scrolled {
     background-color: $white;
     box-shadow: rgba($black, 0.05) 0px 4px 20px 0px;
   }
 
-  // Main Navbar
   .header-navbar {
     .navbar-container {
       .dropdown-language,
@@ -89,7 +80,6 @@ body #root .wrapper .ps__rail-y {
     }
   }
 
-  // Menu
   .horizontal-menu-wrapper {
     #main-menu-navigation {
       .dropdown {
@@ -128,7 +118,6 @@ body #root .wrapper .ps__rail-y {
           border-bottom: none;
         }
 
-        // Scrollbar styles
         &::-webkit-scrollbar {
           width: 5px;
           height: 5px;
@@ -148,8 +137,6 @@ body #root .wrapper .ps__rail-y {
   }
 }
 
-// Layout BreadCrumbs
-// =======================================================================
 .content-header {
   .content-header-title {
     font-weight: 500;
@@ -164,8 +151,6 @@ body #root .wrapper .ps__rail-y {
   }
 }
 
-// Bookmarks search
-// ========================================================================
 .header-navbar .navbar-container {
   .navbar-nav {
     .autocomplete-container .suggestion-item span {
@@ -174,8 +159,6 @@ body #root .wrapper .ps__rail-y {
   }
 }
 
-// Component Code
-// ========================================================================
 .card-snippet {
   pre {
     margin-top: 0;
@@ -183,8 +166,6 @@ body #root .wrapper .ps__rail-y {
   }
 }
 
-// Dashboard Analytics
-// =======================================================================
 
 .card-congratulations {
   .avatar svg {
@@ -193,45 +174,33 @@ body #root .wrapper .ps__rail-y {
   }
 }
 
-// Card Analytics
-// =======================================================================
 .avg-session-progress {
   height: 6px;
 }
 
-// Block UI
-// ========================================================================
 .block-ui-container {
   .block-ui-overlay {
     background: rgba($black, 0.6);
   }
 }
 
-// React SlideDown
-// ========================================================================
 .react-slidedown {
   &::-webkit-scrollbar {
     width: 0px;
   }
 }
 
-// Router Transitions
-// ========================================================================
 .animate__animated.animate__zoomIn,
 .animate__animated.animate__fadeInLeft {
   --animate-duration: 1s;
 }
 
-// App Ecommerce
-// ========================================================================
 .ecommerce-application {
   .content-wrapper.animate__animated {
     animation: none;
   }
 }
 
-// Customizer
-// ========================================================================
 .customizer {
   .react-select {
     width: 100%;
@@ -243,7 +212,6 @@ body #root .wrapper .ps__rail-y {
   }
 }
 
-// Media Query to fix navbar dropdown on sm screen
 @media (max-width: 576px) {
   .header-navbar .navbar-container .dropdown.show .dropdown-menu {
     width: auto;

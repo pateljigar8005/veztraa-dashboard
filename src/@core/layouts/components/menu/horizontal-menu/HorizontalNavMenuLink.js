@@ -1,11 +1,7 @@
-// ** React Imports
 import { NavLink } from 'react-router-dom'
-
-// ** Third Party Components
 import classnames from 'classnames'
 
 const HorizontalNavMenuLink = ({ item, isChild, setMenuOpen }) => {
-  // ** Conditional Link Tag, if item has newTab or externalLink props use <a> tag else use NavLink
   const LinkTag = item.externalLink ? 'a' : NavLink
 
   const handleClick = () => {
@@ -27,7 +23,6 @@ const HorizontalNavMenuLink = ({ item, isChild, setMenuOpen }) => {
           'nav-link': !isChild
         })}
         target={item.newTab ? '_blank' : undefined}
-        /*eslint-disable */
         {...(item.externalLink === true
           ? {
               href: item.navLink || '/'
@@ -51,7 +46,6 @@ const HorizontalNavMenuLink = ({ item, isChild, setMenuOpen }) => {
                 }
               }
             })}
-        /*eslint-enable */
       >
         {item.icon}
         <span>{item.title}</span>

@@ -1,4 +1,3 @@
-// ** React Imports
 import { lazy } from 'react'
 
 const Chat = lazy(() => import('../../views/apps/chat'))
@@ -77,13 +76,6 @@ const JobListingForm = lazy(() => import('../../views/apps/job-listing/form'))
 
 const AppRoutes = [
   {
-    // A single route with a splat, not two+ separate route config entries
-    // for /email, /email/:folder, /email/:folder/:uid - useRoutes() matching
-    // two different config objects for what's logically the same page has
-    // itself been a remount-trigger before (see Company Settings' tab
-    // history), and stacked optional segments (":folder?/:uid?") turned out
-    // not to reliably match even the bare /email case in this router
-    // version. The page itself splits `params['*']` into folder/uid.
     element: <Email />,
     path: '/email/*',
     meta: {

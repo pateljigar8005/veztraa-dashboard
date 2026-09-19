@@ -1,13 +1,10 @@
-// placeholder specific scss
 @import 'forms/labels';
 @import 'forms/form-control';
 @import 'forms/input-group';
 @import 'forms/form-check';
 @import 'forms/floating-labels';
 
-// Custom third party form plugin scss
 
-/* Textarea with Counter */
 .textarea-counter-value {
   background-color: $primary;
   color: $white;
@@ -17,7 +14,6 @@
   margin-right: 1rem;
 }
 
-//  Number Input style
 .btn.disabled-max-min,
 .btn.disabled-max-min:focus,
 .btn.disabled-max-min:active {
@@ -25,7 +21,6 @@
   cursor: default;
 }
 
-// disabled number input
 .bootstrap-touchspin,
 .bootstrap-touchspin {
   &.disabled-touchspin {
@@ -36,20 +31,17 @@
   }
 }
 
-/* Number Type Input Box Scss for - Remove arrow on hover */
 input[type='number']::-webkit-inner-spin-button,
 input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
 }
 
-// Date & Time Picker - Form Control Bg color
 .picker__input {
   &.form-control {
     background-color: $white;
   }
 }
 
-// Autofill style
 input:-webkit-autofill,
 textarea:-webkit-autofill,
 select:-webkit-autofill {

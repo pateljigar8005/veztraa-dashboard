@@ -1,16 +1,5 @@
-// ================================================================================================
-// 	File Name: utilities.scss
-// 	Description: Utility classes provides color, width, position & background etc..
-// 				 related customization.
-// 	----------------------------------------------------------------------------------------------
-// 	Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-// 	Author: PIXINVENT
-// 	Author URL: http://www.themeforest.net/user/pixinvent
-// ================================================================================================
 
-// Sizes Variable for height and width mixins
 $sizes-px: (
-  // in px
   50: 50px,
   100: 100px,
   150: 150px,
@@ -30,7 +19,6 @@ $sizes-px: (
 ) !default;
 
 $sizes-per: (
-  // in %
   5: 5%,
   10: 10%,
   15: 15%,
@@ -52,16 +40,10 @@ $sizes-per: (
   95: 95%
 ) !default;
 
-//--------------- Text ---------------
-//------------------------------------
 
-// Font Size
-//----------
-//small
 .font-small-1 {
   font-size: 0.7rem !important;
 
-  // for Feather SVG icons as we are using base size as 1rem
   @at-root svg#{&} {
     height: 0.7rem !important;
     width: 0.7rem !important;
@@ -88,7 +70,6 @@ $sizes-per: (
     width: 1rem !important;
   }
 }
-//medium
 .font-medium-1 {
   font-size: 1.1rem !important;
   @at-root svg#{&} {
@@ -124,7 +105,6 @@ $sizes-per: (
     width: 1.5rem !important;
   }
 }
-//large
 .font-large-1 {
   font-size: 2rem !important;
   @at-root svg#{&} {
@@ -161,8 +141,6 @@ $sizes-per: (
   }
 }
 
-// Line height
-//----------
 .line-height-1 {
   line-height: 1 !important;
 }
@@ -173,8 +151,6 @@ $sizes-per: (
   line-height: inherit !important;
 }
 
-// Transform
-//----------
 .rotate-45 {
   transform: rotate(45deg);
 }
@@ -194,10 +170,7 @@ $sizes-per: (
   transform: rotate(-180deg);
 }
 
-//-------------- Borders --------------
-//-------------------------------------
 
-// Border width - 2px
 .border-2 {
   border-width: 2px !important;
 }
@@ -214,7 +187,6 @@ $sizes-per: (
   border-right-width: 2px !important;
 }
 
-// Border width - 3px
 .border-3 {
   border-width: 3px !important;
 }
@@ -231,7 +203,6 @@ $sizes-per: (
   border-right-width: 3px !important;
 }
 
-// Shapes radius : Round / Square
 .round {
   @include border-radius(1.5rem);
 }
@@ -239,10 +210,7 @@ $sizes-per: (
   @include border-radius(0);
 }
 
-//-------------- Sizing --------------
-//------------------------------------
 
-// Width && Height
 .fit {
   max-width: 100% !important;
 }
@@ -256,7 +224,6 @@ $sizes-per: (
   height: 100% !important;
 }
 
-// height & width in PX
 @each $name, $size in $sizes-px {
   .height-#{$name} {
     height: $size !important;
@@ -267,7 +234,6 @@ $sizes-per: (
   }
 }
 
-// height & width in %
 @each $name, $size in $sizes-per {
   .height-#{$name}-per {
     height: $size !important;
@@ -278,8 +244,6 @@ $sizes-per: (
   }
 }
 
-//------------- Overflow -------------
-//------------------------------------
 .overflow-visible {
   overflow: visible;
 }
@@ -293,8 +257,6 @@ $sizes-per: (
   overflow: scroll;
 }
 
-//-------------- Cursor --------------
-//------------------------------------
 .cursor-pointer {
   cursor: pointer;
 }
@@ -311,8 +273,6 @@ $sizes-per: (
   cursor: not-allowed;
 }
 
-//-------------- Z-index --------------
-//-------------------------------------
 .zindex-1 {
   z-index: 1 !important;
 }
@@ -341,8 +301,6 @@ $sizes-per: (
   z-index: -4 !important;
 }
 
-//------------ Box Shadow ------------
-//------------------------------------
 .box-shadow-0 {
   box-shadow: none !important;
 }
@@ -365,14 +323,10 @@ $sizes-per: (
   box-shadow: 0 4px 8px 0 rgba($black, 0.12), 0 2px 4px 0 rgba($black, 0.08);
 }
 
-//-------------- Outline --------------
-//-------------------------------------
 .outline-none {
   outline: none !important;
 }
 
-//-------------- Lists --------------
-//-----------------------------------
 .list-style-inside {
   list-style: inside;
 }
@@ -383,8 +337,6 @@ $sizes-per: (
   list-style: square;
 }
 
-//--------- Background Image ---------
-//------------------------------------
 .bg-cover {
   background-size: cover !important;
 }
@@ -395,8 +347,6 @@ $sizes-per: (
   background-repeat: no-repeat !important;
 }
 
-//-------------- Icons --------------
-//-----------------------------------
 .icon-bg-circle {
   color: $white;
   padding: 0.5rem;
@@ -409,7 +359,6 @@ $sizes-per: (
   margin-right: 0.5rem;
 }
 
-// Used for blockUI
 .blockOverlay {
   z-index: 1050 !important;
 }
@@ -429,22 +378,16 @@ a {
   }
 }
 
-//Tables
-//--------------------------
 .table-middle {
   td {
     vertical-align: middle;
   }
 }
 
-//SVG
-//--------------------------
 .fill-current {
   fill: currentColor;
 }
 
-//Cursor
-//--------------------------
 .pointer-events-none {
   pointer-events: none;
 }

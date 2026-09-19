@@ -1,27 +1,14 @@
-// ** Reactstrap Imports
 import { Badge, Card, CardBody } from 'reactstrap'
-
-// ** Custom Components
 import Avatar from '@components/avatar'
-
-// ** Third Party Imports
 import { MessageSquare, Calendar } from 'react-feather'
-
-// ** Redux Imports
 import { useDispatch } from 'react-redux'
-
-// ** Actions
 import { handleSelectTask } from './store'
 import { taskTypeColors, priorityColors } from './kanbanOptions'
-
-// ** Utils
 import { resolveAvatarUrl } from '@utils'
 
 const KanbanTasks = props => {
-  // ** Props
   const { task, handleTaskSidebarToggle } = props
 
-  // ** Hooks
   const dispatch = useDispatch()
 
   const handleTaskClick = () => {

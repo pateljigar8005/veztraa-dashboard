@@ -1,7 +1,6 @@
 @import '~swiper/swiper-bundle.css';
 @import '../../../base/plugins/extensions/ext-component-swiper.scss';
 
-/* cube effect */
 .swiper-cube {
   width: 300px;
   left: 50%;
@@ -9,14 +8,12 @@
   margin-top: -12px;
 }
 
-/* swiper coverflow */
 .swiper-coverflow {
   .swiper-slide {
     width: 300px;
   }
 }
 
-/* swiper virtual */
 .swiper-virtual {
   height: 300px;
 
@@ -64,12 +61,3 @@ html[dir='rtl'] {
     }
   }
 }
-
-// html[dir='rtl'] {
-//   .swiper-container-cube .swiper-slide {
-
-//   }
-//   .swiper-pagination-progressbar .swiper-pagination-progressbar-fill {
-//     transform-origin: left top;
-//   }
-// }

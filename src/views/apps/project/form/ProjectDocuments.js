@@ -1,16 +1,9 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
-
-// ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Shared Components
 import AttachmentsField from '../../shared/AttachmentsField'
 import { confirmDelete } from '@src/utility/confirmDelete'
-
-// ** Store & Actions
 import { getProjectDocuments, uploadProjectDocument, deleteProjectDocument } from '../store'
 
 const ProjectDocuments = ({ projectId }) => {
@@ -24,9 +17,6 @@ const ProjectDocuments = ({ projectId }) => {
     dispatch(getProjectDocuments(projectId))
   }, [projectId])
 
-  // Uploaded one at a time (not a single multipart batch) - keeps each
-  // request's success/failure independent, so one oversized or invalid file
-  // in a batch doesn't block the rest from going through.
   const handleFilesSelect = async files => {
     setUploading(true)
     let successCount = 0

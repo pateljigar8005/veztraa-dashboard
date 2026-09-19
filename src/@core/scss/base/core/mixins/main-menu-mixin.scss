@@ -1,17 +1,5 @@
-//  =========================================================================================
-// File Name: main-menu-mixin.scss
-// Description: Common mixin for menus, contain dark and light version scss.
-// ----------------------------------------------------------------------------------------
-// Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-// Author: PIXINVENT
-// Author URL: http://www.themeforest.net/user/pixinvent
-//==========================================================================================
 
-// Header navbar content and brand expanded & collapsed stats
-// spacing and sizing.
-// ================================================
 
-// Mixins for the menu and navbar position, margin and width change
 @mixin main-menu-width($menu-width) {
   margin-left: $menu-width;
 }
@@ -19,7 +7,6 @@
   float: left;
   width: $menu-width;
 }
-// Mixins for the menu show hide based on width
 @mixin vertical-menu-transform-show($transform-width) {
   transform: translate3d($transform-width, 0, 0);
   backface-visibility: hidden;
@@ -29,7 +16,6 @@
   transform: translate3d(0, 0, 0);
 }
 
-// Mixins for the sub menu arrow
 @mixin vertical-menu-has-sub-arrow($arrow-font-size) {
   &.has-sub {
     > a:after {
@@ -54,7 +40,6 @@
     }
   }
 }
-// Used for apps
 @mixin content-area-wrapper-height(
   $contentPadding: 0rem,
   $navbarHeight: 0rem,
@@ -76,7 +61,6 @@
         calc(#{$contentPadding} * #{$spacingSides}) + #{$navbarHeight} + #{$footerHeight} + #{$floatingNavMargin} + #{$horizontalMenuHeight}
       )
   );
-  // responsive size height
   @if $horizontalLayout {
     @include media-breakpoint-down(xl) {
       height: calc(
@@ -107,16 +91,12 @@
   }
 }
 
-// Light & Dark menu mixin
-// $theme-color : Menu text color
-// $theme-bg    : Menu background color
-// ================================================
 @mixin menu-theme($theme-color, $theme-bg) {
   $main-menu-top-open-color: darken($theme-color, 10%);
   $main-menu-top-open-hover-bg: darken($theme-bg, 6%);
   $main-menu-top-open-head-bg: darken($theme-bg, 4%);
+  $main-menu-top-active-head-bg: darken($theme-bg, 4%);
 
-  $main-menu-top-active-head-bg: darken($theme-bg, 4%); //$primary
 
   $main-menu-sub-color: $theme-color;
   $main-menu-sub-hover-color: lighten($theme-color, 4%);
@@ -159,7 +139,6 @@
       }
     }
 
-    // Menu Item Hover Animation
     li.nav-item {
       a:hover > * {
         transition: transform 0.25s ease;
@@ -285,10 +264,8 @@
             background: $main-menu-top-active-head-bg;
             border-radius: 6px;
           }
-          //for 2rd level menu
           > ul {
             display: block;
-            //for 3rd level menu
             .open {
               > ul {
                 display: block;
@@ -317,10 +294,6 @@
     }
   }
 }
-// Menu content display mixin
-// $menu-expanded-width : Expanded menu width
-// $menu-collapsed-width: Collapsed menu width
-// ================================================
 @mixin menu-content($menu-expanded-width, $menu-collapsed-width, $theme-color, $theme-bg) {
   .main-menu-content {
     > span.menu-title,

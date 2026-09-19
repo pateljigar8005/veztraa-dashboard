@@ -1,7 +1,5 @@
-// Overrides user _variables-components
 @import '../../bootstrap-extended/include';
 
-// Google Color Palette defined: http://www.google.com/design/spec/style/color.html
 
 $white-color: (
   'base': #ffffff
@@ -42,8 +40,6 @@ $secondary-color: (
   'darken-4': darken($secondary, 20%)
 );
 
-// #4839EB
-//
 $success-color: (
   'lighten-4': lighten($success, 20%),
   'lighten-3': lighten($success, 15%),
@@ -72,7 +68,6 @@ $warning-color: (
   'lighten-2': lighten($warning, 10%),
   'lighten-1': lighten($warning, 5%),
   'base': $warning,
-  // #FFAC5D
   'darken-1': darken($warning, 5%),
   'darken-2': darken($warning, 10%),
   'darken-3': darken($warning, 15%),

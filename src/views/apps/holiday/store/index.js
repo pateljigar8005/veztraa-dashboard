@@ -1,7 +1,4 @@
-// ** Redux Imports
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-
-// ** Axios Imports
 import axios from 'axios'
 
 export const getAllData = createAsyncThunk('appHolidays/getAllData', async () => {
@@ -31,13 +28,6 @@ export const getHoliday = createAsyncThunk('appHolidays/getHoliday', async id =>
   return response.data.data
 })
 
-// ** rejectWithValue on both add/update (unlike every other module's own add/
-// update thunks) so the form's own .unwrap().catch() can read the real 422
-// body - specifically errors.date, the one validation failure this form
-// needs to point at a field (a duplicate holiday date) rather than just a
-// generic toast. Without this, RTK's default rejection only carries a
-// generic serialized JS Error (just a message like "Request failed with
-// status code 422"), not the actual response body.
 export const addHoliday = createAsyncThunk(
   'appHolidays/addHoliday',
   async (holiday, { dispatch, getState, rejectWithValue }) => {

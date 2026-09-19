@@ -1,22 +1,11 @@
-// ** React Imports
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-
-// ** Third Party Components
 import Select from 'react-select'
 import { Editor } from '@veztraa/editor'
 import { ChevronDown, ChevronRight } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Label, Button, Collapse } from 'reactstrap'
-
-// ** Utils
 import { selectThemeColors, uploadEditorImage } from '@utils'
 
-// `defaultOpen` (edit/clone) skips the collapse UI entirely - existing
-// content should just be visible, not hidden behind a click. Only a fresh
-// Add page (nothing to review yet) gets the collapsible, collapsed-by-default
-// version.
 const TermsSection = ({ templateOptions, templateId, onTemplateChange, content, onContentChange, defaultOpen }) => {
   const [isOpen, setIsOpen] = useState(false)
   const collapsible = !defaultOpen

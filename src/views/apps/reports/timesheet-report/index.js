@@ -1,31 +1,15 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
-
-// ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import * as XLSX from 'xlsx'
 import Select from 'react-select'
 import DataTable from 'react-data-table-component'
 import { Search, RotateCcw, Download, Clock, FileText, Folder, TrendingUp } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Spinner } from 'reactstrap'
-
-// ** Shared Components
 import DateField from '../../shared/DateField'
-
-// ** Utils
 import { selectThemeColors, getUserData } from '@utils'
-
-// ** Styles
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 
-// ** Same "isAdmin" check as the Timesheet Add form (see
-// TimesheetController's own ownership enforcement there) - a non-admin
-// running this report always gets only their own entries back regardless
-// of what this page sends, so the User filter is hidden entirely for them
-// rather than shown as a pointless control.
 const isAdmin = () => (getUserData()?.role || '').toLowerCase() === 'admin'
 
 const defaultFilters = {
@@ -62,7 +46,6 @@ const columns = [
   }
 ]
 
-// ** A KPI tile for the summary row - same shape used across every report.
 const StatCard = ({ icon: Icon, color, label, value }) => (
   <Col md={3} sm={6} className='mb-1'>
     <Card className='mb-0'>
@@ -81,8 +64,6 @@ const StatCard = ({ icon: Icon, color, label, value }) => (
   </Col>
 )
 
-// ** Builds one Excel sheet from a set of timesheet rows - shared by the
-// combined "Entries" sheet and each per-project sheet below.
 const buildEntrySheet = entryRows => {
   const sheet = XLSX.utils.json_to_sheet(
     entryRows.map(r => ({
@@ -99,7 +80,6 @@ const buildEntrySheet = entryRows => {
 }
 
 const TimesheetReport = () => {
-  // ** States
   const [filters, setFilters] = useState(defaultFilters)
   const [userOptions, setUserOptions] = useState([])
   const [projectOptions, setProjectOptions] = useState([])
@@ -111,8 +91,6 @@ const TimesheetReport = () => {
 
   const admin = isAdmin()
 
-  // ** Filter option lists - the User one is only ever fetched/shown for an
-  // admin (see the note on isAdmin() above).
   useEffect(() => {
     if (admin) {
       axios
@@ -131,7 +109,6 @@ const TimesheetReport = () => {
         setActivityOptions(active.map(a => ({ value: a.id, label: a.name })))
       })
       .catch(() => {})
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const setFilter = (key, value) => setFilters(prev => ({ ...prev, [key]: value }))
@@ -143,11 +120,9 @@ const TimesheetReport = () => {
     return params
   }
 
-  // ** Fully pages through ONE fixed set of filter params.
   const fetchAllPages = async params => {
     let page = 1
     let all = []
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       const response = await axios.get('/timesheets', { params: { ...params, page, perPage: 100 } })
       const { timesheets, total } = response.data.data
@@ -158,18 +133,6 @@ const TimesheetReport = () => {
     return all
   }
 
-  // ** /timesheets only supports ONE exact value per filter (see
-  // Timesheet::FILTERABLE's 'eq' type - no IN-list support), so selecting
-  // several users/projects/activities at once can't be expressed as a
-  // single request. Instead: build every combination across whichever
-  // dimensions actually have a multi-selection (an unselected dimension
-  // contributes a single "no filter on this" placeholder), fire one
-  // paginated fetch per combination in parallel, and concatenate - each
-  // combination's rows are disjoint by construction, so there's nothing to
-  // de-duplicate. Degrades to exactly one request when nothing is
-  // multi-selected, same as before. A non-admin's user_id is still
-  // force-scoped to themselves server-side regardless of what's sent here
-  // (see TimesheetController::index()).
   const dimensionValues = (selected, key) => (selected.length ? selected.map(o => ({ [key]: o.value })) : [{}])
 
   const fetchAllMatching = async () => {
@@ -212,10 +175,6 @@ const TimesheetReport = () => {
   const distinctProjects = new Set(rows.map(r => r.project_id)).size
   const avgHoursPerEntry = rows.length ? totalHours / rows.length : 0
 
-  // ** Summary + combined "Entries" sheet + one sheet per project that
-  // actually has entries - same "categorized worksheets" shape as the
-  // Invoice Report's own per-status sheets, just grouped by project here
-  // since that's the natural breakdown for time logged against work.
   const handleExport = () => {
     if (!rows.length) {
       toast.error('Nothing to export - run the report first')
@@ -253,7 +212,6 @@ const TimesheetReport = () => {
       const projectNames = [...new Set(rows.map(r => r.project_name))].sort()
       projectNames.forEach(name => {
         const projectRows = rows.filter(r => r.project_name === name)
-        // Excel sheet names cap at 31 chars and reject / \ ? * [ ] :
         const sheetName = name.replace(/[/\\?*[\]:]/g, '-').slice(0, 31)
         XLSX.utils.book_append_sheet(workbook, buildEntrySheet(projectRows), sheetName)
       })

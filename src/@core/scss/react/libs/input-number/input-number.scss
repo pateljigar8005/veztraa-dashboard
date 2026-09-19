@@ -6,7 +6,6 @@
   width: 7rem;
   position: relative;
 
-  // ** Handle Wrapper
   .rc-input-number-handler-wrap {
     z-index: 1;
     width: 100%;
@@ -36,7 +35,6 @@
     }
   }
 
-  // ** Input Wrapper
   .rc-input-number-input-wrap {
     input {
       border: 0;
@@ -51,7 +49,6 @@
     }
   }
 
-  // ** States
   &.rc-input-number-focused {
     input {
       outline: 0;
@@ -69,7 +66,6 @@
     }
   }
 
-  // ** Size lg
   &.input-lg {
     width: 9.375rem;
     .rc-input-number-handler {
@@ -101,7 +97,6 @@
     }
   }
 
-  // ** Colors
   @each $color_name, $color in $colors {
     @each $color_type, $color_value in $color {
       @if $color_type== 'base' {
@@ -115,17 +110,14 @@
   }
 }
 
-// Dark Layout
 .dark-layout {
   .rc-input-number {
-    // ** Handle Wrapper
     .rc-input-number-handler-wrap {
       .rc-input-number-handler-up-disabled,
       .rc-input-number-handler-down-disabled {
         background-color: $gray-600;
       }
     }
-    // ** Input Wrapper
     .rc-input-number-input-wrap {
       input {
         color: $theme-dark-body-color;

@@ -1,23 +1,12 @@
-// ** React Imports
 import { Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
-
-// ** Store & Actions
 import { store } from '@store/store'
 import { deleteContract } from '../store'
-
-// ** Icons Imports
 import { Copy, FileText, Trash2 } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
-
-// ** Utils
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
-
-// ** Options
 import { frequencyOptions } from '../contractOptions'
 
 const statusColorObj = {

@@ -1,37 +1,9 @@
-// ** React Imports
 import { useEffect, useRef, useState } from 'react'
 
-// Renders untrusted email HTML inside a sandboxed iframe instead of
-// injecting it directly into the page. Emails routinely ship their own
-// <style>/<script> tags (marketing templates especially) - dropped straight
-// into the page via dangerouslySetInnerHTML, those apply GLOBALLY, not just
-// to the email content. This is exactly how a real email's own
-// ".content { max-width: 680px }" rule (from its own content wrapper div)
-// collided with our app-shell's own ".content" class and shrank the entire
-// page around it.
-//
-// sandbox="allow-same-origin allow-popups" only - no allow-scripts, so an
-// embedded <script> tag in an email can never execute. allow-same-origin is
-// only there so we can read the iframe's own content height to auto-size it
-// (no double scrollbar); it grants no scripting capability by itself.
-// allow-popups lets a normal target="_blank" link actually open a new tab.
 const EmailBodyFrame = ({ html }) => {
   const iframeRef = useRef(null)
   const [height, setHeight] = useState(200)
 
-  // The iframe is sized to fit its content exactly, so it never scrolls
-  // internally - but that also means a wheel event over it has nowhere to
-  // go: iframes are a separate document, so the event never reaches the
-  // page's own PerfectScrollbar container the way it would over a plain
-  // <div>. Forward it manually by replaying the same wheel event on the
-  // iframe's own element in the parent document, letting it bubble up to
-  // PerfectScrollbar exactly like a native scroll would.
-  //
-  // contentWindow persists across srcDoc reloads (only contentDocument
-  // changes), so the listener has to be explicitly torn down and re-added
-  // on every load - otherwise switching between messages piles up duplicate
-  // listeners on the same window, and scrolling would visibly accelerate
-  // with every message opened.
   const wheelCleanupRef = useRef(null)
 
   const forwardWheel = e => {

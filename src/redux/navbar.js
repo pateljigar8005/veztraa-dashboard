@@ -1,7 +1,4 @@
-// ** Redux Imports
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-
-// ** Axios Imports
 import axios from 'axios'
 
 export const getBookmarks = createAsyncThunk('layout/getBookmarks', async () => {
@@ -38,7 +35,6 @@ export const layoutSlice = createSlice({
       .addCase(updateBookmarked.fulfilled, (state, action) => {
         let objectToUpdate
 
-        // ** find & update object
         state.suggestions.find(item => {
           if (item.id === action.payload) {
             item.isBookmarked = !item.isBookmarked
@@ -46,7 +42,6 @@ export const layoutSlice = createSlice({
           }
         })
 
-        // ** Get index to add or remove bookmark from array
         const bookmarkIndex = state.bookmarks.findIndex(x => x.id === action.payload)
 
         if (bookmarkIndex === -1) {

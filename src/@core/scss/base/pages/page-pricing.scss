@@ -1,29 +1,17 @@
-// ===============================================================================================
-//  File Name: pricing.scss
-//  Description: pricing Page Content SCSS
-//  ----------------------------------------------------------------------------------------------
-//  Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-//  Author: PIXINVENT
-//  Author URL: http://www.themeforest.net/user/pixinvent
-// ================================================================================================
+@import '../bootstrap-extended/include';
+@import '../components/include';
 
-@import '../bootstrap-extended/include'; // Bootstrap includes
-@import '../components/include'; // Components includes
 
-// pricing card
 .pricing-card {
-  // card active border
   .card {
     &.popular {
       border: 1px solid $primary;
     }
   }
-  // list group circle
   .list-group-circle {
     font-weight: $font-weight-bold;
     color: $headings-color;
   }
-  // plan price value
   .annual-plan {
     margin-bottom: 1.7rem;
     .plan-price {
@@ -41,7 +29,6 @@
       }
     }
 
-    // annual pricing value
     .annual-pricing {
       position: absolute;
       margin: auto;
@@ -51,7 +38,6 @@
   }
 }
 
-// trial free card
 .pricing-free-trial {
   height: 16.71rem;
   background-color: rgba(186, 191, 199, 0.12);
@@ -60,14 +46,11 @@
   margin-top: 7.5rem;
   margin-bottom: 6.3rem;
 
-  // row default margin zero because it cause the horizontal scroll bar
   .row {
     margin: 0;
   }
-  // content container
   .pricing-trial-content {
     padding: 0 1rem;
-    // image
     img {
       position: relative;
       top: -3.1rem;
@@ -75,7 +58,6 @@
   }
 }
 
-// price trial ad card in small screen
 @include media-breakpoint-down(md) {
   .pricing-free-trial {
     height: auto;
@@ -91,7 +73,6 @@
   }
 }
 
-// free trial div margin change on below screen
 @include media-breakpoint-down(sm) {
   .pricing-free-trial {
     margin-right: -1.2rem;

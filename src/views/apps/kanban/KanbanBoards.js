@@ -1,36 +1,22 @@
-// ** React Imports
 import { useState, useEffect, Fragment } from 'react'
-
-// ** Reactstrap Imports
 import { Input, Button, FormText, DropdownMenu, DropdownItem, DropdownToggle, UncontrolledDropdown } from 'reactstrap'
-
-// ** Third Party Imports
 import { ReactSortable } from 'react-sortablejs'
 import { useForm, Controller } from 'react-hook-form'
 import { Plus, MoreVertical } from 'react-feather'
-
-// ** Redux Imports
 import { useDispatch } from 'react-redux'
-
-// ** Actions
 import { addTask, clearTasks, deleteBoard, reorderTasks, moveTaskToBoard, updateBoardTitle } from './store'
-
 import KanbanTasks from './KanbanTasks'
-// ** Kanban Component
 
 const defaultValues = {
   taskTitle: ''
 }
 
 const KanbanBoard = props => {
-  // ** Props
   const { board, index, store, handleTaskSidebarToggle } = props
 
-  // ** States
   const [title, setTitle] = useState('')
   const [showAddTask, setShowAddTask] = useState(null)
 
-  // ** Hooks
   const dispatch = useDispatch()
   const {
     reset,

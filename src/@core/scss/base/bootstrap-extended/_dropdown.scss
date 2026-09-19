@@ -1,10 +1,8 @@
-// The dropdown menu
 .dropdown {
   [class*='btn-outline-'].dropdown-toggle.dropdown-toggle-split {
     border-left: 0 !important;
   }
 
-  // If don't won't dropdown/up arrow
   &.no-arrow {
     .dropdown-toggle {
       &:after {
@@ -18,17 +16,15 @@
   }
 }
 
-// dropdown menu
 .dropdown-menu {
   transform: scale(1, 0);
-  box-shadow: $dropdown-box-shadow; // this according to vue version
+  box-shadow: $dropdown-box-shadow;
 
   .dropdown-item {
     width: auto;
     cursor: pointer;
   }
 
-  // Dropdown Header
   .dropdown-header {
     font-weight: 500;
     line-height: 1;
@@ -47,7 +43,6 @@
     }
   }
 
-  // For DD box shadow on show
   .btn {
     &.dropdown-toggle {
       &:focus {
@@ -58,7 +53,6 @@
 }
 
 .dropdown-toggle {
-  // changed icon caret
 
   &::after {
     border: none !important;
@@ -78,7 +72,6 @@
     margin: 0;
     vertical-align: 0;
   }
-  // arrow size according to toggle sizes
   &.btn-lg {
     &::after {
       background-size: 18px;
@@ -97,24 +90,20 @@
     }
   }
 
-  // hide default arrow to show custom icon DD
   &.nav-hide-arrow {
     &::after {
       display: none;
     }
   }
 
-  // Prevent the focus on the dropdown toggle when closing dropdowns
   &:focus {
     outline: 0;
   }
 }
 
-// DropUp
 .dropup {
   position: relative;
   .dropdown-toggle {
-    // changed icon dropup caret
     &::after {
       background-image: url(str-replace(str-replace($chevron-up, 'currentColor', $white), '#', '%23'));
       background-repeat: no-repeat;
@@ -131,10 +120,8 @@
   }
 }
 
-// DropStart
 .dropstart {
   .dropdown-toggle {
-    // changed icon dropup caret
     &::before {
       border: none !important;
       background-image: url(str-replace(str-replace($chevron-left, 'currentColor', $white), '#', '%23'));
@@ -153,10 +140,8 @@
   }
 }
 
-// DropEnd
 .dropend {
   .dropdown-toggle {
-    // changed icon dropup caret
     &::after {
       border: none !important;
       background-image: url(str-replace(str-replace($chevron-right, 'currentColor', $white), '#', '%23'));
@@ -173,9 +158,7 @@
   }
 }
 
-// Dropdown ::before position
 .dropdown-menu {
-  // Dropdown margin according to dropdown position
 
   &[data-popper-placement='bottom-start'],
   &[data-popper-placement='bottom-end'] {
@@ -197,7 +180,6 @@
   }
 }
 
-// Dropdown icon
 .dropdown,
 .dropup {
   &.dropdown-icon-wrapper {
@@ -222,7 +204,6 @@
   }
 }
 
-// Dropdown menu animation for Horizontal menu
 .horizontal-menu-wrapper .dropdown-menu,
 .header-navbar .dropdown-menu {
   animation-duration: 0.3s;
@@ -230,7 +211,6 @@
   animation-name: slideIn;
 }
 
-// Hidden dropdown toggle arrow
 .dropdown-toggle.hide-arrow,
 .dropdown-toggle-hide-arrow > .dropdown-toggle {
   &::before,

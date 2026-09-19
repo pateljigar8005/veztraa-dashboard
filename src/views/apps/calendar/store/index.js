@@ -1,7 +1,4 @@
-// ** Redux Imports
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-
-// ** Axios Imports
 import axios from 'axios'
 
 export const fetchEvents = createAsyncThunk('appCalendar/fetchEvents', async calendars => {
@@ -44,12 +41,6 @@ export const removeEvent = createAsyncThunk('appCalendar/removeEvent', async id 
   return id
 })
 
-// Read-only overlay events sourced from the real Kanban/Todo modules, so
-// upcoming due dates show up here without duplicating them into a real
-// calendar_events table - see [[kanban]]/[[todo]] due_date fields, the
-// actual source of truth. Only tasks that actually have a due date are
-// included; a task's own edit form (not this calendar) is still where its
-// due date gets changed, so these events are marked non-editable/non-draggable.
 export const fetchKanbanTaskEvents = createAsyncThunk('appCalendar/fetchKanbanTaskEvents', async () => {
   const response = await axios.get('/kanban-tasks')
   const tasks = response.data.data.tasks
@@ -67,10 +58,6 @@ export const fetchKanbanTaskEvents = createAsyncThunk('appCalendar/fetchKanbanTa
         taskId: task.id
       }
     }))
-  // Keep the full task objects too (not just the trimmed calendar-event
-  // shape) - clicking one of these events opens the real Kanban Task
-  // Details popup, which needs the whole task, not a re-fetch by id (there
-  // is no GET /kanban-tasks/{id} - the list endpoint is the only source).
   return { events, tasks }
 })
 

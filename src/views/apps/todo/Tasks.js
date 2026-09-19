@@ -1,22 +1,11 @@
-// ** React Imports
 import { Link } from 'react-router-dom'
-
-// ** Custom Components
 import Avatar from '@components/avatar'
-
-// ** Utils
 import { resolveAvatarUrl } from '@utils'
-
-// ** Store & Actions
 import { persistTaskOrder } from './store'
-
-// ** Third Party Components
 import classnames from 'classnames'
 import { ReactSortable } from 'react-sortablejs'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 import { Menu, Search, MoreVertical } from 'react-feather'
-
-// ** Reactstrap Imports
 import {
   Input,
   Badge,
@@ -29,7 +18,6 @@ import {
 } from 'reactstrap'
 
 const Tasks = props => {
-  // ** Props
   const {
     query,
     tasks,
@@ -45,13 +33,11 @@ const Tasks = props => {
     handleMainSidebar
   } = props
 
-  // ** Function to selectTask on click
   const handleTaskClick = obj => {
     dispatch(selectTask(obj))
     handleTaskSidebar()
   }
 
-  // ** Returns avatar color based on task tag
   const resolveAvatarVariant = tags => {
     if (tags.includes('high')) return 'light-primary'
     if (tags.includes('medium')) return 'light-warning'
@@ -61,7 +47,6 @@ const Tasks = props => {
     return 'light-primary'
   }
 
-  // ** Renders task tags
   const renderTags = arr => {
     const badgeColor = {
       team: 'light-primary',
@@ -78,7 +63,6 @@ const Tasks = props => {
     ))
   }
 
-  // ** Renders Avatar
   const renderAvatar = obj => {
     const item = obj.assignee
     const avatarUrl = resolveAvatarUrl(item.avatar)
@@ -169,13 +153,11 @@ const Tasks = props => {
     )
   }
 
-  // ** Function to getTasks based on search query
   const handleFilter = e => {
     setQuery(e.target.value)
     dispatch(getTasks(params))
   }
 
-  // ** Function to getTasks based on sort
   const handleSort = (e, val) => {
     e.preventDefault()
     setSort(val)

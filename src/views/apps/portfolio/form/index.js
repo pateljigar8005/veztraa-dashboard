@@ -1,26 +1,13 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
-// ** Hooks
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
-
-// ** Third Party Components
 import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
-
-// ** Custom Components
 import ImageUploadField from '../../shared/ImageUploadField'
 import DateField from '../../shared/DateField'
-
-// ** Utils
 import { resolveAvatarUrl } from '@utils'
-
-// ** Store & Actions
 import { addPortfolioItem, updatePortfolioItem, getPortfolioItem, uploadPortfolioItemImage } from '../store'
 
 const defaultValues = {
@@ -34,7 +21,6 @@ const defaultValues = {
 }
 
 const PortfolioForm = () => {
-  // ** Hooks & Vars
   const { id } = useParams()
   const isEdit = Boolean(id)
   const navigate = useNavigate()
@@ -45,8 +31,6 @@ const PortfolioForm = () => {
   const [isFeatured, setIsFeatured] = useState(false)
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
-  // Tracks edits to the state above (visibility toggles, image), none of
-  // which is registered with react-hook-form, so its own isDirty can't see them.
   const [extraDirty, setExtraDirty] = useState(false)
 
   const {
@@ -59,12 +43,10 @@ const PortfolioForm = () => {
 
   useUnsavedChangesGuard(isDirty || extraDirty)
 
-  // ** Fetch the portfolio item being edited
   useEffect(() => {
     if (isEdit) dispatch(getPortfolioItem(id))
   }, [id])
 
-  // ** Populate the form once the portfolio item loads
   useEffect(() => {
     if (isEdit && store.selectedPortfolioItem && store.selectedPortfolioItem.id === Number(id)) {
       const item = store.selectedPortfolioItem
@@ -83,9 +65,6 @@ const PortfolioForm = () => {
     }
   }, [store.selectedPortfolioItem])
 
-  // ** Edit mode: upload immediately since the item already has an id.
-  // Add mode: just stage the file - it's uploaded right after the new
-  // item is created, once a real id exists to attach it to.
   const handleImageChange = file => {
     setImagePreview(URL.createObjectURL(file))
     if (isEdit) {
@@ -96,8 +75,6 @@ const PortfolioForm = () => {
     }
   }
 
-  // ** Add mode: nothing saved yet, just clear the staged file. Edit mode:
-  // the image is already persisted, so clearing it is a real update.
   const handleRemoveImage = () => {
     setImagePreview(null)
     setImageFile(null)

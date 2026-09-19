@@ -1,17 +1,6 @@
-/*=========================================================================================
-    File Name: navigation.scss
-    Description: Common mixin for menus, contain dark and light version scss.
-    ----------------------------------------------------------------------------------------
-    Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-    Author: PIXINVENT
-    Author URL: http://www.themeforest.net/user/pixinvent
-==========================================================================================*/
 
-// Import first main menu mixin
 @import '../mixins/main-menu-mixin';
 
-// Main menu base
-//==============
 .main-menu {
   z-index: 1031;
   position: absolute;
@@ -46,7 +35,6 @@
     border-right: 1px solid $border-color;
   }
 
-  // menu scroll shadow
   .shadow-bottom {
     display: none;
     position: absolute;
@@ -62,7 +50,6 @@
     }
   }
 
-  // Native Scrollbar (.menu-native-scroll)
   &.menu-native-scroll {
     .main-menu-content {
       overflow-y: scroll !important;
@@ -131,7 +118,6 @@
   }
 }
 
-// Main Navigation
 .navigation {
   font-size: 1.1rem;
   font-family: $font-family-monospace;
@@ -179,10 +165,7 @@
   }
 }
 
-// Media queries for small screen devices
-// =========================================
 @include media-breakpoint-down(md) {
-  // menu hide/open animation
   .menu-hide .main-menu,
   .menu-open .main-menu {
     transition: transform 0.25s, top 0.35s, height 0.35s;

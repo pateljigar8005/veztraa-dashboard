@@ -1,36 +1,22 @@
-// ** React Imports
 import { Fragment, useState } from 'react'
-
-// ** Custom Components
 import Avatar from '@components/avatar'
-
-// ** Third Party Components
 import { X } from 'react-feather'
 import toast from 'react-hot-toast'
 import Flatpickr from 'react-flatpickr'
-import Select, { components } from 'react-select' // eslint-disable-line
+import Select, { components } from 'react-select'
 import { useForm, Controller } from 'react-hook-form'
-
-// ** Reactstrap Imports
 import { Button, Modal, ModalBody, ModalFooter, Label, Input, Form } from 'reactstrap'
-
-// ** Utils
 import { selectThemeColors, isObjEmpty, toDateOnly } from '@utils'
-
-// ** Avatar Images
 import img1 from '@src/assets/images/avatars/1-small.png'
 import img2 from '@src/assets/images/avatars/3-small.png'
 import img3 from '@src/assets/images/avatars/5-small.png'
 import img4 from '@src/assets/images/avatars/7-small.png'
 import img5 from '@src/assets/images/avatars/9-small.png'
 import img6 from '@src/assets/images/avatars/11-small.png'
-
-// ** Styles Imports
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 
 const AddEventSidebar = props => {
-  // ** Props
   const {
     open,
     store,
@@ -48,7 +34,6 @@ const AddEventSidebar = props => {
     isWeekend
   } = props
 
-  // ** Vars & Hooks
   const selectedEvent = store.selectedEvent,
     {
       control,
@@ -61,7 +46,6 @@ const AddEventSidebar = props => {
       defaultValues: { title: '' }
     })
 
-  // ** States
   const [url, setUrl] = useState('')
   const [desc, setDesc] = useState('')
   const [guests, setGuests] = useState({})
@@ -71,7 +55,6 @@ const AddEventSidebar = props => {
   const [startPicker, setStartPicker] = useState(new Date())
   const [calendarLabel, setCalendarLabel] = useState([{ value: 'Business', label: 'Business', color: 'primary' }])
 
-  // ** Select Options
   const options = [
     { value: 'Business', label: 'Business', color: 'primary' },
     { value: 'Personal', label: 'Personal', color: 'danger' },
@@ -89,7 +72,6 @@ const AddEventSidebar = props => {
     { value: 'Cheryl May', label: 'Cheryl May', avatar: img6 }
   ]
 
-  // ** Custom select components
   const OptionComponent = ({ data, ...props }) => {
     return (
       <components.Option {...props}>
@@ -110,13 +92,6 @@ const AddEventSidebar = props => {
     )
   }
 
-  // ** Company-wide holidays and weekend days (see the Holidays and Company
-  // Settings modules) - this form's own Start/End Date pickers used to have
-  // no awareness of either at all, unlike the Calendar's own click-to-create
-  // (see Calendar.js's dateClick), which is how an event could still end up
-  // on a blocked date despite that check existing. Checked again here at
-  // submit time (not just via the pickers' own `disable` option below) since
-  // a date can still be typed directly into a Flatpickr text input.
   const blockReasonForDate = date => {
     if (!date) return null
     const holidayName = getHolidayName(toDateOnly(date))
@@ -125,7 +100,6 @@ const AddEventSidebar = props => {
     return null
   }
 
-  // ** Adds New Event
   const handleAddEvent = () => {
     const blockReason = blockReasonForDate(startPicker) || blockReasonForDate(endPicker)
     if (blockReason) {
@@ -153,7 +127,6 @@ const AddEventSidebar = props => {
     toast.success('Event Added')
   }
 
-  // ** Reset Input Values on Close
   const handleResetInputValues = () => {
     dispatch(selectEvent({}))
     setValue('title', '')
@@ -167,7 +140,6 @@ const AddEventSidebar = props => {
     setEndPicker(new Date())
   }
 
-  // ** Set sidebar fields
   const handleSelectedEvent = () => {
     if (!isObjEmpty(selectedEvent)) {
       const calendar = selectedEvent.extendedProps.calendar
@@ -191,35 +163,24 @@ const AddEventSidebar = props => {
     }
   }
 
-  // ** (UI) updateEventInCalendar
   const updateEventInCalendar = (updatedEventData, propsToUpdate, extendedPropsToUpdate) => {
     const existingEvent = calendarApi.getEventById(updatedEventData.id)
 
-    // ** Set event properties except date related
-    // ? Docs: https://fullcalendar.io/docs/Event-setProp
-    // ** dateRelatedProps => ['start', 'end', 'allDay']
-    // ** eslint-disable-next-line no-plusplus
     for (let index = 0; index < propsToUpdate.length; index++) {
       const propName = propsToUpdate[index]
       existingEvent.setProp(propName, updatedEventData[propName])
     }
 
-    // ** Set date related props
-    // ? Docs: https://fullcalendar.io/docs/Event-setDates
     existingEvent.setDates(new Date(updatedEventData.start), new Date(updatedEventData.end), {
       allDay: updatedEventData.allDay
     })
 
-    // ** Set event's extendedProps
-    // ? Docs: https://fullcalendar.io/docs/Event-setExtendedProp
-    // ** eslint-disable-next-line no-plusplus
     for (let index = 0; index < extendedPropsToUpdate.length; index++) {
       const propName = extendedPropsToUpdate[index]
       existingEvent.setExtendedProp(propName, updatedEventData.extendedProps[propName])
     }
   }
 
-  // ** Updates Event in Store
   const handleUpdateEvent = () => {
     if (getValues('title').length) {
       const blockReason = blockReasonForDate(startPicker) || blockReasonForDate(endPicker)
@@ -258,7 +219,6 @@ const AddEventSidebar = props => {
     }
   }
 
-  // ** (UI) removeEventInCalendar
   const removeEventInCalendar = eventId => {
     calendarApi.getEventById(eventId).remove()
   }
@@ -270,7 +230,6 @@ const AddEventSidebar = props => {
     toast.error('Event Removed')
   }
 
-  // ** Event Action buttons
   const EventActions = () => {
     if (isObjEmpty(selectedEvent) || (!isObjEmpty(selectedEvent) && !selectedEvent.title.length)) {
       return (
@@ -370,11 +329,6 @@ const AddEventSidebar = props => {
                 options={{
                   enableTime: allDay === false,
                   dateFormat: 'Y-m-d H:i',
-                  // Same holiday/weekend blocking as the Calendar's own
-                  // click-to-create (see Calendar.js's dayCellClassNames) -
-                  // this picker had none at all before, which is how an
-                  // event could still be added on a blocked date via this
-                  // form even though clicking the day cell directly refused.
                   disable: [...holidayDates, isWeekend]
                 }}
               />
@@ -387,7 +341,6 @@ const AddEventSidebar = props => {
               <Flatpickr
                 required
                 id='endDate'
-                // tag={Flatpickr}
                 name='endDate'
                 className='form-control'
                 onChange={date => setEndPicker(date[0])}

@@ -1,9 +1,5 @@
 import mock from '../mock'
-
-// ** Utils
 import { paginateArray } from '../utils'
-
-// Avatars Imports
 import avatar1 from '@src/assets/images/avatars/1.png'
 import avatar2 from '@src/assets/images/avatars/2.png'
 import avatar3 from '@src/assets/images/avatars/3.png'
@@ -538,12 +534,9 @@ const data = {
   ]
 }
 
-// GET ALL DATA
 mock.onGet('/api/users/list/all-data').reply(200, data.users)
 
-// POST: Add new user
 mock.onPost('/apps/users/add-user').reply(config => {
-  // Get event from post data
   const user = JSON.parse(config.data)
   const highestValue = data.users.reduce((a, b) => (a.id > b.id ? a : b)).id
 
@@ -554,7 +547,6 @@ mock.onPost('/apps/users/add-user').reply(config => {
   return [201, { user }]
 })
 
-// GET Updated DATA
 mock.onGet('/api/users/list/data').reply(config => {
   const {
     q = '',
@@ -566,7 +558,6 @@ mock.onGet('/api/users/list/data').reply(config => {
     sortColumn = 'fullName'
   } = config
 
-  /* eslint-disable  */
   const queryLowered = q.toLowerCase()
 
   const dataAsc = data.users.sort((a, b) => (a[sortColumn] < b[sortColumn] ? -1 : 1))
@@ -579,7 +570,6 @@ mock.onGet('/api/users/list/data').reply(config => {
       user.role === (role || user.role) &&
       user.status === (status || user.status)
   )
-  /* eslint-enable  */
 
   return [
     200,
@@ -590,19 +580,15 @@ mock.onGet('/api/users/list/data').reply(config => {
   ]
 })
 
-// GET USER
 mock.onGet('/api/users/user').reply(config => {
   const { id } = config
   const user = data.users.find(i => i.id === id)
   return [200, { user }]
 })
 
-// DELETE: Deletes User
 mock.onDelete('/apps/users/delete').reply(config => {
-  // Get user id from URL
   let userId = config.id
 
-  // Convert Id to number
   userId = Number(userId)
 
   const userIndex = data.users.findIndex(t => t.id === userId)

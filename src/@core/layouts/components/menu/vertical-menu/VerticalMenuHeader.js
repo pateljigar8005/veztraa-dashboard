@@ -1,29 +1,18 @@
-// ** React Imports
 import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
-
-// ** Icons Imports
 import { Disc, X, Circle } from 'react-feather'
-
-// ** Config
 import themeConfig from '@configs/themeConfig'
-
-// ** Utils
 import { getUserData, getHomeRouteForLoggedInUser } from '@utils'
 
 const VerticalMenuHeader = props => {
-  // ** Props
   const { menuCollapsed, setMenuCollapsed, setMenuVisibility, setGroupOpen, menuHover } = props
 
-  // ** Vars
   const user = getUserData()
 
-  // ** Reset open group
   useEffect(() => {
     if (!menuHover && menuCollapsed) setGroupOpen([])
   }, [menuHover, menuCollapsed])
 
-  // ** Menu toggler component
   const Toggler = () => {
     if (!menuCollapsed) {
       return (

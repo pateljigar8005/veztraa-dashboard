@@ -1,27 +1,15 @@
-// ** React Imports
 import { Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
-
-// ** Custom Components
 import Avatar from '@components/avatar'
-
-// ** Store & Actions
 import { store } from '@store/store'
 import { deleteUser } from '../store'
-
-// ** Icons Imports
 import { Slack, User, Settings, Database, Edit2, Trash2 } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
-
-// ** Utils
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
 import { resolveAvatarUrl } from '@utils'
 
-// ** Renders Client Columns
 const renderClient = row => {
   if (row.avatar && row.avatar.length) {
     return <Avatar className='me-1' img={resolveAvatarUrl(row.avatar)} width='32' height='32' />
@@ -37,7 +25,6 @@ const renderClient = row => {
   }
 }
 
-// ** Renders Role Columns
 const renderRole = row => {
   const roleObj = {
     subscriber: {

@@ -1,4 +1,3 @@
-// ** Third Party Components
 import { MoreHorizontal } from 'react-feather'
 
 const VerticalNavMenuSectionHeader = ({ item }) => {

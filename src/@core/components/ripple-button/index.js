@@ -1,28 +1,18 @@
-// ** React Imports
 import { useState, useEffect } from 'react'
-
-// ** Third Party Components
 import classnames from 'classnames'
-
-// ** Reactstrap Imports
 import { Button } from 'reactstrap'
-
-// ** Styles
 import './ripple-button.scss'
 
 const RippleButton = ({ className, children, onClick, ...rest }) => {
-  // ** States
   const [mounted, setMounted] = useState(false)
   const [isRippling, setIsRippling] = useState(false)
   const [coords, setCoords] = useState({ x: -1, y: -1 })
 
-  // ** Toggle mounted on mount & unmount
   useEffect(() => {
     setMounted(true)
     return () => setMounted(false)
   }, [])
 
-  // ** Check for coords and set ripple
   useEffect(() => {
     if (mounted) {
       if (coords.x !== -1 && coords.y !== -1) {
@@ -34,7 +24,6 @@ const RippleButton = ({ className, children, onClick, ...rest }) => {
     }
   }, [coords])
 
-  // ** Reset Coords on ripple end
   useEffect(() => {
     if (mounted) {
       if (!isRippling) setCoords({ x: -1, y: -1 })
@@ -69,7 +58,6 @@ const RippleButton = ({ className, children, onClick, ...rest }) => {
   )
 }
 
-// ** PropTypes
 RippleButton.propTypes = {
   ...Button.propTypes
 }

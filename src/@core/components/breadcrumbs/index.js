@@ -1,13 +1,8 @@
-// ** React Imports
 import { Fragment } from 'react'
 import { Link } from 'react-router-dom'
-
-// ** Third Party Components
 import Proptypes from 'prop-types'
 import classnames from 'classnames'
 import { Grid, CheckSquare, MessageSquare, Mail, Calendar } from 'react-feather'
-
-// ** Reactstrap Imports
 import {
   Breadcrumb,
   DropdownMenu,
@@ -18,7 +13,6 @@ import {
 } from 'reactstrap'
 
 const BreadCrumbs = props => {
-  // ** Props
   const { data, title } = props
 
   const renderBreadCrumbs = () => {
@@ -87,7 +81,6 @@ const BreadCrumbs = props => {
 }
 export default BreadCrumbs
 
-// ** PropTypes
 BreadCrumbs.propTypes = {
   title: Proptypes.string.isRequired,
   data: Proptypes.arrayOf(

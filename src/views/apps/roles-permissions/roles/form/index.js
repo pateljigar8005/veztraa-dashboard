@@ -1,29 +1,16 @@
-// ** React Imports
 import { Fragment, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
-// ** Hooks
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
-
-// ** Third Party Components
 import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, Table } from 'reactstrap'
-
-// ** Store & Actions
 import { addRole, updateRole, getRole } from '../store'
-
-// ** Menu Permissions
 import { menuPermissionGroups } from '../menuPermissions'
 
 const actions = ['view', 'add', 'edit', 'delete', 'export']
 const nonViewActions = actions.filter(a => a !== 'view')
 
-// Add/Edit/Delete/Export imply View (checking one auto-checks View too), and
-// unchecking View clears all of them (they're meaningless without it).
 const applyPermissionRule = (entry, action, checked) => {
   const next = { ...entry, [action]: checked }
   if (action === 'view' && !checked) {
@@ -39,17 +26,13 @@ const applyPermissionRule = (entry, action, checked) => {
 const defaultValues = { name: '' }
 
 const RoleForm = () => {
-  // ** Hooks & Vars
   const { id } = useParams()
   const isEdit = Boolean(id)
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const store = useSelector(state => state.roles)
 
-  // ** permissions shape: { [menuId]: { view, add, edit, delete, export } }
   const [permissions, setPermissions] = useState({})
-  // Tracks edits to permissions, which isn't registered with react-hook-form
-  // so its own isDirty can't see it.
   const [extraDirty, setExtraDirty] = useState(false)
 
   const {

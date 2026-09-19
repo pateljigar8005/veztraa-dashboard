@@ -1,24 +1,13 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
-// ** Hooks
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
-
-// ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
-
-// ** Utils
 import { selectThemeColors } from '@utils'
-
-// ** Store & Actions
 import { addClient, updateClient, getClient } from '../store'
 
 const defaultValues = {
@@ -31,7 +20,6 @@ const defaultValues = {
 }
 
 const ClientForm = () => {
-  // ** Hooks & Vars
   const { id } = useParams()
   const isEdit = Boolean(id)
   const navigate = useNavigate()
@@ -56,7 +44,6 @@ const ClientForm = () => {
   const industryId = watch('industry_id')
   const currencyId = watch('currency_id')
 
-  // ** Fetch active currencies and industries for the selects
   useEffect(() => {
     axios.get('/currencies', { params: { perPage: 100 } }).then(response => {
       const active = response.data.data.currencies.filter(c => c.is_active)
@@ -68,12 +55,10 @@ const ClientForm = () => {
     })
   }, [])
 
-  // ** Fetch the client being edited
   useEffect(() => {
     if (isEdit) dispatch(getClient(id))
   }, [id])
 
-  // ** Populate the form once the client loads
   useEffect(() => {
     if (isEdit && store.selectedClient && store.selectedClient.id === Number(id)) {
       const client = store.selectedClient

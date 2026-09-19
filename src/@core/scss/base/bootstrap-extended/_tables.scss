@@ -1,13 +1,4 @@
-// ================================================================================================
-//     File Name: tables.scss
-//     Description: Tables pages custom scss
-//     ----------------------------------------------------------------------------------------------
-//     Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-//     Author: PIXINVENT
-//     Author URL: http://www.themeforest.net/user/pixinvent
-// ================================================================================================
 
-// table-white-space
 .table-white-space {
   th,
   td {
@@ -15,7 +6,6 @@
   }
 }
 
-// table th, td padding
 .table {
   thead,
   tfoot {
@@ -41,14 +31,12 @@
     }
   }
 }
-// if we are not using table-light class then also header color should apply
 .table:not(.table-dark):not(.table-light) {
   thead:not(.table-dark) th,
   tfoot:not(.table-dark) th {
     background-color: $table-head-bg;
   }
 }
-// table inside card, don't need margin bottom
 .table-hover {
   tbody {
     tr {
@@ -57,7 +45,6 @@
   }
 }
 
-// table border radius
 .card .table {
   margin-bottom: 0;
   border-bottom-left-radius: $border-radius;
@@ -79,7 +66,6 @@
   }
 }
 
-// Flush spacing of left from first column ans right from last column
 .table.table-flush-spacing {
   thead,
   tbody {

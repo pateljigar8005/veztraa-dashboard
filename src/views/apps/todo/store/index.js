@@ -1,7 +1,4 @@
-// ** Redux Imports
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-
-// ** Axios Imports
 import axios from 'axios'
 
 export const getTasks = createAsyncThunk('appTodo/getTasks', async params => {
@@ -34,9 +31,6 @@ export const deleteTask = createAsyncThunk('appTodo/deleteTask', async (taskId, 
   return taskId
 })
 
-// Persists a drag-and-drop reorder (see Tasks.js) - the `reOrderTasks`
-// reducer below already updates the on-screen order instantly; this just
-// saves that same order server-side so it survives a reload.
 export const persistTaskOrder = createAsyncThunk('appTodo/persistTaskOrder', async ids => {
   await axios.post('/todos/reorder', { ids })
   return ids

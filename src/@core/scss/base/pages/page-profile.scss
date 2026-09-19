@@ -1,29 +1,17 @@
-// ================================================================================================
-// 	File Name: page-profile.scss
-// 	Description: Page content different types of users page layouts SCSS.
-// 	----------------------------------------------------------------------------------------------
-// 	Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-// 	Author: PIXINVENT
-// 	Author URL: http://www.themeforest.net/user/pixinvent
-// ================================================================================================
+@import '../bootstrap-extended/include';
+@import '../components/include';
 
-@import '../bootstrap-extended/include'; // Bootstrap includes
-@import '../components/include'; // Components includes
 
-// User profile Scss
 #user-profile {
-  /*-------------profile header section---------*/
   .profile-header {
     overflow: hidden;
 
-    // profile picture container
     .profile-img-container {
       position: absolute;
       bottom: -2rem;
       left: 2.14rem;
       z-index: 2;
 
-      // profile image
       .profile-img {
         height: 8.92rem;
         width: 8.92rem;
@@ -34,12 +22,10 @@
       }
     }
 
-    // profile navbar padding
     .profile-header-nav {
       .navbar {
         padding: 0.8rem 1rem;
 
-        // navbar toggle button
         .navbar-toggler {
           line-height: 0;
         }
@@ -55,15 +41,12 @@
     }
   }
 
-  /*-------- profile info section --------*/
   #profile-info {
-    // profile star icons
     .profile-star {
       color: $gray-100;
 
       i,
       svg {
-        // filled star icons
         &.profile-favorite {
           fill: $warning;
           stroke: $warning;
@@ -71,13 +54,11 @@
       }
     }
 
-    // filled heart icons
     .profile-likes {
       fill: $danger;
       stroke: $danger;
     }
 
-    // progress-bar height
     .profile-polls-info {
       .progress {
         height: 0.42rem;
@@ -85,7 +66,6 @@
     }
   }
 
-  //profile-latest-img - hover effect
   .profile-latest-img {
     transition: all 0.2s ease-in-out;
     &:hover {
@@ -97,7 +77,6 @@
     }
   }
 
-  // Load More Button - Block UI
   .block-element {
     .spinner-border {
       border-width: 0.14rem;
@@ -105,7 +84,6 @@
   }
 }
 
-// Latest Photo Section - Image size
 @include media-breakpoint-down(lg) {
   #user-profile {
     .profile-latest-img {
@@ -117,7 +95,6 @@
 }
 
 @include media-breakpoint-up(md) {
-  // navbar tabs pills
   .profile-header-nav {
     .profile-tabs {
       width: 100%;
@@ -126,7 +103,6 @@
   }
 }
 
-// profile img and title
 @include media-breakpoint-down(sm) {
   #user-profile {
     .profile-header {

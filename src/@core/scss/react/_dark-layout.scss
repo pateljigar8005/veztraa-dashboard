@@ -8,7 +8,6 @@
     }
   }
 
-  // ** App Invoice
   .invoice-edit,
   .invoice-add {
     .invoice-edit-input-group .input-group-text {
@@ -24,7 +23,6 @@
     }
   }
 
-  // Autocomplete Navbar
   .autocomplete-container {
     .suggestions-list {
       .suggestion-item {
@@ -35,19 +33,16 @@
     }
   }
 
-  // Ecommerce Application
   .ecommerce-application .list-view .ecommerce-card .card-body {
     border-right-color: $theme-dark-border-color;
   }
 
-  // Chat Application
   .chat-application {
     .more-options-dropdown .btn-icon svg {
       color: $theme-dark-body-color;
     }
   }
 
-  // Pagination Break
   .pagination {
     .break {
       background-color: $theme-dark-pagination-bg;
@@ -57,12 +52,10 @@
     }
   }
 
-  // Invoice data table
   .invoice-list-wrapper header {
     background-color: $theme-dark-card-bg;
   }
 
-  // BlockUI
   .block-ui-container {
     .block-ui-overlay {
       background: $theme-dark-body-bg;
@@ -72,12 +65,10 @@
     }
   }
 
-  // Pricing
   .pricing-card .card.popular {
     border-color: $primary !important;
   }
 
-  // Form Control
   .form-control {
     background-color: transparent;
   }
@@ -85,7 +76,6 @@
     border-color: $success;
   }
 
-  // Apex Charts
   .apexcharts-gridlines-vertical line {
     stroke: $theme-dark-border-color;
   }
@@ -96,7 +86,6 @@
     }
   }
 
-  // Horizontal Menu Scrollbar
   .horizontal-menu {
     .horizontal-menu-wrapper {
       .navbar-horizontal {

@@ -1,4 +1,3 @@
-// Badge
 
 .badge {
   &[class*='bg-'] {
@@ -10,7 +9,6 @@
       color: $white;
     }
 
-    // badge dropdown alignment
     .dropdown-toggle,
     &.dropdown-toggle {
       span,
@@ -45,13 +43,10 @@
     vertical-align: top;
   }
 
-  // square badge
   &.badge-square {
     border-radius: 0;
   }
 
-  // badge-up
-  // to align badge over any element
   &.badge-up {
     position: absolute;
     top: -11px;
@@ -72,7 +67,6 @@
   }
 }
 
-// For fullscreen search
 .badge-icon {
   i,
   svg {
@@ -81,7 +75,6 @@
   }
 }
 
-// badge dropup pointer
 .dropup {
   .badge {
     cursor: pointer;

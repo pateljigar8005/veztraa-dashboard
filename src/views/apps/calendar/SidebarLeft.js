@@ -1,16 +1,8 @@
-// ** React Imports
 import { Fragment } from 'react'
-
-// ** Custom Components
 import classnames from 'classnames'
-
-// ** Reactstrap Imports
 import { Card, CardBody, Button, Input, Label } from 'reactstrap'
-
-// ** illustration import
 import illustration from '@src/assets/images/pages/calendar-illustration.png'
 
-// ** Filters Checkbox Array
 const filters = [
   { label: 'Personal', color: 'danger', className: 'form-check-danger mb-1' },
   { label: 'Business', color: 'primary', className: 'form-check-primary mb-1' },
@@ -19,19 +11,14 @@ const filters = [
   { label: 'ETC', color: 'info', className: 'form-check-info' }
 ]
 
-// ** Upcoming due dates pulled in from the Kanban/Todo modules (read-only,
-// see calendar/store/index.js) - kept as a separate filter group since
-// they're not real calendar events and aren't affected by "View All".
 const taskFilters = [
   { label: 'Kanban Tasks', className: 'form-check-secondary mb-1' },
   { label: 'To-Do', className: 'form-check-dark' }
 ]
 
 const SidebarLeft = props => {
-  // ** Props
   const { handleAddEventSidebar, toggleSidebar, updateFilter, updateAllFilters, toggleTaskFilter, store, dispatch } = props
 
-  // ** Function to handle Add Event Click
   const handleAddEventClick = () => {
     toggleSidebar(false)
     handleAddEventSidebar()

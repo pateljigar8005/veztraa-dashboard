@@ -1,38 +1,27 @@
-// ** React Imports
 import ReactDOM from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { Fragment, useEffect, useState, useRef } from 'react'
-
-// ** Third Party Components
 import PropTypes from 'prop-types'
 import classnames from 'classnames'
 import { AlertCircle } from 'react-feather'
 import PerfectScrollbar from 'react-perfect-scrollbar'
-
-// ** Hooks Imports
 import { useOnClickOutside } from '@hooks/useOnClickOutside'
-
-// ** Styles Imports
 import '@styles/base/bootstrap-extended/_include.scss'
 import './autocomplete.scss'
 
 const Autocomplete = props => {
-  // ** Refs
   const container = useRef(null)
   const inputElRef = useRef(null)
   const suggestionsListRef = useRef(null)
 
-  // ** States
   const [focused, setFocused] = useState(false)
   const [activeSuggestion, setActiveSuggestion] = useState(0)
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [userInput, setUserInput] = useState(props.value ? props.value : '')
 
-  // ** Vars
   const navigate = useNavigate()
   let filteredData = []
 
-  // ** Suggestion Item Click Event
   const onSuggestionItemClick = (url, e) => {
     setActiveSuggestion(0)
     setShowSuggestions(false)
@@ -46,12 +35,10 @@ const Autocomplete = props => {
     }
   }
 
-  // ** Suggestion Hover Event
   const onSuggestionItemHover = index => {
     setActiveSuggestion(index)
   }
 
-  // ** Input On Change Event
   const onChange = e => {
     const userInput = e.currentTarget.value
     setActiveSuggestion(0)
@@ -62,17 +49,14 @@ const Autocomplete = props => {
     }
   }
 
-  // ** Input Click Event
   const onInputClick = e => {
     e.stopPropagation()
   }
 
-  // ** Input's Keydown Event
   const onKeyDown = e => {
     const filterKey = props.filterKey
     const suggestionList = ReactDOM.findDOMNode(suggestionsListRef.current)
 
-    // ** User pressed the up arrow
     if (e.keyCode === 38 && activeSuggestion !== 0) {
       setActiveSuggestion(activeSuggestion - 1)
 
@@ -80,18 +64,15 @@ const Autocomplete = props => {
         suggestionList.scrollTop = 0
       }
     } else if (e.keyCode === 40 && activeSuggestion < filteredData.length - 1) {
-      // ** User pressed the down arrow
       setActiveSuggestion(activeSuggestion + 1)
 
       if (e.target.value.length > -1 && suggestionList !== null && activeSuggestion >= filteredData.length / 2) {
         suggestionList.scrollTop = suggestionList.scrollHeight
       }
     } else if (e.keyCode === 27) {
-      // ** User Pressed ESC
       setShowSuggestions(false)
       setUserInput('')
     } else if (e.keyCode === 13 && showSuggestions) {
-      // ** User Pressed ENTER
       onSuggestionItemClick(filteredData[activeSuggestion].link, e)
       setUserInput(filteredData[activeSuggestion][filterKey])
       setShowSuggestions(false)
@@ -99,13 +80,11 @@ const Autocomplete = props => {
       return
     }
 
-    // ** Custom Keydown Event
     if (props.onKeyDown !== undefined && props.onKeyDown !== null) {
       props.onKeyDown(e, userInput)
     }
   }
 
-  // ** Function To Render Grouped Suggestions
   const renderGroupedSuggestion = arr => {
     const { filterKey, customRender } = props
 
@@ -146,7 +125,6 @@ const Autocomplete = props => {
     })
   }
 
-  // ** Function To Render Ungrouped Suggestions
   const renderUngroupedSuggestions = () => {
     const { filterKey, suggestions, customRender, suggestionLimit } = props
 
@@ -204,11 +182,9 @@ const Autocomplete = props => {
     }
   }
 
-  // ** Function To Render Suggestions
   const renderSuggestions = () => {
     const { filterKey, grouped, filterHeaderKey, suggestions } = props
 
-    // ** Checks if suggestions are grouped or not.
     if (grouped === undefined || grouped === null || !grouped) {
       return renderUngroupedSuggestions()
     } else {
@@ -247,39 +223,32 @@ const Autocomplete = props => {
     }
   }
 
-  //** ComponentDidMount
   useEffect(() => {
     if (props.defaultSuggestions && focused) {
       setShowSuggestions(true)
     }
   }, [focused, props.defaultSuggestions])
 
-  //** ComponentDidUpdate
   useEffect(() => {
     const textInput = ReactDOM.findDOMNode(inputElRef.current)
 
-    // ** For searchbar focus
     if (textInput !== null && props.autoFocus) {
       inputElRef.current.focus()
     }
 
-    // ** If user has passed default suggestions & focus then show default suggestions
     if (props.defaultSuggestions && focused) {
       setShowSuggestions(true)
     }
 
-    // ** Function to run on user passed Clear Input
     if (props.clearInput) {
       props.clearInput(userInput, setUserInput)
     }
 
-    // ** Function on Suggestions Shown
     if (props.onSuggestionsShown && showSuggestions) {
       props.onSuggestionsShown(userInput)
     }
   }, [setShowSuggestions, focused, userInput, showSuggestions, props])
 
-  // ** On External Click Close The Search & Call Passed Function
   useOnClickOutside(container, () => {
     setShowSuggestions(false)
     if (props.externalClick) {
@@ -334,7 +303,6 @@ const Autocomplete = props => {
 
 export default Autocomplete
 
-// ** PropTypes
 Autocomplete.propTypes = {
   grouped: PropTypes.bool,
   autoFocus: PropTypes.bool,

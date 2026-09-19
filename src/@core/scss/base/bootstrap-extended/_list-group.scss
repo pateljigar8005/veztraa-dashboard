@@ -1,19 +1,9 @@
-/* ===============================================================================================
-  File Name: list-group.scss
-  Description: Contain list item, list group related extended SCSS.
-  ----------------------------------------------------------------------------------------------
-  Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-  Author: PIXINVENT
-  Author URL: http://www.themeforest.net/user/pixinvent
-================================================================================================*/
 
-// Inline list style with pipeline separator
 
 ul.list-inline {
   li {
     display: inline-block;
   }
-  // used in search page
   &.list-inline-pipe {
     > li + li:before {
       content: ' | ';
@@ -22,7 +12,6 @@ ul.list-inline {
   }
 }
 
-// bootstrap list group
 .list-group {
   .list-group-item {
     line-height: 1.5;
@@ -46,7 +35,6 @@ ul.list-inline {
     }
   }
 
-  // List group with circle for pages like knowledge base
   &.list-group-circle {
     border: none;
     .list-group-item {
@@ -73,7 +61,6 @@ ul.list-inline {
   }
 }
 
-// for drag and drop border radius on selected
 .list-group-item.gu-mirror {
   border-radius: 0;
 }

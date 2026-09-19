@@ -1,29 +1,14 @@
-// ** React Imports
 import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
-// ** Hooks
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
-
-// ** Third Party Components
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
-
-// ** Utils
 import { selectThemeColors } from '@utils'
-
-// ** Shared Components
 import AmountField from '../../shared/AmountField'
-
-// ** Store & Actions
 import { addServiceItem, updateServiceItem, getServiceItem } from '../store'
-
-// ** Options
 import { categoryOptions, unitOptions } from '../serviceItemOptions'
 
 const defaultValues = {
@@ -33,7 +18,6 @@ const defaultValues = {
 }
 
 const ServiceItemForm = () => {
-  // ** Hooks & Vars
   const { id } = useParams()
   const isEdit = Boolean(id)
   const navigate = useNavigate()
@@ -55,12 +39,10 @@ const ServiceItemForm = () => {
   const category = watch('category')
   const unit = watch('unit')
 
-  // ** Fetch the service item being edited
   useEffect(() => {
     if (isEdit) dispatch(getServiceItem(id))
   }, [id])
 
-  // ** Populate the form once the service item loads
   useEffect(() => {
     if (isEdit && store.selectedServiceItem && store.selectedServiceItem.id === Number(id)) {
       const item = store.selectedServiceItem

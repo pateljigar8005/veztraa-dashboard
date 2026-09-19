@@ -1,7 +1,4 @@
-// Component: UI Loader
-// ========================================================================
 
-// ** Base Styles Imports
 @import '../../scss/base/bootstrap-extended/include';
 @import '../../scss/base/components/include';
 
@@ -9,7 +6,6 @@
   position: relative;
 
   &.show {
-    // background-color: rgba($color: $black, $alpha: 0.3);
     .overlay {
       content: '';
       position: absolute;

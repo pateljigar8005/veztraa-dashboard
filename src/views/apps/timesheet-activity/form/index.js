@@ -1,23 +1,12 @@
-// ** React Imports
 import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
-// ** Hooks
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
-
-// ** Third Party Components
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
-
-// ** Utils
 import { selectThemeColors } from '@utils'
-
-// ** Store & Actions
 import { addTimesheetActivity, updateTimesheetActivity, getTimesheetActivity } from '../store'
 
 const statusOptions = [
@@ -28,7 +17,6 @@ const statusOptions = [
 const defaultValues = { name: '' }
 
 const TimesheetActivityForm = () => {
-  // ** Hooks & Vars
   const { id } = useParams()
   const isEdit = Boolean(id)
   const navigate = useNavigate()
@@ -49,12 +37,10 @@ const TimesheetActivityForm = () => {
 
   const isActive = watch('is_active')
 
-  // ** Fetch the activity being edited
   useEffect(() => {
     if (isEdit) dispatch(getTimesheetActivity(id))
   }, [id])
 
-  // ** Populate the form once the activity loads
   useEffect(() => {
     if (isEdit && store.selectedTimesheetActivity && store.selectedTimesheetActivity.id === Number(id)) {
       const activity = store.selectedTimesheetActivity

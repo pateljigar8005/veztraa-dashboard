@@ -5,7 +5,6 @@
   height: 350px;
 }
 
-// Tooltip
 .recharts-tooltip-wrapper {
   padding: 0.75rem;
   background-color: $white;
@@ -14,7 +13,6 @@
   box-shadow: 2px 2px 6px -4px #999;
 }
 
-// Grid Color
 .recharts-cartesian-grid,
 .recharts-polar-grid-angle,
 .recharts-yAxis,
@@ -40,7 +38,6 @@
   color: $body-color;
 }
 
-// Vertical Tooltip Line
 .recharts-curve.recharts-tooltip-cursor {
   display: none;
 }
@@ -50,9 +47,7 @@
   }
 }
 
-// Dark Layout
 .dark-layout {
-  // Tooltip
   .recharts-tooltip-wrapper {
     padding: 0.75rem;
     background-color: $theme-dark-card-bg;
@@ -61,7 +56,6 @@
     box-shadow: $theme-dark-box-shadow;
   }
 
-  // Grid Color
   .recharts-cartesian-grid,
   .recharts-polar-grid-angle,
   .recharts-yAxis,

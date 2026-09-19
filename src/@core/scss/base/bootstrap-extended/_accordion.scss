@@ -1,4 +1,3 @@
-// Basic accordion
 .accordion {
   [data-bs-toggle='collapse'] {
     font-weight: 500;
@@ -19,7 +18,6 @@
   }
 }
 
-// accordion without icon
 .accordion {
   &.accordion-without-arrow {
     .accordion-button::after {
@@ -28,7 +26,6 @@
   }
 }
 
-// For Accordion with border
 .accordion-border {
   .accordion-item {
     border: 1px solid $border-color;
@@ -45,7 +42,6 @@
   }
 }
 
-// For Accordion with margin
 .accordion-margin {
   .accordion-item {
     margin-top: 0.71rem;

@@ -1,7 +1,6 @@
-// Core variables and mixins
+@import '../bootstrap-extended/include';
+@import '../components/include';
 
-@import '../bootstrap-extended/include'; // Bootstrap includes
-@import '../components/include'; // Components includes
 
 $fc-calendar-height: 650px;
 $fc-sidebar-width: 18rem;
@@ -12,9 +11,7 @@ $fc-event-padding-y: 0.25rem;
 $fc-toolbar-btn-padding: 0.438rem 0.5rem;
 $fc-day-toggle-btn-padding: 0.55rem 1.5rem;
 
-// Full calendar styles
 .fc {
-  // Toolbar
   .fc-toolbar {
     flex-wrap: wrap;
     flex-direction: row !important;
@@ -58,7 +55,6 @@ $fc-day-toggle-btn-padding: 0.55rem 1.5rem;
       }
       .fc-button-primary {
         &:not(.fc-prev-button):not(.fc-next-button) {
-          // background-color: rgba($primary, 0.1);
           background-color: transparent;
           border-color: $primary;
           color: $primary;
@@ -125,7 +121,6 @@ $fc-day-toggle-btn-padding: 0.55rem 1.5rem;
     }
   }
 
-  // Calendar head & body common
   tbody td,
   thead th {
     border-color: $border-color;
@@ -139,7 +134,6 @@ $fc-day-toggle-btn-padding: 0.55rem 1.5rem;
     min-height: $fc-calendar-height;
   }
 
-  // Daygrid
   .fc-scrollgrid-section-liquid > td {
     border-bottom: 0;
   }
@@ -163,7 +157,6 @@ $fc-day-toggle-btn-padding: 0.55rem 1.5rem;
     }
   }
 
-  // All Views Event
   .fc-daygrid-day-number,
   .fc-timegrid-slot-label-cushion,
   .fc-list-event-time {
@@ -173,9 +166,6 @@ $fc-day-toggle-btn-padding: 0.55rem 1.5rem;
     background: $body-bg !important;
     background-color: $body-bg !important;
   }
-  // Company holiday (see the Holidays settings module) - greyed out and
-  // non-clickable, same as Calendar.js's own dateClick handler blocking
-  // event creation on these dates.
   .fc-day-holiday {
     background-color: rgba($black, 0.06) !important;
     cursor: not-allowed;
@@ -184,7 +174,6 @@ $fc-day-toggle-btn-padding: 0.55rem 1.5rem;
     }
   }
 
-  // Timegrid
   .fc-timegrid {
     .fc-scrollgrid-section {
       .fc-col-header-cell,
@@ -221,7 +210,6 @@ $fc-day-toggle-btn-padding: 0.55rem 1.5rem;
     }
   }
 
-  // List View
   .fc-list {
     border-color: $border-color;
     .fc-list-day-cushion {
@@ -240,7 +228,6 @@ $fc-day-toggle-btn-padding: 0.55rem 1.5rem;
   }
 }
 
-// App Calendar specific
 .app-calendar {
   position: relative;
   border-radius: $card-border-radius;
@@ -274,7 +261,6 @@ $fc-day-toggle-btn-padding: 0.55rem 1.5rem;
     }
   }
 
-  // right sidebar area styles
   .event-sidebar {
     position: absolute;
     top: 0;
@@ -377,7 +363,6 @@ $fc-day-toggle-btn-padding: 0.55rem 1.5rem;
   }
 }
 
-// Event Sidebar
 .event-sidebar {
   .select2-selection__choice__remove {
     &:before {
@@ -386,14 +371,12 @@ $fc-day-toggle-btn-padding: 0.55rem 1.5rem;
   }
 }
 
-// Horizontal Menu
 .horizontal-layout {
   .app-calendar {
     margin-bottom: 1rem;
   }
 }
 
-// Media Queries
 @media (max-width: 992px) {
   .fc {
     .fc-sidebarToggle-button {

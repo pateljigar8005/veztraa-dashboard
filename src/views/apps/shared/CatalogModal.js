@@ -1,13 +1,6 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
-
-// ** Third Party Components
 import axios from 'axios'
-
-// ** Reactstrap Imports
 import { Modal, ModalHeader, ModalBody, ModalFooter, Table, Button, Input } from 'reactstrap'
-
-// ** Utils
 import { formatAmount } from '@utils'
 
 const CatalogModal = ({ isOpen, toggle, onAdd }) => {

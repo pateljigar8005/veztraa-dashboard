@@ -1,10 +1,6 @@
-// ** Redux Imports
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-
-// ** Axios Imports
 import axios from 'axios'
 
-// ** Fetch Boards
 export const fetchBoards = createAsyncThunk('appKanban/fetchBoards', async () => {
   const response = await axios.get('/kanban-boards')
   return response.data.data.boards

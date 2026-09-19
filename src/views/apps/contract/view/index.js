@@ -1,39 +1,19 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-
-// ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useDispatch, useSelector } from 'react-redux'
 import { Edit2, ChevronDown, ChevronRight } from 'react-feather'
 import { pdf, ReportDocument } from '@veztraa/report-renderer'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Collapse } from 'reactstrap'
-
-// ** Store & Actions
 import { getContract, updateContract } from '../store'
-
-// ** Options
 import { frequencyOptions, contractStatusOptions } from '../contractOptions'
-
-// ** Utils
 import { selectThemeColors } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 
 const frequencyLabel = value => frequencyOptions.find(i => i.value === value)?.label || value || '-'
 
-// ** Maps a contract's fields onto the field paths the selected PDF template
-// binds to. The "Agreement PDF (Draft)" template currently in PDF Designer
-// still carries the pricing/line-item bindings it was cloned from (Contracts
-// don't track amounts), so those are sent as zero/empty here - editing that
-// template to bind a "body" richtext element is what would make the
-// generated PDF show the actual agreement text.
-// document.{start_date,end_date} rather than {issue_date,due_date} - a
-// contract runs for a PERIOD, not issued-then-due like an invoice/quotation,
-// so it gets its own date field names within the shared "document" shape.
 const buildPdfData = contract => ({
   client: {
     name: contract.contact_name || '',

@@ -1,8 +1,4 @@
-//
-// Base styles
-//
 
-// input group !important for overriding the dark style
 .input-group {
   &:not(.bootstrap-touchspin):focus-within {
     box-shadow: $input-focus-box-shadow;
@@ -68,7 +64,6 @@
   @include transition($input-transition);
 }
 
-// input group merge
 .input-group-merge {
   .form-control {
     &:not(:first-child) {

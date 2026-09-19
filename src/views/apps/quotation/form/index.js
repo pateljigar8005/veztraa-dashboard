@@ -1,35 +1,20 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-
-// ** Hooks
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
-
-// ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
-
-// ** Utils
 import { selectThemeColors, formatAmount } from '@utils'
-
-// ** Shared Components
 import CatalogModal from '../../shared/CatalogModal'
 import TermsSection from '../../shared/TermsSection'
 import PaymentMethodSection from '../../shared/PaymentMethodSection'
 import LineItemsTable from '../../shared/LineItemsTable'
 import DateField from '../../shared/DateField'
 import AmountField from '../../shared/AmountField'
-
-// ** Store & Actions
 import { addQuotation, updateQuotation, getQuotation } from '../store'
-
-// ** Options
 import { discountTypeOptions } from '../documentOptions'
 
 const defaultValues = {
@@ -48,7 +33,6 @@ const defaultValues = {
 }
 
 const QuotationForm = () => {
-  // ** Hooks & Vars
   const { id } = useParams()
   const [searchParams] = useSearchParams()
   const preselectedClientId = searchParams.get('client_id')
@@ -64,8 +48,6 @@ const QuotationForm = () => {
   const [templateOptions, setTemplateOptions] = useState([])
   const [termsContent, setTermsContent] = useState('')
   const [paymentMethodContent, setPaymentMethodContent] = useState('')
-  // Tracks edits to the two content fields above, neither of which is
-  // registered with react-hook-form, so its own isDirty can't see them.
   const [extraDirty, setExtraDirty] = useState(false)
   const [catalogOpen, setCatalogOpen] = useState(false)
   const [taxEnabled, setTaxEnabled] = useState(true)
@@ -94,7 +76,6 @@ const QuotationForm = () => {
   const discountValue = watch('discount_value')
   const discountType = watch('discount_type')
 
-  // ** Load dropdown data
   useEffect(() => {
     axios.get('/clients', { params: { perPage: 100 } }).then(response => {
       setClientOptions(
@@ -131,20 +112,17 @@ const QuotationForm = () => {
     })
   }, [])
 
-  // ** Preselect client from query string (e.g. coming from Client detail page)
   useEffect(() => {
     if (!isEdit && preselectedClientId) {
       setValue('client_id', Number(preselectedClientId))
     }
   }, [preselectedClientId])
 
-  // ** Fetch the quotation being edited, or the source quotation being cloned
   useEffect(() => {
     if (isEdit) dispatch(getQuotation(id))
     else if (cloneId) dispatch(getQuotation(cloneId))
   }, [id, cloneId])
 
-  // ** Populate the form once the quotation loads (edit) or the clone source loads (add)
   useEffect(() => {
     const sourceId = isEdit ? Number(id) : Number(cloneId)
     if (sourceId && store.selectedQuotation && store.selectedQuotation.id === sourceId) {
@@ -173,7 +151,6 @@ const QuotationForm = () => {
     }
   }, [store.selectedQuotation])
 
-  // ** Quick Fill Customer
   const handleQuickFill = option => {
     setValue('client_id', option ? option.value : '', { shouldDirty: true })
     if (option) {
@@ -186,11 +163,6 @@ const QuotationForm = () => {
     }
   }
 
-  // ** Auto-fill Valid Until as one month after whatever issue date the user
-  // picks - only on an explicit change, not while an existing/cloned
-  // quotation's dates are being loaded. Built from the y/m/d parts directly
-  // (rather than `new Date(str)` + `toISOString()`, which parses/formats in
-  // UTC) so it can't shift a day depending on the browser's local timezone.
   const handleIssueDateChange = onChange => value => {
     onChange(value)
     const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || '')
@@ -215,7 +187,6 @@ const QuotationForm = () => {
     items.forEach(item => append({ description: item.name, qty: 1, rate: item.price }))
   }
 
-  // ** Totals
   const subtotal = (lineItems || []).reduce((sum, item) => sum + (Number(item.qty) || 0) * (Number(item.rate) || 0), 0)
   const taxAmount = taxEnabled ? subtotal * ((Number(taxRate) || 0) / 100) : 0
   const discountAmount =

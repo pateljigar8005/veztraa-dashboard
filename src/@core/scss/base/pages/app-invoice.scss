@@ -1,21 +1,11 @@
-// ================================================================================================
-//  File Name: app-invoice.scss
-//  Description: Invoice Layout page layouts SCSS.
-//  ----------------------------------------------------------------------------------------------
-//  Item Name: Vuexy HTML Admin Template
-//  Version: 1.0
-//  Author: PIXINVENT
-//  Author URL: http://www.themeforest.net/user/pixinvent
-// ================================================================================================
+@import '../bootstrap-extended/include';
+@import '../components/include';
 
-@import '../bootstrap-extended/include'; // Bootstrap includes
-@import '../components/include'; // Components includes
 
 $product-details-bg: #fcfcfc;
 $invoice-spacing: 1.45rem 0;
 $invoice-card-body-padding: 2.5rem;
 
-// Invoice Preview, Edit & Add
 .invoice-preview,
 .invoice-edit,
 .invoice-add {
@@ -99,7 +89,6 @@ $invoice-card-body-padding: 2.5rem;
   }
 }
 
-// Invoice Edit & Add
 .invoice-edit,
 .invoice-add {
   .invoice-preview-card {

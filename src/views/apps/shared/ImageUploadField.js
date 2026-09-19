@@ -1,14 +1,7 @@
-// ** Third Party Components
 import { Button } from 'reactstrap'
 import { Trash2 } from 'react-feather'
-
-// ** Shared Components
 import DropzoneFileInput from './DropzoneFileInput'
 
-// ** Full-width image upload: a taller dropzone with the uploaded picture
-// (if any) shown below it, rather than a small avatar preview sitting
-// beside a narrow dropzone. Used wherever a form needs a single image
-// upload (Team Member photo, Portfolio project image, Case Study cover).
 const ImageUploadField = ({ preview, onFileSelect, onRemove, helperText }) => {
   return (
     <div>

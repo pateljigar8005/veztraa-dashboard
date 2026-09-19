@@ -1,8 +1,6 @@
 @import "../../base/bootstrap-extended/include";
 @import "../../base/components/include";
 
-// Kanban App
-// ========================================================================
 
 .kanban-application {
   overflow: auto !important;
@@ -13,9 +11,6 @@
     overflow: auto !important;
     .board-wrapper {
       min-width: 260px;
-      // Caps each column to the viewport so its own task list scrolls
-      // internally instead of the column growing forever and pushing the
-      // whole page into scrolling.
       max-height: calc(100vh - 12rem);
       display: flex;
       flex-direction: column;
@@ -28,10 +23,6 @@
         margin-right: 2rem;
       }
 
-      // Wraps the task list + "Add New Task" control (see KanbanBoards.js).
-      // flex:1 lets it fill the remaining column height below the header;
-      // min-height:0 is required for the .tasks-wrapper child's own flex:1
-      // + overflow to actually take effect inside a flex column.
       .board-content {
         display: flex;
         flex-direction: column;
@@ -43,8 +34,6 @@
         flex: 1;
         min-height: 0;
         overflow-y: auto;
-        // Scrollable, but the scrollbar itself stays hidden (per design) -
-        // cross-browser: Firefox, IE/legacy Edge, then WebKit/Chromium.
         scrollbar-width: none;
         -ms-overflow-style: none;
         &::-webkit-scrollbar {

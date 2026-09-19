@@ -1,18 +1,10 @@
-// ** React Imports
 import { useLocation, useNavigate } from 'react-router-dom'
-
-// ** Third Party Components
 import { useDispatch, useStore } from 'react-redux'
 import { Menu, CornerDownLeft, RefreshCw, PlusCircle, Search, Save, Download } from 'react-feather'
-
-// ** Reactstrap Imports
 import { NavItem, NavLink, UncontrolledTooltip } from 'reactstrap'
-
-// ** Utils
 import { hasActionPermission, inferRouteAction } from '@src/utility/navPermissions'
 import { refetchForRoute } from '@src/utility/refreshRegistry'
 
-// ** List pages that have a matching "/add" route
 const listToAddRoute = {
   '/user': '/user/add',
   '/client': '/client/add',
@@ -37,38 +29,17 @@ const listToAddRoute = {
   '/timesheet-activity': '/timesheet-activity/add'
 }
 
-// ** Matches any module's "/add" or "/edit/:id" form route
 const addOrEditRoutePattern =
   /^\/(user|client|payment-method|service-item|project|quotation|contract|invoice|terms-template|email-template|holiday|roles|pdf-designer|currency|industry|team-member|portfolio|case-study|job-listing|timesheet-activity|timesheet)\/(add|edit\/[^/]+)$/
 
-// ** The PDF Designer page has no <form> - only the widget's own toolbar Save
-// button can hand back the current design (see its form/index.js). So on that
-// page, forward the click into that button instead of calling form.requestSubmit().
 const isPdfDesignerFormRoute = pathname => /^\/pdf-designer\/(add|edit\/[^/]+)$/.test(pathname)
 
-// ** Company Settings is a single-record "edit" page that isn't part of the
-// add/edit list pattern above (there's no /company/add or /company/edit/:id -
-// just /company; its sidebar tabs are managed via a ?tab= query param so the
-// pathname never changes), but it's still a <form> the navbar Save icon
-// should submit.
 const isCompanySettingsRoute = pathname => pathname === '/company'
 
-// ** Same idea as Company Settings above - the navbar dropdown's own
-// "Account Settings" link (see UserDropdown.js), a single self-service
-// record with no /add or /edit/:id in its path.
 const isAccountSettingsRoute = pathname => pathname === '/account-settings'
 
-// ** The Email app fetches its data over live IMAP calls (see the webmail
-// feature) rather than a fast local DB query, so a full browser reload is a
-// needlessly heavy way to "refresh" it - forward the click into the page's
-// own hidden trigger instead, which just re-dispatches the same Redux thunks
-// the page uses on mount.
 const isEmailRoute = pathname => /^\/email(\/[^/]+)?$/.test(pathname)
 
-// ** The Invoice, Contract and Quotation Details pages each offer a PDF
-// download - they render it themselves (via @veztraa/report-renderer) and
-// expose a hidden button whose id this table maps to, for the navbar icon
-// to forward its click into.
 const downloadButtonIdByRoute = [
   { pattern: /^\/invoice\/view\/[^/]+$/, buttonId: 'invoice-download-pdf-btn' },
   { pattern: /^\/contract\/view\/[^/]+$/, buttonId: 'contract-download-pdf-btn' },
@@ -77,10 +48,8 @@ const downloadButtonIdByRoute = [
 const findDownloadButtonId = pathname => downloadButtonIdByRoute.find(i => i.pattern.test(pathname))?.buttonId || null
 
 const NavbarBookmarks = props => {
-  // ** Props
   const { setMenuVisibility } = props
 
-  // ** Hooks
   const location = useLocation()
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -97,14 +66,6 @@ const NavbarBookmarks = props => {
   const isListRoute = Boolean(listToAddRoute[location.pathname])
   const addEnabled = Boolean(addRoute) && hasActionPermission(location.pathname, 'add', userData)
 
-  // ** A list page that supports advanced search renders a hidden button
-  // with this id (see AdvancedSearchModal usage in each module's Table.js,
-  // or email/index.js's own AdvancedSearchModal for the Email app); pages
-  // that don't (e.g. Roles, which has no server-side search) simply don't
-  // render one, so the click silently no-ops. Email isn't in listToAddRoute
-  // (it has no /add route) but does support its own advanced search, so
-  // it's included here separately rather than folded into isListRoute,
-  // which also drives the unrelated Add-button enable state.
   const isSearchRoute = isListRoute || isEmailRoute(location.pathname)
   const handleSearch = () => {
     if (!isSearchRoute) return
@@ -138,9 +99,6 @@ const NavbarBookmarks = props => {
     if (refetchForRoute(location.pathname, dispatch, store.getState)) {
       return
     }
-    // No registered module for this route (e.g. an /add or /edit form,
-    // where a real reload would discard unsaved input anyway) - only here
-    // does a full reload still make sense.
     window.location.reload()
   }
 

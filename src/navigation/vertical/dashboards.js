@@ -1,4 +1,3 @@
-// ** Icons Import
 import { Home } from 'react-feather'
 
 export default [

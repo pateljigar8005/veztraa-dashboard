@@ -1,4 +1,3 @@
-// ** Icons Import
 import {
   Box,
   Mail,

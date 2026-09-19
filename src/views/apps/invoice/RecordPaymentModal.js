@@ -1,19 +1,10 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
-
-// ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useForm, Controller } from 'react-hook-form'
-
-// ** Reactstrap Imports
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Row, Col, Label, Input, FormFeedback } from 'reactstrap'
-
-// ** Utils
 import { selectThemeColors, formatAmount } from '@utils'
-
-// ** Shared Components
 import DateField from '../shared/DateField'
 import AmountField from '../shared/AmountField'
 
@@ -60,11 +51,6 @@ const RecordPaymentModal = ({ isOpen, toggle, invoiceId, currency, balanceDue, p
 
       reset(defaultValues)
       setPaymentMethodId('')
-      // ** Default Rate to INR from the Currency module's configured rate for
-      // this invoice's currency - still just a starting point, editable below
-      // since the real rate on the day payment lands can differ. Uses
-      // setValue (not reset) so it can't clobber anything the user has
-      // already typed by the time this resolves.
       axios.get('/currencies', { params: { perPage: 100 } }).then(response => {
         const match = response.data.data.currencies.find(c => c.icon === currency)
         if (match) setValue('rate_to_inr', Number(match.rate).toFixed(2))

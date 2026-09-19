@@ -1,16 +1,7 @@
-// ** React Imports
 import { Link } from 'react-router-dom'
-
-// ** Icons Imports
 import { ChevronLeft } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Card, CardBody, CardTitle, CardText, Form, Label, Input, Button } from 'reactstrap'
-
-// ** Logo
 import logo from '@src/assets/images/logo/logo-full.svg'
-
-// ** Styles
 import '@styles/react/pages/page-authentication.scss'
 const ForgotPasswordBasic = () => {
   return (

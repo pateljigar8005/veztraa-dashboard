@@ -1,11 +1,3 @@
-/*=========================================================================================
-	File Name: customizer.scss
-	Description: CSS used for demo purpose only. Remove this css from your project.
-	----------------------------------------------------------------------------------------
-	Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-	Author: PIXINVENT
-	Author URL: http://www.themeforest.net/user/pixinvent
-==========================================================================================*/
 
 .customizer {
   width: 400px;
@@ -27,13 +19,11 @@
     right: 0;
   }
 
-  // customizer content height
   .customizer-content {
     position: relative;
     height: 100%;
   }
 
-  //customizer close button
   .customizer-close {
     position: absolute;
     right: 0.6rem;
@@ -50,7 +40,6 @@
     }
   }
 
-  // customizer toggle icon
   .customizer-toggle {
     background: $primary;
     color: $white !important;
@@ -68,7 +57,6 @@
     cursor: pointer;
   }
 
-  // theme color box styles
   .color-box {
     height: 24px;
     width: 24px;

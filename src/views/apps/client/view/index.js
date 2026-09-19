@@ -1,19 +1,10 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
-
-// ** Third Party Components
 import axios from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
 import { Edit2, FileText, PenTool, DollarSign } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Badge, Button, Table } from 'reactstrap'
-
-// ** Store & Actions
 import { getClient } from '../store'
-
-// ** Utils
 import { formatAmount } from '@utils'
 
 const statusColorObj = {

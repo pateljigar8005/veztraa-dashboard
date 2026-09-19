@@ -1,12 +1,11 @@
-@import '../../bootstrap-extended/include'; // Bootstrap includes
-@import '../../components/include'; // Components includes
+@import '../../bootstrap-extended/include';
+@import '../../components/include';
 
 .dropzone {
   min-height: 350px;
   border: 2px dashed $primary;
   background: $body-bg;
   position: relative;
-  // dropzone message customization
   .dz-message {
     font-size: 2rem;
     position: absolute;
@@ -21,7 +20,6 @@
     margin: 0;
   }
 
-  // dropzone message icon
   .dz-message:before {
     content: '';
     background-image: url(str-replace(str-replace($download, 'currentColor', $primary), '#', '%23'));
@@ -39,7 +37,6 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  // for preview of files
   .dz-preview {
     background: transparent !important;
 
@@ -63,7 +60,6 @@
     }
   }
 
-  // for dropzone preview and remove icon
   .dz-preview .dz-remove {
     font-size: 1.1rem;
     color: $danger;
@@ -87,7 +83,6 @@
   }
 }
 
-// For Small Screen drop Logo
 @media (max-width: 576px) {
   .dropzone {
     .dz-message {
@@ -101,7 +96,6 @@
   }
 }
 
-// dark layout
 .dark-layout {
   .dropzone {
     background-color: lighten($theme-dark-card-bg, 3%);

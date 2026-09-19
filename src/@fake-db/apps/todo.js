@@ -1,6 +1,4 @@
 import mock from '../mock'
-
-// Avatar Imports
 import avatar1 from '@src/assets/images/avatars/1.png'
 import avatar5 from '@src/assets/images/avatars/5.png'
 import avatar7 from '@src/assets/images/avatars/7.png'
@@ -283,16 +281,8 @@ const data = {
   ]
 }
 
-// ------------------------------------------------
-// GET: Return Tasks
-// ------------------------------------------------
 mock.onGet('/apps/todo/tasks').reply(config => {
-  // eslint-disable-next-line object-curly-newline
   const { q = '', filter, tag, sortBy: sortByParam = 'latest' } = config.params
-  /* eslint-enable */
-  // ------------------------------------------------
-  // Get Sort by and Sort Direction
-  // ------------------------------------------------
   let sortDesc = true
 
   const sortBy = (() => {
@@ -312,9 +302,6 @@ mock.onGet('/apps/todo/tasks').reply(config => {
     return 'id'
   })()
 
-  // ------------------------------------------------
-  // Filtering
-  // ------------------------------------------------
   const queryLowered = q.toLowerCase()
 
   const hasFilter = task => {
@@ -340,7 +327,6 @@ mock.onGet('/apps/todo/tasks').reply(config => {
     )
   }
 
-  /* eslint-disable */
   const filteredData = data.tasks.filter(task => {
     if (filter || tag) {
       return (
@@ -350,23 +336,16 @@ mock.onGet('/apps/todo/tasks').reply(config => {
       return task.title.toLowerCase().includes(queryLowered) || includesFilter(task) || includesDueDate(task)
     }
   })
-  /* eslint-enable  */
 
-  // ------------------------------------------------
-  // Perform sorting
-  // ------------------------------------------------
   const sortTasks = key => (a, b) => {
     let fieldA
     let fieldB
 
-    // If sorting is by dueDate => Convert data to date
     if (key === 'dueDate') {
       fieldA = new Date(a[key])
       fieldB = new Date(b[key])
-      // eslint-disable-next-line brace-style
     }
 
-    // If sorting is by assignee => Use `fullName` of assignee
     else if (key === 'assignee') {
       fieldA = a.assignee ? a.assignee.fullName : null
       fieldB = b.assignee ? b.assignee.fullName : null
@@ -392,17 +371,12 @@ mock.onGet('/apps/todo/tasks').reply(config => {
     return comparison
   }
 
-  // Sort Data
   const sortedData = filteredData.sort(sortTasks(sortBy))
   if (sortDesc) sortedData.reverse()
   return [200, sortedData]
 })
 
-// ------------------------------------------------
-// POST: Add new task
-// ------------------------------------------------
 mock.onPost('/apps/todo/add-tasks').reply(config => {
-  // Get event from post data
   const { task } = JSON.parse(config.data)
 
   const { length } = data.tasks
@@ -417,13 +391,9 @@ mock.onPost('/apps/todo/add-tasks').reply(config => {
   return [201, { task }]
 })
 
-// ------------------------------------------------
-// POST: Update Task
-// ------------------------------------------------
 mock.onPost('/apps/todo/update-task').reply(config => {
   const taskData = JSON.parse(config.data).task
 
-  // Convert Id to number
   taskData.id = Number(taskData.id)
 
   const task = data.tasks.find(e => e.id === Number(taskData.id))
@@ -432,14 +402,9 @@ mock.onPost('/apps/todo/update-task').reply(config => {
   return [200, { task }]
 })
 
-// ------------------------------------------------
-// DELETE: Remove Task
-// ------------------------------------------------
 mock.onDelete('/apps/todo/delete-task').reply(config => {
-  // Get task id from URL
   let taskId = config.taskId
 
-  // Convert Id to number
   taskId = Number(taskId)
 
   const task = data.tasks.find(t => t.id === taskId)

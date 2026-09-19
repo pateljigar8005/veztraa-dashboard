@@ -1,22 +1,9 @@
-/*=========================================================================================
-    File Name: vertical-menu.scss
-    Description: A classic vertical modern style menu with expand and collops support. It support
-    light & dark version, flipped layout, right side icons, native scroll and borders menu
-    item separation.
-    ----------------------------------------------------------------------------------------
-    Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-    Author: PIXINVENT
-    Author URL: http://www.themeforest.net/user/pixinvent
-==========================================================================================*/
+@import '../../../bootstrap-extended/include';
+@import '../../../components/include';
 
-@import '../../../bootstrap-extended/include'; // Bootstrap includes
-@import '../../../components/include'; // Components includes
 
-// Import first main menu mixin
 @import '../../mixins/main-menu-mixin';
 
-//  Vertical menu
-//=========================
 .vertical-layout {
   &.vertical-menu-modern {
     .main-menu {
@@ -35,7 +22,6 @@
           margin-right: 1.1rem;
           flex-shrink: 0;
         }
-        // Sub-menu icon size
         .menu-content {
           > li > a svg,
           > li > a i {
@@ -48,9 +34,7 @@
       }
     }
 
-    //Vertical menu [Expanded]
     &.menu-expanded {
-      // Main menu expanded
       .main-menu {
         width: $menu-expanded-width;
         .navigation {
@@ -76,14 +60,11 @@
           }
         }
       }
-      //Content expanded
       .footer {
         @include main-menu-width($menu-expanded-width);
       }
     }
-    //Vertical menu [Collapsed]
     &.menu-collapsed {
-      //Navbar collapsed
       .navbar {
         .navbar-header {
           @include menu-navbar-width($menu-collapsed-width);
@@ -98,13 +79,11 @@
             }
           }
         }
-        // fixed-top navbar when menu-collapsed
         &.fixed-top,
         &.floating-nav {
           left: $menu-collapsed-width;
         }
       }
-      // Main menu collapsed
       .main-menu {
         width: $menu-collapsed-width;
 
@@ -113,7 +92,6 @@
           display: none;
         }
 
-        // When menu is collapsed and mouse is not hovered over menu
         &:not(.expanded) {
           .navigation-header {
             margin-left: 2.2rem;
@@ -141,7 +119,6 @@
           }
         }
 
-        // When menu is collapsed but mouse is hovered over menu
         &.expanded {
           width: $menu-expanded-width;
           .navigation {
@@ -165,7 +142,6 @@
           }
         }
 
-        //Navigation collapsed
         .navigation {
           overflow: visible;
           > li.navigation-header {
@@ -180,17 +156,14 @@
           }
         }
       }
-      //Brand center content collapsed
       .app-content,
       .footer {
         @include main-menu-width($menu-collapsed-width);
       }
       .header-navbar {
-        // Floating-navbar
         &.floating-nav {
           width: calc(100vw - (100vw - 100%) - 4.4rem - 74px);
         }
-        // Navbar-static-top
         &.navbar-static-top {
           width: calc(100vw - (100vw - 100%) - 74px);
           left: 74px;
@@ -208,7 +181,6 @@
   }
 }
 
-// Initially menu & content width for lg and up screen
 @include media-breakpoint-up(lg) {
   .vertical-layout {
     &.vertical-menu-modern {
@@ -219,11 +191,9 @@
   }
 }
 
-// Initially menu & content width for md and down screen
 @include media-breakpoint-down(xl) {
   .vertical-layout {
     &.vertical-menu-modern {
-      // not using this class in below < 992
       .main-menu {
         width: 0;
       }
@@ -249,11 +219,9 @@
   }
 }
 
-// Initially menu & content width for sm and down screen
 @include media-breakpoint-down(md) {
   .vertical-layout {
     &.vertical-menu-modern {
-      // not using this class <992
       .main-menu {
         width: 0;
       }
@@ -286,11 +254,9 @@
     opacity: 0;
   }
 }
-// IE Specific CSS
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
   .vertical-menu-modern.vertical-layout .main-menu .navigation > li > a > span {
     animation: none;
   }
 }
-// Import vertical-overlay-menu.scss for small screen support
 @import 'vertical-overlay-menu.scss';

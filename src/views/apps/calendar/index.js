@@ -1,27 +1,14 @@
-// ** React Imports
 import { Fragment, useState, useEffect } from 'react'
-
-// ** Third Party Components
 import classnames from 'classnames'
 import { Row, Col } from 'reactstrap'
-
-// ** Calendar App Component Imports
 import Calendar from './Calendar'
 import SidebarLeft from './SidebarLeft'
 import AddEventSidebar from './AddEventSidebar'
-
-// ** Kanban/Todo Task Details popups - a Kanban/Todo-sourced calendar event
-// opens the real task in the same popup those modules use themselves,
-// instead of navigating away to /kanban or /todo.
 import KanbanTaskSidebar from '../kanban/TaskSidebar'
 import TodoTaskSidebar from '../todo/TaskSidebar'
-
-// ** Custom Hooks
 import { useRTL } from '@hooks/useRTL'
 import useHolidayDates from '@hooks/useHolidayDates'
 import useWeekendDays from '@hooks/useWeekendDays'
-
-// ** Store & Actions
 import { useSelector, useDispatch } from 'react-redux'
 import {
   fetchEvents,
@@ -37,11 +24,8 @@ import {
 } from './store'
 import { handleSelectTask } from '../kanban/store'
 import { selectTask, updateTask as updateTodoTask, addTask as addTodoTask, deleteTask as deleteTodoTask } from '../todo/store'
-
-// ** Styles
 import '@styles/react/apps/app-calendar.scss'
 
-// ** CalendarColors
 const calendarsColor = {
   Business: 'primary',
   Holiday: 'success',
@@ -53,31 +37,25 @@ const calendarsColor = {
 }
 
 const CalendarComponent = () => {
-  // ** Variables
   const dispatch = useDispatch()
   const store = useSelector(state => state.calendar)
   const kanbanStore = useSelector(state => state.kanban)
   const todoStore = useSelector(state => state.todo)
 
-  // ** states
   const [calendarApi, setCalendarApi] = useState(null)
   const [addSidebarOpen, setAddSidebarOpen] = useState(false)
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false)
   const [kanbanTaskSidebarOpen, setKanbanTaskSidebarOpen] = useState(false)
   const [todoTaskSidebarOpen, setTodoTaskSidebarOpen] = useState(false)
 
-  // ** Hooks
   const [isRtl] = useRTL()
   const { holidayDates, isHoliday, getHolidayName } = useHolidayDates()
   const { isWeekend } = useWeekendDays()
 
-  // ** AddEventSidebar Toggle Function
   const handleAddEventSidebar = () => setAddSidebarOpen(!addSidebarOpen)
 
-  // ** LeftSidebar Toggle Function
   const toggleSidebar = val => setLeftSidebarOpen(val)
 
-  // ** Blank Event Object
   const blankEvent = {
     title: '',
     start: '',
@@ -92,16 +70,12 @@ const CalendarComponent = () => {
     }
   }
 
-  // ** refetchEvents
   const refetchEvents = () => {
     if (calendarApi !== null) {
       calendarApi.refetchEvents()
     }
   }
 
-  // ** Opens the real Kanban/Todo Task Details popup (same component those
-  // modules render themselves) for the task behind a clicked calendar event,
-  // instead of navigating away to /kanban or /todo.
   const handleTaskEventClick = (source, taskId) => {
     if (source === 'kanban') {
       const task = store.kanbanTasks.find(t => t.id === taskId)
@@ -116,7 +90,6 @@ const CalendarComponent = () => {
     }
   }
 
-  // ** Fetch Events On Mount
   useEffect(() => {
     dispatch(fetchEvents(store.selectedCalendars))
     dispatch(fetchKanbanTaskEvents())

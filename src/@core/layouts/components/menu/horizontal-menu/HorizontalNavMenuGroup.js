@@ -1,18 +1,9 @@
-// ** React Imports
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-
-// ** Third Party Components
 import classnames from 'classnames'
 import { usePopper } from 'react-popper'
-
-// ** Utils
 import { hasActiveChild } from '@layouts/utils'
-
-// ** Hooks
 import { useRTL } from '@hooks/useRTL'
-
-// ** Horizontal Menu Items Component
 import HorizontalNavMenuItems from './HorizontalNavMenuItems'
 
 const applyHeight = {
@@ -25,7 +16,6 @@ const applyHeight = {
       ddTop = popperEl.getBoundingClientRect().top,
       ddHeight = popperEl.clientHeight
     let maxHeight, stylesObj
-    // ** Calculate and set height
     if (pageHeight - ddTop - ddHeight - 28 < 1) {
       maxHeight = pageHeight - ddTop - 25
       stylesObj = {
@@ -34,7 +24,6 @@ const applyHeight = {
       }
     }
     const ddRef = popperEl.getBoundingClientRect()
-    // ** If there is not space left to open sub menu open it to the right
     if (ddRef.left + ddRef.width - (window.innerWidth - 16) >= 0) {
       popperEl.closest('.dropdown').classList.add('openLeft')
     }
@@ -43,23 +32,18 @@ const applyHeight = {
 }
 
 const HorizontalNavMenuGroup = props => {
-  // ** Props
   const { item, submenu, isChild } = props
 
-  // ** State
   const [menuOpen, setMenuOpen] = useState(false)
   const [popperElement, setPopperElement] = useState(null)
   const [referenceElement, setReferenceElement] = useState(null)
 
-  // ** Hooks
   const [isRtl] = useRTL()
 
-  // ** Vars
   const popperOffsetHorizontal = isRtl ? 16 : -16
   const popperPlacement = isRtl ? 'bottom-end' : 'bottom-start'
   const popperPlacementSubMenu = isRtl ? 'left-start' : 'right-start'
 
-  // ** Hooks
   const currentURL = useLocation().pathname
   const { update, styles, attributes } = usePopper(referenceElement, popperElement, {
     placement: isChild ? popperPlacementSubMenu : popperPlacement,

@@ -1,34 +1,24 @@
-//  ================================================================================================
-//  File Name: variables.scss
-//  Description: Custom overrides of Bootstrap variables
-//  ----------------------------------------------------------------------------------------------
-//  Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-//  Author: PIXINVENT
-//  Author URL: http://www.themeforest.net/user/pixinvent
-//  ================================================================================================
 
-// (c) = are custom variables for vuexy template
 
-// Color system
 
 $white: #fff !default;
 $gray-50: #f6f6f6 !default;
-$gray-100: #babfc7 !default; // $gray-lightest
-$gray-200: #ededed !default; // $gray-lighter
-$gray-300: #dae1e7 !default; // $gray-light
+$gray-100: #babfc7 !default;
+$gray-200: #ededed !default;
+$gray-300: #dae1e7 !default;
 $gray-400: #636363 !default;
 $gray-500: #adb5bd !default;
-$gray-600: #b8c2cc !default; // $gray
+$gray-600: #b8c2cc !default;
 $gray-700: #4e5154 !default;
-$gray-800: #1e1e1e !default; // $gray-dark
+$gray-800: #1e1e1e !default;
 $gray-900: #2a2e30 !default;
-$black: #22292f !default; // 231f48 22292f
+$black: #22292f !default;
+$purple: #7367f0 !default;
+$green: #28c76f !default;
+$blue: #00cfe8 !default;
+$orange: #ff9f43 !default;
+$red: #ea5455 !default;
 
-$purple: #7367f0 !default; //$primary
-$green: #28c76f !default; //$success
-$blue: #00cfe8 !default; //$info
-$orange: #ff9f43 !default; //$warning
-$red: #ea5455 !default; //$danger
 
 $primary: $purple !default;
 $secondary: #82868b !default;
@@ -41,20 +31,14 @@ $dark: #4b4b4b !default;
 
 $min-contrast-ratio: 3 !default;
 
-// Spacing
-//
-// Control the default styling of most Bootstrap elements by modifying these
-// variables. Mostly focused on spacing.
-// You can add more entries to the $spacers map, should you need more variation.
 
-// scss-docs-start container-max-widths
 $grid-breakpoints: (
   xs: 0,
   sm: 576px,
   md: 768px,
   lg: 992px,
   xl: 1200px,
-  xxl: 1440px // Custom xxl size
+  xxl: 1440px
 ) !default;
 
 $container-max-widths: (
@@ -63,14 +47,11 @@ $container-max-widths: (
   md: 768px,
   lg: 992px,
   xl: 1200px,
-  xxl: 1440px // Custom xxl size
+  xxl: 1440px
 ) !default;
-// scss-docs-end container-max-widths
 
-// stylelint-disable
 $spacer: 1rem !default;
 $spacers: () !default;
-// stylelint-disable-next-line scss/dollar-variable-default
 $spacers: map-merge(
   (
     0: 0,
@@ -102,15 +83,9 @@ $spacers: map-merge(
   $spacers
 );
 
-// Body
-//
-// Settings for the `<body>` element.
 $body-bg: #f8f8f8 !default;
 $body-color: #6e6b7b !default;
 
-// Links
-//
-// Style anchor elements.
 
 $link-color: $primary !default;
 $link-decoration: none !default;
@@ -118,15 +93,9 @@ $link-shade-percentage: 5% !default;
 $link-hover-color: shift-color($link-color, $link-shade-percentage) !default;
 $link-hover-decoration: none !default;
 
-// Grid columns
-//
-// Set the number of columns and specify the width of the gutters.
 
 $grid-gutter-width: 2rem !default;
 
-// Components
-//
-// Define common padding and border radius sizes and more.
 
 $border-width: 1px !default;
 $border-color: #ebe9f1 !default;
@@ -134,22 +103,16 @@ $border-radius: 0.357rem !default;
 $border-radius-lg: 0.6rem !default;
 $border-radius-sm: 0.25rem !default;
 
-// shadow
 $box-shadow: 0 4px 24px 0 rgba($black, 0.1) !default;
 
 $component-active-color: $white !default;
 $component-active-bg: $primary !default;
 
-// Typography
 
-//
-// Font, line-height, and color for body text, headings, and more.
 
-// stylelint-disable value-keyword-case
 $font-family-sans-serif: 'Montserrat', Helvetica, Arial, serif !default;
 $font-family-monospace: 'Montserrat', Helvetica, Arial, serif !default;
 
-// stylelint-enable value-keyword-case
 $font-size-base: 1rem !default;
 $font-size-lg: ceil($font-size-base * 1.25) !default;
 $font-size-sm: ceil($font-size-base * 0.85) !default;
@@ -195,11 +158,7 @@ $blockquote-footer-color: $text-muted !default;
 $hr-color: $border-color !default;
 $hr-opacity: 1 !default;
 
-// Tables
-//
-// Customizes the `.table` component with basic values, each used across all table variations.
 
-// scss-docs-start table-variables
 $table-cell-padding-y: 0.72rem !default;
 $table-cell-padding-x: 2rem !default;
 $table-cell-padding-y-sm: 0.3rem !default;
@@ -216,15 +175,12 @@ $table-hover-bg: #f6f6f9 !default;
 $table-border-color: $border-color !default;
 
 $table-group-separator-color: $border-color !default;
+$table-head-bg: #f3f2f7 !default;
+$table-row-group-bg: $table-striped-bg !default;
+$table-head-color: $headings-color !default;
+$table-th-font-size: 0.857rem !default;
 
-$table-head-bg: #f3f2f7 !default; // (c)
-$table-row-group-bg: $table-striped-bg !default; // (c)
-$table-head-color: $headings-color !default; // (c)
-$table-th-font-size: 0.857rem !default; // (c)
 
-// Buttons + Forms
-//
-// Shared variables that are reassigned to `$input-` and `$btn-` specific variables.
 
 $input-btn-padding-y: 0.75rem !default;
 $input-btn-padding-x: 2rem !default;
@@ -239,9 +195,6 @@ $input-btn-font-size-lg: $font-size-base * 1.25 !default;
 
 $input-bg: $white !default;
 
-// Buttons
-//
-// For each of Bootstrap's buttons, define text, background, and border color.
 
 $btn-padding-y: 0.786rem !default;
 $btn-padding-x: 1.5rem !default;
@@ -254,7 +207,6 @@ $btn-border-radius-sm: $btn-border-radius !default;
 $btn-transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out,
   box-shadow 0.15s ease-in-out, background 0s, border 0s !default;
 
-// Forms
 $form-label-margin-bottom: 0.2857rem !default;
 $form-label-font-size: $small-font-size !default;
 $form-label-color: $headings-color !default;
@@ -288,10 +240,6 @@ $input-placeholder-color: $text-muted !default;
 
 $input-height-border: $input-border-width * 2 !default;
 
-// Switch
-// $custom-switch-width: 3rem !default;
-// $custom-switch-indicator-border-radius: 1rem !default;
-// $custom-switch-indicator-size: 1rem !default;
 
 $input-height: 2.714rem !default;
 $input-height-sm: 2.142rem !default;
@@ -317,7 +265,7 @@ $form-check-input-disabled-opacity: 0.65 !default;
 
 $form-switch-color: $component-active-color !default;
 $form-switch-width: 3rem !default;
-$form-switch-height: 1.7rem !default; // (c)
+$form-switch-height: 1.7rem !default;
 $form-switch-padding-start: $form-switch-width + 0.5rem !default;
 $form-switch-bg-image: url("data:image/svg+xml,<svg width='26px' height='26px' viewBox='0 0 26 27' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'><defs><circle id='path-1' cx='8' cy='8' r='8'></circle><filter x='-40.6%' y='-21.9%' width='168.8%' height='168.8%' filterUnits='objectBoundingBox' id='filter-2'><feOffset dx='-1' dy='2' in='SourceAlpha' result='shadowOffsetOuter1'></feOffset><feGaussianBlur stdDeviation='1.5' in='shadowOffsetOuter1' result='shadowBlurOuter1'></feGaussianBlur><feColorMatrix values='0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.2 0' type='matrix' in='shadowBlurOuter1'></feColorMatrix></filter></defs><g id='Artboard' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'><g id='switches-dot' transform='translate(5.000000, 5.000000)' fill-rule='nonzero'><g id='Oval'><use fill='black' fill-opacity='1' filter='url(#filter-2)' xlink:href='#path-1'></use><use fill='#{$form-switch-color}' xlink:href='#path-1'></use></g></g></g></svg>") !default;
 $form-switch-transition: background-position 0.15s ease-in-out, background-color 0.1s ease !default;
@@ -326,21 +274,17 @@ $form-switch-focus-bg-image: url("data:image/svg+xml,<svg width='26px' height='2
 
 $form-switch-checked-color: $form-switch-color !default;
 $form-switch-checked-bg-image: url("data:image/svg+xml,<svg width='26px' height='26px' viewBox='0 0 26 27' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'><defs><circle id='path-1' cx='8' cy='8' r='8'></circle><filter x='-40.6%' y='-21.9%' width='168.8%' height='168.8%' filterUnits='objectBoundingBox' id='filter-2'><feOffset dx='-1' dy='2' in='SourceAlpha' result='shadowOffsetOuter1'></feOffset><feGaussianBlur stdDeviation='1.5' in='shadowOffsetOuter1' result='shadowBlurOuter1'></feGaussianBlur><feColorMatrix values='0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.2 0' type='matrix' in='shadowBlurOuter1'></feColorMatrix></filter></defs><g id='Artboard' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'><g id='switches-dot' transform='translate(5.000000, 5.000000)' fill-rule='nonzero'><g id='Oval'><use fill='black' fill-opacity='1' filter='url(#filter-2)' xlink:href='#path-1'></use><use fill='#{$form-switch-checked-color}' xlink:href='#path-1'></use></g></g></g></svg>") !default;
+$switch-bg-color: #e2e2e2 !default;
 
-$switch-bg-color: #e2e2e2 !default; // (c)
-// $switch-indicator-color: $white !default; // (c)
 
 $input-group-addon-bg: $white !default;
+$form-select-indicator-padding: 1rem !default;
 
-$form-select-indicator-padding: 1rem !default; // Extra padding for background-image
 $form-select-disabled-bg: $input-disabled-bg !default;
-$form-select-bg-size: 15px 14px !default; // In pixels because image dimensions
+$form-select-bg-size: 15px 14px !default;
 $form-select-indicator-color: $input-border-color !default;
 $form-select-indicator: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='#{$form-select-indicator-color}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-chevron-down'><polyline points='6 9 12 15 18 9'></polyline></svg>") !default;
 
-// $form-select-feedback-icon-padding-end: $form-select-padding-x * 2.5 + $form-select-indicator-padding !default;
-// $form-select-feedback-icon-position:    center right $form-select-indicator-padding !default;
-// $form-select-feedback-icon-size:        $input-height-inner-half $input-height-inner-half !default;
 
 $form-select-border-radius: $input-border-radius !default;
 
@@ -348,7 +292,6 @@ $form-select-focus-box-shadow: $input-focus-box-shadow !default;
 
 $form-file-button-color: $input-color !default;
 $form-file-button-bg: $input-group-addon-bg !default;
-// $form-file-button-hover-bg: shade-color($form-file-button-bg, 5%) !default;
 
 $form-floating-height: add(2.57rem, $input-height-border) !default;
 $form-floating-padding-y: $input-padding-y !default;
@@ -357,7 +300,6 @@ $form-floating-input-padding-b: $input-padding-y !default;
 $form-floating-label-opacity: 0.9 !default;
 $form-floating-label-transform: scale(0.85) translateY(-2.25rem) translateX(-0.85rem) !default;
 
-// Form validation
 
 $form-feedback-valid-color: $success !default;
 $form-feedback-invalid-color: $danger !default;
@@ -367,7 +309,6 @@ $form-feedback-icon-valid: url("data:image/svg+xml,<svg xmlns='http://www.w3.org
 $form-feedback-icon-invalid-color: $form-feedback-invalid-color !default;
 $form-feedback-icon-invalid: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='#{$form-feedback-icon-invalid-color}'><circle cx='6' cy='6' r='4.5'/><path stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/><circle cx='6' cy='8.2' r='.6' fill='#{$form-feedback-icon-invalid-color}' stroke='none'/></svg>") !default;
 
-// scss-docs-start form-validation-states
 $form-validation-states: (
   'valid': (
     'color': $form-feedback-valid-color,
@@ -381,7 +322,6 @@ $form-validation-states: (
   )
 ) !default;
 
-// Nav tabs
 
 $nav-link-padding-y: 0.358rem !default;
 $nav-link-padding-x: 0.5rem !default;
@@ -393,14 +333,10 @@ $nav-tabs-link-active-color: $primary !default;
 $nav-tabs-link-active-bg: transparent !default;
 
 $nav-pills-border-radius: $btn-border-radius !default;
+$floating-nav-margin: 1.3rem;
 
-// navbar
 
-$floating-nav-margin: 1.3rem; // (c)
 
-// Dropdowns
-//
-// Dropdown menu container and contents.
 
 $dropdown-spacer: 0 !default;
 $dropdown-border-color: rgba($black, 0.05) !default;
@@ -417,10 +353,9 @@ $dropdown-item-padding-y: 0.65rem !default;
 $dropdown-item-padding-x: 1.28rem !default;
 
 $dropdown-header-color: $headings-color !default;
+$dropdown_spacing: 0.4rem;
 
-$dropdown_spacing: 0.4rem; // (c)
 
-// Pagination
 
 $pagination-padding-y: 0.5rem !default;
 $pagination-padding-x: 0.85rem !default;
@@ -443,11 +378,10 @@ $pagination-active-color: $primary !default;
 
 $pagination-disabled-color: $text-muted !default;
 $pagination-disabled-bg: $pagination-bg !default;
+$pagination-font-size-lg: 1.14rem !default;
+$pagination-font-size-sm: 0.857rem !default;
 
-$pagination-font-size-lg: 1.14rem !default; // (c)
-$pagination-font-size-sm: 0.857rem !default; // (c)
 
-// Cards
 
 $card-spacer-y: 1.5rem !default;
 $card-spacer-x: 1.5rem !default;
@@ -462,7 +396,6 @@ $card-img-overlay-padding: $spacer !default;
 
 $card-group-margin: calc($grid-gutter-width / 2) !default;
 
-// Accordion
 $accordion-padding-x: 1rem !default;
 $accordion-color: $body-color !default;
 $accordion-border-width: 0 !default;
@@ -481,7 +414,6 @@ $accordion-icon-active-color: $accordion-button-active-color !default;
 $accordion-button-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='#{$accordion-icon-color}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-chevron-up'><polyline points='18 15 12 9 6 15'></polyline></svg>") !default;
 $accordion-button-active-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='#{$accordion-icon-color}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-chevron-up'><polyline points='18 15 12 9 6 15'></polyline></svg>") !default;
 
-// Tooltips
 
 $tooltip-font-size: 0.857rem !default;
 $tooltip-max-width: 220px !default;
@@ -491,7 +423,6 @@ $tooltip-opacity: 1 !default;
 $tooltip-padding-y: 0.4rem !default;
 $tooltip-padding-x: 0.775rem !default;
 
-// Popovers
 
 $popover-font-size: 1rem !default;
 $popover-border-width: 0 !default;
@@ -506,7 +437,6 @@ $popover-header-padding-x: 1.21rem !default;
 
 $popover-arrow-outer-color: fade-in($popover-border-color, 0.05) !default;
 
-// Toasts
 
 $toast-max-width: 380px !default;
 $toast-padding-x: 1.14rem !default;
@@ -520,7 +450,6 @@ $toast-box-shadow: 0 2px 20px 0 rgba($black, 0.08) !default;
 $toast-header-color: $body-color !default;
 $toast-header-background-color: $white !default;
 
-// Badges
 
 $badge-font-size: 85% !default;
 $badge-font-weight: 600 !default;
@@ -528,9 +457,7 @@ $badge-padding-y: 0.3rem !default;
 $badge-padding-x: 0.5rem !default;
 $badge-border-radius: 0.358rem !default;
 
-// Modals
 
-// Padding applied to the modal body
 $modal-inner-padding: 0.8rem 1.4rem !default;
 
 $modal-content-border-width: 0 !default;
@@ -544,13 +471,11 @@ $modal-header-padding-x: 1.4rem !default;
 
 $modal-sm: 400px !default;
 $modal-xl: 94% !default;
+$modal-slide-in-width-sm: 25rem !default;
+$modal-slide-in-width: 28rem !default;
+$modal-slide-in-width-lg: 30rem !default;
 
-//    Slide In Modal
-$modal-slide-in-width-sm: 25rem !default; // (c)
-$modal-slide-in-width: 28rem !default; // (c)
-$modal-slide-in-width-lg: 30rem !default; // (c)
 
-//Alerts
 
 $alert-padding-y: 0.71rem !default;
 $alert-padding-x: 1rem !default;
@@ -558,14 +483,12 @@ $alert-border-radius: 0.358rem !default;
 $alert-link-font-weight: 700 !default;
 $alert-border-width: 0 !default;
 
-// Progress
 
 $progress-height: 0.857rem !default;
 $progress-font-size: $font-size-base * 0.857 !default;
 $progress-bg: rgba($primary, 0.12) !default;
 $progress-border-radius: 5rem !default;
 
-// List group
 $list-group-color: $body-color !default;
 $list-group-item-padding-y: $spacer * 0.75 !default;
 $list-group-item-padding-x: $spacer * 1.25 !default;
@@ -579,7 +502,6 @@ $list-group-action-color: $body-color !default;
 $list-group-action-active-color: $component-active-color !default;
 $list-group-action-active-bg: $component-active-bg !default;
 
-// Breadcrumbs
 
 $breadcrumb-font-size: 1rem !default;
 $breadcrumb-padding-y: 0.3rem !default;
@@ -591,7 +513,6 @@ $breadcrumb-active-color: $body-color !default;
 $breadcrumb-divider-flipped: quote('\\') !default;
 $breadcrumb-border-radius: 0 !default;
 
-// Carousel
 
 $carousel-control-color: $white !default;
 
@@ -600,15 +521,11 @@ $carousel-control-icon-width: 1.43rem !default;
 $carousel-control-prev-icon-bg: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#{$carousel-control-color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>') !default;
 $carousel-control-next-icon-bg: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#{$carousel-control-color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"></polyline></svg>') !default;
 
-// Offcanvas
 
-// scss-docs-start offcanvas-variables
 $offcanvas-padding-y: 0.8rem !default;
 $offcanvas-padding-x: 1.4rem !default;
 $offcanvas-horizontal-width: 320px !default;
-// scss-docs-end offcanvas-variables
 
-// Close
 
 $btn-close-width: 0.75rem !default;
 $btn-close-color: currentColor !default;
@@ -616,19 +533,13 @@ $btn-close-opacity: 0.4 !default;
 $btn-close-hover-opacity: 0.65 !default;
 $btn-close-focus-shadow: none !default;
 
-// Code
 
 $code-font-size: 90% !default;
 
 $kbd-bg: #eee !default;
 
-//svg color
-// $svg-color-light: #626262 !default;
 
-// SVG icons - (c) custom icon svg
-// For Breadcrumb
 $double-chevron-right: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-chevrons-right'%3E%3Cpolyline points='13 17 18 12 13 7'%3E%3C/polyline%3E%3Cpolyline points='6 17 11 12 6 7'%3E%3C/polyline%3E%3C/svg%3E";
-// Chevron Icons
 $chevron-left: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-chevron-left'%3E%3Cpolyline points='15 18 9 12 15 6'%3E%3C/polyline%3E%3C/svg%3E";
 $chevron-right: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-chevron-right'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E";
 $chevron-up: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-chevron-up'%3E%3Cpolyline points='18 15 12 9 6 15'%3E%3C/polyline%3E%3C/svg%3E";

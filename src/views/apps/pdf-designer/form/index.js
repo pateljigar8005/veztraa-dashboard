@@ -1,24 +1,12 @@
-// ** React Imports
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-
-// ** Third Party Components
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useDispatch, useSelector } from 'react-redux'
 import { ReportDesigner } from '@veztraa/report-designer'
-
-// ** Reactstrap Imports
 import { Card, CardBody, Row, Col, Label, Input } from 'reactstrap'
-
-// ** Select Theme
 import { selectThemeColors } from '@utils'
-
-// ** Store & Actions
 import { addPdfDesignerTemplate, updatePdfDesignerTemplate, getPdfDesignerTemplate } from '../store'
-
-// ** Utils - see this file for why the designer's CSS is scoped rather than
-// rendered inside an isolated iframe (an iframe would break its drag-and-drop)
 import { PDF_DESIGNER_SCOPE_ID } from '@src/utility/reportDesignerStyleGuard'
 
 const typeOptions = [
@@ -28,14 +16,6 @@ const typeOptions = [
   { value: 'other', label: 'Other' }
 ]
 
-// ** Realistic starter data matching the exact field shape a REAL record of
-// this type actually feeds the designer (see buildPdfData() in each type's
-// own view/index.js - invoice/quotation/contract) - designing a layout
-// against these instead of an empty Data tab means every field a real
-// record could bind to is already there to drag onto the canvas, instead of
-// the user having to know and hand-type that whole structure themselves.
-// 'other' has no real record type behind it, so it's left for the user to
-// define their own shape from scratch.
 const sampleClient = {
   name: 'Michael Anderson',
   company: 'Acme Corporation',
@@ -109,20 +89,12 @@ const statusOptions = [
   { value: false, label: 'Inactive' }
 ]
 
-// ** These two selects sit directly above the designer canvas below (see
-// #PDF_DESIGNER_SCOPE_ID), whose own scoped-but-still-broad Tailwind reset
-// (see reportDesignerStyleGuard.js) ends up left the dropdown menu's
-// background translucent and under the designer's own toolbar in stacking
-// order - its "Header/Body/Footer" tab labels visibly bleed through the open
-// menu otherwise. Forcing a fully opaque background plus a z-index well
-// above the designer's own UI fixes both at once.
 const selectMenuStyles = {
   menu: base => ({ ...base, backgroundColor: '#fff', opacity: 1, zIndex: 9999 }),
   menuList: base => ({ ...base, backgroundColor: '#fff' })
 }
 
 const PdfDesignerTemplateForm = () => {
-  // ** Hooks & Vars
   const { id } = useParams()
   const [searchParams] = useSearchParams()
   const cloneId = searchParams.get('clone')
@@ -136,32 +108,16 @@ const PdfDesignerTemplateForm = () => {
   const [type, setType] = useState('invoice')
   const [isActive, setIsActive] = useState(true)
   const [template, setTemplate] = useState(undefined)
-  // Seeds the designer's Data tab once when the template loads. Kept separate
-  // from the *live* value the user is editing (sampleDataRef below) - if we
-  // fed every keystroke's onDataChange back into this as a new object
-  // reference, the designer treats a changed `data` prop as a full reset of
-  // its field editor, remounting it and dropping focus after every character
-  // typed, making the fields effectively impossible to edit.
   const [initialSampleData, setInitialSampleData] = useState(undefined)
   const sampleDataRef = useRef(undefined)
 
-  // ** A brand new template (not editing, not cloning - those load their own
-  // sample_data from the source record in the effect below, which this must
-  // never override) starts pre-filled with realistic sample data matching
-  // the default type ('invoice'), so the Data tab already has real fields to
-  // drag onto the canvas from the very first render.
   useEffect(() => {
     if (isEdit || cloneId) return
     const sample = getSampleDataForType(type)
     setInitialSampleData(sample)
     sampleDataRef.current = sample
-    // Deliberately empty deps - only the very first mount of a fresh Add
-    // page, never again (re-selecting Type below handles every change
-    // after that; re-running this on [type] too would double-fire it).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // ** Fetch the template being edited, or the source template being cloned
   useEffect(() => {
     if (isEdit) dispatch(getPdfDesignerTemplate(id))
     else if (cloneId) dispatch(getPdfDesignerTemplate(cloneId))
@@ -180,13 +136,6 @@ const PdfDesignerTemplateForm = () => {
     }
   }, [store.selectedPdfDesignerTemplate])
 
-  // ** Re-picking Type on a brand new template re-seeds the Data tab for
-  // that type - an explicit, user-initiated action, so it's fine to replace
-  // whatever sample data was there before (same reasoning as the initial
-  // mount effect above). Editing an existing template never does this - its
-  // sample_data belongs to the real template being edited, and the whole
-  // point here is only ever helping populate what starts out as a truly
-  // blank slate.
   const handleTypeChange = option => {
     setType(option.value)
     if (isEdit || cloneId) return
@@ -195,10 +144,6 @@ const PdfDesignerTemplateForm = () => {
     sampleDataRef.current = sample
   }
 
-  // ** The designer has no ref/onChange API to pull its current template from,
-  // so its own toolbar Save button (wired below) is what actually persists this
-  // page (the navbar Save icon forwards its click into this same button - see
-  // NavbarBookmarks.js).
   const handleDesignerSave = designerTemplate => {
     if (!name.trim()) {
       setNameError(true)
@@ -213,10 +158,6 @@ const PdfDesignerTemplateForm = () => {
 
     dispatch(action).then(result => {
       toast.success(isEdit ? 'PDF designer template updated' : 'PDF designer template added')
-      // Stay in the designer instead of bouncing back to the list. A brand
-      // new template has no id yet, though - move the URL onto its real
-      // edit route (replacing /add) so a second Save updates it instead of
-      // silently creating a duplicate template each time.
       if (!isEdit) {
         navigate(`/pdf-designer/edit/${result.payload.id}`, { replace: true })
       }
@@ -283,12 +224,9 @@ const PdfDesignerTemplateForm = () => {
             report={template}
             data={initialSampleData}
             onDataChange={dataStr => {
-              // Only captured for Save - see sampleDataRef above for why this
-              // deliberately does NOT feed back into the `data` prop live.
               try {
                 sampleDataRef.current = JSON.parse(dataStr)
               } catch (e) {
-                // ignore - keep the last valid sample data until this parses
               }
             }}
             theme='light'

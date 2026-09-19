@@ -1,5 +1,5 @@
-@import '../bootstrap-extended/include'; // Bootstrap includes
-@import '../components/include'; // Components includes
+@import '../bootstrap-extended/include';
+@import '../components/include';
 
 $auth-1-inner-max-width: 400px !default;
 
@@ -17,7 +17,7 @@ $auth-1-inner-max-width: 400px !default;
   &.auth-basic {
     align-items: center;
     justify-content: center;
-    overflow: hidden; // For v1 scroll for long auth form
+    overflow: hidden;
     .auth-inner {
       position: relative;
       &:before {
@@ -52,7 +52,7 @@ $auth-1-inner-max-width: 400px !default;
     align-items: flex-start;
     .auth-inner {
       height: 100vh;
-      overflow-y: auto; // For v2 scroll for long auth form
+      overflow-y: auto;
       height: calc(var(--vh, 1vh) * 100);
     }
     .brand-logo {
@@ -90,14 +90,12 @@ $auth-1-inner-max-width: 400px !default;
     }
   }
 
-  // two steps verification
   .auth-input {
     max-width: 50px;
     padding-right: 0.571rem;
     padding-left: 0.571rem;
   }
 
-  // multi-steps register
   .custom-options-checkable {
     .plan-price {
       .pricing-value {
@@ -140,7 +138,6 @@ $auth-1-inner-max-width: 400px !default;
   }
 }
 
-// Auth pages for mobile and small height & width screen
 @media (max-height: 825px) and (max-width: 991.98px) {
   .dark-layout {
     .auth-wrapper .auth-inner {

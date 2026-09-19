@@ -1,10 +1,5 @@
-// ** Third Party Components
 import { FileText, Image, Film, Music, Archive, Table, Code, Paperclip } from 'react-feather'
 
-// Extension -> icon mapping shared by anywhere a file list needs a quick
-// visual cue for what kind of file it is (react-feather has no dedicated
-// per-format icons like a literal PDF logo, so this groups extensions into
-// the closest generic shape instead).
 const ICON_BY_EXTENSION = {
   pdf: FileText,
   doc: FileText,

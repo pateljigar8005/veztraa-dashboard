@@ -1,28 +1,16 @@
-// ** React Imports
 import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
-// ** Hooks
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
-
-// ** Third Party Components
 import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormText } from 'reactstrap'
-
-// ** Shared Components
 import DateField from '../../shared/DateField'
-
-// ** Store & Actions
 import { addHoliday, updateHoliday, getHoliday } from '../store'
 
 const defaultValues = { name: '', date: '' }
 
 const HolidayForm = () => {
-  // ** Hooks & Vars
   const { id } = useParams()
   const isEdit = Boolean(id)
   const navigate = useNavigate()
@@ -61,9 +49,6 @@ const HolidayForm = () => {
           navigate('/holiday')
         })
         .catch(err => {
-          // The one real validation failure this form can hit server-side -
-          // a duplicate date - lands as a field-level error instead of just
-          // a generic toast, same as the rest of the form's own errors.
           if (err?.errors?.date) {
             setError('date', { type: 'manual', message: err.errors.date[0] })
           } else {

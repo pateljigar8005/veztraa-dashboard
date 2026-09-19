@@ -1,7 +1,6 @@
-@import '../../bootstrap-extended/include'; // Bootstrap includes
-@import '../../components/include'; // Components includes
+@import '../../bootstrap-extended/include';
+@import '../../components/include';
 
-// Toast container opacity
 #toast-container > div {
   opacity: 1;
   -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
@@ -10,7 +9,6 @@
   border-radius: $toast-border-radius;
 }
 
-// Toast container hover shadow
 #toast-container > div,
 #toast-container > div:hover {
   box-shadow: $toast-box-shadow;
@@ -19,7 +17,6 @@
 #toast-container > .toast {
   background-image: none !important;
 }
-// Toast colors
 .toast {
   background-color: $white;
   color: $body-color !important;
@@ -57,8 +54,6 @@
   }
 }
 
-// we are using only few colors in toast so not adding in palette.scss
-// plugin class name 'error' is also differ then ours so not useful to add in palette
 .toast-success {
   .toast-title {
     color: $success;
@@ -108,7 +103,6 @@
   }
 }
 
-// position alignments
 .toast-top-left {
   top: 1.3rem;
   left: $content-padding;
@@ -136,7 +130,6 @@
   width: 100% !important;
 }
 
-// Media query
 
 @media (max-width: 480px) and (min-width: 241px) {
   #toast-container > .toast {
@@ -153,7 +146,6 @@
   }
   .toast-top-left {
     left: 1rem;
-    //   left: 0;
   }
   #toast-container {
     &.toast-top-center,
@@ -192,7 +184,6 @@
   }
 }
 
-// Toastr Dark Layout
 .dark-layout {
   #toast-container > div,
   #toast-container > div:hover {

@@ -1,30 +1,15 @@
-// ** React Imports
 import { Fragment, useState, useEffect, useMemo, useRef } from 'react'
-
-// ** Hooks
 import useDebounce from '@hooks/useDebounce'
-
-// ** Shared Components
 import AdvancedSearchModal from '../../shared/AdvancedSearchModal'
 import useDragReorder from '../../shared/useDragReorder'
-
-// ** Table Columns
 import { getColumns } from './columns'
-
-// ** Store & Actions
 import { getAllData, getData, updateTeamMember } from '../store'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Third Party Components
 import toast from 'react-hot-toast'
 import ReactPaginate from 'react-paginate'
 import DataTable from 'react-data-table-component'
 import { ChevronDown } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Row, Col, Card, Input, Button } from 'reactstrap'
-
-// ** Styles
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 
@@ -40,7 +25,6 @@ const searchFields = [
   }
 ]
 
-// ** Table Header
 const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) => {
   return (
     <div className='invoice-list-table-header w-100 me-1 ms-50 mt-1 mb-75'>
@@ -84,33 +68,24 @@ const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) 
 }
 
 const TeamMembersList = () => {
-  // ** Store Vars
   const dispatch = useDispatch()
   const store = useSelector(state => state.teamMembers)
 
-  // ** States - defaults to display order (sort_order asc) rather than the
-  // usual id/desc, matching TeamMember::paginate()'s default on the backend.
   const [sort, setSort] = useState('asc')
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [sortColumn, setSortColumn] = useState('sort_order')
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
-  // ** Advanced search (opened via the navbar search icon)
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false)
   const [filters, setFilters] = useState({})
 
-  // ** Debounce the search term so typing doesn't fire a request per keystroke
   const debouncedSearchTerm = useDebounce(searchTerm, 400)
 
-  // ** Drag-to-reorder only makes sense while viewing the default Display
-  // Order (sort_order asc) - dragging while sorted by another column would
-  // silently reassign sort_order values that don't match what's on screen.
   const dragEnabled = sortColumn === 'sort_order' && sort === 'asc'
   const columns = useMemo(() => getColumns(dragEnabled), [dragEnabled])
   const tableContainerRef = useRef(null)
 
-  // ** Get data on mount
   useEffect(() => {
     dispatch(getAllData())
     dispatch(
@@ -125,7 +100,6 @@ const TeamMembersList = () => {
     )
   }, [dispatch, sort, sortColumn, currentPage, debouncedSearchTerm, filters])
 
-  // ** Function in get data on page change
   const handlePagination = page => {
     dispatch(
       getData({
@@ -140,7 +114,6 @@ const TeamMembersList = () => {
     setCurrentPage(page.selected + 1)
   }
 
-  // ** Function in get data on rows per page
   const handlePerPage = e => {
     const value = parseInt(e.currentTarget.value)
     dispatch(
@@ -156,15 +129,11 @@ const TeamMembersList = () => {
     setRowsPerPage(value)
   }
 
-  // ** Debounced via debouncedSearchTerm above - just update local state and
-  // reset to page 1 here; the mount effect refetches once typing settles.
   const handleFilter = val => {
     setSearchTerm(val)
     setCurrentPage(1)
   }
 
-  // ** Advanced search: apply/clear both reset to page 1 and let the mount
-  // effect (which depends on `filters`) refetch with the new criteria.
   const handleApplyFilters = newFilters => {
     setFilters(newFilters)
     setCurrentPage(1)
@@ -175,7 +144,6 @@ const TeamMembersList = () => {
     setCurrentPage(1)
   }
 
-  // ** Custom Pagination
   const CustomPagination = () => {
     const count = Number(Math.ceil(store.total / rowsPerPage))
 
@@ -198,7 +166,6 @@ const TeamMembersList = () => {
     )
   }
 
-  // ** Table data to render
   const dataToRender = () => {
     const isFiltered = searchTerm.length > 0 || Object.keys(filters).length > 0
 
@@ -211,17 +178,11 @@ const TeamMembersList = () => {
     }
   }
 
-  // ** Just update the sort state - the mount effect above already
-  // depends on [sort, sortColumn] and refetches with the new values.
   const handleSort = (column, sortDirection) => {
     setSort(sortDirection)
     setSortColumn(column.sortField)
   }
 
-  // ** Drag reorder: permute sort_order values among the currently visible
-  // rows to match their new on-screen positions, rather than renumbering the
-  // whole table - e.g. dragging row 3 to the top only needs those rows'
-  // sort_order values swapped, not every row in the database touched.
   const handleReorder = async (oldIndex, newIndex) => {
     const rows = dataToRender()
     const originalSortOrders = rows.map(r => r.sort_order)

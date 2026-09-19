@@ -1,24 +1,10 @@
-/*=========================================================================================
-	File Name: horizontal-menu.scss
-	Description: A classic horizontal menu for easy navigation & support all devices.
-	It support light & dark version, flipped layout, right side icons, borders menu for
-	item separation.
-	----------------------------------------------------------------------------------------
-	Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard TemplateTheme
-	Author: PIXINVENT
-	Author URL: http://www.themeforest.net/user/pixinvent
-==========================================================================================*/
+@import '../../../bootstrap-extended/include';
+@import '../../../components/include';
 
-@import '../../../bootstrap-extended/include'; // Bootstrap includes
-@import '../../../components/include'; // Components includes
 
-// Import first main menu mixin
 @import '../../mixins/main-menu-mixin';
 
-// Horizontal Menu
-//=========================
 .horizontal-menu {
-  // Content Area margin
   .content {
     margin-left: 0;
     &.show-overlay {
@@ -28,7 +14,6 @@
     }
   }
 
-  // Navbar container spacing for all
   .navbar.header-navbar {
     .navbar-container {
       padding: 0.8rem #{$content-padding};
@@ -45,9 +30,6 @@
     position: static;
   }
 
-  //---------------//
-  // Navbar Header //
-  //---------------//
   .horizontal-menu-wrapper {
     position: fixed;
     top: 62px;
@@ -72,7 +54,6 @@
     &.navbar-light {
       background: $white;
     }
-    // Navbar- Brand Center - Logo
     &.navbar-horizontal.floating-nav {
       left: 0;
       top: 62px;
@@ -89,7 +70,7 @@
     &.navbar-brand-center {
       .navbar-header {
         position: absolute;
-        left: calc(50% - 56px); // left 50% - branding width
+        left: calc(50% - 56px);
         padding: 0;
         z-index: 1000;
         .navbar-brand {
@@ -101,7 +82,6 @@
             max-width: 36px;
           }
 
-          // Brand Text Scss
           .brand-text {
             color: $primary;
             padding-left: 1rem;
@@ -150,7 +130,6 @@
           top: 50%;
           margin-top: -7px;
           right: 1rem;
-          // content: '\e844' !important;
           background-image: url(str-replace(str-replace($chevron-right, 'currentColor', $body-color), '#', '%23'));
         }
         .dropdown-item {
@@ -268,9 +247,7 @@
 }
 
 .horizontal-layout {
-  // navbar floating
   &.navbar-floating {
-    // Horizontal layout navbar shadow position and height fix
     .header-navbar-shadow {
       height: 80px;
     }
@@ -281,8 +258,7 @@
     }
     &:not(.blank-page) {
       .app-content {
-        // padding-top: 9.75rem;
-        padding: calc(#{$content-padding} + #{$navbar-height}* 2 + #{$floating-nav-margin}) #{$content-padding} 0 #{$content-padding}; // * 2  as we have 2 navbar (menu + navbar)  in horizontal layout.
+        padding: calc(#{$content-padding} + #{$navbar-height}* 2 + #{$floating-nav-margin}) #{$content-padding} 0 #{$content-padding};
       }
     }
     .horizontal-menu-wrapper {
@@ -293,12 +269,8 @@
         rgba($white, 0) 100%
       );
       background-repeat: repeat-x;
-      // .navbar-horizontal.floating-nav {
-      //   margin: $floating-nav-margin $content-padding 0;
-      // }
     }
 
-    // App content area wrapper height
     &.footer-static {
       .app-content {
         .content-area-wrapper,
@@ -349,7 +321,6 @@
     }
   }
 
-  // navbar sticky
   &.navbar-sticky {
     .app-content {
       padding: calc(#{$content-padding} + #{$navbar-height}* 2) #{$content-padding} 0 #{$content-padding};
@@ -367,7 +338,6 @@
       }
     }
 
-    // App content area wrapper height
     &.footer-static {
       .app-content {
         .content-area-wrapper,
@@ -417,7 +387,6 @@
       }
     }
   }
-  // navbar static
   &.navbar-static {
     .app-content {
       padding: calc(#{$content-padding} + #{$horizontal-menu-height}) #{$content-padding} 0 #{$content-padding};
@@ -433,14 +402,12 @@
       position: relative;
       .navbar-horizontal.header-navbar {
         background: $white;
-        // ? Added for angular fix as it adds this class to navbar in hz layout
         &.navbar-static-top {
           left: 0;
           width: 100%;
         }
       }
     }
-    // App content area wrapper height
     &.footer-static {
       .app-content {
         .content-area-wrapper,
@@ -491,7 +458,6 @@
     }
   }
 
-  // navbar Hidden
   &.navbar-hidden {
     &.footer-static {
       .app-content {
@@ -563,7 +529,6 @@
   }
 }
 
-// Initially menu & content width for md and down screen
 @include media-breakpoint-down(xl) {
   .horizontal-layout {
     &.horizontal-menu {
@@ -584,11 +549,9 @@
 }
 
 @include media-breakpoint-down(sm) {
-  // For static navbar
   html body.horizontal-layout.navbar-static .app-content {
     padding: calc(#{$content-padding} - 0.8rem + #{$navbar-height}) calc(#{$content-padding} - 0.8rem) 0
-      calc(#{$content-padding} - 0.8rem) !important; // - 0.8rem to reduce padding in small screen
+      calc(#{$content-padding} - 0.8rem) !important;
   }
 }
-// Import vertical-overlay-menu.scss for small screen support
 @import 'vertical-overlay-menu.scss';

@@ -1,5 +1,5 @@
-@import '../../bootstrap-extended/include'; // Bootstrap includes
-@import '../../components/include'; // Components includes
+@import '../../bootstrap-extended/include';
+@import '../../components/include';
 
 .jq-ry-container:not(.multi-color-ratings) {
   .jq-ry-normal-group {
@@ -16,7 +16,6 @@
   }
 }
 
-// Dark Layout
 .dark-layout {
   .jq-ry-container:not(.multi-color-ratings) {
     .jq-ry-normal-group {
@@ -28,7 +27,6 @@
   }
 }
 
-// RTL
 [data-textdirection='rtl'] {
   .jq-ry-container:not(.multi-color-ratings) {
     .jq-ry-normal-group {

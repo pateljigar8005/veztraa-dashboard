@@ -1,5 +1,3 @@
-// App Calendar
-// ========================================================================
 @import '../../base/pages/app-calendar.scss';
 
 .event-sidebar {
@@ -13,10 +11,6 @@
 
 html[dir='rtl'] {
   .fc {
-    // &.fc-direction-rtl {
-    //   direction: rtl;
-    //   text-align: right;
-    // }
     .fc-header-toolbar {
       .fc-prev-button,
       .fc-next-button {

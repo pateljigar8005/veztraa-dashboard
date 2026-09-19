@@ -1,34 +1,22 @@
-// ** React Imports
 import { Fragment, useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-
-// ** Third Party Components
 import classnames from 'classnames'
-
-// ** Todo App Components
 import Tasks from './Tasks'
 import Sidebar from './Sidebar'
 import TaskSidebar from './TaskSidebar'
-
-// ** Store & Actions
 import { useDispatch, useSelector } from 'react-redux'
 import { getTasks, updateTask, selectTask, addTask, deleteTask, reOrderTasks } from './store'
-
-// ** Styles
 import '@styles/react/apps/app-todo.scss'
 
 const TODO = () => {
-  // ** States
   const [sort, setSort] = useState('')
   const [query, setQuery] = useState('')
   const [mainSidebar, setMainSidebar] = useState(false)
   const [openTaskSidebar, setOpenTaskSidebar] = useState(false)
 
-  // ** Store Vars
   const dispatch = useDispatch()
   const store = useSelector(state => state.todo)
 
-  // ** URL Params
   const paramsURL = useParams()
   const params = {
     filter: paramsURL.filter || '',
@@ -37,11 +25,9 @@ const TODO = () => {
     tag: paramsURL.tag || ''
   }
 
-  // ** Function to handle Left sidebar & Task sidebar
   const handleMainSidebar = () => setMainSidebar(!mainSidebar)
   const handleTaskSidebar = () => setOpenTaskSidebar(!openTaskSidebar)
 
-  // ** Get Tasks on mount & based on dependency change
   useEffect(() => {
     dispatch(
       getTasks({

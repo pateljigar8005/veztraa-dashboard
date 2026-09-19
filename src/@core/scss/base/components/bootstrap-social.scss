@@ -35,7 +35,6 @@ $bs-height-xs: (floor($font-size-sm * 0.2) + $input-btn-padding-y-lg) !default;
   }
 }
 
-// Social button Mixin
 @mixin btn-social($color-bg, $color: #fff, $hover: $color-bg, $border-hover: $color-bg) {
   @include button-variant($color-bg, transparent);
   color: $white !important;
@@ -45,19 +44,16 @@ $bs-height-xs: (floor($font-size-sm * 0.2) + $input-btn-padding-y-lg) !default;
   }
 }
 
-// Social Outline Button Mixin
 @mixin btn-social-outline($color-bg) {
   border: 1px solid $color-bg !important;
   color: $color-bg;
 }
 
-// Social Outline Button Hover Mixin
 @mixin btn-hover-outline($color-bg) {
   color: shade-color($color-bg, 20%);
   border: 1px solid shade-color($color-bg, 20%) !important;
 }
 
-// Social button
 .btn-adn {
   @include btn-social(#d87a68);
 }
@@ -122,7 +118,6 @@ $bs-height-xs: (floor($font-size-sm * 0.2) + $input-btn-padding-y-lg) !default;
   @include btn-social(#720e9e);
 }
 
-// Social Outline button
 .btn-outline-adn {
   @include btn-social-outline(#d87a68);
 }
@@ -187,7 +182,6 @@ $bs-height-xs: (floor($font-size-sm * 0.2) + $input-btn-padding-y-lg) !default;
   @include btn-social-outline(#720e9e);
 }
 
-// Social Outline hover button
 .btn-outline-adn:hover {
   @include btn-hover-outline(#d87a68);
 }
@@ -252,7 +246,6 @@ $bs-height-xs: (floor($font-size-sm * 0.2) + $input-btn-padding-y-lg) !default;
   @include btn-hover-outline(#720e9e);
 }
 
-// Social Background colors
 .bg-adn {
   background-color: #d87a68;
 }

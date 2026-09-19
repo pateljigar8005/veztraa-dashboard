@@ -1,41 +1,24 @@
-// ** React Imports
 import { useState, useEffect, Fragment } from 'react'
-
-// ** Third Party Components
 import axios from 'axios'
 import classnames from 'classnames'
 import { Editor } from '@veztraa/editor'
 import { X, Star, Trash } from 'react-feather'
-import Select, { components } from 'react-select' //eslint-disable-line
+import Select, { components } from 'react-select'
 import { useForm, Controller } from 'react-hook-form'
-
-// ** Reactstrap Imports
 import { Modal, ModalBody, ModalFooter, Button, Form, Input, Label, FormFeedback } from 'reactstrap'
-
-// ** Custom Components
 import Avatar from '@components/avatar'
 import TaskAttachments from './TaskAttachments'
 import DateField from '../shared/DateField'
-
-// ** Hooks
 import useHolidayDates from '@hooks/useHolidayDates'
 import useWeekendDays from '@hooks/useWeekendDays'
-
-// ** Utils
 import { isObjEmpty, selectThemeColors, resolveAvatarUrl, uploadEditorImage } from '@utils'
-
-// ** Styles Imports
 import '@styles/react/libs/react-select/_react-select.scss'
 
-// ** Function to capitalize the first letter of string
 const capitalize = string => string.charAt(0).toUpperCase() + string.slice(1)
 
-// ** Modal Header
 const ModalHeader = props => {
-  // ** Props
   const { children, store, handleTaskSidebar, important, setImportant, deleteTask, dispatch } = props
 
-  // ** Function to delete task
   const handleDeleteTask = () => {
     dispatch(deleteTask(store.selectedTask.id))
     handleTaskSidebar()
@@ -64,10 +47,8 @@ const ModalHeader = props => {
 }
 
 const TaskSidebar = props => {
-  // ** Props
   const { open, handleTaskSidebar, store, dispatch, updateTask, selectTask, addTask, deleteTask } = props
 
-  // ** States
   const [assigneeOptions, setAssigneeOptions] = useState([])
   const [assignee, setAssignee] = useState(null)
   const [tags, setTags] = useState([])
@@ -89,7 +70,6 @@ const TaskSidebar = props => {
     defaultValues: { title: '' }
   })
 
-  // ** Real users for the Assignee select, instead of the old hardcoded demo list
   useEffect(() => {
     axios.get('/users', { params: { perPage: 100 } }).then(response => {
       setAssigneeOptions(
@@ -102,7 +82,6 @@ const TaskSidebar = props => {
     })
   }, [])
 
-  // ** Tag Select Options
   const tagOptions = [
     { value: 'team', label: 'Team' },
     { value: 'low', label: 'Low' },
@@ -111,7 +90,6 @@ const TaskSidebar = props => {
     { value: 'update', label: 'Update' }
   ]
 
-  // ** Custom Assignee Component
   const AssigneeComponent = ({ data, ...props }) => {
     return (
       <components.Option {...props}>
@@ -127,7 +105,6 @@ const TaskSidebar = props => {
     )
   }
 
-  // ** Returns sidebar title
   const handleSidebarTitle = () => {
     if (store && !isObjEmpty(store.selectedTask)) {
       return (
@@ -145,7 +122,6 @@ const TaskSidebar = props => {
     }
   }
 
-  // ** Function to run when sidebar opens
   const handleSidebarOpened = () => {
     const { selectedTask } = store
     if (!isObjEmpty(selectedTask)) {
@@ -174,7 +150,6 @@ const TaskSidebar = props => {
     }
   }
 
-  // ** Function to run when sidebar closes
   const handleSidebarClosed = () => {
     setTags([])
     setDesc('')
@@ -187,7 +162,6 @@ const TaskSidebar = props => {
     clearErrors()
   }
 
-  // ** Renders Footer Buttons
   const renderFooterButtons = () => {
     if (store && !isObjEmpty(store.selectedTask)) {
       return (

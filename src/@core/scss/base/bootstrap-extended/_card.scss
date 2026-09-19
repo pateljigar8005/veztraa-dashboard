@@ -8,7 +8,7 @@
   .card-title {
     font-weight: 500;
     font-size: 1.285rem;
-    margin-bottom: 1.53rem; // Considering sub-title minus margin
+    margin-bottom: 1.53rem;
   }
   .card-bordered {
     border: $card-border-width solid $card-border-color;
@@ -20,7 +20,6 @@
     border-radius: $card-border-radius;
   }
 
-  //fullscreen card
   &.card-fullscreen {
     display: block;
     z-index: 9999;
@@ -139,7 +138,6 @@
   }
 }
 
-// overlay-img-card
 .overlay-img-card {
   .card-img-overlay,
   img {
@@ -147,24 +145,18 @@
   }
 }
 
-// IE Specific CSS
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
-  // img-fluid class
   .card-body,
   .card-content {
     min-height: 1px;
   }
 }
 
-//--------------- Advance Cards ---------------
-//---------------------------------------------
 
-// Congratulations Card
 .card-congratulations {
   background: linear-gradient(118deg, rgba($primary, 1), rgba($primary, 0.7));
   color: $white;
 
-  // image on left
   .congratulations-img-left {
     width: 200px;
     position: absolute;
@@ -175,7 +167,6 @@
       width: 140px;
     }
   }
-  // image on right
   .congratulations-img-right {
     width: 175px;
     position: absolute;
@@ -191,14 +182,12 @@
     margin-bottom: 2rem;
   }
 }
-// congratulation medal card
 .congratulation-medal {
   position: absolute;
   top: 0;
   right: 37px;
 }
 
-// Deposits Card
 .card-deposits {
   .deposits-divider {
     margin-top: 1.8rem;
@@ -206,7 +195,6 @@
   }
 }
 
-// Employee Task Card
 .card-employee-task {
   .employee-task {
     &:not(:last-child) {
@@ -215,7 +203,6 @@
   }
 }
 
-// Developer Meetup Card
 .card-developer-meetup {
   .meetup-img-wrapper {
     background-color: rgba($primary, 0.1);
@@ -244,7 +231,6 @@
   }
 }
 
-// Profile Card
 .card-profile {
   text-align: center;
   .card-body {
@@ -278,7 +264,6 @@
   }
 }
 
-// Apply Job Card
 .card-apply-job {
   .apply-job-package {
     padding: 1.2rem;
@@ -292,7 +277,6 @@
   }
 }
 
-// Transaction Card
 .card-transaction {
   .transaction-item {
     display: flex;
@@ -317,7 +301,6 @@
   }
 }
 
-// User Timeline Card
 .card-user-timeline {
   .user-timeline-title-icon {
     width: 1.714rem;
@@ -338,7 +321,6 @@
   }
 }
 
-// Business Card
 .business-card {
   .business-items {
     &:not(:last-child) {
@@ -356,7 +338,6 @@
   }
 }
 
-// States Card
 .card-browser-states {
   .browser-states {
     margin-top: 2.14rem;
@@ -366,7 +347,6 @@
   }
 }
 
-// App Design Card
 .card-app-design {
   .design-group {
     margin-bottom: 2rem;
@@ -398,8 +378,6 @@
   }
 }
 
-//--------------- Statistics Card ---------------
-//------------------------------------------------
 
 .card-statistics {
   .card-header {
@@ -420,10 +398,7 @@
   }
 }
 
-//--------------- Analytics Card ---------------
-//----------------------------------------------
 
-// Chart-dropdown Button
 .chart-dropdown {
   .btn {
     font-size: 1rem;
@@ -434,7 +409,6 @@
   }
 }
 
-// Revenue Report & Budget Card
 .card-revenue-budget {
   .revenue-report-wrapper {
     padding: 1.286rem 1.5rem;
@@ -474,7 +448,6 @@
   }
 }
 
-// Earnings Card
 .earnings-card {
   .apexcharts-canvas .apexcharts-pie {
     .apexcharts-datalabel-label {
@@ -489,9 +462,7 @@
   }
 }
 
-// IE Specific CSS
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
-  // make icon center in avatar-content
   #dashboard-analytics,
   #statistics-card {
     .avatar {

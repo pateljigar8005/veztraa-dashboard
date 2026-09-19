@@ -1,16 +1,5 @@
-// ================================================================================================
-// 	File Name: helper.scss
-// 	Description: Helper classes provides template related customization.
-// 	----------------------------------------------------------------------------------------------
-// 	Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-// 	Author: PIXINVENT
-// 	Author URL: http://www.themeforest.net/user/pixinvent
-// ================================================================================================
 
-// Content helpers
-// -------------------------
 
-// typography page icon with list
 .list-style-icons {
   padding-left: 10px;
   margin-left: 0;
@@ -21,7 +10,6 @@
   }
 }
 
-//Pull the element
 .pull-up {
   transition: all 0.25s ease;
 
@@ -32,7 +20,6 @@
   }
 }
 
-// Spinner classes
 .spinner {
   display: inline-block;
   animation: spin 1s linear infinite;
@@ -59,7 +46,6 @@
   }
 }
 
-// Bullets used in application pages
 .bullet {
   width: 1rem;
   height: 1rem;
@@ -79,7 +65,6 @@
   }
 }
 
-// Section Label - used in pages and apps
 .section-label {
   font-size: 0.85rem;
   color: $text-muted;
@@ -87,13 +72,11 @@
   letter-spacing: 0.6px;
 }
 
-// Used for table cell fit
 .cell-fit {
   width: 0.1%;
   white-space: nowrap;
 }
 
-// Card match height
 .match-height {
   > [class*='col'] {
     display: flex;

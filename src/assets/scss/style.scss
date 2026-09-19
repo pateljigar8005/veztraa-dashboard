@@ -1,11 +1,4 @@
-/*================================================================================
-	Item Name: Veztraa Admin Dashboard
-================================================================================
 
-NOTE:
-------
-PLACE HERE YOUR OWN SCSS CODES AND IF NEEDED, OVERRIDE THE STYLES FROM THE OTHER STYLESHEETS.
-WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BETTER LIKE THIS.  */
 
 .main-menu-content .navigation.navigation-main {
   padding-top: 0.75rem !important;
@@ -20,15 +13,10 @@ WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BET
   width: auto;
 }
 
-// Let action-column icons keep their own text-* color instead of the
-// template's fixed $body-color stroke
 .column-action svg {
   stroke: currentColor !important;
 }
 
-// The layout wrapper always adds "overflow-hidden" to .app-content; that
-// clips position:sticky on any descendant. Scoped to routes tagged with
-// this class (via route meta.className) so it doesn't affect other pages.
 .app-content.invoice-form-page {
   overflow: visible !important;
 }

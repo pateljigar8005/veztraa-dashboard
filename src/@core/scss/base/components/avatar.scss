@@ -1,16 +1,5 @@
-// =========================================================================================
-//   File Name: avatar.scss
-//   Description: Avatar style.
-//   ----------------------------------------------------------------------------------------
-//   Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-//   Author: PIXINVENT
-//   Author URL: http://www.themeforest.net/user/pixinvent
-// ==========================================================================================
 
-// Component: Avatar
-// ========================================================================
 
-// avatar
 
 .avatar {
   white-space: nowrap;
@@ -25,7 +14,6 @@
   vertical-align: middle;
   font-weight: 600;
 
-  // avatar content
   .avatar-content {
     width: $avatar-size;
     height: $avatar-size;
@@ -67,8 +55,6 @@
     background-color: $secondary;
   }
 
-  // avatar label with basic size
-  // using in FAQ & other pages
   &.avatar-tag {
     display: flex;
     align-items: center;
@@ -78,13 +64,10 @@
     border-radius: $border-radius;
   }
 
-  // avatar img
   img {
     border-radius: 50%;
   }
 
-  // Size Modifier
-  // ========================================================================
 
   &.avatar-xl {
     font-size: 1.5rem;
@@ -156,7 +139,6 @@
   }
 }
 
-// Avatar Group SCSS
 .avatar-group {
   display: flex;
   justify-content: flex-start;
@@ -176,7 +158,6 @@
       transform: translateY(-4px) scale(1.07);
     }
   }
-  // Avatar Group Sizings
   .avatar:not(:first-child) {
     margin-left: -0.55rem;
   }

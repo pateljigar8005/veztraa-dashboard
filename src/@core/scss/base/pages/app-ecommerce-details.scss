@@ -1,22 +1,12 @@
-// ================================================================================================
-//  File Name: app-ecommerce-details.scss
-//  Description: App Ecommerce Details SCSS.
-//  ----------------------------------------------------------------------------------------------
-//  Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-//  Author: PIXINVENT
-//  Author URL: http://www.themeforest.net/user/pixinvent
-// ================================================================================================
+@import '../bootstrap-extended/include';
+@import '../components/include';
 
-@import '../bootstrap-extended/include'; // Bootstrap includes
-@import '../components/include'; // Components includes
 
-// App e-commerce detail style
 .ecommerce-application {
   .app-ecommerce-details {
     .product-img {
       width: 600px;
     }
-    // ratings style
     .ratings-list-item {
       svg,
       i {
@@ -35,11 +25,9 @@
       color: $gray-100;
     }
 
-    // Item Price
     .item-price {
       color: $primary;
     }
-    // Common for list-view, checkout and wishlist
     .item-company {
       display: inline-flex;
       font-weight: $font-weight-normal;
@@ -51,7 +39,6 @@
       }
     }
 
-    // Product feature list
     .product-features {
       margin-top: 1.5rem;
       margin-bottom: 1.5rem;
@@ -103,7 +90,6 @@
     }
   }
 
-  // centered slides option-1
   .swiper-responsive-breakpoints {
     &.swiper-container {
       .swiper-slide {
@@ -121,7 +107,6 @@
     }
   }
 
-  //navigation button custom icons
   .swiper-button-prev,
   .swiper-button-next,
   .swiper-container-rtl .swiper-button-prev,
@@ -193,7 +178,6 @@
     }
   }
 
-  // color options
 
   .product-color-options {
     .color-option {
@@ -210,9 +194,7 @@
       }
     }
 
-    // selected
     .selected {
-      // these use for border color only page specific
       .b-primary {
         border-color: $primary;
         .filloption {
@@ -274,7 +256,6 @@
 @include media-breakpoint-down(md) {
   .ecommerce-application {
     .app-ecommerce-details {
-      // ratings style
       .ratings-list-item {
         svg,
         i {

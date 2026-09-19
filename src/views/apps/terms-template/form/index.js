@@ -1,29 +1,17 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
-// ** Hooks
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
-
-// ** Third Party Components
 import toast from 'react-hot-toast'
 import { Editor } from '@veztraa/editor'
-
-// ** Utils
 import { uploadEditorImage } from '@utils'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
-
-// ** Store & Actions
 import { addTermsTemplate, updateTermsTemplate, getTermsTemplate } from '../store'
 
 const defaultValues = { name: '' }
 
 const TermsTemplateForm = () => {
-  // ** Hooks & Vars
   const { id } = useParams()
   const isEdit = Boolean(id)
   const navigate = useNavigate()
@@ -31,8 +19,6 @@ const TermsTemplateForm = () => {
   const store = useSelector(state => state.termsTemplates)
 
   const [content, setContent] = useState('')
-  // Tracks edits to content, which isn't registered with react-hook-form so
-  // its own isDirty can't see it.
   const [extraDirty, setExtraDirty] = useState(false)
 
   const {

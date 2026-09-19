@@ -1,41 +1,24 @@
-// ** React Imports
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-
-// ** Custom Components
 import Avatar from '@components/avatar'
-
-// ** Utils
 import { isUserLoggedIn, resolveAvatarUrl } from '@utils'
-
-// ** Auth
 import useJwt from '@src/auth/jwt/useJwt'
-
-// ** Store & Actions
 import { useDispatch } from 'react-redux'
 import { handleLogout } from '@store/authentication'
-
-// ** Third Party Components
 import { Settings, Lock, Power } from 'react-feather'
-
-// ** Reactstrap Imports
 import { UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem } from 'reactstrap'
 
 const UserDropdown = () => {
-  // ** Store Vars
   const dispatch = useDispatch()
 
-  // ** State
   const [userData, setUserData] = useState(null)
 
-  //** ComponentDidMount
   useEffect(() => {
     if (isUserLoggedIn() !== null) {
       setUserData(JSON.parse(localStorage.getItem('userData')))
     }
   }, [])
 
-  //** Vars
   const displayName = (userData && userData.fullName) || 'John Doe'
 
   return (

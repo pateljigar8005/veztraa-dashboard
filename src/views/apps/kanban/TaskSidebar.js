@@ -1,39 +1,20 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
-
-// ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
-import Select, { components } from 'react-select' //eslint-disable-line
+import Select, { components } from 'react-select'
 import { X, Trash2, Send } from 'react-feather'
 import { useForm, Controller } from 'react-hook-form'
-
-// ** Reactstrap Imports
 import { Modal, ModalBody, ModalFooter, Button, Form, Input, Label, FormFeedback } from 'reactstrap'
-
-// ** Redux Imports
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Actions
 import { updateTask, deleteTask, fetchComments, addComment, handleSelectTask } from './store'
-
-// ** Options
 import { taskTypeOptions, priorityOptions } from './kanbanOptions'
-
-// ** Custom Components
 import Avatar from '@components/avatar'
 import TaskAttachments from './TaskAttachments'
 import DateField from '../shared/DateField'
-
-// ** Hooks
 import useHolidayDates from '@hooks/useHolidayDates'
 import useWeekendDays from '@hooks/useWeekendDays'
-
-// ** Utils
 import { isObjEmpty, selectThemeColors, resolveAvatarUrl } from '@utils'
 import { confirmDelete } from '@src/utility/confirmDelete'
-
-// ** Styles Imports
 import '@styles/react/libs/react-select/_react-select.scss'
 
 const defaultValues = {
@@ -41,10 +22,8 @@ const defaultValues = {
 }
 
 const TaskSidebar = props => {
-  // ** Props
   const { sidebarOpen, selectedTask, handleTaskSidebarToggle } = props
 
-  // ** State
   const [description, setDescription] = useState('')
   const [taskType, setTaskType] = useState('task')
   const [priority, setPriority] = useState('medium')
@@ -56,7 +35,6 @@ const TaskSidebar = props => {
   const [commentText, setCommentText] = useState('')
   const [submittingComment, setSubmittingComment] = useState(false)
 
-  // ** Hooks
   const dispatch = useDispatch()
   const comments = useSelector(state => state.kanban.comments)
   const {
@@ -78,7 +56,6 @@ const TaskSidebar = props => {
     })
   }, [])
 
-  // ** Function to run when sidebar opens
   const handleSidebarOpened = () => {
     if (!isObjEmpty(selectedTask)) {
       setValue('title', selectedTask.title)
@@ -93,7 +70,6 @@ const TaskSidebar = props => {
     }
   }
 
-  // ** Function to run when sidebar closes
   const handleSidebarClosed = () => {
     setDescription('')
     setTaskType('task')

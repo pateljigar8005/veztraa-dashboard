@@ -1,17 +1,9 @@
-// ** Third Party Components
 import { FileText, Download, Trash2 } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Button, Spinner } from 'reactstrap'
-
-// ** Shared Components
 import DropzoneFileInput from './DropzoneFileInput'
+export const ATTACHMENT_MAX_SIZE = 5 * 1024 * 1024
 
-export const ATTACHMENT_MAX_SIZE = 5 * 1024 * 1024 // 5MB
 
-// Matches the extension allowlist enforced server-side in each resource's
-// upload controller - kept in sync so rejections happen instantly in the
-// browser instead of round-tripping to the API first.
 export const ATTACHMENT_ACCEPT = {
   'application/pdf': ['.pdf'],
   'application/msword': ['.doc'],
@@ -32,11 +24,6 @@ export const formatFileSize = bytes => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-// ** Presentational multi-file attachment field: a dropzone plus the list of
-// already-uploaded files below it, each with download/delete. Used wherever
-// a resource needs generic file attachments (Project Documents, Task
-// Attachments, ...) - the resource-specific piece is just which
-// upload/download/delete endpoints the wrapping component wires up.
 const AttachmentsField = ({
   attachments,
   uploading,

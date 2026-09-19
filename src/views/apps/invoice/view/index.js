@@ -1,39 +1,19 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-
-// ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useDispatch, useSelector } from 'react-redux'
 import { Edit2, Trash2, ChevronDown, ChevronRight } from 'react-feather'
 import { pdf, ReportDocument } from '@veztraa/report-renderer'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Table, Collapse } from 'reactstrap'
-
-// ** Store & Actions
 import { getInvoice, updateInvoice } from '../store'
-
-// ** Options
 import { invoiceStatusOptions } from '../../quotation/documentOptions'
-
-// ** Shared Components
 import RecordPaymentModal from '../RecordPaymentModal'
-
-// ** Utils
 import { selectThemeColors, formatAmount } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
 
-// ** Maps an invoice's real fields onto the field paths the selected PDF
-// template's elements bind to (see the "service_items" repeating container
-// and the client./document. bindings set up in the PDF Designer) - "document"
-// rather than "invoice" since this same shape is shared across Invoice,
-// Quotation and Contract (see those modules' own buildPdfData()), so one PDF
-// template layout can realistically be reused across document types. Shared
-// by the live preview and the download button so they always render identically.
 const buildPdfData = invoice => ({
   client: {
     name: invoice.contact_name || '',
@@ -48,10 +28,6 @@ const buildPdfData = invoice => ({
     due_date: invoice.due_date
   },
   currency: invoice.currency,
-  // Left as raw numbers (not .toFixed(2) strings) so the template's own
-  // conditional visibility - which hides these rows when the bound value is
-  // falsy - keeps working; "0.00" as a string is truthy and would always
-  // show a $0 tax/discount line.
   tax_rate: invoice.tax_rate,
   tax_amount: invoice.tax_amount,
   discount_amount: invoice.discount_amount,
@@ -59,9 +35,6 @@ const buildPdfData = invoice => ({
   total: formatAmount(invoice.total),
   paid_amount: formatAmount(invoice.paid_amount),
   balance_due: formatAmount(invoice.balance_due),
-  // Rich-text HTML straight from the Editor - bind these to a "richtext"
-  // element (not a plain "text" one) in the PDF Designer so the formatting
-  // actually renders instead of showing raw tags.
   terms_conditions: invoice.terms_content || '',
   payment_method: invoice.payment_method_content || '',
   service_items: (invoice.line_items || []).map(item => ({
@@ -91,8 +64,6 @@ const InvoiceView = () => {
     dispatch(getInvoice(id))
   }, [id])
 
-  // ** Load whichever PDF template Company Settings has picked for invoices,
-  // so the download button can render the same template selected there.
   useEffect(() => {
     axios.get('/company').then(response => {
       const templateId = response.data.data.invoice_pdf_template_id
@@ -113,9 +84,6 @@ const InvoiceView = () => {
 
   const invoice = store.selectedInvoice
 
-  // ** Keep a live PDF preview in sync with the invoice + selected template.
-  // Revokes the previous blob URL whenever a new one is generated (or on
-  // unmount) so we don't leak memory across regenerations.
   useEffect(() => {
     if (!invoice || !pdfTemplate) {
       setPreviewUrl(null)
@@ -158,9 +126,6 @@ const InvoiceView = () => {
 
   const selectedStatusOption = invoiceStatusOptions.find(i => i.value === invoice.status) || null
 
-  // ** Downloads the same PDF already showing in the live preview below -
-  // regenerates it only if the preview isn't ready yet, rather than
-  // rendering the document twice for one click.
   const handleDownloadPdf = async () => {
     if (!pdfTemplate) {
       toast.error('No invoice PDF template is selected in Company Settings.')
@@ -451,9 +416,8 @@ const InvoiceView = () => {
               >
                 + Record Payment
               </Button>
-              {/* No longer shown - the PDF preview below has its own native
-                  download icon. Kept in the DOM (just hidden) so the navbar's
-                  Download icon still has something to forward its click to. */}
+              {
+                                                                               }
               <Button
                 id='invoice-download-pdf-btn'
                 className='d-none'

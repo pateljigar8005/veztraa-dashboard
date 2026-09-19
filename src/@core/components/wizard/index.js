@@ -1,18 +1,12 @@
-// ** React Imports
 import { useEffect, useState, Fragment, forwardRef } from 'react'
-
-// ** Third Party Components
 import Stepper from 'bs-stepper'
 import classnames from 'classnames'
 import { PropTypes } from 'prop-types'
 import { ChevronRight } from 'react-feather'
-
-// ** Styles
 import 'bs-stepper/dist/css/bs-stepper.min.css'
 import '../../../@core/scss/base/plugins/forms/form-wizard.scss'
 
 const Wizard = forwardRef((props, ref) => {
-  // ** Props
   const {
     type,
     steps,
@@ -25,13 +19,10 @@ const Wizard = forwardRef((props, ref) => {
     contentWrapperClassName
   } = props
 
-  // ** State
   const [activeIndex, setActiveIndex] = useState(0)
 
-  // ** Vars
   let stepper = null
 
-  // ** Step change listener on mount
   useEffect(() => {
     stepper = new Stepper(ref.current, options)
 
@@ -44,7 +35,6 @@ const Wizard = forwardRef((props, ref) => {
     }
   }, [])
 
-  // ** Renders Wizard Header
   const renderHeader = () => {
     return steps.map((step, index) => {
       return (
@@ -70,7 +60,6 @@ const Wizard = forwardRef((props, ref) => {
     })
   }
 
-  // ** Renders Wizard Content
   const renderContent = () => {
     return steps.map((step, index) => {
       return (
@@ -108,14 +97,12 @@ const Wizard = forwardRef((props, ref) => {
 
 export default Wizard
 
-// ** Default Props
 Wizard.defaultProps = {
   options: {},
   type: 'horizontal',
   separator: <ChevronRight size={17} />
 }
 
-// ** PropTypes
 Wizard.propTypes = {
   type: PropTypes.string,
   instance: PropTypes.func,

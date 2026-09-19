@@ -1,38 +1,21 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-
-// ** Hooks
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
-
-// ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Reactstrap Imports
 import { Row, Col, Card, CardHeader, CardTitle, CardBody, Form, Label, Input } from 'reactstrap'
-
-// ** Utils
 import { selectThemeColors, formatAmount } from '@utils'
-
-// ** Shared Components
 import CatalogModal from '../../shared/CatalogModal'
 import TermsSection from '../../shared/TermsSection'
 import PaymentMethodSection from '../../shared/PaymentMethodSection'
 import LineItemsTable from '../../shared/LineItemsTable'
 import DateField from '../../shared/DateField'
 import AmountField from '../../shared/AmountField'
-
-// ** Store & Actions
 import { addInvoice, updateInvoice, getInvoice } from '../store'
-
-// ** Options
 import { discountTypeOptions } from '../../quotation/documentOptions'
-
-// ** Styles
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/base/pages/app-invoice.scss'
 
@@ -51,7 +34,6 @@ const defaultValues = {
 }
 
 const InvoiceForm = () => {
-  // ** Hooks & Vars
   const { id } = useParams()
   const [searchParams] = useSearchParams()
   const preselectedClientId = searchParams.get('client_id')
@@ -67,8 +49,6 @@ const InvoiceForm = () => {
   const [templateOptions, setTemplateOptions] = useState([])
   const [termsContent, setTermsContent] = useState('')
   const [paymentMethodContent, setPaymentMethodContent] = useState('')
-  // Tracks edits to the two content fields above, neither of which is
-  // registered with react-hook-form, so its own isDirty can't see them.
   const [extraDirty, setExtraDirty] = useState(false)
   const [catalogOpen, setCatalogOpen] = useState(false)
   const [taxEnabled, setTaxEnabled] = useState(true)
@@ -141,7 +121,6 @@ const InvoiceForm = () => {
     }
   }, [preselectedClientId])
 
-  // ** Fetch the invoice being edited, or the source invoice being cloned
   useEffect(() => {
     if (isEdit) dispatch(getInvoice(id))
     else if (cloneId) dispatch(getInvoice(cloneId))
@@ -186,12 +165,6 @@ const InvoiceForm = () => {
     }
   }
 
-  // ** Auto-fill Due Date from Company Settings' default term whenever the
-  // user picks an issue date - only on an explicit change, not while an
-  // existing/cloned invoice's dates are being loaded. Built from the y/m/d
-  // parts directly (rather than `new Date(str)` + `toISOString()`, which
-  // parses/formats in UTC) so it can't shift a day depending on the
-  // browser's local timezone.
   const handleIssueDateChange = onChange => value => {
     onChange(value)
     const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || '')
@@ -267,7 +240,7 @@ const InvoiceForm = () => {
         <Row className='invoice-add'>
           <Col xl={9} md={8} sm={12}>
             <Card className='invoice-preview-card'>
-              {/* Bill To & Details */}
+              {                       }
               <CardBody className='invoice-padding'>
                 <Row className='row-bill-to invoice-spacing'>
                   <Col className='col-bill-to ps-0' xl='12'>
@@ -330,9 +303,9 @@ const InvoiceForm = () => {
                   </Col>
                 </Row>
               </CardBody>
-              {/* /Bill To */}
+              {              }
 
-              {/* Product Details */}
+              {                     }
               <LineItemsTable
                 control={control}
                 fields={fields}
@@ -342,11 +315,11 @@ const InvoiceForm = () => {
                 onAddItem={() => append({ description: '', qty: 1, rate: 0 })}
                 onOpenCatalog={() => setCatalogOpen(true)}
               />
-              {/* /Product Details */}
+              {                      }
 
               <hr className='invoice-spacing mt-0' />
 
-              {/* Invoice Note & Terms */}
+              {                          }
               <CardBody className='invoice-padding py-0'>
                 <Row>
                   <Col>
@@ -379,7 +352,7 @@ const InvoiceForm = () => {
                   </Col>
                 </Row>
               </CardBody>
-              {/* /Invoice Note & Terms */}
+              {                           }
             </Card>
           </Col>
 

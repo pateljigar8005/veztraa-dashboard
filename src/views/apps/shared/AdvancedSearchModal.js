@@ -1,27 +1,10 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
-
-// ** Third Party Components
 import Select from 'react-select'
-
-// ** Reactstrap Imports
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Row, Col, Label, Input } from 'reactstrap'
-
-// ** Utils
 import { selectThemeColors } from '@utils'
-
-// ** Shared Components
 import DateField from './DateField'
 import AmountField from './AmountField'
 
-// ** Generic "advanced search" popup, driven entirely by a `fields` config so
-// every list page can reuse the same component instead of hand-rolling its
-// own filter form. Supported field types:
-//   - text            -> a single Input, sent as {[name]: value}
-//   - select          -> a react-select, options given directly or fetched
-//                        once via `fetchOptions()`, sent as {[name]: value}
-//   - date-range       -> two date Inputs, sent as {[name]_from, [name]_to}
-//   - number-range     -> two number Inputs, sent as {[name]_from, [name]_to}
 const AdvancedSearchModal = ({ isOpen, toggle, title = 'Advanced Search', fields, values, onApply, onClear }) => {
   const [formValues, setFormValues] = useState({})
   const [optionsByField, setOptionsByField] = useState({})
@@ -37,13 +20,11 @@ const AdvancedSearchModal = ({ isOpen, toggle, title = 'Advanced Search', fields
         })
       }
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen])
 
   const setValue = (key, val) => setFormValues(prev => ({ ...prev, [key]: val }))
 
   const handleApply = () => {
-    // Drop empty values so the request only carries filters actually set
     const cleaned = Object.fromEntries(Object.entries(formValues).filter(([, v]) => v !== '' && v !== null && v !== undefined))
     onApply(cleaned)
     toggle()

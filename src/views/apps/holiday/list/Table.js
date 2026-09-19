@@ -1,29 +1,15 @@
-// ** React Imports
 import { Fragment, useState, useEffect } from 'react'
-
-// ** Hooks
 import useDebounce from '@hooks/useDebounce'
-
-// ** Table Columns
 import { columns } from './columns'
-
-// ** Store & Actions
 import { getAllData, getData } from '../store'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Third Party Components
 import ReactPaginate from 'react-paginate'
 import DataTable from 'react-data-table-component'
 import { ChevronDown } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Row, Col, Card, Input } from 'reactstrap'
-
-// ** Styles
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 
-// ** Table Header
 const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) => {
   return (
     <div className='invoice-list-table-header w-100 me-1 ms-50 mt-1 mb-75'>
@@ -67,21 +53,17 @@ const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) 
 }
 
 const HolidaysList = () => {
-  // ** Store Vars
   const dispatch = useDispatch()
   const store = useSelector(state => state.holidays)
 
-  // ** States
   const [sort, setSort] = useState('asc')
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [sortColumn, setSortColumn] = useState('date')
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
-  // ** Debounce the search term so typing doesn't fire a request per keystroke
   const debouncedSearchTerm = useDebounce(searchTerm, 400)
 
-  // ** Get data on mount
   useEffect(() => {
     dispatch(getAllData())
     dispatch(
@@ -95,7 +77,6 @@ const HolidaysList = () => {
     )
   }, [dispatch, sort, sortColumn, currentPage, debouncedSearchTerm])
 
-  // ** Function in get data on page change
   const handlePagination = page => {
     dispatch(
       getData({
@@ -109,7 +90,6 @@ const HolidaysList = () => {
     setCurrentPage(page.selected + 1)
   }
 
-  // ** Function in get data on rows per page
   const handlePerPage = e => {
     const value = parseInt(e.currentTarget.value)
     dispatch(
@@ -124,13 +104,11 @@ const HolidaysList = () => {
     setRowsPerPage(value)
   }
 
-  // ** Function in get data on search query change
   const handleFilter = val => {
     setSearchTerm(val)
     setCurrentPage(1)
   }
 
-  // ** Custom Pagination
   const CustomPagination = () => {
     const count = Number(Math.ceil(store.total / rowsPerPage))
 
@@ -153,7 +131,6 @@ const HolidaysList = () => {
     )
   }
 
-  // ** Table data to render
   const dataToRender = () => {
     const isFiltered = searchTerm.length > 0
 

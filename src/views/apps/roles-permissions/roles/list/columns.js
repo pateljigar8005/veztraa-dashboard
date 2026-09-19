@@ -1,21 +1,10 @@
-// ** React Imports
 import { Fragment } from 'react'
 import { Link } from 'react-router-dom'
-
-// ** Store & Actions
 import { store } from '@store/store'
 import { deleteRole } from '../store'
-
-// ** Icons Imports
 import { Edit2, Trash2 } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
-
-// ** Third Party Components
 import toast from 'react-hot-toast'
-
-// ** Utils
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
 

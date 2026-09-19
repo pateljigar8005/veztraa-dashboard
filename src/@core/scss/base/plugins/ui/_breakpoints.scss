@@ -1,19 +1,13 @@
-// config
 $debug: false;
 
-// declare breakpoints
 $usn-x-small: 0px;
 $usn-small: 544px;
 $usn-medium: 768px;
 $usn-large: 992px;
 $usn-x-large: 1200px;
 
-// create sass list to pass media query data
-// if a breakpoint name changes, remember to
-// update it in the list below as well
 $mq-sync: xs $usn-x-small, sm $usn-small, md $usn-medium, lg $usn-large, xl $usn-x-large;
 
-// build each media query for js ingestion
 @each $mq in $mq-sync {
   @media screen and (min-width: nth($mq, 2)) {
     head {
@@ -26,15 +20,12 @@ $mq-sync: xs $usn-x-small, sm $usn-small, md $usn-medium, lg $usn-large, xl $usn
 }
 
 head {
-  // set clear on head to show Unison is set up correctly
   clear: both;
-  // store hash of all breakpoints
   title {
     font-family: '#{$mq-sync}';
   }
 }
 
-// debug styles to see breakpoint info
 body:after {
   display: none;
 }
@@ -57,8 +48,6 @@ body:after {
   }
 }
 
-// hide elements for conditional loading
-// only used for responsive comments plugin
 *[data-usn-if] {
   display: none;
 }

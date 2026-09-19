@@ -1,13 +1,4 @@
-/*=========================================================================================
-    File Name: demo.scss
-    Description: CSS used for demo purpose only. Remove this css from your project.
-    ----------------------------------------------------------------------------------------
-    Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-    Author: PIXINVENT
-    Author URL: http://www.themeforest.net/user/pixinvent
-==========================================================================================*/
 
-// Demo content spacing
 .demo-inline-spacing {
   display: flex;
   flex-wrap: wrap;
@@ -19,7 +10,6 @@
   }
 }
 
-// Demo content spacing
 .demo-vertical-spacing > * {
   margin: 0;
   margin-bottom: 1.5rem;
@@ -32,7 +22,6 @@
   margin: 0;
 }
 
-// using in icon pages
 .icon-wrapper {
   .feather {
     height: 24px;
@@ -83,7 +72,6 @@
   bottom: 10px;
 }
 
-// Breadcrumb page alignment demo
 #component-breadcrumbs .breadcrumb:not(last-child){
   margin-bottom: .5rem;
 }
@@ -106,7 +94,6 @@
   }
 }
 
-// Buy now
 .buy-now {
   position: fixed;
   bottom: 5%;

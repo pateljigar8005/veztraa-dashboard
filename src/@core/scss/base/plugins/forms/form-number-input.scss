@@ -1,7 +1,6 @@
-@import '../../bootstrap-extended/include'; // Bootstrap includes
-@import '../../components/include'; // Components includes
+@import '../../bootstrap-extended/include';
+@import '../../components/include';
 
-// Number Inputs (Touch spin)
 $bootstrap-touchspin-width: 8.4rem;
 $bootstrap-touchspin-width-lg: 9.375rem;
 $bootstrap-touchspin-width-sm: 6.25rem;
@@ -13,7 +12,6 @@ $bootstrap-touchspin-btn-height-lg: 24px;
 $bootstrap-touchspin-btn-width-sm: 16px;
 $bootstrap-touchspin-btn-height-sm: 16px;
 
-/* Bootstrap Touchspin */
 
 .bootstrap-touchspin {
   &.input-group {
@@ -61,7 +59,6 @@ $bootstrap-touchspin-btn-height-sm: 16px;
     }
   }
 
-  // Disabled Touchspin
   &.disabled-touchspin {
     .bootstrap-touchspin-down,
     .bootstrap-touchspin-up {
@@ -71,7 +68,6 @@ $bootstrap-touchspin-btn-height-sm: 16px;
     }
   }
 
-  // Touchspin Large
   &.input-group-lg {
     width: $bootstrap-touchspin-width-lg;
     .touchspin {
@@ -93,7 +89,6 @@ $bootstrap-touchspin-btn-height-sm: 16px;
     }
   }
 
-  // Touchspin Small
   &.input-group-sm {
     width: $bootstrap-touchspin-width-sm;
     .touchspin {
@@ -118,7 +113,6 @@ $bootstrap-touchspin-btn-height-sm: 16px;
   }
 }
 
-/* Number Type Input Box Scss for Touchspin - Remove arrow for firefox */
 .bootstrap-touchspin {
   &.input-group {
     input[type='number'] {
@@ -127,9 +121,7 @@ $bootstrap-touchspin-btn-height-sm: 16px;
   }
 }
 
-// Dark layout style
 .dark-layout {
-  // number inputs[touchspin]
   .bootstrap-touchspin {
     &.input-group {
       .form-control {

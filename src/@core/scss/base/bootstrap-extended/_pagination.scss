@@ -1,6 +1,4 @@
-// Pagination
 
-// default look for page item, first and last item
 
 .page-item {
   border-radius: 5rem;
@@ -37,7 +35,6 @@
     }
   }
 
-  // prev and next item separated styles
   &.prev-item {
     margin-right: 0.3571rem;
 
@@ -143,7 +140,6 @@
     }
   }
 
-  // prev and next style
   &.prev,
   &.previous {
     .page-link {
@@ -157,7 +153,6 @@
         height: 18px;
         content: '';
       }
-      // &:active,
       &:hover {
         &:before {
           background-image: url(str-replace(
@@ -192,7 +187,6 @@
         height: 18px;
         content: '';
       }
-      // &:active,
       &:hover {
         &:after {
           background-image: url(str-replace(
@@ -222,7 +216,6 @@
     }
   }
 
-  // page link customization
 
   .page-link {
     margin: 0;
@@ -238,7 +231,6 @@
     }
   }
 
-  // for active page item
   &.active {
     background-color: $pagination-bg;
     border-radius: 0;
@@ -252,7 +244,6 @@
     }
   }
 
-  // if you don't want separated look
 
   &:first-child:not(.prev-item) {
     &.active {
@@ -283,9 +274,7 @@
   }
 }
 
-// For Pagination Font sizes
 .pagination {
-  // For Pagination lg
   &.pagination-lg {
     .page-item {
       .page-link {
@@ -294,7 +283,6 @@
       }
     }
   }
-  // For Pagination sm
   &.pagination-sm {
     .page-item {
       .page-link {

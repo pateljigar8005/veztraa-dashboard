@@ -1,14 +1,4 @@
-// ================================================================================================
-//     File Name: content.scss
-//     Description: Page content level SCSS for different screen size, layout and device.
-//     ----------------------------------------------------------------------------------------------
-//     Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-//     Author: PIXINVENT
-//     Authuseror URL: http://www.themeforest.net//pixinvent
-// ================================================================================================
 
-// Contest margin left for expanded & collapsed stats width & margin left
-// ================================================================================================
 
 @import '../mixins/main-menu-mixin';
 
@@ -20,7 +10,6 @@ html {
     height: 100%;
     background-color: $body-bg;
     direction: $body-direction;
-    // paragraph line-height
     p {
       line-height: 1.5rem;
     }
@@ -60,7 +49,7 @@ html {
       .content-area-wrapper {
         display: flex;
         position: relative;
-        overflow: hidden; // Required in apps
+        overflow: hidden;
         .content-wrapper,
         .content-body {
           height: 100%;
@@ -115,8 +104,6 @@ html {
     }
   }
 
-  // kanban app uses kanban-wrapper class as not having content-layout so added this class with all the options
-  // For floating navbar
   .navbar-floating {
     &.footer-static {
       .app-content {
@@ -163,7 +150,6 @@ html {
     }
   }
 
-  //for navbar hidden
   .navbar-hidden {
     .app-content {
       padding: #{$content-padding} #{$content-padding} 0 #{$content-padding} !important;
@@ -194,7 +180,6 @@ html {
     }
   }
 
-  // for static navbar
   .navbar-static {
     .main-menu {
       top: 0;
@@ -238,7 +223,6 @@ html {
     }
   }
 
-  // for sticky navbar
   .navbar-sticky {
     .app-content {
       padding: calc(#{$content-padding} + #{$navbar-height}) #{$content-padding} 0 #{$content-padding};
@@ -276,7 +260,6 @@ html {
     }
   }
 
-  // navbar search width for sticky and static navbar
   .navbar-static,
   .navbar-sticky {
     .nav.header-navbar {
@@ -295,72 +278,71 @@ html {
     }
   }
 
-  // Fixed layout
   .footer-fixed {
     .content {
       &.app-content {
-        padding-bottom: $footer-height !important; // ? Added extra padding bottom due to fixed footer height
+        padding-bottom: $footer-height !important;
       }
     }
   }
 
-  //Remove left margin for 1 column layout
   [data-col='1-column'] {
     .header-navbar {
-      // Custom width for floating nav
       &.floating-nav {
         width: calc(
           100vw - (100vw - 100%) - calc(#{$content-padding} * 2)
-        ) !important; // ? override all navbar type width
+        ) !important;
       }
-      width: 100%; // Full width for other nav options
+
+
+
+
+
+
+
+      width: 100%;
       left: 0 !important;
     }
     .content,
     .footer {
       margin-left: 0px !important;
-    }
 
-    // horizontal layout
+
+
+
+
+    }
     &.horizontal-layout {
       .header-navbar {
         width: 100% !important;
       }
       .app-content {
-        padding: calc(#{$content-padding} + #{$navbar-height} + #{$floating-nav-margin}) #{$content-padding} 0 #{$content-padding} !important; // ? need to check all navbar types case
+        padding: calc(#{$content-padding} + #{$navbar-height} + #{$floating-nav-margin}) #{$content-padding} 0 #{$content-padding} !important;
       }
       &.footer-fixed {
         .app-content {
           padding: calc(#{$content-padding} + #{$navbar-height} + #{$floating-nav-margin}) #{$content-padding} #{$footer-height}
-            #{$content-padding} !important; // ? need to check all navbar types case
+            #{$content-padding} !important;
         }
       }
+
     }
   }
-
-  /*
-    * Blank page
-    */
-
   .blank-page {
     .content {
-      margin-left: 0; // not using in both cases
-      // overflow-x hidden, overflow for y in sm screen issue resolved default
+      margin-left: 0;
       &.app-content {
         overflow: overlay;
         overflow-x: hidden;
         padding: 0 !important;
         transition: none;
-        // remove white space on top by header-navbar-shadow class
         .header-navbar-shadow {
           display: none;
         }
       }
     }
-    // blank page content-wrapper
     .content-wrapper {
       padding: 0 !important;
-      // content to be in center horizontally and vertically
       .flexbox-container {
         display: flex;
         align-items: center;
@@ -370,25 +352,17 @@ html {
       }
     }
   }
-
   .pace {
     .pace-progress {
       background: $primary;
     }
   }
 }
-
 .app-content.center-layout {
   overflow: hidden;
 }
-
-/*
-* Col 3 layout for detached and general type
-*/
-
 @include media-breakpoint-up(lg) {
   body {
-    // Normal sidebar
     .content-right {
       width: calc(100vw - (100vw - 100%) - #{$sidebar-width});
       float: right;
@@ -397,7 +371,6 @@ html {
       width: calc(100vw - (100vw - 100%) - #{$sidebar-width});
       float: left;
     }
-    // Detached sidebar
     .content-detached {
       width: 100%;
       &.content-right {
@@ -423,30 +396,22 @@ html {
     margin-top: $navbar-height + 1.25;
   }
 }
-
 @include media-breakpoint-down(md) {
   html body .app-content {
     padding: calc(#{$content-padding} - 0.8rem + #{$navbar-height} + #{$floating-nav-margin})
-      calc(#{$content-padding} - 0.8rem) 0 calc(#{$content-padding} - 0.8rem) !important; // - 0.8rem to reduce padding in small screen
+      calc(#{$content-padding} - 0.8rem) 0 calc(#{$content-padding} - 0.8rem) !important;
   }
-
-  // For static navbar
   html body.navbar-static .app-content {
-    padding: calc(#{$content-padding} - 0.8rem) calc(#{$content-padding} - 0.8rem) 0 calc(#{$content-padding} - 0.8rem) !important; // - 0.8rem to reduce padding in small screen
+    padding: calc(#{$content-padding} - 0.8rem) calc(#{$content-padding} - 0.8rem) 0 calc(#{$content-padding} - 0.8rem) !important;
   }
-
-  // For sticky navbar
   html body.navbar-sticky .app-content {
     padding: calc(#{$content-padding} - 0.8rem + #{$navbar-height}) calc(#{$content-padding} - 0.8rem) 0
-      calc(#{$content-padding} - 0.8rem) !important; // - 0.8rem to reduce padding in small screen
+      calc(#{$content-padding} - 0.8rem) !important;
   }
-
-  // For Hidden navbar
   html body.navbar-hidden .app-content {
-    padding: calc(#{$content-padding} - 0.8rem) calc(#{$content-padding} - 0.8rem) 0 calc(#{$content-padding} - 0.8rem) !important; // - 0.8rem to reduce padding in small screen
+    padding: calc(#{$content-padding} - 0.8rem) calc(#{$content-padding} - 0.8rem) 0 calc(#{$content-padding} - 0.8rem) !important;
   }
 }
-
 @include media-breakpoint-down(md) {
   .navbar-static,
   .navbar-sticky {
@@ -460,8 +425,6 @@ html {
     }
   }
 }
-
-// For Fullscreen IE
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
   html.full-screen {
     width: 100%;

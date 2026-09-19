@@ -1,14 +1,6 @@
-// ================================================================================================
-// 	File Name: app-email.scss
-// 	Description: SCC file for email application page.
-// 	----------------------------------------------------------------------------------------------
-// 	Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-// 	Author: PIXINVENT
-// 	Author URL: http://www.themeforest.net/user/pixinvent
-// ================================================================================================
+@import "../bootstrap-extended/include";
+@import "../components/include";
 
-@import "../bootstrap-extended/include"; // Bootstrap includes
-@import "../components/include"; // Components includes
 
 $email_read: $body-bg;
 $email_selected_border: #e4e1e8;
@@ -18,7 +10,6 @@ $email_details_header_height: 5rem;
   .content-area-wrapper {
     border: 1px solid $border-color;
     border-radius: $card-border-radius;
-    // Sidebar area starts
     .sidebar {
       .email-app-sidebar {
         width: $menu-expanded-width;
@@ -37,7 +28,7 @@ $email_details_header_height: 5rem;
           }
           .sidebar-menu-list {
             position: relative;
-            height: calc(100% - 80px); // search section height 80px
+            height: calc(100% - 80px);
           }
         }
       }
@@ -62,9 +53,7 @@ $email_details_header_height: 5rem;
         }
       }
     }
-    // Sidebar area ends
 
-    // Right content area common css starts
     .content-right {
       width: calc(100% - #{$menu-expanded-width});
       border-left: 1px solid $border-color;
@@ -90,8 +79,6 @@ $email_details_header_height: 5rem;
         cursor: pointer;
       }
     }
-    // Right content area common css End
-    // Sidebar toggle icon
     .sidebar-toggle {
       cursor: pointer;
       float: left;
@@ -100,16 +87,14 @@ $email_details_header_height: 5rem;
       cursor: pointer;
     }
 
-    // Email user list area
     .email-user-list {
       position: relative;
       height: calc(
         100% - calc(3.49rem + 3.32rem)
-      ); // ? search box height (3.49rem) + select all section height (3.32rem)
+      );
       .email-media-list {
         padding: 0;
         margin: 0;
-        // Set delay per List Item
         @for $i from 1 through 5000 {
           li:nth-child(#{$i}) {
             animation-delay: 0.1s * $i;
@@ -139,14 +124,8 @@ $email_details_header_height: 5rem;
               width: 100%;
             }
           }
-          // Email avatar style
           .avatar {
             margin-bottom: 0rem;
-            // .avatar-content has its own fixed $avatar-size box - since this
-            // rule makes the outer circle 8px bigger than that, it has to
-            // explicitly center that smaller content itself, or flexbox's
-            // default start-alignment leaves the initials sitting in the
-            // top-left of the circle instead of centered.
             display: flex;
             align-items: center;
             justify-content: center;
@@ -157,13 +136,6 @@ $email_details_header_height: 5rem;
             width: $avatar-size + 8;
           }
 
-          // Bulk-select checkbox swaps in over the avatar on hover (or stays
-          // shown once a row is actually selected) instead of taking up its
-          // own permanent column - matches Gmail's own list behavior. Sized
-          // and shaped to match the avatar circle exactly (same
-          // width/height/border-radius) so the circle itself stays put and
-          // only its content (initials vs. checkbox) changes, rather than
-          // the whole circle disappearing and leaving a bare checkbox.
           .mail-select-toggle {
             position: relative;
             .mail-select-checkbox {
@@ -171,12 +143,6 @@ $email_details_header_height: 5rem;
               align-items: center;
               justify-content: center;
               position: absolute;
-              // The avatar is a plain flow element sitting flush at the
-              // container's top-left (the trailing pe-50 padding is just
-              // whitespace after it, not centering space) - since this is
-              // sized identically to the avatar, flush top-left makes it
-              // land in exactly the same spot rather than centering within
-              // the padded box, which would drift a few px right of it.
               top: 0;
               left: 0;
               width: $avatar-size + 8;
@@ -200,11 +166,9 @@ $email_details_header_height: 5rem;
             }
           }
 
-          // read email
           &.mail-read {
             background-color: $email_read;
           }
-          // selected email
           &.selected-row-bg {
             background-color: rgba($primary, 0.06);
             &:not(:first-child) {
@@ -260,7 +224,6 @@ $email_details_header_height: 5rem;
       }
     }
   }
-  // Action area of email list section
   .app-action {
     padding: 0.3rem 14px;
     display: flex;
@@ -282,8 +245,6 @@ $email_details_header_height: 5rem;
       }
     }
   }
-  // On click of mail Details section slide in from right
-  // Email details section starts
   .email-app-details {
     position: absolute;
     display: block;
@@ -326,7 +287,6 @@ $email_details_header_height: 5rem;
         color: $body-color;
       }
     }
-    // Email detail scroll area
     .email-scroll-area {
       padding: 0 2rem;
       position: relative;
@@ -393,7 +353,6 @@ $email_details_header_height: 5rem;
         font-size: $font-size-base;
       }
     }
-    // On compose form full screen
     .modal-fullscreen {
       .compose-form {
         height: 100%;
@@ -467,13 +426,12 @@ $email_details_header_height: 5rem;
   }
 }
 
-// Extra small devices (portrait phones, less than 576px)
 @include media-breakpoint-down(sm) {
   .email-application {
     .email-detail-head .mail-meta-item {
       display: flex;
       justify-content: space-between;
-      margin-left: 4rem; // Spacing from left according to avatar image
+      margin-left: 4rem;
       .mail-date,
       .mail-time {
         margin: 1rem 0.75rem 0 0;
@@ -522,7 +480,6 @@ $email_details_header_height: 5rem;
   }
 }
 
-// Keyframe animation
 @-webkit-keyframes fadeIn {
   0% {
     opacity: 0;
@@ -537,7 +494,6 @@ $email_details_header_height: 5rem;
   }
 }
 
-// RTL Style
 html[data-textdirection="rtl"] {
   .email-application {
     .email-app-details {

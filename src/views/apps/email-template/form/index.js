@@ -1,31 +1,19 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
-// ** Hooks
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
-
-// ** Third Party Components
 import axios from 'axios'
 import Select from 'react-select'
 import toast from 'react-hot-toast'
 import { Editor } from '@veztraa/editor'
-
-// ** Utils
 import { uploadEditorImage, selectThemeColors } from '@utils'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormText } from 'reactstrap'
-
-// ** Store & Actions
 import { addEmailTemplate, updateEmailTemplate, getEmailTemplate } from '../store'
 
 const defaultValues = { name: '', subject: '' }
 
 const EmailTemplateForm = () => {
-  // ** Hooks & Vars
   const { id } = useParams()
   const isEdit = Boolean(id)
   const navigate = useNavigate()
@@ -35,12 +23,7 @@ const EmailTemplateForm = () => {
   const [content, setContent] = useState('')
   const [isActive, setIsActive] = useState(true)
   const [roleOptions, setRoleOptions] = useState([])
-  // Which roles can load this template in Compose - empty means everyone,
-  // the same as it always worked before this existed (see schema.sql's own
-  // note on the visible_role_ids column).
   const [visibleRoleIds, setVisibleRoleIds] = useState([])
-  // Tracks edits to content/isActive/visibleRoleIds, none of which is
-  // registered with react-hook-form, so its own isDirty can't see them.
   const [extraDirty, setExtraDirty] = useState(false)
 
   const {

@@ -4,12 +4,10 @@ html[dir='rtl'] {
     left: 1px !important;
   }
 
-  // RTL Icons
   .rotate-rtl {
     transform: rotate(-180deg);
   }
 
-  // Scroll To Top
   .scroll-to-top {
     div:first-of-type {
       left: auto !important;
@@ -17,7 +15,6 @@ html[dir='rtl'] {
     }
   }
 
-  // Vertical Menu Item Arrows
   .vertical-layout .main-menu .navigation li.has-sub {
     > a:after {
       transform: rotate(90deg) !important;
@@ -29,12 +26,10 @@ html[dir='rtl'] {
     }
   }
 
-  // Horizontal menu
   .horizontal-menu .header-navbar.navbar-horizontal .dropdown-menu .dropdown-toggle::after {
     background-image: url(str-replace(str-replace($chevron-left, 'currentColor', $body-color), '#', '%23'));
   }
 
-  // Dropdown RTL Changes
   .dropdown,
   .dropup,
   .btn-group {
@@ -67,7 +62,6 @@ html[dir='rtl'] {
     }
   }
 
-  // Breadcrumbs
   .breadcrumb:not([class*='breadcrumb-']),
   .breadcrumb.breadcrumb-chevron {
     .breadcrumb-item + .breadcrumb-item {
@@ -77,7 +71,6 @@ html[dir='rtl'] {
     }
   }
 
-  // Pagination
   .pagination .page-item {
     &.prev-item,
     &.prev,
@@ -131,7 +124,6 @@ html[dir='rtl'] {
     }
   }
 
-  // Popover
   .popover {
     &[data-popper-placement^='left'] {
       .popover-arrow {
@@ -149,7 +141,6 @@ html[dir='rtl'] {
     }
   }
 
-  // Tooltip
   .bs-tooltip-left .arrow,
   .bs-tooltip-auto[data-popper-placement^='left'] .arrow {
     right: -1px;
@@ -163,7 +154,6 @@ html[dir='rtl'] {
     transform: translate3d(0px, 15px, 0px) !important;
   }
 
-  // App Email
   .email-application {
     .toggle-cc.mr-1 {
       margin-right: 0 !important;
@@ -171,7 +161,6 @@ html[dir='rtl'] {
     }
   }
 
-  // App Calendar
   .app-calendar {
     .fc-toolbar {
       flex-direction: row-reverse !important;
@@ -185,7 +174,6 @@ html[dir='rtl'] {
     }
   }
 
-  // App Ecommerce
   .app-ecommerce-details {
     .swiper-button-next {
       right: 0;
@@ -193,21 +181,18 @@ html[dir='rtl'] {
     }
   }
 
-  // Invoice List
   .invoice-list-table-header {
     select {
       background-position: calc(100% - (100% - 13px)) 13px, calc(100% - (100% - 20px)) 13px, 0% 0 !important;
     }
   }
 
-  // TinyMCE
   .tox-tinymce {
     .tox-editor-header {
       direction: ltr;
     }
   }
 
-  // Apex Charts
   .apexcharts-canvas {
     .apexcharts-tooltip {
       .apexcharts-tooltip-marker {
@@ -217,7 +202,6 @@ html[dir='rtl'] {
     }
   }
 
-  // Swiper
   .swiper-button-next {
     right: 10px !important;
     left: auto !important;
@@ -228,7 +212,6 @@ html[dir='rtl'] {
     right: auto !important;
   }
 
-  // Flatpickr
   .flatpickr-calendar {
     .flatpickr-months {
       svg {
@@ -237,7 +220,6 @@ html[dir='rtl'] {
     }
   }
 
-  // Wizard
   .bs-stepper {
     &:not(.vertical) {
       .bs-stepper-header .line svg {
@@ -250,7 +232,6 @@ html[dir='rtl'] {
     }
   }
 
-  // Datatables
   .rdt_Table {
     [aria-label='Expand Row'] {
       svg {

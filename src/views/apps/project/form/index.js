@@ -1,33 +1,18 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
-// ** Hooks
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
-
-// ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { Editor } from '@veztraa/editor'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
-
-// ** Utils
 import { selectThemeColors, uploadEditorImage } from '@utils'
-
-// ** Custom Components
 import ProjectDocuments from './ProjectDocuments'
 import DateField from '../../shared/DateField'
 import AmountField from '../../shared/AmountField'
-
-// ** Store & Actions
 import { addProject, updateProject, getProject } from '../store'
-
-// ** Options
 import { statusOptions } from '../statusOptions'
 import { budgetTypeOptions } from '../budgetTypeOptions'
 
@@ -39,7 +24,6 @@ const defaultValues = {
 }
 
 const ProjectForm = () => {
-  // ** Hooks & Vars
   const { id } = useParams()
   const isEdit = Boolean(id)
   const navigate = useNavigate()
@@ -49,8 +33,6 @@ const ProjectForm = () => {
   const [clientOptions, setClientOptions] = useState([])
   const [currencyOptions, setCurrencyOptions] = useState([])
   const [description, setDescription] = useState('')
-  // Tracks edits to description, which isn't registered with react-hook-form
-  // so its own isDirty can't see it.
   const [extraDirty, setExtraDirty] = useState(false)
 
   const {
@@ -70,7 +52,6 @@ const ProjectForm = () => {
   const currency = watch('currency')
   const budgetType = watch('budget_type')
 
-  // ** Fetch clients and currencies for their selects
   useEffect(() => {
     axios.get('/clients', { params: { perPage: 100 } }).then(response => {
       const clients = response.data.data.clients
@@ -85,12 +66,10 @@ const ProjectForm = () => {
     })
   }, [])
 
-  // ** Fetch the project being edited
   useEffect(() => {
     if (isEdit) dispatch(getProject(id))
   }, [id])
 
-  // ** Populate the form once the project loads
   useEffect(() => {
     if (isEdit && store.selectedProject && store.selectedProject.id === Number(id)) {
       const project = store.selectedProject

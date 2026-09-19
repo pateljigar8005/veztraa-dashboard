@@ -1,33 +1,17 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-
-// ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useDispatch, useSelector } from 'react-redux'
 import { Edit2, ChevronDown, ChevronRight } from 'react-feather'
 import { pdf, ReportDocument } from '@veztraa/report-renderer'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Table, Collapse } from 'reactstrap'
-
-// ** Store & Actions
 import { getQuotation, updateQuotation } from '../store'
-
-// ** Options
 import { quotationStatusOptions } from '../documentOptions'
-
-// ** Utils
 import { selectThemeColors, formatAmount } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 
-// ** Maps a quotation's real fields onto the field paths the selected PDF
-// template's elements bind to - same shape as the Invoice template's
-// bindings (client./document./service_items), since Quotation carries the
-// same pricing model as Invoice. document.valid_until rather than due_date -
-// a quotation is VALID until a date, not due like an invoice payment.
 const buildPdfData = quotation => ({
   client: {
     name: quotation.contact_name || '',
@@ -42,9 +26,6 @@ const buildPdfData = quotation => ({
     valid_until: quotation.valid_until
   },
   currency: quotation.currency,
-  // Raw numbers (not .toFixed(2) strings) so the template's conditional
-  // visibility - which hides these rows when the bound value is falsy -
-  // keeps working.
   tax_rate: quotation.tax_rate,
   tax_amount: quotation.tax_amount,
   discount_amount: quotation.discount_amount,

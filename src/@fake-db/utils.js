@@ -1,7 +1,5 @@
-// ** Returns paginated array
 export const paginateArray = (array, perPage, page) => array.slice((page - 1) * perPage, page * perPage)
 
-// ** Returns sorted array
 export const sortCompare = key => (a, b) => {
   const fieldA = a[key]
   const fieldB = b[key]
@@ -15,14 +13,11 @@ export const sortCompare = key => (a, b) => {
   return comparison
 }
 
-// ** Returns number range
 export const getRandomInt = (min, max) => {
   if (min > max) {
     const temp = max
-    /* eslint-disable no-param-reassign */
     max = min
     min = temp
-    /* eslint-enable */
   }
 
   if (min <= 0) {
@@ -31,7 +26,6 @@ export const getRandomInt = (min, max) => {
   return Math.floor(Math.random() * max) + min
 }
 
-// ** Returns random date
 export const randomDate = (start, end) => {
   const diff = end.getTime() - start.getTime()
   const newDiff = diff * Math.random()

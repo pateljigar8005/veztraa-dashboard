@@ -1,12 +1,3 @@
-// ** Maps a route to how to refetch that page's data. Every standard list
-// module already re-dispatches its own getData(currentParams) after add/
-// update/delete (see e.g. client/store's addClient) - this reuses that exact
-// same idiom so the navbar refresh icon can re-run "this page's own fetch,
-// with its own current filters/pagination" for every module, instead of a
-// full window.location.reload() (see NavbarBookmarks.js's handleRefresh).
-// Email has its own dedicated hidden-trigger mechanism (its data comes from
-// a local cache, not a plain Redux list fetch - see isEmailRoute) and isn't
-// registered here.
 
 import { getData as getClientData } from '@src/views/apps/client/store'
 import { getData as getInvoiceData } from '@src/views/apps/invoice/store'
@@ -37,8 +28,6 @@ import {
   fetchTodoTaskEvents as fetchCalendarTodoEvents
 } from '@src/views/apps/calendar/store'
 
-// Each entry's refetch(dispatch, getState) mirrors exactly what that
-// module's own mount effect and post-mutation refetches already dispatch.
 const registry = [
   { pattern: /^\/client$/, refetch: (d, g) => d(getClientData(g().clients.params)) },
   { pattern: /^\/invoice$/, refetch: (d, g) => d(getInvoiceData(g().invoice.params)) },
@@ -60,7 +49,6 @@ const registry = [
   { pattern: /^\/job-listing$/, refetch: (d, g) => d(getJobListingData(g().jobListings.params)) },
   { pattern: /^\/user$/, refetch: (d, g) => d(getUserData(g().users.params)) },
   { pattern: /^\/pdf-designer$/, refetch: (d, g) => d(getPdfDesignerTemplateData(g().pdfDesignerTemplates.params)) },
-  // Roles has no pagination/filters - it's a small fixed list, fetched whole.
   { pattern: /^\/roles$/, refetch: d => d(getRolesAllData()) },
   { pattern: /^\/kanban$/, refetch: d => { d(fetchKanbanBoards()); d(fetchKanbanTasks()) } },
   { pattern: /^\/todo(\/.*)?$/, refetch: (d, g) => d(getTodoTasks(g().todo.params)) },
@@ -74,8 +62,6 @@ const registry = [
   }
 ]
 
-// Returns true if a matching module's refetch actually ran (so the caller
-// knows it doesn't need to fall back to a full reload), false otherwise.
 export const refetchForRoute = (pathname, dispatch, getState) => {
   const entry = registry.find(e => e.pattern.test(pathname))
   if (!entry) return false

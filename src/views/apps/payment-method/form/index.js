@@ -1,24 +1,13 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
-// ** Hooks
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
-
-// ** Third Party Components
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { Editor } from '@veztraa/editor'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
-
-// ** Utils
 import { selectThemeColors, uploadEditorImage } from '@utils'
-
-// ** Store & Actions
 import { addPaymentMethod, updatePaymentMethod, getPaymentMethod } from '../store'
 
 const statusOptions = [
@@ -29,7 +18,6 @@ const statusOptions = [
 const defaultValues = { name: '' }
 
 const PaymentMethodForm = () => {
-  // ** Hooks & Vars
   const { id } = useParams()
   const isEdit = Boolean(id)
   const navigate = useNavigate()
@@ -37,8 +25,6 @@ const PaymentMethodForm = () => {
   const store = useSelector(state => state.paymentMethods)
 
   const [description, setDescription] = useState('')
-  // Tracks edits to description, which isn't registered with react-hook-form
-  // so its own isDirty can't see it.
   const [extraDirty, setExtraDirty] = useState(false)
 
   const {
@@ -55,12 +41,10 @@ const PaymentMethodForm = () => {
 
   const isActive = watch('is_active')
 
-  // ** Fetch the payment method being edited
   useEffect(() => {
     if (isEdit) dispatch(getPaymentMethod(id))
   }, [id])
 
-  // ** Populate the form once the payment method loads
   useEffect(() => {
     if (isEdit && store.selectedPaymentMethod && store.selectedPaymentMethod.id === Number(id)) {
       const method = store.selectedPaymentMethod

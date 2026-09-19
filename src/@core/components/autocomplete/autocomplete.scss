@@ -1,7 +1,4 @@
-// Component: Autocomplete
-// ========================================================================
 
-// ** Base Styles Imports
 @import '../../scss/base/bootstrap-extended/include';
 @import '../../scss/base/components/include';
 
@@ -64,7 +61,6 @@ $autocomplete-active-color: #f1f1f1;
   }
 }
 
-// Dark
 .dark-layout {
   .autocomplete-container {
     .suggestions-list {

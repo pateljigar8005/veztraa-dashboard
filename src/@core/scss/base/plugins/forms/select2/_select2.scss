@@ -1,4 +1,3 @@
-// select-2 Theme
 $font-size-xs: 0.75rem;
 .select2-container {
   width: 100% !important;
@@ -18,19 +17,16 @@ $font-size-xs: 0.75rem;
     font-size: 0.9rem;
     margin-top: 6px !important;
   }
-  // single select
   .select2-selection--single {
     min-height: 2.714rem;
     padding: 5px;
     border: 1px solid $input-border-color;
-    // Border color on focus
     &:focus {
       outline: 0;
       border-color: $primary !important;
       box-shadow: $input-focus-box-shadow !important;
     }
 
-    // Select with icons scss
     .select2-selection__rendered {
       i,
       svg {
@@ -40,7 +36,6 @@ $font-size-xs: 0.75rem;
         margin-right: 0.5rem;
       }
     }
-    // dropdown arrow height
     .select2-selection__arrow {
       b {
         background-image: url(str-replace(str-replace($chevron-down, 'currentColor', $input-border-color), '#', '%23'));
@@ -55,7 +50,6 @@ $font-size-xs: 0.75rem;
       }
     }
   }
-  // when select container open - scss
   &.select2-container--open {
     box-shadow: $dropdown-box-shadow;
     .select2-selection--single {
@@ -64,7 +58,6 @@ $font-size-xs: 0.75rem;
     }
   }
 
-  // select container - focus
   &.select2-container--focus {
     outline: 0;
     .select2-selection--multiple {
@@ -73,7 +66,6 @@ $font-size-xs: 0.75rem;
     }
   }
 
-  // Select2 Search Dropdown
   .select2-dropdown {
     border-color: $input-border-color;
     z-index: 1060;
@@ -88,7 +80,6 @@ $font-size-xs: 0.75rem;
     }
   }
 
-  // multiple select scss
   .select2-selection--multiple {
     min-height: 38px !important;
     border: 1px solid $input-border-color;
@@ -97,25 +88,21 @@ $font-size-xs: 0.75rem;
       border-color: $primary !important;
       box-shadow: $input-focus-box-shadow !important;
     }
-    // selected items bg color for multiple selection
     .select2-selection__choice {
       background-color: $primary !important;
       border-color: $primary !important;
       color: $white;
       padding: 2px 5px;
     }
-    // font -size for selected options
     .select2-selection__rendered {
       padding: 0 6px;
       li {
-        // font-size: 0.9rem;
         .select2-search__field {
           margin-top: 7px;
         }
       }
     }
     .select2-selection__choice__remove {
-      // color: $white !important;
       float: right;
       margin-left: 0.7rem;
       margin-right: 0.5rem;
@@ -134,7 +121,6 @@ $font-size-xs: 0.75rem;
         left: -4px;
       }
     }
-    // select dropdown menu with icons
     i,
     svg {
       position: relative;
@@ -147,7 +133,6 @@ $font-size-xs: 0.75rem;
     }
   }
 
-  // Select2 group alignment
   .select2-results__group {
     padding: 6px 9px;
     font-weight: 600;
@@ -176,17 +161,13 @@ $font-size-xs: 0.75rem;
     color: $primary !important;
   }
 
-  //Loading Remote Data Image Size
   .select2-result-repository__avatar {
     img {
       width: 50px;
     }
   }
 
-  // Optional sizing
-  // ------------------------------
 
-  // Large Single select
   .select-lg {
     min-height: $input-height !important;
     font-size: ($font-size-lg - 0.8);
@@ -195,7 +176,6 @@ $font-size-xs: 0.75rem;
     &.select2-selection--single {
       .select2-selection__rendered {
         padding-top: $input-btn-padding-y-lg - 0.9;
-        // padding-left: 0;
       }
 
       .select2-selection__arrow {
@@ -203,7 +183,6 @@ $font-size-xs: 0.75rem;
       }
     }
 
-    // large Multiple select
     &.select2-selection--multiple {
       padding: 0 0.2rem;
       .select2-selection__rendered {
@@ -224,21 +203,18 @@ $font-size-xs: 0.75rem;
       }
     }
   }
-  // Small Single select
   .select-sm {
     min-height: $input-height-sm !important;
     padding: 0 0.2rem;
     font-size: $font-size-xs;
     margin-bottom: 0 !important;
     line-height: $line-height-base;
-    // Single
     &.select2-selection--single {
       .select2-selection__arrow {
         top: -0.3rem !important;
       }
     }
 
-    // Small Multiple select
     &.select2-selection--multiple {
       line-height: $line-height-base - 0.2;
       .select2-selection__rendered {
@@ -266,7 +242,6 @@ $font-size-xs: 0.75rem;
   }
 }
 
-//  Dark Layout
 .dark-layout {
   .select2-container {
     .select2-selection,

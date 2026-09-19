@@ -1,24 +1,11 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
-
-// ** Third Party Imports
 import { Plus } from 'react-feather'
 import { useForm, Controller } from 'react-hook-form'
-
-// ** Reactstrap Imports
 import { Button, Input, FormText } from 'reactstrap'
-
-// ** Redux Imports
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Actions
 import { fetchBoards, fetchTasks, addBoard } from './store'
-
-// ** Kanban Component
 import TaskSidebar from './TaskSidebar'
 import KanbanBoards from './KanbanBoards'
-
-// ** Styles
 import '@styles/react/apps/app-kanban.scss'
 
 const defaultValues = {
@@ -26,11 +13,9 @@ const defaultValues = {
 }
 
 const KanbanBoard = () => {
-  // ** States
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showAddBoard, setShowAddBoard] = useState(false)
 
-  // ** Hooks
   const dispatch = useDispatch()
   const store = useSelector(state => state.kanban)
   const {

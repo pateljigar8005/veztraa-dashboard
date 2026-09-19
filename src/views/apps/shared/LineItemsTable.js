@@ -1,22 +1,10 @@
-// ** React Imports
 import { useRef, useState } from 'react'
-
-// ** Third Party Components
 import { Controller } from 'react-hook-form'
-
-// ** Icons Imports
 import { X } from 'react-feather'
-
-// ** Reactstrap Imports
 import { CardBody, Table, Input, Button } from 'reactstrap'
-
-// ** Shared Components
 import AmountField from './AmountField'
-
-// ** Utils
 import { formatAmount } from '@utils'
 
-// ** Drag Handle Icon (two columns of dots — a real grip handle, not a "more options" glyph)
 const GripIcon = ({ size = 14, className }) => (
   <svg width={size} height={size} viewBox='0 0 10 16' fill='currentColor' className={className}>
     <circle cx='2' cy='2' r='1.5' />

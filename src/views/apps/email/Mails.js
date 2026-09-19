@@ -1,25 +1,14 @@
-// ** React Imports
 import { Fragment, useEffect, useState } from 'react'
-
-// ** Mail Components Imports
 import MailCard from './MailCard'
 import MailDetails from './MailDetails'
 import ComposePopUp from './ComposePopup'
 import MailCardContextMenu from './MailCardContextMenu'
-
-// ** Third Party Components
 import toast from 'react-hot-toast'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 import { Menu, Search, Trash2, X } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Input, InputGroup, InputGroupText, Spinner, Button } from 'reactstrap'
-
-// ** Utils
 import { confirmDelete } from '@src/utility/confirmDelete'
 import { formatRelativeDate } from '@utils'
-
-// ** Store & Actions
 import {
   clearCurrentMessage,
   bulkDeleteMessages,
@@ -31,7 +20,6 @@ import {
 } from './store'
 
 const Mails = props => {
-  // ** Props
   const {
     query,
     store,
@@ -51,17 +39,11 @@ const Mails = props => {
 
   const { messages, messagesLoading } = store
 
-  // ** Selection state - cleared whenever the folder/search changes so a
-  // stale selection never survives into a different message list.
   const [selectedUids, setSelectedUids] = useState([])
   useEffect(() => {
     setSelectedUids([])
   }, [store.params.folder, store.params.q])
 
-  // ** Right-click context menu (Reply/Forward/Archive/Delete) - null when
-  // closed, otherwise the cursor position plus which mail it's for. Never
-  // opens at all while browsing an admin mailbox (see AdminMailboxController)
-  // - that whole view is read-only, nothing in this menu applies to it.
   const [contextMenu, setContextMenu] = useState(null)
   const handleContextMenu = (e, mail) => {
     if (viewingMailboxId) return
@@ -100,12 +82,6 @@ const Mails = props => {
     })
   }
 
-  // Opens Compose in the given mode (draft/reply/forward) for a message
-  // that's only ever a live IMAP fetch away (bodies are never cached, one
-  // cached-draft exception aside - see MailboxCache::getDraftContent()) -
-  // the popup opens immediately showing a loading state (see ComposePopup's
-  // replyTo.loading handling) instead of leaving the click looking
-  // unresponsive until that fetch resolves.
   const openComposeFor = (uid, mode) => {
     setReplyTo({ uid, mode, loading: true })
     toggleCompose()
@@ -118,10 +94,6 @@ const Mails = props => {
       })
   }
 
-  // A draft isn't something you read - clicking one reopens it for editing
-  // instead of the read-only detail view every other folder uses. Not while
-  // browsing an admin mailbox though (see AdminMailboxController) - that
-  // whole view is read-only, so even a draft there just opens for viewing.
   const handleMailClick = uid => {
     if (store.params.folder === 'Drafts' && !viewingMailboxId) {
       openComposeFor(uid, 'draft')
@@ -133,15 +105,6 @@ const Mails = props => {
     setOpenMail(true)
   }
 
-  // ** Context menu actions - same folder-aware "Trash = permanent delete,
-  // anywhere else = move to Trash" logic as MailDetails' own delete button.
-  // Scheduled is the third permanent case (alongside Trash) - there's no
-  // real IMAP message behind it to move anywhere, "deleting" it just
-  // cancels the pending send outright (see MailboxOutbox::cancelScheduled()).
-  // The backend now only ever updates its cache + queues the real IMAP
-  // change before responding (see MailboxActions) rather than waiting on a
-  // live connection, but removing it from the list here too, immediately,
-  // means this doesn't even wait on that (now fast) round trip.
   const handleContextDelete = mail => {
     const folder = store.params.folder
     dispatch(removeMessageFromList(mail.uid))
@@ -173,11 +136,8 @@ const Mails = props => {
           <div className='sidebar-toggle d-block d-lg-none ms-1' onClick={() => setSidebarOpen(true)}>
             <Menu size='21' />
           </div>
-          {/* Works the same in both modes now - an admin mailbox reads from
-              its own AdminMailboxCache (see that class), just like this
-              search box already reads from the current user's own
-              MailboxCache otherwise (see MailboxController::
-              buildMessagesList()). */}
+          {
+                                      }
           <div className='d-flex align-items-center justify-content-between w-100'>
             <InputGroup className='input-group-merge flex-grow-1'>
               <InputGroupText>
@@ -190,10 +150,8 @@ const Mails = props => {
                 onChange={e => setQuery(e.target.value)}
               />
             </InputGroup>
-            {/* When this folder's cache was last actually refreshed from the
-                mail server (see MailboxCache::getLastSyncedAt()) - a search
-                (see the box above) also reads from this same cache, so this
-                stays just as meaningful/relevant while one's active. */}
+            {
+                                                                        }
             {store.lastSyncedAt && (
               <span className='text-muted text-nowrap ms-1' style={{ fontSize: '0.75rem' }}>
                 Synced {formatRelativeDate(store.lastSyncedAt)}
@@ -284,10 +242,6 @@ const Mails = props => {
               ? 'Delete permanently'
               : 'Move to Trash'
           }
-          // Replying to/forwarding/archiving your own not-yet-sent draft
-          // doesn't mean anything - Scheduled only gets the delete/cancel
-          // action (see MailCardContextMenu, where a null handler hides an
-          // item entirely).
           onReply={store.params.folder !== 'Scheduled' ? () => openComposeFor(contextMenu.mail.uid, 'reply') : null}
           onForward={store.params.folder !== 'Scheduled' ? () => openComposeFor(contextMenu.mail.uid, 'forward') : null}
           onArchive={

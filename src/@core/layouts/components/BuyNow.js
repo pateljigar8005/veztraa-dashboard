@@ -1,4 +1,3 @@
-// ** Reactstrap Imports
 import { Button } from 'reactstrap'
 
 const BuyNow = () => {

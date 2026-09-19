@@ -1,12 +1,8 @@
-//** React Imports
 import { useEffect } from 'react'
-
-// ** Store Imports
 import { useDispatch, useSelector } from 'react-redux'
 import { handleLayout, handleLastLayout } from '@store/layout'
 
 export const useLayout = () => {
-  // ** Hooks
   const dispatch = useDispatch()
   const store = useSelector(state => state.layout)
 

@@ -1,7 +1,6 @@
-// Core variables and mixins
+@import '../bootstrap-extended/include';
+@import '../components/include';
 
-@import '../bootstrap-extended/include'; // Bootstrap includes
-@import '../components/include'; // Components includes
 
 $avatar-add-new-color: rgba(108, 117, 125, 0.12);
 
@@ -13,7 +12,6 @@ $avatar-add-new-color: rgba(108, 117, 125, 0.12);
       display: flex;
       width: max-content !important;
 
-      // Padding to prevent add-item btn from touching scrollbar
       padding-bottom: 1.5rem;
 
       .kanban-board {
@@ -108,7 +106,6 @@ $avatar-add-new-color: rgba(108, 117, 125, 0.12);
     }
   }
 
-  // Add new board styles
   .add-new-board {
     margin-top: 22px;
     float: left;
@@ -121,7 +118,6 @@ $avatar-add-new-color: rgba(108, 117, 125, 0.12);
     }
   }
 
-  // Update sidebar styles
   .update-item-sidebar {
     text-align: left;
 
@@ -146,7 +142,6 @@ $avatar-add-new-color: rgba(108, 117, 125, 0.12);
   }
 }
 
-// For when item is being dragged
 .kanban-item.gu-mirror {
   .item-dropdown {
     .dropdown-toggle:after {
@@ -154,7 +149,6 @@ $avatar-add-new-color: rgba(108, 117, 125, 0.12);
     }
   }
 }
-// For Light Layout
 .kanban-board.gu-mirror {
   height: fit-content !important;
   .kanban-board-header {

@@ -1,22 +1,11 @@
-// ** React Imports
 import { Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
-
-// ** Custom Components
 import Avatar from '@components/avatar'
-
-// ** Store & Actions
 import { store } from '@store/store'
 import { deleteTeamMember } from '../store'
-
-// ** Icons Imports
 import { Edit2, Trash2 } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
-
-// ** Utils
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
 import { resolveAvatarUrl } from '@utils'
@@ -28,8 +17,6 @@ const statusObj = {
   inactive: 'light-secondary'
 }
 
-// ** dragEnabled: true only while sorted by Display Order (asc) - see
-// list/Table.js's useDragReorder call for why dragging is gated on that.
 export const getColumns = dragEnabled => [
   {
     name: '',

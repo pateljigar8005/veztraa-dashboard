@@ -1,14 +1,7 @@
-// ** React Imports
 import { Fragment } from 'react'
-
-// ** Third Party Components
 import Proptypes from 'prop-types'
 import classnames from 'classnames'
-
-// ** Reactstrap Imports
 import { Spinner } from 'reactstrap'
-
-// ** Styles
 import './ui-loader.scss'
 
 const UILoader = props => {
@@ -22,9 +15,8 @@ const UILoader = props => {
       {blocking ? (
         <Fragment>
           <div
-            className='overlay' /*eslint-disable */
+            className='overlay'
             {...(blocking && overlayColor ? { style: { backgroundColor: overlayColor } } : {})}
-            /*eslint-enable */
           ></div>
           <div className='loader'>{loader}</div>
         </Fragment>

@@ -1,12 +1,9 @@
-// Modals
 
 .modal {
-  // Modal Header
 
   .modal-header {
     background-color: $body-bg;
 
-    // close button
     .btn-close {
       padding: 0.8rem;
       box-shadow: 0 5px 20px 0 rgba($black, 0.1);
@@ -17,7 +14,6 @@
       position: relative;
       transform: translate(18px, -10px);
 
-      // For hover effect of close btn
       &:hover,
       &:focus,
       &:active {
@@ -35,9 +31,7 @@
       }
     }
   }
-  // Modal Content
   .modal-content {
-    // overflow: unset; updated to "visible" as close icon is not visible in IE
     overflow: visible;
     box-shadow: 0 5px 20px 0 rgba($black, 0.1);
   }
@@ -46,7 +40,6 @@
     padding: $modal-inner-padding;
   }
 
-  // modal sticky for apps
   &.modal-sticky {
     bottom: 0;
     right: 0;
@@ -72,12 +65,10 @@
   }
 }
 
-// Modal XS
 .modal-xs {
   max-width: 300px;
 }
 
-// Modal XL
 @media (min-width: 1200px) {
   .modal-xl {
     margin-left: 3%;
@@ -85,7 +76,6 @@
   }
 }
 
-// Slide In Modal //
 .modal-slide-in,
 .modal-slide-in .modal {
   padding: 0 !important;
@@ -146,7 +136,6 @@
   }
 }
 
-// Slide from Right
 .modal-slide-in.fade .modal-dialog,
 .modal-slide-in .modal.fade .modal-dialog {
   transform: translateX(100%);
@@ -159,7 +148,6 @@
   transition: transform 0.1s ease-out;
 }
 
-// To remove Max-width of XS Modal in Small Screen
 
 @media (max-width: 576px) {
   .modal {
@@ -181,11 +169,7 @@
   }
 }
 
-// ------------------------------------------------
-// Modal Examples
-// ------------------------------------------------
 
-// --- refer and earn start ----- //
 
 .modal-refer-earn {
   .modal-refer-earn-step {
@@ -195,9 +179,7 @@
     }
   }
 }
-// --- refer and earn end ----- //
 
-// --- share project start ----- //
 
 @include media-breakpoint-down(lg) {
   #shareProject {
@@ -211,5 +193,3 @@
     }
   }
 }
-
-// --- share project end ----- //

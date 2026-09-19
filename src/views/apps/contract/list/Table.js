@@ -1,33 +1,15 @@
-// ** React Imports
 import { Fragment, useState, useEffect } from 'react'
-
-// ** Hooks
 import useDebounce from '@hooks/useDebounce'
-
-// ** Axios
 import axios from 'axios'
-
-// ** Shared Components
 import AdvancedSearchModal from '../../shared/AdvancedSearchModal'
-// ** Options
 import { frequencyOptions, contractStatusOptions } from '../contractOptions'
-
-// ** Table Columns
 import { columns } from './columns'
-
-// ** Store & Actions
 import { getAllData, getData } from '../store'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Third Party Components
 import ReactPaginate from 'react-paginate'
 import DataTable from 'react-data-table-component'
 import { ChevronDown } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Row, Col, Card, Input, Button } from 'reactstrap'
-
-// ** Styles
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 
@@ -45,7 +27,6 @@ const searchFields = [
   { name: 'start_date', label: 'Start Date', type: 'date-range' },
   { name: 'end_date', label: 'End Date', type: 'date-range' }
 ]
-// ** Table Header
 const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) => {
   return (
     <div className='invoice-list-table-header w-100 me-1 ms-50 mt-1 mb-75'>
@@ -89,25 +70,20 @@ const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) 
 }
 
 const ContractsList = () => {
-  // ** Store Vars
   const dispatch = useDispatch()
   const store = useSelector(state => state.contracts)
 
-  // ** States
   const [sort, setSort] = useState('desc')
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [sortColumn, setSortColumn] = useState('id')
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
-  // ** Advanced search (opened via the navbar search icon)
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false)
   const [filters, setFilters] = useState({})
 
-  // ** Debounce the search term so typing doesn't fire a request per keystroke
   const debouncedSearchTerm = useDebounce(searchTerm, 400)
 
-  // ** Get data on mount
   useEffect(() => {
     dispatch(getAllData())
     dispatch(
@@ -122,7 +98,6 @@ const ContractsList = () => {
     )
   }, [dispatch, sort, sortColumn, currentPage, debouncedSearchTerm, filters])
 
-  // ** Function in get data on page change
   const handlePagination = page => {
     dispatch(
       getData({
@@ -137,7 +112,6 @@ const ContractsList = () => {
     setCurrentPage(page.selected + 1)
   }
 
-  // ** Function in get data on rows per page
   const handlePerPage = e => {
     const value = parseInt(e.currentTarget.value)
     dispatch(
@@ -153,17 +127,12 @@ const ContractsList = () => {
     setRowsPerPage(value)
   }
 
-  // ** Function in get data on search query change
-  // ** Debounced via debouncedSearchTerm above - just update local state and
-  // reset to page 1 here; the mount effect refetches once typing settles.
   const handleFilter = val => {
     setSearchTerm(val)
     setCurrentPage(1)
   }
 
 
-  // ** Advanced search: apply/clear both reset to page 1 and let the mount
-  // effect (which depends on `filters`) refetch with the new criteria.
   const handleApplyFilters = newFilters => {
     setFilters(newFilters)
     setCurrentPage(1)
@@ -174,7 +143,6 @@ const ContractsList = () => {
     setCurrentPage(1)
   }
 
-  // ** Custom Pagination
   const CustomPagination = () => {
     const count = Number(Math.ceil(store.total / rowsPerPage))
 
@@ -197,7 +165,6 @@ const ContractsList = () => {
     )
   }
 
-  // ** Table data to render
   const dataToRender = () => {
     const isFiltered = searchTerm.length > 0 || Object.keys(filters).length > 0
 
@@ -210,10 +177,6 @@ const ContractsList = () => {
     }
   }
 
-  // ** Just update the sort state - the mount effect above already
-  // depends on [sort, sortColumn] and refetches with the new values.
-  // (Dispatching here too used the stale pre-update sort/sortColumn from
-  // this closure, so the table always sorted one click behind.)
   const handleSort = (column, sortDirection) => {
     setSort(sortDirection)
     setSortColumn(column.sortField)

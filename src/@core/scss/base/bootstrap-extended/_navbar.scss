@@ -1,18 +1,9 @@
-/* ===============================================================================================
-    File Name: navbar.scss
-    Description: Contain header navigation bar, vertical main navigation bar and
-    horiznotal main navigation bar related SCSS.
-    ----------------------------------------------------------------------------------------------
-    Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-    Author: PIXINVENT
-    Author URL: http://www.themeforest.net/user/pixinvent
-================================================================================================*/
 
 @function set-navbar-text-color($color) {
   @if (lightness($color) > 50) {
-    @return $white; // Lighter backgorund, return dark color
+    @return $white;
   } @else {
-    @return $black; // Darker background, return light color
+    @return $black;
   }
 }
 
@@ -28,7 +19,6 @@
     left: $menu-expanded-width;
   }
 
-  // Apply navbar color as per background
   &[class*='bg-'] {
     .navbar-nav {
       .nav-item {
@@ -59,10 +49,7 @@
     }
   }
 
-  //* Navbar modifiers
-  //*------------------------
 
-  // floating nav
   &.floating-nav {
     position: fixed;
     right: 0;
@@ -72,22 +59,19 @@
     z-index: 12;
   }
 
-  // static nav
   &.navbar-static-top {
     top: 0;
     right: 0;
     left: $menu-expanded-width;
     width: calc(100vw - (100vw - 100%) - #{$sidebar-width});
     background: transparent;
-    box-shadow: none !important; // remove this if removing "menu-shadow" class
+    box-shadow: none !important;
   }
 
-  // add border to navbar
   &.navbar-border {
     border-bottom: 1px solid $border-color;
   }
 
-  // add shadow to navbar
   &.navbar-shadow {
     box-shadow: $box-shadow;
   }
@@ -96,7 +80,6 @@
     border-bottom: 1px solid $theme-dark-border-color;
   }
 
-  // Hide navbar dropdown arrow
   &:not(.navbar-horizontal) {
     .nav-link {
       &.dropdown-toggle::after {
@@ -105,12 +88,9 @@
     }
   }
 
-  //* Navbar modifiers
-  //*------------------------
 
   .navbar-container {
     padding: 0.8rem 1rem;
-    // Added more horizontal padding above small screen
     @include media-breakpoint-up(sm) {
       padding: 0.8rem 1.4rem;
     }
@@ -118,15 +98,12 @@
     transition: 300ms ease all;
     margin-left: 0;
 
-    // Navbar bookmark primary color on hover
     .bookmark-wrapper {
-      // for bookmark z-index
       .bookmark-input {
         z-index: 1;
       }
     }
 
-    // Language dd style
     .dropdown-language {
       .selected-language {
         font-weight: 500;
@@ -149,7 +126,7 @@
         &.dropdown {
           .dropdown-menu {
             .vertical-layout & {
-              top: 41px !important; // Apply navbar dd position on vertical layouts only (Not for horizontal layout due to hover out issue)
+              top: 41px !important;
               right: 0;
             }
           }
@@ -161,7 +138,6 @@
           }
         }
 
-        // Cart & Notification badge
         &.dropdown-cart,
         &.dropdown-notification {
           .badge {
@@ -204,7 +180,6 @@
           }
         }
 
-        // Cart dropdown
         &.dropdown-cart {
           .list-item {
             position: relative;
@@ -264,7 +239,7 @@
         }
 
         &.dropdown-user {
-          line-height: 1 !important; // Set due to custom 2 line component in navbar
+          line-height: 1 !important;
           .dropdown-menu {
             margin-top: 10px;
             i,
@@ -277,7 +252,6 @@
           }
         }
 
-        // Logged in user dropdown styles
         a.dropdown-user-link {
           display: flex;
           align-items: center;
@@ -297,7 +271,6 @@
           }
         }
 
-        // navbar toggle menu size (display below lg)
         a.menu-toggle {
           i,
           svg {
@@ -345,7 +318,6 @@
       }
     }
 
-    //Navbar notification css
     .dropdown-menu-media {
       width: 30rem;
 
@@ -384,14 +356,11 @@
   }
 }
 
-// Navbar shadow on scroll
 .header-navbar-shadow {
   display: none;
 }
 
-// Floating Navbar
 .navbar-floating {
-  // Floating nav should have same padding across all screen
   .navbar-container:not(.main-menu-content) {
     padding: 0.8rem 1rem;
   }
@@ -414,7 +383,6 @@
   }
 }
 
-// Navbar colors
 .navbar-light {
   background: $white;
 
@@ -475,11 +443,8 @@
   }
 }
 
-// Media queries for device support
-// =========================================
 @include media-breakpoint-down(md) {
   .header-navbar {
-    // generic navbar dropdown specific
     .navbar-nav {
       .show {
         position: static;
@@ -524,7 +489,6 @@
     }
   }
 
-  // dark navbar
   .navbar-dark {
     .navbar-header {
       .navbar-nav {
@@ -543,7 +507,6 @@
     }
   }
 
-  // light navbar
   .navbar-light {
     .navbar-header {
       .navbar-nav {
@@ -563,12 +526,9 @@
   }
 }
 
-// For Medium and down: iPad support for navbr
 
-// navbar static top
 @include media-breakpoint-down(xl) {
   .header-navbar {
-    // floating nav width
     &.floating-nav {
       width: calc(100vw - (100vw - 100%) - calc(#{$content-padding} * 2));
     }
@@ -579,7 +539,6 @@
   }
 }
 
-//For responsive sub nav
 @mixin responsive_sub_nav {
   .header-navbar {
     .navbar-nav {
@@ -609,7 +568,7 @@
     &.floating-nav {
       width: calc(
         100vw - (100vw - 100%) - calc(#{$content-padding} + 0.4rem)
-      ) !important; // SM screen calc as per updated spacings
+      ) !important;
       margin-left: calc(#{$content-padding} - 0.8rem);
       margin-right: calc(#{$content-padding} - 0.8rem);
     }
@@ -620,9 +579,7 @@
   }
 }
 
-/* ----------- iPhone 5, 5S  iPhone 6----------- */
 
-// Set dropdown height as per the screen size
 @mixin extend_mobile_specific($menu_height) {
   .header-navbar {
     .navbar-container {
@@ -635,21 +592,17 @@
   }
 }
 
-/* Landscape */
 
 @media only screen and (min-device-width: 26.78em) and (max-device-width: 47.64em) and (-webkit-min-device-pixel-ratio: 2) and (orientation: landscape) {
   @include extend_mobile_specific(180px);
 }
 
-/* ----------- iPhone 6+ ----------- */
 
-/* Landscape */
 
 @media only screen and (min-device-width: 29.57em) and (max-device-width: 52.57em) and (-webkit-min-device-pixel-ratio: 3) and (orientation: landscape) {
   @include extend_mobile_specific(280px);
 }
 
-// for width of navbar in fixed-top
 @media (max-width: 1201px) {
   .header-navbar {
     &.fixed-top,

@@ -1,12 +1,9 @@
-// ** Third Party Components
 import Proptypes from 'prop-types'
 import classnames from 'classnames'
 
 const Timeline = props => {
-  // ** Props
   const { data, tag, className } = props
 
-  // ** Custom Tagg
   const Tag = tag ? tag : 'ul'
 
   return (
@@ -68,7 +65,6 @@ const Timeline = props => {
 
 export default Timeline
 
-// ** PropTypes
 Timeline.propTypes = {
   tag: Proptypes.string,
   className: Proptypes.string,

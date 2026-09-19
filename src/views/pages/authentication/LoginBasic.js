@@ -1,33 +1,14 @@
-// ** React Imports
 import { useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-
-// ** Custom Hooks
 import useJwt from '@src/auth/jwt/useJwt'
-
-// ** Third Party Components
 import { useDispatch } from 'react-redux'
 import { useForm, Controller } from 'react-hook-form'
-
-// ** Actions
 import { handleLogin } from '@store/authentication'
-
-// ** Context
 import { AbilityContext } from '@src/utility/context/Can'
-
-// ** Custom Components
 import InputPasswordToggle from '@components/input-password-toggle'
-
-// ** Logo
 import logo from '@src/assets/images/logo/logo-full.svg'
-
-// ** Utils
 import { getHomeRouteForLoggedInUser } from '@utils'
-
-// ** Reactstrap Imports
 import { Card, CardBody, CardTitle, CardText, Form, Label, Input, Button, FormFeedback } from 'reactstrap'
-
-// ** Styles
 import '@styles/react/pages/page-authentication.scss'
 
 const defaultValues = {
@@ -36,7 +17,6 @@ const defaultValues = {
 }
 
 const LoginBasic = () => {
-  // ** Hooks
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const ability = useContext(AbilityContext)

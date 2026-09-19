@@ -1,16 +1,9 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
-// ** Hooks
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
-
-// ** Third Party Components
 import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Reactstrap Imports
 import {
   Card,
   CardHeader,
@@ -26,14 +19,8 @@ import {
   Button
 } from 'reactstrap'
 import { X } from 'react-feather'
-
-// ** Custom Components
 import ImageUploadField from '../../shared/ImageUploadField'
-
-// ** Utils
 import { resolveAvatarUrl } from '@utils'
-
-// ** Store & Actions
 import { addCaseStudy, updateCaseStudy, getCaseStudy, getAllData, uploadCaseStudyCoverImage } from '../store'
 
 const slugify = value =>
@@ -57,7 +44,6 @@ const defaultValues = {
 }
 
 const CaseStudyForm = () => {
-  // ** Hooks & Vars
   const { id } = useParams()
   const isEdit = Boolean(id)
   const navigate = useNavigate()
@@ -72,9 +58,6 @@ const CaseStudyForm = () => {
   const [objectives, setObjectives] = useState([''])
   const [relatedIds, setRelatedIds] = useState([])
   const [relatedSearch, setRelatedSearch] = useState('')
-  // Tracks edits to the state above (visibility toggles, objectives,
-  // related picks, cover image), none of which is registered with
-  // react-hook-form, so its own isDirty can't see them.
   const [extraDirty, setExtraDirty] = useState(false)
 
   const {
@@ -91,27 +74,20 @@ const CaseStudyForm = () => {
 
   const title = watch('title')
 
-  // ** Related Case Studies list needs every other case study, regardless
-  // of add/edit mode, so fetch it unconditionally on mount.
   useEffect(() => {
     dispatch(getAllData())
   }, [])
 
-  // ** Auto-derive the slug from the title until the user edits the slug
-  // field directly - same "sync until touched" pattern as elsewhere in this
-  // app (see Quotation's issue-date -> valid-until auto-fill).
   useEffect(() => {
     if (!isEdit && !slugManuallyEdited) {
       setValue('slug', slugify(title || ''))
     }
   }, [title])
 
-  // ** Fetch the case study being edited
   useEffect(() => {
     if (isEdit) dispatch(getCaseStudy(id))
   }, [id])
 
-  // ** Populate the form once the case study loads
   useEffect(() => {
     if (isEdit && store.selectedCaseStudy && store.selectedCaseStudy.id === Number(id)) {
       const cs = store.selectedCaseStudy
@@ -158,9 +134,6 @@ const CaseStudyForm = () => {
     cs => cs.id !== Number(id) && cs.title.toLowerCase().includes(relatedSearch.toLowerCase())
   )
 
-  // ** Edit mode: upload immediately since the case study already has an id.
-  // Add mode: just stage the file - it's uploaded right after the new case
-  // study is created, once a real id exists to attach it to.
   const handleImageChange = file => {
     setImagePreview(URL.createObjectURL(file))
     if (isEdit) {
@@ -171,8 +144,6 @@ const CaseStudyForm = () => {
     }
   }
 
-  // ** Add mode: nothing saved yet, just clear the staged file. Edit mode:
-  // the cover image is already persisted, so clearing it is a real update.
   const handleRemoveImage = () => {
     setImagePreview(null)
     setImageFile(null)

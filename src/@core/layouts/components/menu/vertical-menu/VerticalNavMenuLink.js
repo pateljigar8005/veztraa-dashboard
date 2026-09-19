@@ -1,14 +1,8 @@
-// ** React Imports
 import { NavLink } from 'react-router-dom'
-
-// ** Third Party Components
 import classnames from 'classnames'
-
-// ** Reactstrap Imports
 import { Badge } from 'reactstrap'
 
 const VerticalNavMenuLink = ({ item, activeItem }) => {
-  // ** Conditional Link Tag, if item has newTab or externalLink props use <a> tag else use NavLink
   const LinkTag = item.externalLink ? 'a' : NavLink
 
   return (
@@ -22,7 +16,6 @@ const VerticalNavMenuLink = ({ item, activeItem }) => {
       <LinkTag
         className='d-flex align-items-center'
         target={item.newTab ? '_blank' : undefined}
-        /*eslint-disable */
         {...(item.externalLink === true
           ? {
               href: item.navLink || '/'

@@ -1,24 +1,12 @@
-// App Email
-// ========================================================================
 
 @import '../../base/pages/app-email.scss';
 
-// For editor height
 .email-application {
   #message-editor .rdw-editor-main {
     min-height: 17.9rem;
   }
 }
 
-// The base .sidebar-menu-list rule (see base/pages/app-email.scss) sizes the
-// folder list to a fixed `calc(100% - 80px)`, apparently tuned for some
-// other app's own 80px top search bar rather than anything this sidebar
-// actually has - relying on that leftover 80px as a reserved footer slot
-// for the admin-only mailbox picker below (see Sidebar.js) turned out to be
-// unreliable in practice. This makes the sizing explicit and robust instead:
-// a real flex column, where the folder list is the only flexible/scrolling
-// piece and the picker is a normal fixed-size footer, regardless of how
-// tall the folder list's own content happens to be.
 .email-application .content-area-wrapper .sidebar .email-app-sidebar .email-app-menu {
   display: flex;
   flex-direction: column;
@@ -32,7 +20,6 @@
   }
 }
 
-// Dark Layout
 .dark-layout {
   .email-application {
     .email-app-menu {

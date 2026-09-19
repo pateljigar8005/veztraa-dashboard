@@ -1,5 +1,5 @@
-@import '../../bootstrap-extended/include'; // Bootstrap includes
-@import '../../components/include'; // Components includes
+@import '../../bootstrap-extended/include';
+@import '../../components/include';
 
 .apexcharts-canvas {
   line[stroke='transparent'] {
@@ -24,10 +24,6 @@
   .apexcharts-yaxistooltip {
     background: $body-bg;
     border-color: $border-color;
-    // &:after,
-    // &:before {
-    //   border-left-color: $body-bg;
-    // }
   }
   .apexcharts-xaxistooltip-bottom {
     &:before {

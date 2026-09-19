@@ -1,7 +1,6 @@
-@import '../../bootstrap-extended/include'; // Bootstrap includes
-@import '../../components/include'; // Components includes
+@import '../../bootstrap-extended/include';
+@import '../../components/include';
 
-/********* CONTEXT MENU *********/
 
 .context-menu-list {
   margin: 0;
@@ -36,7 +35,6 @@
   }
 }
 
-// Dark Layout
 .dark-layout {
   .context-menu-list {
     background-color: $theme-dark-body-bg;
@@ -62,7 +60,6 @@
   }
 }
 
-// RTL
 [data-textdirection='rtl'] {
   .context-menu-list {
     z-index: 1031 !important;

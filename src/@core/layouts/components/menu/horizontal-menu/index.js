@@ -1,4 +1,3 @@
-// ** Horizontal Menu Components
 import HorizontalNavMenuItems from './HorizontalNavMenuItems'
 
 const HorizontalMenu = ({ menuData }) => {

@@ -1,28 +1,15 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
-
-// ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import * as XLSX from 'xlsx'
 import Select from 'react-select'
 import DataTable from 'react-data-table-component'
 import { Search, RotateCcw, Download, FileText, DollarSign, CheckCircle, AlertCircle } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Badge, Spinner } from 'reactstrap'
-
-// ** Shared Components
 import DateField from '../../shared/DateField'
 import AmountField from '../../shared/AmountField'
-
-// ** Options
 import { invoiceStatusOptions, currencyOptions } from '../../quotation/documentOptions'
-
-// ** Utils
 import { selectThemeColors, formatAmount } from '@utils'
-
-// ** Styles
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 
 const statusColorObj = {
@@ -111,9 +98,6 @@ const columns = [
   }
 ]
 
-// ** Builds one Excel sheet from a set of invoice rows - shared by the
-// combined "Invoices" sheet and each per-status sheet below, so both use
-// the exact same columns/widths.
 const buildInvoiceSheet = invoiceRows => {
   const sheet = XLSX.utils.json_to_sheet(
     invoiceRows.map(r => ({
@@ -152,8 +136,6 @@ const buildInvoiceSheet = invoiceRows => {
   return sheet
 }
 
-// ** A KPI tile for the summary row - same shape used across this report,
-// only the icon/color/label/value change.
 const StatCard = ({ icon: Icon, color, label, value }) => (
   <Col md={3} sm={6} className='mb-1'>
     <Card className='mb-0'>
@@ -173,7 +155,6 @@ const StatCard = ({ icon: Icon, color, label, value }) => (
 )
 
 const InvoiceReport = () => {
-  // ** States
   const [filters, setFilters] = useState(defaultFilters)
   const [clientOptions, setClientOptions] = useState([])
   const [rows, setRows] = useState([])
@@ -181,8 +162,6 @@ const InvoiceReport = () => {
   const [exporting, setExporting] = useState(false)
   const [hasRun, setHasRun] = useState(false)
 
-  // ** Client options for the filter - same lightweight fetch pattern used
-  // by the plain Invoice list's own Advanced Search modal.
   useEffect(() => {
     axios
       .get('/clients', { params: { perPage: 100 } })
@@ -203,11 +182,9 @@ const InvoiceReport = () => {
     return params
   }
 
-  // ** Fully pages through ONE fixed set of filter params.
   const fetchAllPages = async params => {
     let page = 1
     let all = []
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       const response = await axios.get('/invoices', { params: { ...params, page, perPage: 100 } })
       const { invoices, total } = response.data.data
@@ -218,15 +195,6 @@ const InvoiceReport = () => {
     return all
   }
 
-  // ** /invoices only supports ONE exact value per filter (see
-  // Invoice::FILTERABLE's 'eq' type - no IN-list support), so selecting
-  // several clients/statuses/currencies at once can't be expressed as a
-  // single request. Instead: build every combination across whichever
-  // filters actually have a multi-selection (an unselected one contributes
-  // a single "no filter on this" placeholder), fire one paginated fetch per
-  // combination in parallel, and concatenate - each combination's rows are
-  // disjoint by construction, so there's nothing to de-duplicate. Degrades
-  // to exactly one request when nothing is multi-selected, same as before.
   const dimensionValues = (selected, key) => (selected.length ? selected.map(o => ({ [key]: o.value })) : [{}])
 
   const fetchAllMatching = async () => {
@@ -275,11 +243,6 @@ const InvoiceReport = () => {
     { total: 0, paid: 0, due: 0 }
   )
 
-  // ** Two sheets rather than one flat dump - a "Summary" sheet capturing
-  // exactly which filters produced this report plus the same aggregate
-  // totals shown on screen, and an "Invoices" sheet with the full row-level
-  // detail - so the file is self-explanatory on its own later, without
-  // needing to remember what was filtered when it was generated.
   const handleExport = () => {
     if (!rows.length) {
       toast.error('Nothing to export - run the report first')
@@ -315,17 +278,9 @@ const InvoiceReport = () => {
       XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary')
       XLSX.utils.book_append_sheet(workbook, buildInvoiceSheet(rows), 'Invoices')
 
-      // ** One sheet per status (Draft, Sent, Paid, ...), each holding only
-      // that status's own invoices - lets whoever opens this in Excel jump
-      // straight to e.g. just the overdue ones instead of filtering the
-      // combined "Invoices" sheet by hand every time. Only a status that
-      // actually has at least one matching invoice gets its own sheet.
       invoiceStatusOptions.forEach(option => {
         const statusRows = rows.filter(r => r.status === option.value)
         if (!statusRows.length) return
-        // Excel sheet names cap at 31 chars and reject / \ ? * [ ] : - every
-        // status label here is short and plain, but truncate defensively
-        // rather than let a future longer status label throw at export time.
         const sheetName = option.label.slice(0, 31)
         XLSX.utils.book_append_sheet(workbook, buildInvoiceSheet(statusRows), sheetName)
       })

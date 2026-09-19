@@ -1,20 +1,11 @@
-// ** React Imports
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
-// ** Hooks
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
-
-// ** Third Party Components
 import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, Button } from 'reactstrap'
 import { Trash2 } from 'react-feather'
-
-// ** Store & Actions
 import { addJobListing, updateJobListing, getJobListing } from '../store'
 
 const defaultValues = {
@@ -25,7 +16,6 @@ const defaultValues = {
 }
 
 const JobListingForm = () => {
-  // ** Hooks & Vars
   const { id } = useParams()
   const isEdit = Boolean(id)
   const navigate = useNavigate()
@@ -35,8 +25,6 @@ const JobListingForm = () => {
   const [isActive, setIsActive] = useState(true)
   const [responsibilities, setResponsibilities] = useState([''])
   const [requirements, setRequirements] = useState([''])
-  // Tracks edits to the state above, none of which is registered with
-  // react-hook-form, so its own isDirty can't see them.
   const [extraDirty, setExtraDirty] = useState(false)
 
   const {
@@ -49,12 +37,10 @@ const JobListingForm = () => {
 
   useUnsavedChangesGuard(isDirty || extraDirty)
 
-  // ** Fetch the job listing being edited
   useEffect(() => {
     if (isEdit) dispatch(getJobListing(id))
   }, [id])
 
-  // ** Populate the form once the job listing loads
   useEffect(() => {
     if (isEdit && store.selectedJobListing && store.selectedJobListing.id === Number(id)) {
       const job = store.selectedJobListing

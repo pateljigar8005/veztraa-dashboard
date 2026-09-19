@@ -1,16 +1,9 @@
-// ** React Imports
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-
-// ** Third Party Components
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
-
-// ** Reactstrap Imports
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, FormText, Button } from 'reactstrap'
-
-// ** Custom Components
 import InputPasswordToggle from '@components/input-password-toggle'
 
 const defaultValues = {
@@ -19,14 +12,6 @@ const defaultValues = {
   confirm_password: ''
 }
 
-// ** A dedicated page (navbar dropdown's "Change Password", see
-// UserDropdown.js) rather than the full Account Settings form - and
-// deliberately its own POST /account/change-password endpoint rather than
-// UserController::update()'s generic 'password' field, since that one
-// requires no proof of the current password (an admin uses it to reset
-// someone else's). Requiring the current password here means a session
-// left open/unlocked can't have its password silently changed by whoever's
-// sitting at it.
 const ChangePassword = () => {
   const navigate = useNavigate()
   const [saving, setSaving] = useState(false)
@@ -63,8 +48,6 @@ const ChangePassword = () => {
       .catch(err => {
         setSaving(false)
         const message = err?.response?.data?.message || 'Failed to update password'
-        // The one failure mode worth pointing at a specific field - every
-        // other validation error is already caught client-side above.
         if (err?.response?.status === 422 && message === 'Current password is incorrect') {
           setError('current_password', { type: 'manual', message })
         }

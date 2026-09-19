@@ -23,7 +23,6 @@
   }
 }
 
-/* Switches */
 
 .form-switch {
   position: relative;
@@ -49,11 +48,9 @@
       }
     }
   }
-  // }
   .form-check-label {
     line-height: $form-switch-height;
 
-    /*For Switch text*/
     .switch-text-left,
     .switch-text-right,
     .switch-icon-left,
@@ -90,14 +87,11 @@
     }
   }
 
-  // /*For Switch label*/
-  // after its checked
 
   .form-check-input:checked ~ .form-check-label::before {
     box-shadow: none;
   }
 
-  /*For Switch Handle Animation*/
   .form-check-input:checked ~ .form-check-label::after {
     transform: translateX(1.4rem);
   }

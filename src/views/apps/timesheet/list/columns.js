@@ -1,27 +1,15 @@
-// ** React Imports
 import { Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
-
-// ** Custom Components
 import Avatar from '@components/avatar'
-
-// ** Store & Actions
 import { store } from '@store/store'
 import { deleteTimesheet } from '../store'
-
-// ** Icons Imports
 import { Edit2, Trash2 } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Button, UncontrolledTooltip } from 'reactstrap'
-
-// ** Utils
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
 import { resolveAvatarUrl, htmlToString } from '@utils'
 
-// ** Renders the User column's avatar + name
 const renderUser = row => {
   if (row.user_avatar && row.user_avatar.length) {
     return <Avatar className='me-1' img={resolveAvatarUrl(row.user_avatar)} width='32' height='32' />

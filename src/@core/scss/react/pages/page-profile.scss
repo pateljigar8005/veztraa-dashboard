@@ -1,5 +1,3 @@
-// Profile
-// =======================================================================
 @import '../../base/bootstrap-extended/include';
 @import '../../base/pages/page-profile';
 
@@ -24,7 +22,6 @@
 }
 
 @include media-breakpoint-up(md) {
-  // navbar tabs pills
   .profile-header-nav {
     .profile-tabs {
       margin-left: 11.1rem;

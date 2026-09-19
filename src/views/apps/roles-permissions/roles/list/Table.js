@@ -1,25 +1,13 @@
-// ** React Imports
 import { Fragment, useState, useEffect } from 'react'
-
-// ** Table Columns
 import { columns } from './columns'
-
-// ** Store & Actions
 import { getAllData } from '../store'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Third Party Components
 import DataTable from 'react-data-table-component'
 import { ChevronDown } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Row, Col, Card, Input } from 'reactstrap'
-
-// ** Styles
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 
-// ** Table Header
 const CustomHeader = ({ rowsPerPage, handlePerPage, searchTerm, handleFilter }) => {
   return (
     <div className='invoice-list-table-header w-100 me-1 ms-50 mt-1 mb-75'>
@@ -63,11 +51,9 @@ const CustomHeader = ({ rowsPerPage, handlePerPage, searchTerm, handleFilter }) 
 }
 
 const RolesTable = () => {
-  // ** Store Vars
   const dispatch = useDispatch()
   const store = useSelector(state => state.roles)
 
-  // ** States
   const [searchTerm, setSearchTerm] = useState('')
   const [rowsPerPage, setRowsPerPage] = useState(10)
 

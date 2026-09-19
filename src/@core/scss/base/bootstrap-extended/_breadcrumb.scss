@@ -19,7 +19,6 @@
   }
 }
 
-/* Component Specific */
 .breadcrumb-slash {
   &.breadcrumb {
     .breadcrumb-item + .breadcrumb-item:before {
@@ -63,7 +62,6 @@
     }
   }
 }
-// padding left for header area breadcrumbs
 .content-header .breadcrumb {
   padding-left: 1rem;
 }

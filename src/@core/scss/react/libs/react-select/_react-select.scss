@@ -1,14 +1,12 @@
 @import '../../../base/bootstrap-extended/include';
 @import '../../../base/components/include';
 
-// InValid Select
 .react-select.is-invalid {
   .select__control {
     border-color: $danger;
   }
 }
 
-// Select Control(Input)
 .select__control,
 .react-select__control {
   .select__input {
@@ -44,7 +42,6 @@
   }
 }
 
-// Select Menu
 .select__menu,
 .react-select__menu {
   z-index: 1000;
@@ -82,7 +79,6 @@
   }
 }
 
-// Multi Select
 .select__multi-value,
 .react-select__multi-value {
   color: $white;
@@ -115,7 +111,6 @@
   }
 }
 
-// Select Borderless
 .select-borderless {
   .select__control {
     border: 0;
@@ -125,7 +120,6 @@
   }
 }
 
-// Dark Layout
 .dark-layout {
   .select__control {
     background-color: $theme-dark-input-bg;

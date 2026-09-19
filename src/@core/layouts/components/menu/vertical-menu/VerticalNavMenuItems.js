@@ -1,9 +1,6 @@
-// ** Vertical Menu Components
 import VerticalNavMenuLink from './VerticalNavMenuLink'
 import VerticalNavMenuGroup from './VerticalNavMenuGroup'
 import VerticalNavMenuSectionHeader from './VerticalNavMenuSectionHeader'
-
-// ** Utils
 import {
   canViewMenuItem,
   canViewMenuGroup,
@@ -11,14 +8,12 @@ import {
 } from '@layouts/utils'
 
 const VerticalMenuNavItems = props => {
-  // ** Components Object
   const Components = {
     VerticalNavMenuLink,
     VerticalNavMenuGroup,
     VerticalNavMenuSectionHeader
   }
 
-  // ** Render Nav Menu Items
   const RenderNavItems = props.items.map((item, index) => {
     const TagName = Components[resolveNavItemComponent(item)]
     if (item.children) {

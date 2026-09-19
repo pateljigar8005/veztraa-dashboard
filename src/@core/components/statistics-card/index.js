@@ -1,13 +1,9 @@
-// ** Third Party Components
 import Proptypes from 'prop-types'
 import classnames from 'classnames'
 import Chart from 'react-apexcharts'
-
-// ** Reactstrap Imports
 import { Card, CardBody } from 'reactstrap'
 
 const StatisticsCards = props => {
-  // ** Props
   const { className, hideChart, iconRight, iconBg, icon, stat, statTitle, options, series, type, height } = props
 
   return (
@@ -38,7 +34,6 @@ const StatisticsCards = props => {
 }
 export default StatisticsCards
 
-// ** PropTypes
 StatisticsCards.propTypes = {
   type: Proptypes.string,
   series: Proptypes.array,

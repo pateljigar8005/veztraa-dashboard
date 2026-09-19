@@ -1,5 +1,4 @@
 import mock from './mock'
-
 import './jwt'
 import './apps/chat'
 import './apps/todo'

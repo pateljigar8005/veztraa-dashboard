@@ -1,35 +1,30 @@
-@import '../../bootstrap-extended/include'; // Bootstrap includes
-@import '../../components/include'; // Components includes
+@import '../../bootstrap-extended/include';
+@import '../../components/include';
 
 .swal2-container {
   .swal2-popup {
     border-radius: $card-border-radius;
     padding-bottom: 1.5rem;
 
-    // close button
     .swal2-close:focus {
       outline: none;
       box-shadow: none;
     }
 
-    // content
     .swal2-content {
       color: $body-color;
     }
 
-    // header styling
     .swal2-title {
       font-size: $h3-font-size;
       font-weight: $headings-font-family;
       color: $headings-color;
     }
 
-    // remove box-shadow on focus of buttons
     button.swal2-confirm:focus {
       box-shadow: none;
     }
 
-    // input
     input.swal2-input {
       height: $input-height;
       font-size: $font-size-base;
@@ -44,7 +39,6 @@
       }
     }
 
-    // steps
     .swal2-progress-steps {
       .swal2-progress-step {
         background-color: $primary;
@@ -60,13 +54,11 @@
       }
     }
 
-    // pre code
     pre {
       min-height: 1.35rem;
       margin-top: 0.5rem;
     }
 
-    // footer
     .swal2-footer {
       border-color: $border-color;
       color: $body-color;
@@ -74,7 +66,6 @@
   }
 }
 
-// Dark Layout
 .dark-layout {
   .swal2-container {
     .swal2-popup .swal2-title {
@@ -118,7 +109,6 @@
         background-color: $theme-dark-card-bg;
       }
 
-      // footer
       .swal2-footer {
         border-color: $theme-dark-border-color;
         color: $theme-dark-body-color;

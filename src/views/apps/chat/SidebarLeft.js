@@ -1,33 +1,19 @@
-// ** React Imports
 import { useState, useEffect } from 'react'
-
-// ** Custom Components
 import Avatar from '@components/avatar'
-
-// ** Store & Actions
 import { selectChat } from './store'
 import { useDispatch } from 'react-redux'
-
-// ** Utils
 import { formatDateToMonthShort, isObjEmpty } from '@utils'
-
-// ** Third Party Components
 import classnames from 'classnames'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 import { X, Search, CheckSquare, Bell, User, Trash } from 'react-feather'
-
-// ** Reactstrap Imports
 import { CardText, InputGroup, InputGroupText, Badge, Input, Button, Label } from 'reactstrap'
 
 const SidebarLeft = props => {
-  // ** Props & Store
   const { store, sidebar, handleSidebar, userSidebarLeft, handleUserSidebarLeft } = props
   const { chats, contacts, userProfile } = store
 
-  // ** Dispatch
   const dispatch = useDispatch()
 
-  // ** State
   const [query, setQuery] = useState('')
   const [about, setAbout] = useState('')
   const [active, setActive] = useState(0)
@@ -35,7 +21,6 @@ const SidebarLeft = props => {
   const [filteredChat, setFilteredChat] = useState([])
   const [filteredContacts, setFilteredContacts] = useState([])
 
-  // ** Handles User Chat Click
   const handleUserClick = id => {
     dispatch(selectChat(id))
     setActive(id)
@@ -54,7 +39,6 @@ const SidebarLeft = props => {
     }
   }, [])
 
-  // ** Renders Chat
   const renderChats = () => {
     if (chats && chats.length) {
       if (query.length && !filteredChat.length) {
@@ -101,7 +85,6 @@ const SidebarLeft = props => {
     }
   }
 
-  // ** Renders Contact
   const renderContacts = () => {
     if (contacts && contacts.length) {
       if (query.length && !filteredContacts.length) {
@@ -129,7 +112,6 @@ const SidebarLeft = props => {
     }
   }
 
-  // ** Handles Filter
   const handleFilter = e => {
     setQuery(e.target.value)
     const searchFilterFunction = contact => contact.fullName.toLowerCase().includes(e.target.value.toLowerCase())

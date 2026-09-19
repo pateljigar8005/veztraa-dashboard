@@ -1,5 +1,5 @@
-@import '../../../bootstrap-extended/include'; // Bootstrap includes
-@import '../../../components/include'; // Components includes
+@import '../../../bootstrap-extended/include';
+@import '../../../components/include';
 
 .flatpickr-calendar {
   .flatpickr-day {
@@ -73,7 +73,6 @@
   height: $input-height;
 }
 
-// Time picker hover & focus bg color
 .flatpickr-time input:hover,
 .flatpickr-time .flatpickr-am-pm:hover,
 .flatpickr-time input:focus,
@@ -81,7 +80,6 @@
   background: $white;
 }
 
-//Dark layout
 .dark-layout {
   .flatpickr-calendar {
     background: $theme-dark-body-bg;
@@ -154,7 +152,6 @@
       }
     }
   }
-  // Time picker hover & focus bg color
   .flatpickr-time input:hover,
   .flatpickr-time .flatpickr-am-pm:hover,
   .flatpickr-time input:focus,
@@ -163,7 +160,6 @@
   }
 }
 
-// ? Added bg color for flatpickr input only as it has default readonly attribute
 .flatpickr-input[readonly],
 .flatpickr-input ~ .form-control[readonly],
 .flatpickr-human-friendly[readonly] {

@@ -1,9 +1,6 @@
-// Component nav and nav/pill tabs
 
 .nav {
   border-radius: 0.25rem;
-  // for component navs
-  // to wrap border around nav component
   &.wrap-border {
     border: 1px solid $nav-component-border-color;
     li.nav-header {
@@ -27,7 +24,6 @@
     }
   }
 
-  // Square Border
   &.square-border {
     border-radius: 0;
     .nav-item {
@@ -37,13 +33,11 @@
     }
   }
 
-  // for main menu toggle lock
   .modern-nav-toggle {
     padding: 0;
     margin: 1.571rem 0;
   }
 
-  // Dropdown without background need arrow color changes
   .dropdown.show {
     .dropdown-toggle {
       &::after {
@@ -62,7 +56,6 @@
 }
 .nav-pills,
 .nav-tabs {
-  // if icon added inside nav-link
   .nav-link {
     display: flex;
     align-items: center;
@@ -73,10 +66,8 @@
     }
   }
 }
-// nav pills
 .nav-pills {
   margin-bottom: 1rem;
-  // nav item of nav pill
   .nav-link {
     padding: $btn-padding-y $btn-padding-x;
     font-size: $btn-font-size;
@@ -111,7 +102,6 @@
     }
   }
 
-  // Justified Pills
   &.nav-justified {
     @include nav-justified;
     @include nav-tabs-justified;
@@ -130,11 +120,9 @@
   }
 }
 
-// Basic Nav Tabs
 .nav-tabs {
   margin-bottom: 1rem;
   position: relative;
-  // Basic nav item
   .nav-item {
     position: relative;
   }
@@ -176,7 +164,6 @@
       }
     }
   }
-  // Justified Tabs
   &.nav-justified {
     @include nav-justified;
     @include nav-tabs-justified;
@@ -197,11 +184,9 @@
   }
 }
 
-// Nav Tabs Vertical
 .nav-vertical {
   overflow: hidden;
   .nav.nav-tabs {
-    // nav item styles for vertical nav tabs
     .nav-item {
       .nav-link {
         margin-bottom: 0;
@@ -221,7 +206,6 @@
       }
     }
 
-    // vertical nav left tabs
     &.nav-left {
       float: left;
       display: table;
@@ -239,7 +223,6 @@
       }
     }
 
-    // vertical right nav tabs
     &.nav-right {
       float: right;
       display: table;

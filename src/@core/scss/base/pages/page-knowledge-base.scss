@@ -1,26 +1,15 @@
-// ===============================================================================================
-//  File Name: knowledge-base.scss
-//  Description: Knowledge Base Page Content SCSS
-//  ----------------------------------------------------------------------------------------------
-//  Item Name: Vuexy  - Vuejs, HTML & Laravel Admin Dashboard Template
-//  Author: PIXINVENT
-//  Author URL: http://www.themeforest.net/user/pixinvent
-// ================================================================================================
+@import '../bootstrap-extended/include';
+@import '../components/include';
 
-@import '../bootstrap-extended/include'; // Bootstrap includes
-@import '../components/include'; // Components includes
 
 $svg-bg: #fcfcfc;
 
-// Knowledge-base jumbotron scss
 .knowledge-base-bg {
   background-size: cover;
   background-color: rgba($primary, 0.12) !important;
 
-  // knowledge base search
   .kb-search-input {
     .input-group {
-      // remove input group box shadow on inside focus
       &:focus-within {
         box-shadow: none;
       }
@@ -28,7 +17,6 @@ $svg-bg: #fcfcfc;
   }
 }
 
-//
 .kb-search-content-info {
   .kb-search-content {
     .card-img-top {
@@ -41,13 +29,11 @@ $svg-bg: #fcfcfc;
     }
   }
 }
-// knowledge base title
 .kb-title {
   display: flex;
   align-items: center;
 }
 
-//search input width fixed for medium up screen
 @include media-breakpoint-up(md) {
   .knowledge-base-bg {
     .kb-search-input {
@@ -59,7 +45,6 @@ $svg-bg: #fcfcfc;
   }
 }
 
-// make jumbotron card body padding
 @include media-breakpoint-up(lg) {
   .knowledge-base-bg {
     .card-body {
@@ -67,7 +52,6 @@ $svg-bg: #fcfcfc;
     }
   }
 }
-// make jumbotron card body padding
 @include media-breakpoint-only(md) {
   .knowledge-base-bg {
     .card-body {

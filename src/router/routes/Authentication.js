@@ -1,4 +1,3 @@
-// ** React Imports
 import { lazy } from 'react'
 
 const LoginBasic = lazy(() => import('../../views/pages/authentication/LoginBasic'))

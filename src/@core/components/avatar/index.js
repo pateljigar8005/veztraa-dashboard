@@ -1,15 +1,9 @@
-// ** React Imports
 import { forwardRef } from 'react'
-
-// ** Third Party Components
 import Proptypes from 'prop-types'
 import classnames from 'classnames'
-
-// ** Reactstrap Imports
 import { Badge } from 'reactstrap'
 
 const Avatar = forwardRef((props, ref) => {
-  // ** Props
   const {
     img,
     size,
@@ -30,12 +24,6 @@ const Avatar = forwardRef((props, ref) => {
     ...rest
   } = props
 
-  // ** Function to extract initials from content - the first LETTER of each
-  // word (not just index 0), so a name/company starting with a quote,
-  // number, or symbol (e.g. `"Acme Inc"`, `&Co`) doesn't leak that
-  // character into the avatar instead of a real initial. Uppercased since
-  // an initial from a lowercase word (e.g. "n8n") should still read as a
-  // capital, matching every other avatar around it.
   const getInitials = str => {
     const results = []
     const wordArray = str.split(' ')
@@ -97,7 +85,6 @@ const Avatar = forwardRef((props, ref) => {
 
 export default Avatar
 
-// ** PropTypes
 Avatar.propTypes = {
   icon: Proptypes.node,
   src: Proptypes.string,
@@ -157,7 +144,6 @@ Avatar.propTypes = {
   }
 }
 
-// ** Default Props
 Avatar.defaultProps = {
   tag: 'div'
 }

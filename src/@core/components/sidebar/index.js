@@ -1,13 +1,10 @@
-// ** Third Party Components
 import { X } from 'react-feather'
 import Proptypes from 'prop-types'
 import classnames from 'classnames'
 import PerfectScrollbar from 'react-perfect-scrollbar'
-
 import { Modal, ModalHeader, ModalBody } from 'reactstrap'
 
 const Sidebar = props => {
-  // ** Props
   const {
     open,
     size,
@@ -24,7 +21,6 @@ const Sidebar = props => {
     ...rest
   } = props
 
-  // ** If user passes custom close btn render that else default close btn
   const renderCloseBtn = closeBtn ? closeBtn : <X className='cursor-pointer' size={15} onClick={toggleSidebar} />
 
   return (
@@ -42,13 +38,11 @@ const Sidebar = props => {
         'sidebar-lg': size === 'lg',
         'sidebar-sm': size === 'sm'
       })}
-      /*eslint-disable */
       {...(width !== undefined
         ? {
             style: { width: String(width) + 'px' }
           }
         : {})}
-      /*eslint-enable */
       {...rest}
     >
       <ModalHeader
@@ -78,7 +72,6 @@ const Sidebar = props => {
 
 export default Sidebar
 
-// ** PropTypes
 Sidebar.propTypes = {
   className: Proptypes.string,
   bodyClassName: Proptypes.string,

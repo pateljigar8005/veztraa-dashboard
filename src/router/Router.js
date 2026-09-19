@@ -1,28 +1,15 @@
-// ** Router imports
 import { lazy } from 'react'
-
-// ** Router imports
 import { useRoutes, Navigate } from 'react-router-dom'
-
-// ** Layouts
 import BlankLayout from '@layouts/BlankLayout'
-
-// ** Hooks Imports
 import { useLayout } from '@hooks/useLayout'
-
-// ** Utils
 import { getUserData, getHomeRouteForLoggedInUser } from '../utility/Utils'
-
-// ** GetRoutes
 import { getRoutes } from './routes'
 
-// ** Components
-const Error = lazy(() => import('../views/pages/misc/Error'))
+const Error = lazy(() => import('../views/pages/Error'))
 const Login = lazy(() => import('../views/pages/authentication/LoginBasic'))
-const NotAuthorized = lazy(() => import('../views/pages/misc/NotAuthorized'))
+const NotAuthorized = lazy(() => import('../views/pages/NotAuthorized'))
 
 const Router = () => {
-  // ** Hooks
   const { layout } = useLayout()
 
   const allRoutes = getRoutes(layout)

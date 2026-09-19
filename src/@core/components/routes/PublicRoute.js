@@ -1,8 +1,5 @@
-// ** React Imports
 import { Suspense } from 'react'
 import { Navigate } from 'react-router-dom'
-
-// ** Utils
 import { getUserData, getHomeRouteForLoggedInUser } from '@utils'
 
 const PublicRoute = ({ children, route }) => {

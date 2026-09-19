@@ -1,33 +1,15 @@
-// ** React Imports
 import { Fragment, useState, useEffect } from 'react'
-
-// ** Hooks
 import useDebounce from '@hooks/useDebounce'
-
-// ** Axios
 import axios from 'axios'
-
-// ** Shared Components
 import AdvancedSearchModal from '../../shared/AdvancedSearchModal'
-// ** Options
 import { invoiceStatusOptions, currencyOptions } from '../../quotation/documentOptions'
-
-// ** Table Columns
 import { columns } from './columns'
-
-// ** Store & Actions
 import { getAllData, getData } from '../store'
 import { useDispatch, useSelector } from 'react-redux'
-
-// ** Third Party Components
 import ReactPaginate from 'react-paginate'
 import DataTable from 'react-data-table-component'
 import { ChevronDown } from 'react-feather'
-
-// ** Reactstrap Imports
 import { Row, Col, Card, Input, Button } from 'reactstrap'
-
-// ** Styles
 import '@styles/react/apps/app-invoice.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 
@@ -46,7 +28,6 @@ const searchFields = [
   { name: 'due_date', label: 'Due Date', type: 'date-range' },
   { name: 'total', label: 'Total Amount', type: 'number-range' }
 ]
-// ** Table Header
 const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) => {
   return (
     <div className='invoice-list-table-header w-100 me-1 ms-50 mt-1 mb-75'>
@@ -90,22 +71,18 @@ const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) 
 }
 
 const InvoiceList = () => {
-  // ** Store Vars
   const dispatch = useDispatch()
   const store = useSelector(state => state.invoice)
 
-  // ** States
   const [sort, setSort] = useState('desc')
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [sortColumn, setSortColumn] = useState('id')
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
-  // ** Advanced search (opened via the navbar search icon)
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false)
   const [filters, setFilters] = useState({})
 
-  // ** Debounce the search term so typing doesn't fire a request per keystroke
   const debouncedSearchTerm = useDebounce(searchTerm, 400)
 
   useEffect(() => {
@@ -151,16 +128,12 @@ const InvoiceList = () => {
     setRowsPerPage(value)
   }
 
-  // ** Debounced via debouncedSearchTerm above - just update local state and
-  // reset to page 1 here; the mount effect refetches once typing settles.
   const handleFilter = val => {
     setSearchTerm(val)
     setCurrentPage(1)
   }
 
 
-  // ** Advanced search: apply/clear both reset to page 1 and let the mount
-  // effect (which depends on `filters`) refetch with the new criteria.
   const handleApplyFilters = newFilters => {
     setFilters(newFilters)
     setCurrentPage(1)
@@ -205,10 +178,6 @@ const InvoiceList = () => {
     }
   }
 
-  // ** Just update the sort state - the mount effect above already
-  // depends on [sort, sortColumn] and refetches with the new values.
-  // (Dispatching here too used the stale pre-update sort/sortColumn from
-  // this closure, so the table always sorted one click behind.)
   const handleSort = (column, sortDirection) => {
     setSort(sortDirection)
     setSortColumn(column.sortField)
