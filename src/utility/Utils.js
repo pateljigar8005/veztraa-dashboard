@@ -1,16 +1,20 @@
 import { DefaultRoute } from '../router/routes'
 import axios from 'axios'
+import { resizeToFit, uploadToR2 } from './imageUpload'
 
 export const isObjEmpty = obj => Object.keys(obj).length === 0
 
-export const resolveAvatarUrl = path => (path ? `${axios.defaults.baseURL}${path}` : null)
-
-export const uploadEditorImage = async file => {
-  const formData = new FormData()
-  formData.append('file', file)
-  const response = await axios.post('/uploads/image', formData)
-  return resolveAvatarUrl(response.data.data.url)
+// R2-hosted images come back as an already-absolute URL (custom domain);
+// only a legacy pre-R2 relative path (e.g. "/public/avatars/xxx.jpg") needs
+// the API base URL prefixed.
+export const resolveAvatarUrl = path => {
+  if (!path) return null
+  return /^https?:\/\//i.test(path) ? path : `${axios.defaults.baseURL}${path}`
 }
+
+// Uploads straight to R2 (see src/utility/imageUpload.js) - the API never
+// receives the file, only mints the presigned URL.
+export const uploadEditorImage = async file => uploadToR2('editor', await resizeToFit(file))
 
 export const kFormatter = num => (num > 999 ? `${(num / 1000).toFixed(1)}k` : num)
 

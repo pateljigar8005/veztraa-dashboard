@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
+import { squareCrop, uploadToR2 } from '@src/utility/imageUpload'
 
 export const getAllData = createAsyncThunk('appUsers/getAllData', async () => {
   const response = await axios.get('/users', { params: { perPage: 100 } })
@@ -44,9 +45,8 @@ export const updateUser = createAsyncThunk('appUsers/updateUser', async ({ id, .
 })
 
 export const uploadAvatar = createAsyncThunk('appUsers/uploadAvatar', async ({ id, file }, { dispatch, getState }) => {
-  const formData = new FormData()
-  formData.append('avatar', file)
-  const response = await axios.post(`/users/${id}/avatar`, formData)
+  const url = await uploadToR2('avatar', await squareCrop(file, 200))
+  const response = await axios.post(`/users/${id}/avatar`, { url })
   await dispatch(getData(getState().users.params))
   await dispatch(getAllData())
   return response.data.data

@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
+import { resizeToJpeg, uploadToR2 } from '@src/utility/imageUpload'
 
 export const getAllData = createAsyncThunk('appCaseStudies/getAllData', async () => {
   const response = await axios.get('/case-studies', { params: { perPage: 100 } })
@@ -52,9 +53,8 @@ export const updateCaseStudy = createAsyncThunk(
 export const uploadCaseStudyCoverImage = createAsyncThunk(
   'appCaseStudies/uploadCaseStudyCoverImage',
   async ({ id, file }, { dispatch, getState }) => {
-    const formData = new FormData()
-    formData.append('image', file)
-    const response = await axios.post(`/case-studies/${id}/cover-image`, formData)
+    const url = await uploadToR2('case-study-cover', await resizeToJpeg(file))
+    const response = await axios.post(`/case-studies/${id}/cover-image`, { url })
     await dispatch(getData(getState().caseStudies.params))
     await dispatch(getAllData())
     return response.data.data
