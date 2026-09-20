@@ -20,6 +20,8 @@ const ClientView = lazy(() => import('../../views/apps/client/view'))
 
 const PaymentMethodList = lazy(() => import('../../views/apps/payment-method/list'))
 const PaymentMethodForm = lazy(() => import('../../views/apps/payment-method/form'))
+const EventCategoryList = lazy(() => import('../../views/apps/event-category/list'))
+const EventCategoryForm = lazy(() => import('../../views/apps/event-category/form'))
 const CurrencyList = lazy(() => import('../../views/apps/currency/list'))
 const CurrencyForm = lazy(() => import('../../views/apps/currency/form'))
 
@@ -211,6 +213,18 @@ const AppRoutes = [
   {
     element: <PaymentMethodForm />,
     path: '/payment-method/edit/:id'
+  },
+  {
+    element: <EventCategoryList />,
+    path: '/event-category'
+  },
+  {
+    element: <EventCategoryForm />,
+    path: '/event-category/add'
+  },
+  {
+    element: <EventCategoryForm />,
+    path: '/event-category/edit/:id'
   },
   {
     element: <CurrencyList />,

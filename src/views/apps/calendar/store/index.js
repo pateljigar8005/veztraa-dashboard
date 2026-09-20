@@ -1,43 +1,60 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 
-export const fetchEvents = createAsyncThunk('appCalendar/fetchEvents', async calendars => {
-  const response = await axios.get('/apps/calendar/events', { calendars })
-  return response.data
+// MySQL DATETIME wants local wall-clock parts, not a UTC-shifted ISO string
+// (same reasoning as the date-only fields elsewhere in this app, see
+// CLAUDE.md's Money/currency/dates note) - a plain toISOString() here would
+// silently shift an event's time by the browser's UTC offset.
+const toMySQLDateTime = date => {
+  if (!date) return null
+  const d = date instanceof Date ? date : new Date(date)
+  const pad = n => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+}
+
+// Normalizes either shape a caller passes in - a plain object built by
+// AddEventSidebar's Add/Update handlers, or a real FullCalendar Event
+// instance from a drag/resize (Calendar.js's eventDrop/eventResize) - into
+// the API's field names. Both shapes expose the same property names
+// (title/start/end/allDay/url/extendedProps), just one is a plain object
+// and the other a FullCalendar class instance.
+const toApiPayload = event => ({
+  title: event.title,
+  start_at: toMySQLDateTime(event.start),
+  end_at: event.end ? toMySQLDateTime(event.end) : null,
+  all_day: Boolean(event.allDay),
+  url: event.url || null,
+  category_id: event.extendedProps?.category_id ?? null,
+  location: event.extendedProps?.location ?? null,
+  description: event.extendedProps?.description ?? '',
+  guests: event.extendedProps?.guests ?? []
 })
 
-export const addEvent = createAsyncThunk('appCalendar/addEvent', async (event, { dispatch, getState }) => {
-  await axios.post('/apps/calendar/add-event', { event })
-  await dispatch(fetchEvents(getState().calendar.selectedCalendars))
-  return event
+export const fetchEventCategories = createAsyncThunk('appCalendar/fetchEventCategories', async () => {
+  const response = await axios.get('/event-categories/active')
+  return response.data.data.eventCategories
 })
 
-export const updateEvent = createAsyncThunk('appCalendar/updateEvent', async (event, { dispatch, getState }) => {
-  await axios.post('/apps/calendar/update-event', { event })
-  await dispatch(fetchEvents(getState().calendar.selectedCalendars))
-  return event
+export const fetchEvents = createAsyncThunk('appCalendar/fetchEvents', async () => {
+  const response = await axios.get('/calendar-events')
+  return response.data.data
 })
 
-export const updateFilter = createAsyncThunk('appCalendar/updateFilter', async (filter, { dispatch, getState }) => {
-  if (getState().calendar.selectedCalendars.includes(filter)) {
-    await dispatch(fetchEvents(getState().calendar.selectedCalendars.filter(i => i !== filter)))
-  } else {
-    await dispatch(fetchEvents([...getState().calendar.selectedCalendars, filter]))
-  }
-  return filter
+export const addEvent = createAsyncThunk('appCalendar/addEvent', async (event, { dispatch }) => {
+  const response = await axios.post('/calendar-events', toApiPayload(event))
+  await dispatch(fetchEvents())
+  return response.data.data
 })
 
-export const updateAllFilters = createAsyncThunk('appCalendar/updateAllFilters', async (value, { dispatch }) => {
-  if (value === true) {
-    await dispatch(fetchEvents(['Personal', 'Business', 'Family', 'Holiday', 'ETC']))
-  } else {
-    await dispatch(fetchEvents([]))
-  }
-  return value
+export const updateEvent = createAsyncThunk('appCalendar/updateEvent', async (event, { dispatch }) => {
+  const response = await axios.put(`/calendar-events/${event.id}`, toApiPayload(event))
+  await dispatch(fetchEvents())
+  return response.data.data
 })
 
-export const removeEvent = createAsyncThunk('appCalendar/removeEvent', async id => {
-  await axios.delete('/apps/calendar/remove-event', { id })
+export const removeEvent = createAsyncThunk('appCalendar/removeEvent', async (id, { dispatch }) => {
+  await axios.delete(`/calendar-events/${id}`)
+  await dispatch(fetchEvents())
   return id
 })
 
@@ -85,13 +102,20 @@ export const appCalendarSlice = createSlice({
   name: 'appCalendar',
   initialState: {
     events: [],
+    eventCategories: [],
     kanbanEvents: [],
     kanbanTasks: [],
     todoEvents: [],
     todoTasks: [],
     taskFilters: ['Kanban Tasks', 'To-Do'],
     selectedEvent: {},
-    selectedCalendars: ['Personal', 'Business', 'Family', 'Holiday', 'ETC']
+    // Category names currently shown - seeded to "all" once categories load
+    // (see fetchEventCategories.fulfilled below). Purely a client-side
+    // display filter now: the backend already returns exactly this user's
+    // own events (or everyone's, for an admin) in one fetch, so toggling a
+    // category no longer needs a server round-trip the way the old demo
+    // fetchEvents(calendars) faked one.
+    selectedCalendars: []
   },
   reducers: {
     selectEvent: (state, action) => {
@@ -103,10 +127,29 @@ export const appCalendarSlice = createSlice({
       } else {
         state.taskFilters.push(action.payload)
       }
+    },
+    updateFilter: (state, action) => {
+      if (state.selectedCalendars.includes(action.payload)) {
+        state.selectedCalendars = state.selectedCalendars.filter(name => name !== action.payload)
+      } else {
+        state.selectedCalendars.push(action.payload)
+      }
+    },
+    updateAllFilters: (state, action) => {
+      state.selectedCalendars = action.payload === true ? state.eventCategories.map(c => c.name) : []
     }
   },
   extraReducers: builder => {
     builder
+      .addCase(fetchEventCategories.fulfilled, (state, action) => {
+        state.eventCategories = action.payload
+        // Default to "all selected" the first time categories load - only
+        // when nothing's been chosen yet, so a user's filter picks aren't
+        // reset every time this refetches.
+        if (state.selectedCalendars.length === 0) {
+          state.selectedCalendars = action.payload.map(c => c.name)
+        }
+      })
       .addCase(fetchEvents.fulfilled, (state, action) => {
         state.events = action.payload
       })
@@ -118,26 +161,9 @@ export const appCalendarSlice = createSlice({
         state.todoEvents = action.payload.events
         state.todoTasks = action.payload.tasks
       })
-      .addCase(updateFilter.fulfilled, (state, action) => {
-        if (state.selectedCalendars.includes(action.payload)) {
-          state.selectedCalendars.splice(state.selectedCalendars.indexOf(action.payload), 1)
-        } else {
-          state.selectedCalendars.push(action.payload)
-        }
-      })
-      .addCase(updateAllFilters.fulfilled, (state, action) => {
-        const value = action.payload
-        let selected = []
-        if (value === true) {
-          selected = ['Personal', 'Business', 'Family', 'Holiday', 'ETC']
-        } else {
-          selected = []
-        }
-        state.selectedCalendars = selected
-      })
   }
 })
 
-export const { selectEvent, toggleTaskFilter } = appCalendarSlice.actions
+export const { selectEvent, toggleTaskFilter, updateFilter, updateAllFilters } = appCalendarSlice.actions
 
 export default appCalendarSlice.reducer

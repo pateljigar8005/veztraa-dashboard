@@ -1,15 +1,10 @@
 import { Fragment } from 'react'
+import { Link } from 'react-router-dom'
 import classnames from 'classnames'
+import { Settings } from 'react-feather'
 import { Card, CardBody, Button, Input, Label } from 'reactstrap'
+import { currentUserCan } from '@src/utility/navPermissions'
 import illustration from '@src/assets/images/pages/calendar-illustration.png'
-
-const filters = [
-  { label: 'Personal', color: 'danger', className: 'form-check-danger mb-1' },
-  { label: 'Business', color: 'primary', className: 'form-check-primary mb-1' },
-  { label: 'Family', color: 'warning', className: 'form-check-warning mb-1' },
-  { label: 'Holiday', color: 'success', className: 'form-check-success mb-1' },
-  { label: 'ETC', color: 'info', className: 'form-check-info' }
-]
 
 const taskFilters = [
   { label: 'Kanban Tasks', className: 'form-check-secondary mb-1' },
@@ -33,16 +28,23 @@ const SidebarLeft = props => {
           </Button>
         </CardBody>
         <CardBody>
-          <h5 className='section-label mb-1'>
-            <span className='align-middle'>Filter</span>
-          </h5>
+          <div className='d-flex align-items-center justify-content-between mb-1'>
+            <h5 className='section-label mb-0'>
+              <span className='align-middle'>Filter</span>
+            </h5>
+            {currentUserCan('/event-category', 'edit') && (
+              <Link to='/event-category' title='Manage Event Categories'>
+                <Settings size={14} />
+              </Link>
+            )}
+          </div>
           <div className='form-check mb-1'>
             <Input
               id='view-all'
               type='checkbox'
               label='View All'
               className='select-all'
-              checked={store.selectedCalendars.length === filters.length}
+              checked={store.selectedCalendars.length === store.eventCategories.length}
               onChange={e => dispatch(updateAllFilters(e.target.checked))}
             />
             <Label className='form-check-label' for='view-all'>
@@ -50,32 +52,36 @@ const SidebarLeft = props => {
             </Label>
           </div>
           <div className='calendar-events-filter'>
-            {filters.length &&
-              filters.map(filter => {
-                return (
-                  <div
-                    key={`${filter.label}-key`}
-                    className={classnames('form-check', {
-                      [filter.className]: filter.className
-                    })}
-                  >
-                    <Input
-                      type='checkbox'
-                      key={filter.label}
-                      label={filter.label}
-                      className='input-filter'
-                      id={`${filter.label}-event`}
-                      checked={store.selectedCalendars.includes(filter.label)}
-                      onChange={() => {
-                        dispatch(updateFilter(filter.label))
-                      }}
-                    />
-                    <Label className='form-check-label' for={`${filter.label}-event`}>
-                      {filter.label}
-                    </Label>
-                  </div>
-                )
-              })}
+            {store.eventCategories.length ? (
+              store.eventCategories.map(category => (
+                <div
+                  key={`${category.name}-key`}
+                  className={classnames('form-check', {
+                    [`form-check-${category.color} mb-1`]: true
+                  })}
+                >
+                  <Input
+                    type='checkbox'
+                    key={category.name}
+                    label={category.name}
+                    className='input-filter'
+                    id={`${category.name}-event`}
+                    checked={store.selectedCalendars.includes(category.name)}
+                    onChange={() => {
+                      dispatch(updateFilter(category.name))
+                    }}
+                  />
+                  <Label className='form-check-label' for={`${category.name}-event`}>
+                    {category.name}
+                  </Label>
+                </div>
+              ))
+            ) : (
+              <p className='text-muted small mb-0'>
+                No event categories yet - add one under{' '}
+                <Link to='/event-category'>Settings &rarr; Event Categories</Link>.
+              </p>
+            )}
           </div>
         </CardBody>
         <CardBody>

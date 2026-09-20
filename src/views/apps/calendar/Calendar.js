@@ -49,8 +49,16 @@ const Calendar = props => {
     ...(store.taskFilters.includes('To-Do') ? store.todoEvents : [])
   ]
 
+  // An event with no category (extendedProps.calendar null/undefined) is
+  // never filterable - selectedCalendars only ever holds real category
+  // names, so a null-category event could never match it and would
+  // otherwise vanish regardless of "View All" state.
+  const filteredEvents = store.events.filter(
+    event => !event.extendedProps?.calendar || store.selectedCalendars.includes(event.extendedProps.calendar)
+  )
+
   const calendarOptions = {
-    events: [...(store.events.length ? store.events : []), ...taskEvents],
+    events: [...filteredEvents, ...taskEvents],
     plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin],
     initialView: 'dayGridMonth',
     headerToolbar: {

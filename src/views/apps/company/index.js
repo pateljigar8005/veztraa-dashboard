@@ -22,7 +22,7 @@ import {
   Button,
   Spinner
 } from 'reactstrap'
-import { Settings, Mail, FileText, Sun, Server, Trash2 } from 'react-feather'
+import { Settings, Mail, FileText, Send, Sun, Server, Trash2 } from 'react-feather'
 import InputPasswordToggle from '@components/input-password-toggle'
 import AdminEmailsTab from './AdminEmailsTab'
 import { selectThemeColors, getUserData } from '@utils'
@@ -76,6 +76,8 @@ const CompanySettings = () => {
       ? 'mailbox'
       : tabParam === 'admin-emails'
       ? 'admin-emails'
+      : tabParam === 'email-templates'
+      ? 'email-templates'
       : 'general'
   const [taxEnabled, setTaxEnabled] = useState(false)
   const [currencyId, setCurrencyId] = useState('')
@@ -86,6 +88,14 @@ const CompanySettings = () => {
   const [invoicePdfOptions, setInvoicePdfOptions] = useState([])
   const [contractPdfOptions, setContractPdfOptions] = useState([])
   const [quotationPdfOptions, setQuotationPdfOptions] = useState([])
+  const [invoiceEmailTemplateId, setInvoiceEmailTemplateId] = useState('')
+  const [contractEmailTemplateId, setContractEmailTemplateId] = useState('')
+  const [quotationEmailTemplateId, setQuotationEmailTemplateId] = useState('')
+  const [invoiceEmailMailboxId, setInvoiceEmailMailboxId] = useState('')
+  const [contractEmailMailboxId, setContractEmailMailboxId] = useState('')
+  const [quotationEmailMailboxId, setQuotationEmailMailboxId] = useState('')
+  const [emailTemplateOptions, setEmailTemplateOptions] = useState([])
+  const [adminMailboxOptions, setAdminMailboxOptions] = useState([])
   const [smtpEncryption, setSmtpEncryption] = useState('')
   const [imapEncryption, setImapEncryption] = useState('')
   const [syncIntervalMinutes, setSyncIntervalMinutes] = useState(1)
@@ -131,6 +141,21 @@ const CompanySettings = () => {
       setContractPdfOptions(options)
       setQuotationPdfOptions(options)
     })
+
+    axios.get('/email-templates', { params: { perPage: 100 } }).then(response => {
+      const options = response.data.data.emailTemplates
+        .filter(t => t.is_active)
+        .map(t => ({ value: t.id, label: t.name }))
+      setEmailTemplateOptions(options)
+    })
+
+    axios.get('/company-mailboxes').then(response => {
+      const options = (response.data.data.companyMailboxes || []).map(m => ({
+        value: m.id,
+        label: m.label ? `${m.label} (${m.email})` : m.email
+      }))
+      setAdminMailboxOptions(options)
+    })
   }, [])
 
   useEffect(() => {
@@ -160,6 +185,12 @@ const CompanySettings = () => {
       setInvoicePdfTemplateId(data.invoice_pdf_template_id || '')
       setContractPdfTemplateId(data.contract_pdf_template_id || '')
       setQuotationPdfTemplateId(data.quotation_pdf_template_id || '')
+      setInvoiceEmailTemplateId(data.invoice_email_template_id || '')
+      setContractEmailTemplateId(data.contract_email_template_id || '')
+      setQuotationEmailTemplateId(data.quotation_email_template_id || '')
+      setInvoiceEmailMailboxId(data.invoice_email_mailbox_id || '')
+      setContractEmailMailboxId(data.contract_email_mailbox_id || '')
+      setQuotationEmailMailboxId(data.quotation_email_mailbox_id || '')
       setSmtpEncryption(data.smtp_encryption || '')
       setImapEncryption(data.imap_encryption || '')
       setSyncIntervalMinutes(data.mailbox_sync_interval_minutes || 1)
@@ -182,6 +213,12 @@ const CompanySettings = () => {
         invoice_pdf_template_id: invoicePdfTemplateId || null,
         contract_pdf_template_id: contractPdfTemplateId || null,
         quotation_pdf_template_id: quotationPdfTemplateId || null,
+        invoice_email_template_id: invoiceEmailTemplateId || null,
+        contract_email_template_id: contractEmailTemplateId || null,
+        quotation_email_template_id: quotationEmailTemplateId || null,
+        invoice_email_mailbox_id: invoiceEmailMailboxId || null,
+        contract_email_mailbox_id: contractEmailMailboxId || null,
+        quotation_email_mailbox_id: quotationEmailMailboxId || null,
         smtp_host: data.smtp_host || null,
         smtp_port: data.smtp_port === '' ? null : Number(data.smtp_port),
         smtp_username: data.smtp_username || null,
@@ -248,6 +285,10 @@ const CompanySettings = () => {
                 <ListGroupItem tag={Link} to='/company?tab=admin-emails' action active={activeTab === 'admin-emails'}>
                   <Mail size={16} className='me-75' />
                   <span className='align-middle'>Admin Emails</span>
+                </ListGroupItem>
+                <ListGroupItem tag={Link} to='/company?tab=email-templates' action active={activeTab === 'email-templates'}>
+                  <Send size={16} className='me-75' />
+                  <span className='align-middle'>Email Templates</span>
                 </ListGroupItem>
               </ListGroup>
             </div>
@@ -510,6 +551,130 @@ const CompanySettings = () => {
 
             <TabPane tabId='admin-emails'>
               <AdminEmailsTab />
+            </TabPane>
+
+            <TabPane tabId='email-templates'>
+              <div className='d-flex justify-content-between align-items-start mb-1'>
+                <div>
+                  <h6 className='mb-1'>Email Templates</h6>
+                  <p className='text-muted small mb-0'>
+                    Which email template and which Admin Email mailbox each document type uses when it's sent by
+                    email. Author a template's subject/body under{' '}
+                    <Link to='/email-template'>Email Templates</Link> - this just picks which one, and which
+                    mailbox, each document type sends from.
+                  </p>
+                </div>
+                <Link to='/email-template/add' className='text-nowrap ms-2'>
+                  + New Template
+                </Link>
+              </div>
+              <Row>
+                <Col md={12} className='mb-1'>
+                  <Label className='form-label' for='invoice_email_template_id'>
+                    Invoice
+                  </Label>
+                  <Row>
+                    <Col md={6} className='mb-1 mb-md-0'>
+                      <Select
+                        inputId='invoice_email_template_id'
+                        isClearable
+                        className='react-select'
+                        classNamePrefix='select'
+                        theme={selectThemeColors}
+                        options={emailTemplateOptions}
+                        value={emailTemplateOptions.find(i => i.value === invoiceEmailTemplateId) || null}
+                        onChange={option => setInvoiceEmailTemplateId(option ? option.value : '')}
+                        placeholder='Select email template...'
+                      />
+                    </Col>
+                    <Col md={6}>
+                      <Select
+                        inputId='invoice_email_mailbox_id'
+                        isClearable
+                        className='react-select'
+                        classNamePrefix='select'
+                        theme={selectThemeColors}
+                        options={adminMailboxOptions}
+                        value={adminMailboxOptions.find(i => i.value === invoiceEmailMailboxId) || null}
+                        onChange={option => setInvoiceEmailMailboxId(option ? option.value : '')}
+                        placeholder='Select sending mailbox...'
+                      />
+                    </Col>
+                  </Row>
+                </Col>
+                <Col md={12} className='mb-1'>
+                  <Label className='form-label' for='quotation_email_template_id'>
+                    Quotation
+                  </Label>
+                  <Row>
+                    <Col md={6} className='mb-1 mb-md-0'>
+                      <Select
+                        inputId='quotation_email_template_id'
+                        isClearable
+                        className='react-select'
+                        classNamePrefix='select'
+                        theme={selectThemeColors}
+                        options={emailTemplateOptions}
+                        value={emailTemplateOptions.find(i => i.value === quotationEmailTemplateId) || null}
+                        onChange={option => setQuotationEmailTemplateId(option ? option.value : '')}
+                        placeholder='Select email template...'
+                      />
+                    </Col>
+                    <Col md={6}>
+                      <Select
+                        inputId='quotation_email_mailbox_id'
+                        isClearable
+                        className='react-select'
+                        classNamePrefix='select'
+                        theme={selectThemeColors}
+                        options={adminMailboxOptions}
+                        value={adminMailboxOptions.find(i => i.value === quotationEmailMailboxId) || null}
+                        onChange={option => setQuotationEmailMailboxId(option ? option.value : '')}
+                        placeholder='Select sending mailbox...'
+                      />
+                    </Col>
+                  </Row>
+                </Col>
+                <Col md={12} className='mb-1'>
+                  <Label className='form-label' for='contract_email_template_id'>
+                    Contract
+                  </Label>
+                  <Row>
+                    <Col md={6} className='mb-1 mb-md-0'>
+                      <Select
+                        inputId='contract_email_template_id'
+                        isClearable
+                        className='react-select'
+                        classNamePrefix='select'
+                        theme={selectThemeColors}
+                        options={emailTemplateOptions}
+                        value={emailTemplateOptions.find(i => i.value === contractEmailTemplateId) || null}
+                        onChange={option => setContractEmailTemplateId(option ? option.value : '')}
+                        placeholder='Select email template...'
+                      />
+                    </Col>
+                    <Col md={6}>
+                      <Select
+                        inputId='contract_email_mailbox_id'
+                        isClearable
+                        className='react-select'
+                        classNamePrefix='select'
+                        theme={selectThemeColors}
+                        options={adminMailboxOptions}
+                        value={adminMailboxOptions.find(i => i.value === contractEmailMailboxId) || null}
+                        onChange={option => setContractEmailMailboxId(option ? option.value : '')}
+                        placeholder='Select sending mailbox...'
+                      />
+                    </Col>
+                  </Row>
+                </Col>
+              </Row>
+              {!adminMailboxOptions.length && (
+                <p className='text-muted small mb-0'>
+                  No Admin Email mailboxes yet - add one under <Link to='/company?tab=admin-emails'>Admin Emails</Link>{' '}
+                  first.
+                </p>
+              )}
             </TabPane>
 
             <TabPane tabId='smtp'>

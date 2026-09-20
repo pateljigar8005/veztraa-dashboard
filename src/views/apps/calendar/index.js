@@ -12,6 +12,7 @@ import useWeekendDays from '@hooks/useWeekendDays'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   fetchEvents,
+  fetchEventCategories,
   fetchKanbanTaskEvents,
   fetchTodoTaskEvents,
   selectEvent,
@@ -26,12 +27,11 @@ import { handleSelectTask } from '../kanban/store'
 import { selectTask, updateTask as updateTodoTask, addTask as addTodoTask, deleteTask as deleteTodoTask } from '../todo/store'
 import '@styles/react/apps/app-calendar.scss'
 
-const calendarsColor = {
-  Business: 'primary',
-  Holiday: 'success',
-  Personal: 'danger',
-  Family: 'warning',
-  ETC: 'info',
+// Kanban/Todo tiles aren't real event_categories rows (they're derived,
+// read-only entries from those two other apps - see fetchKanbanTaskEvents/
+// fetchTodoTaskEvents in store/index.js), so their color stays fixed here
+// rather than living in the admin-manageable category list.
+const taskSourceColors = {
   'Kanban Tasks': 'secondary',
   'To-Do': 'dark'
 }
@@ -41,6 +41,11 @@ const CalendarComponent = () => {
   const store = useSelector(state => state.calendar)
   const kanbanStore = useSelector(state => state.kanban)
   const todoStore = useSelector(state => state.todo)
+
+  const calendarsColor = {
+    ...Object.fromEntries(store.eventCategories.map(c => [c.name, c.color])),
+    ...taskSourceColors
+  }
 
   const [calendarApi, setCalendarApi] = useState(null)
   const [addSidebarOpen, setAddSidebarOpen] = useState(false)
@@ -91,7 +96,8 @@ const CalendarComponent = () => {
   }
 
   useEffect(() => {
-    dispatch(fetchEvents(store.selectedCalendars))
+    dispatch(fetchEventCategories())
+    dispatch(fetchEvents())
     dispatch(fetchKanbanTaskEvents())
     dispatch(fetchTodoTaskEvents())
   }, [])

@@ -52,6 +52,7 @@ const routeToMenuId = [
   { pattern: /^\/roles/, id: 'roles-permissions' },
   { pattern: /^\/service-item/, id: 'serviceItems' },
   { pattern: /^\/payment-method/, id: 'paymentMethods' },
+  { pattern: /^\/event-category/, id: 'eventCategories' },
   { pattern: /^\/terms-template/, id: 'termsTemplates' },
   { pattern: /^\/email-template/, id: 'emailTemplates' },
   { pattern: /^\/holiday/, id: 'holidays' },

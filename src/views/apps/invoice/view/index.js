@@ -4,15 +4,17 @@ import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useDispatch, useSelector } from 'react-redux'
-import { Edit2, Trash2, ChevronDown, ChevronRight } from 'react-feather'
+import { Edit2, Trash2, Send, ChevronDown, ChevronRight } from 'react-feather'
 import { pdf, ReportDocument } from '@veztraa/report-renderer'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Table, Collapse } from 'reactstrap'
 import { getInvoice, updateInvoice } from '../store'
 import { invoiceStatusOptions } from '../../quotation/documentOptions'
 import RecordPaymentModal from '../RecordPaymentModal'
+import ComposePopup from '../../email/ComposePopup'
 import { selectThemeColors, formatAmount } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
+import { renderEmailTemplate } from '@src/utility/renderEmailTemplate'
 
 const buildPdfData = invoice => ({
   client: {
@@ -59,6 +61,12 @@ const InvoiceView = () => {
   const [generatingPdf, setGeneratingPdf] = useState(false)
   const [previewUrl, setPreviewUrl] = useState(null)
   const [previewLoading, setPreviewLoading] = useState(false)
+  const [companySettings, setCompanySettings] = useState(null)
+  const [emailTemplate, setEmailTemplate] = useState(null)
+  const [preparingEmail, setPreparingEmail] = useState(false)
+  const [composeOpen, setComposeOpen] = useState(false)
+  const [composeInitialValues, setComposeInitialValues] = useState(null)
+  const [composeAttachments, setComposeAttachments] = useState([])
 
   useEffect(() => {
     dispatch(getInvoice(id))
@@ -66,11 +74,18 @@ const InvoiceView = () => {
 
   useEffect(() => {
     axios.get('/company').then(response => {
-      const templateId = response.data.data.invoice_pdf_template_id
-      if (!templateId) return
-      axios.get(`/pdf-designer-templates/${templateId}`).then(templateResponse => {
-        setPdfTemplate(templateResponse.data.data.template)
-      })
+      const data = response.data.data
+      setCompanySettings(data)
+      if (data.invoice_pdf_template_id) {
+        axios.get(`/pdf-designer-templates/${data.invoice_pdf_template_id}`).then(templateResponse => {
+          setPdfTemplate(templateResponse.data.data.template)
+        })
+      }
+      if (data.invoice_email_template_id) {
+        axios.get(`/email-templates/${data.invoice_email_template_id}`).then(templateResponse => {
+          setEmailTemplate(templateResponse.data.data)
+        })
+      }
     })
   }, [])
 
@@ -151,6 +166,59 @@ const InvoiceView = () => {
       toast.error('Failed to generate PDF')
     } finally {
       setGeneratingPdf(false)
+    }
+  }
+
+  const handleSendEmail = async () => {
+    if (!companySettings?.invoice_email_template_id || !companySettings?.invoice_email_mailbox_id) {
+      toast.error('Set an Invoice email template and sending mailbox in Company Settings first.')
+      return
+    }
+    if (!emailTemplate) {
+      toast.error('The selected email template failed to load.')
+      return
+    }
+    if (!pdfTemplate) {
+      toast.error('No invoice PDF template is selected in Company Settings.')
+      return
+    }
+    if (!invoice.email) {
+      toast('Client has no email on file - fill in the recipient manually.')
+    }
+
+    setPreparingEmail(true)
+    try {
+      const blob = await pdf(<ReportDocument template={pdfTemplate} data={buildPdfData(invoice)} />).toBlob()
+      const file = new File([blob], `${invoice.invoice_number}.pdf`, { type: 'application/pdf' })
+
+      const { subject, body } = renderEmailTemplate(emailTemplate, {
+        contact_name: invoice.contact_name || '',
+        client_full_name: invoice.client_full_name || invoice.contact_name || '',
+        company_name: invoice.company_name || '',
+        email: invoice.email || '',
+        phone: invoice.phone || '',
+        billing_address: invoice.billing_address || '',
+        status: invoice.status || '',
+        invoice_number: invoice.invoice_number || '',
+        issue_date: invoice.issue_date || '',
+        due_date: invoice.due_date || '',
+        currency: invoice.currency || '',
+        total: formatAmount(invoice.total),
+        subtotal: formatAmount(invoice.subtotal),
+        tax_amount: formatAmount(invoice.tax_amount),
+        discount_amount: formatAmount(invoice.discount_amount),
+        paid_amount: formatAmount(invoice.paid_amount),
+        balance_due: formatAmount(invoice.balance_due),
+        sender_company_name: companySettings.legal_name || ''
+      })
+
+      setComposeInitialValues({ to: invoice.email || '', cc: '', bcc: '', subject, body })
+      setComposeAttachments([file])
+      setComposeOpen(true)
+    } catch (e) {
+      toast.error('Failed to prepare email')
+    } finally {
+      setPreparingEmail(false)
     }
   }
 
@@ -416,8 +484,19 @@ const InvoiceView = () => {
               >
                 + Record Payment
               </Button>
-              {
-                                                                               }
+              {currentUserCan('/invoice', 'edit') && (
+                <Button
+                  color='primary'
+                  outline
+                  block
+                  className='mt-1'
+                  disabled={preparingEmail}
+                  onClick={handleSendEmail}
+                >
+                  <Send size={14} className='me-50' />
+                  {preparingEmail ? 'Preparing…' : 'Send Email'}
+                </Button>
+              )}
               <Button
                 id='invoice-download-pdf-btn'
                 className='d-none'
@@ -429,6 +508,12 @@ const InvoiceView = () => {
               {!pdfTemplate && (
                 <p className='text-muted small mb-0 mt-50'>
                   No Invoice PDF template selected in <Link to='/company'>Company Settings</Link>.
+                </p>
+              )}
+              {companySettings && (!companySettings.invoice_email_template_id || !companySettings.invoice_email_mailbox_id) && (
+                <p className='text-muted small mb-0 mt-50'>
+                  Set an email template and sending mailbox for Invoices in{' '}
+                  <Link to='/company?tab=email-templates'>Company Settings</Link>.
                 </p>
               )}
             </CardBody>
@@ -463,6 +548,18 @@ const InvoiceView = () => {
           loadPayments()
           dispatch(getInvoice(id))
         }}
+      />
+
+      <ComposePopup
+        composeOpen={composeOpen}
+        toggleCompose={() => setComposeOpen(prev => !prev)}
+        replyTo={null}
+        initialValues={composeInitialValues}
+        initialAttachments={composeAttachments}
+        adminMailboxId={companySettings?.invoice_email_mailbox_id}
+        adminMailboxEmail={companySettings?.invoice_email_mailbox_email}
+        container='body'
+        hideTemplateAndDraft
       />
     </Row>
   )

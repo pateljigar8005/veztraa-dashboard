@@ -1548,21 +1548,26 @@
           border-color: $theme-dark-border-color !important;
         }
       }
+    }
+  }
 
-      #compose-mail {
-        .compose-mail-form-field,
-        .ql-toolbar,
-        .ql-container {
-          border-color: $theme-dark-border-color;
-        }
-        label {
-          color: $theme-dark-body-color;
-        }
-        .modal-body {
-          border-bottom-left-radius: $modal-content-border-radius;
-          border-bottom-right-radius: $modal-content-border-radius;
-        }
-      }
+  // Compose Mail modal - deliberately NOT nested under .email-application:
+  // ComposePopup (#compose-mail) is also rendered from non-Email pages now
+  // (Invoice/Quotation/Contract "Send Email"), which have no
+  // .email-application ancestor, so these rules must stand on their own
+  // (still gated by .dark-layout so they only apply in dark mode).
+  #compose-mail {
+    .compose-mail-form-field,
+    .ql-toolbar,
+    .ql-container {
+      border-color: $theme-dark-border-color;
+    }
+    label {
+      color: $theme-dark-body-color;
+    }
+    .modal-body {
+      border-bottom-left-radius: $modal-content-border-radius;
+      border-bottom-right-radius: $modal-content-border-radius;
     }
   }
 

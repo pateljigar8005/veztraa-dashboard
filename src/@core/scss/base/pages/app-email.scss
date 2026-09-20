@@ -320,8 +320,13 @@ $email_details_header_height: 5rem;
       }
     }
   }
+}
 
-  #compose-mail {
+// Compose Mail modal - deliberately NOT nested under .email-application:
+// ComposePopup (#compose-mail) is also rendered from non-Email pages now
+// (Invoice/Quotation/Contract "Send Email"), which have no
+// .email-application ancestor, so these rules must stand on their own.
+#compose-mail {
     .compose-mail-form-field {
       display: flex;
       justify-content: center;
@@ -383,7 +388,6 @@ $email_details_header_height: 5rem;
       align-items: center;
       justify-content: space-between;
     }
-  }
 }
 @include media-breakpoint-down(lg) {
   .email-application {
@@ -421,7 +425,7 @@ $email_details_header_height: 5rem;
 }
 
 @include media-breakpoint-down(md) {
-  .email-application #compose-mail .ql-editor {
+  #compose-mail .ql-editor {
     min-height: 150px;
   }
 }

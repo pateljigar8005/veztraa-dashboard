@@ -1,4 +1,6 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import axios from 'axios'
 import Avatar from '@components/avatar'
 import { X } from 'react-feather'
 import toast from 'react-hot-toast'
@@ -7,12 +9,6 @@ import Select, { components } from 'react-select'
 import { useForm, Controller } from 'react-hook-form'
 import { Button, Modal, ModalBody, ModalFooter, Label, Input, Form } from 'reactstrap'
 import { selectThemeColors, isObjEmpty, toDateOnly } from '@utils'
-import img1 from '@src/assets/images/avatars/1-small.png'
-import img2 from '@src/assets/images/avatars/3-small.png'
-import img3 from '@src/assets/images/avatars/5-small.png'
-import img4 from '@src/assets/images/avatars/7-small.png'
-import img5 from '@src/assets/images/avatars/9-small.png'
-import img6 from '@src/assets/images/avatars/11-small.png'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 
@@ -27,12 +23,13 @@ const AddEventSidebar = props => {
     updateEvent,
     removeEvent,
     refetchEvents,
-    calendarsColor,
     handleAddEventSidebar,
     holidayDates,
     getHolidayName,
     isWeekend
   } = props
+
+  const eventCategories = store.eventCategories
 
   const selectedEvent = store.selectedEvent,
     {
@@ -48,29 +45,25 @@ const AddEventSidebar = props => {
 
   const [url, setUrl] = useState('')
   const [desc, setDesc] = useState('')
-  const [guests, setGuests] = useState({})
+  const [guests, setGuests] = useState([])
   const [allDay, setAllDay] = useState(false)
   const [location, setLocation] = useState('')
   const [endPicker, setEndPicker] = useState(new Date())
   const [startPicker, setStartPicker] = useState(new Date())
-  const [calendarLabel, setCalendarLabel] = useState([{ value: 'Business', label: 'Business', color: 'primary' }])
+  const [calendarLabel, setCalendarLabel] = useState([])
+  const [userOptions, setUserOptions] = useState([])
 
-  const options = [
-    { value: 'Business', label: 'Business', color: 'primary' },
-    { value: 'Personal', label: 'Personal', color: 'danger' },
-    { value: 'Family', label: 'Family', color: 'warning' },
-    { value: 'Holiday', label: 'Holiday', color: 'success' },
-    { value: 'ETC', label: 'ETC', color: 'info' }
-  ]
+  const options = eventCategories.map(c => ({ value: c.id, label: c.name, color: c.color }))
 
-  const guestsOptions = [
-    { value: 'Donna Frank', label: 'Donna Frank', avatar: img1 },
-    { value: 'Jane Foster', label: 'Jane Foster', avatar: img2 },
-    { value: 'Gabrielle Robertson', label: 'Gabrielle Robertson', avatar: img3 },
-    { value: 'Lori Spears', label: 'Lori Spears', avatar: img4 },
-    { value: 'Sandy Vega', label: 'Sandy Vega', avatar: img5 },
-    { value: 'Cheryl May', label: 'Cheryl May', avatar: img6 }
-  ]
+  useEffect(() => {
+    if (!open || userOptions.length) return
+    axios.get('/users', { params: { perPage: 200 } }).then(response => {
+      const users = response.data?.data?.users || []
+      setUserOptions(
+        users.filter(u => u.is_active).map(u => ({ value: u.id, label: u.fullName, avatar: u.avatar }))
+      )
+    })
+  }, [open])
 
   const OptionComponent = ({ data, ...props }) => {
     return (
@@ -85,7 +78,13 @@ const AddEventSidebar = props => {
     return (
       <components.Option {...props}>
         <div className='d-flex flex-wrap align-items-center'>
-          <Avatar className='my-0 me-1' size='sm' img={data.avatar} />
+          <Avatar
+            className='my-0 me-1'
+            size='sm'
+            img={data.avatar}
+            content={data.label}
+            initials={!data.avatar}
+          />
           <div>{data.label}</div>
         </div>
       </components.Option>
@@ -106,19 +105,24 @@ const AddEventSidebar = props => {
       toast.error(blockReason)
       return
     }
+    if (!calendarLabel.length) {
+      toast.error('Pick an event category first - add one under Settings > Event Categories if none exist yet.')
+      return
+    }
 
     const obj = {
       title: getValues('title'),
       start: startPicker,
       end: endPicker,
       allDay,
+      url: url.length ? url : '',
       display: 'block',
       extendedProps: {
         calendar: calendarLabel[0].label,
-        url: url.length ? url : undefined,
-        guests: guests.length ? guests : undefined,
-        location: location.length ? location : undefined,
-        desc: desc.length ? desc : undefined
+        category_id: calendarLabel[0].value,
+        guests,
+        location,
+        description: desc
       }
     }
     dispatch(addEvent(obj))
@@ -134,37 +138,50 @@ const AddEventSidebar = props => {
     setUrl('')
     setLocation('')
     setDesc('')
-    setGuests({})
-    setCalendarLabel([{ value: 'Business', label: 'Business', color: 'primary' }])
+    setGuests([])
+    setCalendarLabel(options.length ? [options[0]] : [])
     setStartPicker(new Date())
     setEndPicker(new Date())
   }
 
   const handleSelectedEvent = () => {
     if (!isObjEmpty(selectedEvent)) {
+      const categoryId = selectedEvent.extendedProps.category_id
       const calendar = selectedEvent.extendedProps.calendar
 
       const resolveLabel = () => {
-        if (calendar.length) {
-          return { label: calendar, value: calendar, color: calendarsColor[calendar] }
-        } else {
-          return { value: 'Business', label: 'Business', color: 'primary' }
+        const match = options.find(o => o.value === categoryId)
+        if (match) return match
+        if (calendar) {
+          return { value: categoryId, label: calendar, color: 'primary' }
         }
+        return options.length ? options[0] : null
       }
+
       setValue('title', selectedEvent.title || getValues('title'))
       setAllDay(selectedEvent.allDay || allDay)
       setUrl(selectedEvent.url || url)
       setLocation(selectedEvent.extendedProps.location || location)
       setDesc(selectedEvent.extendedProps.description || desc)
-      setGuests(selectedEvent.extendedProps.guests || guests)
+      setGuests(
+        (selectedEvent.extendedProps.guests || []).map(g => ({
+          value: g.id,
+          label: g.fullName,
+          avatar: userOptions.find(u => u.value === g.id)?.avatar
+        }))
+      )
       setStartPicker(new Date(selectedEvent.start))
       setEndPicker(selectedEvent.allDay ? new Date(selectedEvent.start) : new Date(selectedEvent.end))
-      setCalendarLabel([resolveLabel()])
+      const label = resolveLabel()
+      setCalendarLabel(label ? [label] : [])
+    } else {
+      setCalendarLabel(options.length ? [options[0]] : [])
     }
   }
 
   const updateEventInCalendar = (updatedEventData, propsToUpdate, extendedPropsToUpdate) => {
     const existingEvent = calendarApi.getEventById(updatedEventData.id)
+    if (!existingEvent) return
 
     for (let index = 0; index < propsToUpdate.length; index++) {
       const propName = propsToUpdate[index]
@@ -188,6 +205,10 @@ const AddEventSidebar = props => {
         toast.error(blockReason)
         return
       }
+      if (!calendarLabel.length) {
+        toast.error('Pick an event category first.')
+        return
+      }
 
       const eventToUpdate = {
         id: selectedEvent.id,
@@ -201,7 +222,8 @@ const AddEventSidebar = props => {
           location,
           description: desc,
           guests,
-          calendar: calendarLabel[0].label
+          calendar: calendarLabel[0].label,
+          category_id: calendarLabel[0].value
         }
       }
 
@@ -220,7 +242,7 @@ const AddEventSidebar = props => {
   }
 
   const removeEventInCalendar = eventId => {
-    calendarApi.getEventById(eventId).remove()
+    calendarApi.getEventById(eventId)?.remove()
   }
 
   const handleDeleteEvent = () => {
@@ -300,19 +322,25 @@ const AddEventSidebar = props => {
               <Label className='form-label' for='label'>
                 Label
               </Label>
-              <Select
-                id='label'
-                value={calendarLabel}
-                options={options}
-                theme={selectThemeColors}
-                className='react-select'
-                classNamePrefix='select'
-                isClearable={false}
-                onChange={data => setCalendarLabel([data])}
-                components={{
-                  Option: OptionComponent
-                }}
-              />
+              {options.length ? (
+                <Select
+                  id='label'
+                  value={calendarLabel}
+                  options={options}
+                  theme={selectThemeColors}
+                  className='react-select'
+                  classNamePrefix='select'
+                  isClearable={false}
+                  onChange={data => setCalendarLabel([data])}
+                  components={{
+                    Option: OptionComponent
+                  }}
+                />
+              ) : (
+                <p className='text-muted small mb-0'>
+                  No event categories yet - add one under <Link to='/event-category'>Settings &rarr; Event Categories</Link>.
+                </p>
+              )}
             </div>
 
             <div className='mb-1'>
@@ -390,10 +418,10 @@ const AddEventSidebar = props => {
                 className='react-select'
                 classNamePrefix='select'
                 isClearable={false}
-                options={guestsOptions}
+                options={userOptions}
                 theme={selectThemeColors}
-                value={guests.length ? [...guests] : null}
-                onChange={data => setGuests([...data])}
+                value={guests.length ? guests : null}
+                onChange={data => setGuests(data ? [...data] : [])}
                 components={{
                   Option: GuestsComponent
                 }}

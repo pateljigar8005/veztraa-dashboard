@@ -44,6 +44,7 @@ export const menuPermissionGroups = [
       { id: 'roles-permissions', title: 'Roles & Permissions' },
       { id: 'serviceItems', title: 'Service Item' },
       { id: 'paymentMethods', title: 'Payment Methods' },
+      { id: 'eventCategories', title: 'Event Categories' },
       { id: 'termsTemplates', title: 'Terms & Conditions' },
       { id: 'emailTemplates', title: 'Email Template' },
       { id: 'holidays', title: 'Holidays' },

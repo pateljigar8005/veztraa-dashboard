@@ -18,7 +18,28 @@ import { getUserData, uploadEditorImage, selectThemeColors } from '@utils'
 
 const blank = { to: '', cc: '', bcc: '', subject: '', body: '' }
 
-const ComposePopup = ({ composeOpen, toggleCompose, replyTo, adminMailboxId, adminMailboxEmail }) => {
+const ComposePopup = ({
+  composeOpen,
+  toggleCompose,
+  replyTo,
+  adminMailboxId,
+  adminMailboxEmail,
+  initialValues,
+  initialAttachments,
+  // Defaults to the Email app's own '.content-body' div (email/index.js) -
+  // that class only exists there, not app-wide, so any caller outside the
+  // Email module (e.g. Invoice/Quotation/Contract "Send Email") must pass
+  // container='body' or reactstrap's getTarget() falls through to an
+  // invalid '#.content-body' selector and throws.
+  container = '.content-body',
+  // Invoice/Quotation/Contract "Send Email" already prefills from the
+  // document type's configured template and always sends via a company
+  // mailbox (drafts aren't supported there, see handleSaveDraft/handleClose
+  // below) - both controls are irrelevant/confusing in that flow, so the
+  // caller opts out of them here. The Email app's own Compose leaves this
+  // false and keeps both.
+  hideTemplateAndDraft = false
+}) => {
   const dispatch = useDispatch()
 
   const [ccOpen, setCCOpen] = useState(false)
@@ -143,12 +164,24 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo, adminMailboxId, adm
       setFields(replyFields)
       setInitialFields(replyFields)
       setDraftUid(null)
+    } else if (composeOpen && initialValues) {
+      // Programmatic prefill (e.g. "Send Email" from an Invoice/Quotation/
+      // Contract page) rather than a user-picked reply/draft/forward -
+      // initialValues/initialAttachments are read once here, from whatever
+      // the caller passed at the moment composeOpen flipped true, same as
+      // every other branch above. Deliberately NOT in this effect's deps
+      // (see below) so a parent re-render while the modal stays open can't
+      // clobber in-progress edits by re-seeding these fields.
+      const seededFields = { ...blank, ...initialValues }
+      setFields(seededFields)
+      setInitialFields(seededFields)
+      setDraftUid(null)
     } else if (composeOpen) {
       setFields(blank)
       setInitialFields(blank)
       setDraftUid(null)
     }
-    setAttachments([])
+    setAttachments(composeOpen && initialValues ? initialAttachments || [] : [])
     setSelectedTemplate(null)
     setScheduleOpen(false)
     setScheduleDate(null)
@@ -342,7 +375,7 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo, adminMailboxId, adm
       isOpen={composeOpen}
       centered
       size='xl'
-      container='.content-body'
+      container={container}
       toggle={handleClose}
     >
       <div className='modal-header d-flex align-items-center justify-content-between'>
@@ -367,15 +400,6 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo, adminMailboxId, adm
             </div>
           ) : (
             <>
-              {
-              }
-              {adminMailboxId && (
-                <div className='alert alert-primary d-flex align-items-center py-50 px-1 mb-1'>
-                  <span>
-                    Sending as <strong>{adminMailboxEmail || 'this mailbox'}</strong>
-                  </span>
-                </div>
-              )}
               <div className='compose-mail-form-field'>
                 <Label for='email-to' className='form-label me-1 mb-0'>
                   To:
@@ -468,32 +492,40 @@ const ComposePopup = ({ composeOpen, toggleCompose, replyTo, adminMailboxId, adm
             </>
           )}
         </ModalBody>
-        <ModalFooter className='d-flex align-items-center justify-content-between flex-nowrap'>
-          <Select
-            isClearable
-            className='react-select me-1'
-            classNamePrefix='select'
-            theme={selectThemeColors}
-            options={templateOptions}
-            value={selectedTemplate}
-            onChange={handleTemplateSelect}
-            isDisabled={replyTo?.loading}
-            placeholder='Load from template...'
-            menuPlacement='top'
-            styles={{ container: base => ({ ...base, width: '250px', maxWidth: '250px' }) }}
-          />
+        <ModalFooter
+          className={`d-flex align-items-center flex-nowrap ${
+            hideTemplateAndDraft ? 'justify-content-end' : 'justify-content-between'
+          }`}
+        >
+          {!hideTemplateAndDraft && (
+            <Select
+              isClearable
+              className='react-select me-1'
+              classNamePrefix='select'
+              theme={selectThemeColors}
+              options={templateOptions}
+              value={selectedTemplate}
+              onChange={handleTemplateSelect}
+              isDisabled={replyTo?.loading}
+              placeholder='Load from template...'
+              menuPlacement='top'
+              styles={{ container: base => ({ ...base, width: '250px', maxWidth: '250px' }) }}
+            />
+          )}
           <div className='btn-wrapper d-flex align-items-center flex-shrink-0'>
-            <Button
-              type='button'
-              color='secondary'
-              outline
-              className='me-1'
-              disabled={savingDraft || replyTo?.loading || Boolean(adminMailboxId)}
-              onClick={handleSaveDraft}
-              title={adminMailboxId ? "Drafts aren't supported for a company mailbox yet" : undefined}
-            >
-              {savingDraft ? 'Saving...' : 'Save Draft'}
-            </Button>
+            {!hideTemplateAndDraft && (
+              <Button
+                type='button'
+                color='secondary'
+                outline
+                className='me-1'
+                disabled={savingDraft || replyTo?.loading || Boolean(adminMailboxId)}
+                onClick={handleSaveDraft}
+                title={adminMailboxId ? "Drafts aren't supported for a company mailbox yet" : undefined}
+              >
+                {savingDraft ? 'Saving...' : 'Save Draft'}
+              </Button>
+            )}
             <Dropdown
               isOpen={scheduleOpen}
               toggle={() => setScheduleOpen(!scheduleOpen)}

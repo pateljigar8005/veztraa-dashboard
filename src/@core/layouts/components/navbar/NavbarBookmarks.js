@@ -9,6 +9,7 @@ const listToAddRoute = {
   '/user': '/user/add',
   '/client': '/client/add',
   '/payment-method': '/payment-method/add',
+  '/event-category': '/event-category/add',
   '/service-item': '/service-item/add',
   '/project': '/project/add',
   '/quotation': '/quotation/add',
@@ -30,7 +31,7 @@ const listToAddRoute = {
 }
 
 const addOrEditRoutePattern =
-  /^\/(user|client|payment-method|service-item|project|quotation|contract|invoice|terms-template|email-template|holiday|roles|pdf-designer|currency|industry|team-member|portfolio|case-study|job-listing|timesheet-activity|timesheet)\/(add|edit\/[^/]+)$/
+  /^\/(user|client|payment-method|event-category|service-item|project|quotation|contract|invoice|terms-template|email-template|holiday|roles|pdf-designer|currency|industry|team-member|portfolio|case-study|job-listing|timesheet-activity|timesheet)\/(add|edit\/[^/]+)$/
 
 const isPdfDesignerFormRoute = pathname => /^\/pdf-designer\/(add|edit\/[^/]+)$/.test(pathname)
 

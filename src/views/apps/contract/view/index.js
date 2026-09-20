@@ -4,13 +4,15 @@ import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useDispatch, useSelector } from 'react-redux'
-import { Edit2, ChevronDown, ChevronRight } from 'react-feather'
+import { Edit2, Send, ChevronDown, ChevronRight } from 'react-feather'
 import { pdf, ReportDocument } from '@veztraa/report-renderer'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Collapse } from 'reactstrap'
 import { getContract, updateContract } from '../store'
 import { frequencyOptions, contractStatusOptions } from '../contractOptions'
+import ComposePopup from '../../email/ComposePopup'
 import { selectThemeColors } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
+import { renderEmailTemplate } from '@src/utility/renderEmailTemplate'
 
 const frequencyLabel = value => frequencyOptions.find(i => i.value === value)?.label || value || '-'
 
@@ -50,6 +52,12 @@ const ContractView = () => {
   const [generatingPdf, setGeneratingPdf] = useState(false)
   const [previewUrl, setPreviewUrl] = useState(null)
   const [previewLoading, setPreviewLoading] = useState(false)
+  const [companySettings, setCompanySettings] = useState(null)
+  const [emailTemplate, setEmailTemplate] = useState(null)
+  const [preparingEmail, setPreparingEmail] = useState(false)
+  const [composeOpen, setComposeOpen] = useState(false)
+  const [composeInitialValues, setComposeInitialValues] = useState(null)
+  const [composeAttachments, setComposeAttachments] = useState([])
 
   useEffect(() => {
     dispatch(getContract(id))
@@ -57,11 +65,18 @@ const ContractView = () => {
 
   useEffect(() => {
     axios.get('/company').then(response => {
-      const templateId = response.data.data.contract_pdf_template_id
-      if (!templateId) return
-      axios.get(`/pdf-designer-templates/${templateId}`).then(templateResponse => {
-        setPdfTemplate(templateResponse.data.data.template)
-      })
+      const data = response.data.data
+      setCompanySettings(data)
+      if (data.contract_pdf_template_id) {
+        axios.get(`/pdf-designer-templates/${data.contract_pdf_template_id}`).then(templateResponse => {
+          setPdfTemplate(templateResponse.data.data.template)
+        })
+      }
+      if (data.contract_email_template_id) {
+        axios.get(`/email-templates/${data.contract_email_template_id}`).then(templateResponse => {
+          setEmailTemplate(templateResponse.data.data)
+        })
+      }
     })
   }, [])
 
@@ -134,6 +149,54 @@ const ContractView = () => {
       toast.error('Failed to generate PDF')
     } finally {
       setGeneratingPdf(false)
+    }
+  }
+
+  const handleSendEmail = async () => {
+    if (!companySettings?.contract_email_template_id || !companySettings?.contract_email_mailbox_id) {
+      toast.error('Set a Contract email template and sending mailbox in Company Settings first.')
+      return
+    }
+    if (!emailTemplate) {
+      toast.error('The selected email template failed to load.')
+      return
+    }
+    if (!pdfTemplate) {
+      toast.error('No contract PDF template is selected in Company Settings.')
+      return
+    }
+    if (!contract.email) {
+      toast('Client has no email on file - fill in the recipient manually.')
+    }
+
+    setPreparingEmail(true)
+    try {
+      const blob = await pdf(<ReportDocument template={pdfTemplate} data={buildPdfData(contract)} />).toBlob()
+      const file = new File([blob], `${contract.contract_number}.pdf`, { type: 'application/pdf' })
+
+      const { subject, body } = renderEmailTemplate(emailTemplate, {
+        contact_name: contract.contact_name || '',
+        client_full_name: contract.client_full_name || contract.contact_name || '',
+        company_name: contract.company_name || '',
+        email: contract.email || '',
+        phone: contract.phone || '',
+        billing_address: contract.billing_address || '',
+        status: contract.status || '',
+        contract_number: contract.contract_number || '',
+        title: contract.title || '',
+        start_date: contract.start_date || '',
+        end_date: contract.end_date || '',
+        frequency: frequencyLabel(contract.frequency),
+        sender_company_name: companySettings.legal_name || ''
+      })
+
+      setComposeInitialValues({ to: contract.email || '', cc: '', bcc: '', subject, body })
+      setComposeAttachments([file])
+      setComposeOpen(true)
+    } catch (e) {
+      toast.error('Failed to prepare email')
+    } finally {
+      setPreparingEmail(false)
     }
   }
 
@@ -266,6 +329,19 @@ const ContractView = () => {
                 onChange={handleStatusChange}
                 isDisabled={!currentUserCan('/contract', 'edit')}
               />
+              {currentUserCan('/contract', 'edit') && (
+                <Button
+                  color='primary'
+                  outline
+                  block
+                  className='mb-1'
+                  disabled={preparingEmail}
+                  onClick={handleSendEmail}
+                >
+                  <Send size={14} className='me-50' />
+                  {preparingEmail ? 'Preparing…' : 'Send Email'}
+                </Button>
+              )}
               <Button
                 id='contract-download-pdf-btn'
                 className='d-none'
@@ -277,6 +353,12 @@ const ContractView = () => {
               {!pdfTemplate && (
                 <p className='text-muted small mb-0 mt-50'>
                   No Contract PDF template selected in <Link to='/company'>Company Settings</Link>.
+                </p>
+              )}
+              {companySettings && (!companySettings.contract_email_template_id || !companySettings.contract_email_mailbox_id) && (
+                <p className='text-muted small mb-0 mt-50'>
+                  Set an email template and sending mailbox for Contracts in{' '}
+                  <Link to='/company?tab=email-templates'>Company Settings</Link>.
                 </p>
               )}
             </CardBody>
@@ -299,6 +381,18 @@ const ContractView = () => {
           )}
         </div>
       </Col>
+
+      <ComposePopup
+        composeOpen={composeOpen}
+        toggleCompose={() => setComposeOpen(prev => !prev)}
+        replyTo={null}
+        initialValues={composeInitialValues}
+        initialAttachments={composeAttachments}
+        adminMailboxId={companySettings?.contract_email_mailbox_id}
+        adminMailboxEmail={companySettings?.contract_email_mailbox_email}
+        container='body'
+        hideTemplateAndDraft
+      />
     </Row>
   )
 }

@@ -4,13 +4,15 @@ import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useDispatch, useSelector } from 'react-redux'
-import { Edit2, ChevronDown, ChevronRight } from 'react-feather'
+import { Edit2, Send, ChevronDown, ChevronRight } from 'react-feather'
 import { pdf, ReportDocument } from '@veztraa/report-renderer'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Table, Collapse } from 'reactstrap'
 import { getQuotation, updateQuotation } from '../store'
 import { quotationStatusOptions } from '../documentOptions'
+import ComposePopup from '../../email/ComposePopup'
 import { selectThemeColors, formatAmount } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
+import { renderEmailTemplate } from '@src/utility/renderEmailTemplate'
 
 const buildPdfData = quotation => ({
   client: {
@@ -53,6 +55,12 @@ const QuotationView = () => {
   const [generatingPdf, setGeneratingPdf] = useState(false)
   const [previewUrl, setPreviewUrl] = useState(null)
   const [previewLoading, setPreviewLoading] = useState(false)
+  const [companySettings, setCompanySettings] = useState(null)
+  const [emailTemplate, setEmailTemplate] = useState(null)
+  const [preparingEmail, setPreparingEmail] = useState(false)
+  const [composeOpen, setComposeOpen] = useState(false)
+  const [composeInitialValues, setComposeInitialValues] = useState(null)
+  const [composeAttachments, setComposeAttachments] = useState([])
 
   useEffect(() => {
     dispatch(getQuotation(id))
@@ -60,11 +68,18 @@ const QuotationView = () => {
 
   useEffect(() => {
     axios.get('/company').then(response => {
-      const templateId = response.data.data.quotation_pdf_template_id
-      if (!templateId) return
-      axios.get(`/pdf-designer-templates/${templateId}`).then(templateResponse => {
-        setPdfTemplate(templateResponse.data.data.template)
-      })
+      const data = response.data.data
+      setCompanySettings(data)
+      if (data.quotation_pdf_template_id) {
+        axios.get(`/pdf-designer-templates/${data.quotation_pdf_template_id}`).then(templateResponse => {
+          setPdfTemplate(templateResponse.data.data.template)
+        })
+      }
+      if (data.quotation_email_template_id) {
+        axios.get(`/email-templates/${data.quotation_email_template_id}`).then(templateResponse => {
+          setEmailTemplate(templateResponse.data.data)
+        })
+      }
     })
   }, [])
 
@@ -137,6 +152,58 @@ const QuotationView = () => {
       toast.error('Failed to generate PDF')
     } finally {
       setGeneratingPdf(false)
+    }
+  }
+
+  const handleSendEmail = async () => {
+    if (!companySettings?.quotation_email_template_id || !companySettings?.quotation_email_mailbox_id) {
+      toast.error('Set a Quotation email template and sending mailbox in Company Settings first.')
+      return
+    }
+    if (!emailTemplate) {
+      toast.error('The selected email template failed to load.')
+      return
+    }
+    if (!pdfTemplate) {
+      toast.error('No quotation PDF template is selected in Company Settings.')
+      return
+    }
+    if (!quotation.email) {
+      toast('Client has no email on file - fill in the recipient manually.')
+    }
+
+    setPreparingEmail(true)
+    try {
+      const blob = await pdf(<ReportDocument template={pdfTemplate} data={buildPdfData(quotation)} />).toBlob()
+      const file = new File([blob], `${quotation.quotation_number}.pdf`, { type: 'application/pdf' })
+
+      const { subject, body } = renderEmailTemplate(emailTemplate, {
+        contact_name: quotation.contact_name || '',
+        client_full_name: quotation.client_full_name || quotation.contact_name || '',
+        company_name: quotation.company_name || '',
+        email: quotation.email || '',
+        phone: quotation.phone || '',
+        billing_address: quotation.billing_address || '',
+        status: quotation.status || '',
+        quotation_number: quotation.quotation_number || '',
+        issue_date: quotation.issue_date || '',
+        valid_until: quotation.valid_until || '',
+        currency: quotation.currency || '',
+        total: formatAmount(quotation.total),
+        subtotal: formatAmount(quotation.subtotal),
+        tax_amount: formatAmount(quotation.tax_amount),
+        discount_amount: formatAmount(quotation.discount_amount),
+        notes: quotation.notes || '',
+        sender_company_name: companySettings.legal_name || ''
+      })
+
+      setComposeInitialValues({ to: quotation.email || '', cc: '', bcc: '', subject, body })
+      setComposeAttachments([file])
+      setComposeOpen(true)
+    } catch (e) {
+      toast.error('Failed to prepare email')
+    } finally {
+      setPreparingEmail(false)
     }
   }
 
@@ -325,6 +392,19 @@ const QuotationView = () => {
                 onChange={handleStatusChange}
                 isDisabled={!currentUserCan('/quotation', 'edit')}
               />
+              {currentUserCan('/quotation', 'edit') && (
+                <Button
+                  color='primary'
+                  outline
+                  block
+                  className='mb-1'
+                  disabled={preparingEmail}
+                  onClick={handleSendEmail}
+                >
+                  <Send size={14} className='me-50' />
+                  {preparingEmail ? 'Preparing…' : 'Send Email'}
+                </Button>
+              )}
               <Button
                 id='quotation-download-pdf-btn'
                 className='d-none'
@@ -336,6 +416,12 @@ const QuotationView = () => {
               {!pdfTemplate && (
                 <p className='text-muted small mb-0 mt-50'>
                   No Quotation PDF template selected in <Link to='/company'>Company Settings</Link>.
+                </p>
+              )}
+              {companySettings && (!companySettings.quotation_email_template_id || !companySettings.quotation_email_mailbox_id) && (
+                <p className='text-muted small mb-0 mt-50'>
+                  Set an email template and sending mailbox for Quotations in{' '}
+                  <Link to='/company?tab=email-templates'>Company Settings</Link>.
                 </p>
               )}
             </CardBody>
@@ -358,6 +444,18 @@ const QuotationView = () => {
           )}
         </div>
       </Col>
+
+      <ComposePopup
+        composeOpen={composeOpen}
+        toggleCompose={() => setComposeOpen(prev => !prev)}
+        replyTo={null}
+        initialValues={composeInitialValues}
+        initialAttachments={composeAttachments}
+        adminMailboxId={companySettings?.quotation_email_mailbox_id}
+        adminMailboxEmail={companySettings?.quotation_email_mailbox_email}
+        container='body'
+        hideTemplateAndDraft
+      />
     </Row>
   )
 }

@@ -20,6 +20,7 @@ import {
   List,
   Clock,
   Sun,
+  Tag,
   BarChart2
 } from 'react-feather'
 
@@ -173,6 +174,12 @@ export default [
     title: 'Currency',
     icon: <DollarSign size={20} />,
     navLink: '/currency'
+  },
+  {
+    id: 'eventCategories',
+    title: 'Event Categories',
+    icon: <Tag size={20} />,
+    navLink: '/event-category'
   },
   {
     id: 'industries',
