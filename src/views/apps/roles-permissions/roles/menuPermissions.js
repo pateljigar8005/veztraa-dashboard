@@ -26,7 +26,9 @@ export const menuPermissionGroups = [
       { id: 'teamMembers', title: 'Team' },
       { id: 'portfolioItems', title: 'Portfolio' },
       { id: 'caseStudies', title: 'Case Studies' },
-      { id: 'jobListings', title: 'Job Listings' }
+      { id: 'jobListings', title: 'Job Listings' },
+      { id: 'contactSubmissions', title: 'Contact Us' },
+      { id: 'jobApplications', title: 'Job Applications' }
     ]
   },
   {
@@ -51,7 +53,8 @@ export const menuPermissionGroups = [
       { id: 'pdfDesignerTemplates', title: 'PDF Designer' },
       { id: 'currencies', title: 'Currency' },
       { id: 'industries', title: 'Industry' },
-      { id: 'timesheetActivities', title: 'Timesheet Activity' }
+      { id: 'timesheetActivities', title: 'Timesheet Activity' },
+      { id: 'apiKeys', title: 'API Keys' }
     ]
   }
 ]

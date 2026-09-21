@@ -9,6 +9,7 @@ import Select, { components } from 'react-select'
 import { useForm, Controller } from 'react-hook-form'
 import { Button, Modal, ModalBody, ModalFooter, Label, Input, Form } from 'reactstrap'
 import { selectThemeColors, isObjEmpty, toDateOnly } from '@utils'
+import { fetchEvents } from './store'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 
@@ -245,11 +246,26 @@ const AddEventSidebar = props => {
     calendarApi.getEventById(eventId)?.remove()
   }
 
-  const handleDeleteEvent = () => {
-    dispatch(removeEvent(selectedEvent.id))
-    removeEventInCalendar(selectedEvent.id)
+  const handleDeleteEvent = async () => {
+    const eventId = selectedEvent.id
+
+    // Instant, optimistic removal so this doesn't sit waiting on a network
+    // round trip to feel responsive - removeEvent() below is still the
+    // real source of truth and re-syncs store.events from the server
+    // either way, so this can't leave the calendar showing something the
+    // backend disagrees with: on success it's a no-op (the event's already
+    // gone from both), on failure the catch below re-fetches and this
+    // optimistic removal gets corrected.
+    removeEventInCalendar(eventId)
     handleAddEventSidebar()
-    toast.error('Event Removed')
+
+    try {
+      await dispatch(removeEvent(eventId)).unwrap()
+      toast.success('Event removed')
+    } catch (err) {
+      toast.error(err?.message || 'Failed to delete event')
+      dispatch(fetchEvents())
+    }
   }
 
   const EventActions = () => {

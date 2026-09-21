@@ -120,18 +120,22 @@ export const moveMessage = createAsyncThunk(
 
 export const deleteMessage = createAsyncThunk(
   'appEmail/deleteMessage',
-  async ({ folder, uid }, { dispatch, getState }) => {
-    const params = getState().email.params
-    if (params.adminMailboxId) {
-      await axios.delete(`${adminBase(params, folder)}/${uid}`)
+  async ({ folder, uid }, { dispatch, getState }) => {    try {
+
+      const params = getState().email.params
+      if (params.adminMailboxId) {
+        await axios.delete(`${adminBase(params, folder)}/${uid}`)
+        await dispatch(getMessages(params))
+        return uid
+      }
+      await axios.delete(`/mailbox/${folder}/messages/${uid}`)
       await dispatch(getMessages(params))
+      dispatch(getFolders())
       return uid
-    }
-    await axios.delete(`/mailbox/${folder}/messages/${uid}`)
-    await dispatch(getMessages(params))
-    dispatch(getFolders())
-    return uid
-  }
+  
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to delete')
+    }}
 )
 
 export const bulkDeleteMessages = createAsyncThunk(

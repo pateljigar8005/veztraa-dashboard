@@ -1,14 +1,23 @@
 import { Fragment, useState, useEffect } from 'react'
 import useDebounce from '@hooks/useDebounce'
+import AdvancedSearchModal from '../../shared/AdvancedSearchModal'
 import { columns } from './columns'
 import { getAllData, getData } from '../store'
 import { useDispatch, useSelector } from 'react-redux'
 import ReactPaginate from 'react-paginate'
 import DataTable from 'react-data-table-component'
 import { ChevronDown } from 'react-feather'
-import { Row, Col, Card, Input } from 'reactstrap'
+import { Row, Col, Card, Input, Button } from 'reactstrap'
+import { toDateOnly } from '@utils'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
+
+const searchFields = [{ name: 'date', label: 'Date', type: 'date-range' }]
+
+// Default view is "what's coming up" - past holidays are still reachable
+// by clearing this filter (or picking an earlier range) in Advanced Search,
+// just not what loads first.
+const defaultFilters = { date_from: toDateOnly(new Date()) }
 
 const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) => {
   return (
@@ -62,6 +71,9 @@ const HolidaysList = () => {
   const [sortColumn, setSortColumn] = useState('date')
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
+  const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false)
+  const [filters, setFilters] = useState(defaultFilters)
+
   const debouncedSearchTerm = useDebounce(searchTerm, 400)
 
   useEffect(() => {
@@ -72,10 +84,11 @@ const HolidaysList = () => {
         sortColumn,
         q: debouncedSearchTerm,
         page: currentPage,
-        perPage: rowsPerPage
+        perPage: rowsPerPage,
+        filters
       })
     )
-  }, [dispatch, sort, sortColumn, currentPage, debouncedSearchTerm])
+  }, [dispatch, sort, sortColumn, currentPage, debouncedSearchTerm, filters])
 
   const handlePagination = page => {
     dispatch(
@@ -84,7 +97,8 @@ const HolidaysList = () => {
         sortColumn,
         q: searchTerm,
         perPage: rowsPerPage,
-        page: page.selected + 1
+        page: page.selected + 1,
+        filters
       })
     )
     setCurrentPage(page.selected + 1)
@@ -98,7 +112,8 @@ const HolidaysList = () => {
         sortColumn,
         q: searchTerm,
         perPage: value,
-        page: currentPage
+        page: currentPage,
+        filters
       })
     )
     setRowsPerPage(value)
@@ -106,6 +121,16 @@ const HolidaysList = () => {
 
   const handleFilter = val => {
     setSearchTerm(val)
+    setCurrentPage(1)
+  }
+
+  const handleApplyFilters = newFilters => {
+    setFilters(newFilters)
+    setCurrentPage(1)
+  }
+
+  const handleClearFilters = () => {
+    setFilters({})
     setCurrentPage(1)
   }
 
@@ -132,7 +157,7 @@ const HolidaysList = () => {
   }
 
   const dataToRender = () => {
-    const isFiltered = searchTerm.length > 0
+    const isFiltered = searchTerm.length > 0 || Object.keys(filters).length > 0
 
     if (store.data.length > 0) {
       return store.data
@@ -150,6 +175,15 @@ const HolidaysList = () => {
 
   return (
     <Fragment>
+      <Button id='navbar-advanced-search-trigger' className='d-none' onClick={() => setAdvancedSearchOpen(true)} />
+      <AdvancedSearchModal
+        isOpen={advancedSearchOpen}
+        toggle={() => setAdvancedSearchOpen(!advancedSearchOpen)}
+        fields={searchFields}
+        values={filters}
+        onApply={handleApplyFilters}
+        onClear={handleClearFilters}
+      />
       <Card>
         <div className='react-dataTable'>
           <DataTable

@@ -94,6 +94,10 @@ const CompanySettings = () => {
   const [invoiceEmailMailboxId, setInvoiceEmailMailboxId] = useState('')
   const [contractEmailMailboxId, setContractEmailMailboxId] = useState('')
   const [quotationEmailMailboxId, setQuotationEmailMailboxId] = useState('')
+  const [contactEmailTemplateId, setContactEmailTemplateId] = useState('')
+  const [careerEmailTemplateId, setCareerEmailTemplateId] = useState('')
+  const [contactEmailMailboxId, setContactEmailMailboxId] = useState('')
+  const [careerEmailMailboxId, setCareerEmailMailboxId] = useState('')
   const [emailTemplateOptions, setEmailTemplateOptions] = useState([])
   const [adminMailboxOptions, setAdminMailboxOptions] = useState([])
   const [smtpEncryption, setSmtpEncryption] = useState('')
@@ -191,6 +195,10 @@ const CompanySettings = () => {
       setInvoiceEmailMailboxId(data.invoice_email_mailbox_id || '')
       setContractEmailMailboxId(data.contract_email_mailbox_id || '')
       setQuotationEmailMailboxId(data.quotation_email_mailbox_id || '')
+      setContactEmailTemplateId(data.contact_email_template_id || '')
+      setCareerEmailTemplateId(data.career_email_template_id || '')
+      setContactEmailMailboxId(data.contact_email_mailbox_id || '')
+      setCareerEmailMailboxId(data.career_email_mailbox_id || '')
       setSmtpEncryption(data.smtp_encryption || '')
       setImapEncryption(data.imap_encryption || '')
       setSyncIntervalMinutes(data.mailbox_sync_interval_minutes || 1)
@@ -219,6 +227,10 @@ const CompanySettings = () => {
         invoice_email_mailbox_id: invoiceEmailMailboxId || null,
         contract_email_mailbox_id: contractEmailMailboxId || null,
         quotation_email_mailbox_id: quotationEmailMailboxId || null,
+        contact_email_template_id: contactEmailTemplateId || null,
+        career_email_template_id: careerEmailTemplateId || null,
+        contact_email_mailbox_id: contactEmailMailboxId || null,
+        career_email_mailbox_id: careerEmailMailboxId || null,
         smtp_host: data.smtp_host || null,
         smtp_port: data.smtp_port === '' ? null : Number(data.smtp_port),
         smtp_username: data.smtp_username || null,
@@ -663,6 +675,72 @@ const CompanySettings = () => {
                         options={adminMailboxOptions}
                         value={adminMailboxOptions.find(i => i.value === contractEmailMailboxId) || null}
                         onChange={option => setContractEmailMailboxId(option ? option.value : '')}
+                        placeholder='Select sending mailbox...'
+                      />
+                    </Col>
+                  </Row>
+                </Col>
+                <Col md={12} className='mb-1'>
+                  <Label className='form-label' for='contact_email_template_id'>
+                    Contact Us (confirmation email to the submitter)
+                  </Label>
+                  <Row>
+                    <Col md={6} className='mb-1 mb-md-0'>
+                      <Select
+                        inputId='contact_email_template_id'
+                        isClearable
+                        className='react-select'
+                        classNamePrefix='select'
+                        theme={selectThemeColors}
+                        options={emailTemplateOptions}
+                        value={emailTemplateOptions.find(i => i.value === contactEmailTemplateId) || null}
+                        onChange={option => setContactEmailTemplateId(option ? option.value : '')}
+                        placeholder='Select email template...'
+                      />
+                    </Col>
+                    <Col md={6}>
+                      <Select
+                        inputId='contact_email_mailbox_id'
+                        isClearable
+                        className='react-select'
+                        classNamePrefix='select'
+                        theme={selectThemeColors}
+                        options={adminMailboxOptions}
+                        value={adminMailboxOptions.find(i => i.value === contactEmailMailboxId) || null}
+                        onChange={option => setContactEmailMailboxId(option ? option.value : '')}
+                        placeholder='Select sending mailbox...'
+                      />
+                    </Col>
+                  </Row>
+                </Col>
+                <Col md={12} className='mb-1'>
+                  <Label className='form-label' for='career_email_template_id'>
+                    Job Apply (confirmation email to the applicant)
+                  </Label>
+                  <Row>
+                    <Col md={6} className='mb-1 mb-md-0'>
+                      <Select
+                        inputId='career_email_template_id'
+                        isClearable
+                        className='react-select'
+                        classNamePrefix='select'
+                        theme={selectThemeColors}
+                        options={emailTemplateOptions}
+                        value={emailTemplateOptions.find(i => i.value === careerEmailTemplateId) || null}
+                        onChange={option => setCareerEmailTemplateId(option ? option.value : '')}
+                        placeholder='Select email template...'
+                      />
+                    </Col>
+                    <Col md={6}>
+                      <Select
+                        inputId='career_email_mailbox_id'
+                        isClearable
+                        className='react-select'
+                        classNamePrefix='select'
+                        theme={selectThemeColors}
+                        options={adminMailboxOptions}
+                        value={adminMailboxOptions.find(i => i.value === careerEmailMailboxId) || null}
+                        onChange={option => setCareerEmailMailboxId(option ? option.value : '')}
                         placeholder='Select sending mailbox...'
                       />
                     </Col>

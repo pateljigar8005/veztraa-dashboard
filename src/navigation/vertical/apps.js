@@ -21,7 +21,8 @@ import {
   Clock,
   Sun,
   Tag,
-  BarChart2
+  BarChart2,
+  Key
 } from 'react-feather'
 
 export default [
@@ -111,6 +112,18 @@ export default [
     title: 'Team',
     icon: <Users size={20} />,
     navLink: '/team-member'
+  },
+  {
+    id: 'contactSubmissions',
+    title: 'Contact Us',
+    icon: <Mail size={20} />,
+    navLink: '/contact-submission'
+  },
+  {
+    id: 'jobApplications',
+    title: 'Job Applications',
+    icon: <Briefcase size={20} />,
+    navLink: '/job-application'
   },
   {
     header: 'Templates'
@@ -216,5 +229,11 @@ export default [
     title: 'User',
     icon: <User size={20} />,
     navLink: '/user'
+  },
+  {
+    id: 'apiKeys',
+    title: 'API Keys',
+    icon: <Key size={20} />,
+    navLink: '/api-key'
   }
 ]

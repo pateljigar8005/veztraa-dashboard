@@ -139,7 +139,7 @@ export const columns = [
                 confirmDelete({
                   text: `This will permanently delete the quotation for "${row.contact_name}".`,
                   onConfirm: () =>
-                    store.dispatch(deleteQuotation(row.id)).then(() => toast.success('Quotation deleted'))
+                    store.dispatch(deleteQuotation(row.id)).unwrap().then(() => toast.success('Quotation deleted')).catch(err => toast.error(err?.message || 'Failed to delete'))
                 })
               }}
             >

@@ -108,7 +108,7 @@ export const columns = [
                 confirmDelete({
                   text: `This will permanently delete "${row.name}".`,
                   onConfirm: () =>
-                    store.dispatch(deleteServiceItem(row.id)).then(() => toast.success('Service Item deleted'))
+                    store.dispatch(deleteServiceItem(row.id)).unwrap().then(() => toast.success('Service Item deleted')).catch(err => toast.error(err?.message || 'Failed to delete'))
                 })
               }}
             >

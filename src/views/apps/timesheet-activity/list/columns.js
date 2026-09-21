@@ -86,7 +86,7 @@ export const columns = [
                 confirmDelete({
                   text: `This will permanently delete "${row.name}".`,
                   onConfirm: () =>
-                    store.dispatch(deleteTimesheetActivity(row.id)).then(() => toast.success('Timesheet activity deleted'))
+                    store.dispatch(deleteTimesheetActivity(row.id)).unwrap().then(() => toast.success('Timesheet activity deleted')).catch(err => toast.error(err?.message || 'Failed to delete'))
                 })
               }}
             >

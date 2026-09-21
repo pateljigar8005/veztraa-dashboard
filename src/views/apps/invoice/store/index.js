@@ -47,12 +47,16 @@ export const updateInvoice = createAsyncThunk(
   }
 )
 
-export const deleteInvoice = createAsyncThunk('appInvoice/deleteInvoice', async (id, { dispatch, getState }) => {
-  await axios.delete(`/invoices/${id}`)
-  await dispatch(getData(getState().invoice.params))
-  await dispatch(getAllData())
-  return id
-})
+export const deleteInvoice = createAsyncThunk('appInvoice/deleteInvoice', async (id, { dispatch, getState }) => {  try {
+
+    await axios.delete(`/invoices/${id}`)
+    await dispatch(getData(getState().invoice.params))
+    await dispatch(getAllData())
+    return id
+
+  } catch (err) {
+    throw new Error(err?.response?.data?.message || 'Failed to delete')
+  }})
 
 export const appInvoiceSlice = createSlice({
   name: 'appInvoice',

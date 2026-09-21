@@ -51,12 +51,16 @@ export const updatePaymentMethod = createAsyncThunk(
 
 export const deletePaymentMethod = createAsyncThunk(
   'appPaymentMethods/deletePaymentMethod',
-  async (id, { dispatch, getState }) => {
-    await axios.delete(`/payment-methods/${id}`)
-    await dispatch(getData(getState().paymentMethods.params))
-    await dispatch(getAllData())
-    return id
-  }
+  async (id, { dispatch, getState }) => {    try {
+
+      await axios.delete(`/payment-methods/${id}`)
+      await dispatch(getData(getState().paymentMethods.params))
+      await dispatch(getAllData())
+      return id
+  
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to delete')
+    }}
 )
 
 export const appPaymentMethodsSlice = createSlice({

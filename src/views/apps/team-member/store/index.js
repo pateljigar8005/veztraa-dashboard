@@ -58,12 +58,16 @@ export const uploadTeamMemberPhoto = createAsyncThunk(
   }
 )
 
-export const deleteTeamMember = createAsyncThunk('appTeamMembers/deleteTeamMember', async (id, { dispatch, getState }) => {
-  await axios.delete(`/team-members/${id}`)
-  await dispatch(getData(getState().teamMembers.params))
-  await dispatch(getAllData())
-  return id
-})
+export const deleteTeamMember = createAsyncThunk('appTeamMembers/deleteTeamMember', async (id, { dispatch, getState }) => {  try {
+
+    await axios.delete(`/team-members/${id}`)
+    await dispatch(getData(getState().teamMembers.params))
+    await dispatch(getAllData())
+    return id
+
+  } catch (err) {
+    throw new Error(err?.response?.data?.message || 'Failed to delete')
+  }})
 
 export const appTeamMembersSlice = createSlice({
   name: 'appTeamMembers',

@@ -4,11 +4,10 @@ import classnames from 'classnames'
 import { Settings } from 'react-feather'
 import { Card, CardBody, Button, Input, Label } from 'reactstrap'
 import { currentUserCan } from '@src/utility/navPermissions'
-import illustration from '@src/assets/images/pages/calendar-illustration.png'
 
 const taskFilters = [
   { label: 'Kanban Tasks', className: 'form-check-secondary mb-1' },
-  { label: 'To-Do', className: 'form-check-dark' }
+  { label: 'To-Do', className: 'form-check-info' }
 ]
 
 const SidebarLeft = props => {
@@ -115,9 +114,6 @@ const SidebarLeft = props => {
           </div>
         </CardBody>
       </Card>
-      <div className='mt-auto'>
-        <img className='img-fluid' src={illustration} alt='illustration' />
-      </div>
     </Fragment>
   )
 }

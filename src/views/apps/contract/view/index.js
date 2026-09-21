@@ -4,7 +4,7 @@ import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useDispatch, useSelector } from 'react-redux'
-import { Edit2, Send, ChevronDown, ChevronRight } from 'react-feather'
+import { Edit2, ChevronDown, ChevronRight } from 'react-feather'
 import { pdf, ReportDocument } from '@veztraa/report-renderer'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Collapse } from 'reactstrap'
 import { getContract, updateContract } from '../store'
@@ -321,7 +321,7 @@ const ContractView = () => {
               </Label>
               <Select
                 inputId='contract-status'
-                className='react-select mb-2'
+                className='react-select'
                 classNamePrefix='select'
                 theme={selectThemeColors}
                 options={contractStatusOptions}
@@ -330,16 +330,11 @@ const ContractView = () => {
                 isDisabled={!currentUserCan('/contract', 'edit')}
               />
               {currentUserCan('/contract', 'edit') && (
-                <Button
-                  color='primary'
-                  outline
-                  block
-                  className='mb-1'
-                  disabled={preparingEmail}
-                  onClick={handleSendEmail}
-                >
-                  <Send size={14} className='me-50' />
-                  {preparingEmail ? 'Preparing…' : 'Send Email'}
+                // No longer shown here - triggered from the navbar's Send
+                // Email icon instead (see NavbarBookmarks.js), same
+                // hidden-trigger pattern as contract-download-pdf-btn below.
+                <Button id='contract-send-email-btn' className='d-none' disabled={preparingEmail} onClick={handleSendEmail}>
+                  Send Email
                 </Button>
               )}
               <Button

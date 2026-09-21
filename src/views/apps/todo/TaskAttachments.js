@@ -36,7 +36,7 @@ const TaskAttachments = ({ taskId }) => {
   const handleDelete = file => {
     confirmDelete({
       text: `This will permanently delete "${file.file_name}".`,
-      onConfirm: () => dispatch(deleteTaskAttachment(file.id)).then(() => toast.success('Attachment deleted'))
+      onConfirm: () => dispatch(deleteTaskAttachment(file.id)).unwrap().then(() => toast.success('Attachment deleted')).catch(err => toast.error(err?.message || 'Failed to delete'))
     })
   }
 

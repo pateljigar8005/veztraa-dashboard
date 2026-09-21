@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch, useStore } from 'react-redux'
-import { Menu, CornerDownLeft, RefreshCw, PlusCircle, Search, Save, Download } from 'react-feather'
+import { Menu, CornerDownLeft, RefreshCw, PlusCircle, Search, Save, Download, Send } from 'react-feather'
 import { NavItem, NavLink, UncontrolledTooltip } from 'reactstrap'
 import { hasActionPermission, inferRouteAction } from '@src/utility/navPermissions'
 import { refetchForRoute } from '@src/utility/refreshRegistry'
@@ -41,12 +41,30 @@ const isAccountSettingsRoute = pathname => pathname === '/account-settings'
 
 const isEmailRoute = pathname => /^\/email(\/[^/]+)?$/.test(pathname)
 
+// listToAddRoute (below) covers every list page, but not every one of
+// those actually wires up the Advanced Search modal (AdvancedSearchModal +
+// the hidden #navbar-advanced-search-trigger button its list/ renders) -
+// these four don't, so without this the Search icon looks enabled there
+// but silently does nothing when clicked.
+const noSearchRoutes = ['/email-template', '/terms-template', '/roles']
+
 const downloadButtonIdByRoute = [
   { pattern: /^\/invoice\/view\/[^/]+$/, buttonId: 'invoice-download-pdf-btn' },
   { pattern: /^\/contract\/view\/[^/]+$/, buttonId: 'contract-download-pdf-btn' },
   { pattern: /^\/quotation\/view\/[^/]+$/, buttonId: 'quotation-download-pdf-btn' }
 ]
 const findDownloadButtonId = pathname => downloadButtonIdByRoute.find(i => i.pattern.test(pathname))?.buttonId || null
+
+// Same three routes as the download button above - each has its own
+// "Send Email" button/handler already (see <module>/view/index.js's
+// handleSendEmail), gated behind that module's own 'edit' permission, same
+// as the button itself is.
+const sendEmailButtonIdByRoute = [
+  { pattern: /^\/invoice\/view\/[^/]+$/, buttonId: 'invoice-send-email-btn', resource: '/invoice' },
+  { pattern: /^\/contract\/view\/[^/]+$/, buttonId: 'contract-send-email-btn', resource: '/contract' },
+  { pattern: /^\/quotation\/view\/[^/]+$/, buttonId: 'quotation-send-email-btn', resource: '/quotation' }
+]
+const findSendEmailRoute = pathname => sendEmailButtonIdByRoute.find(i => i.pattern.test(pathname)) || null
 
 const NavbarBookmarks = props => {
   const { setMenuVisibility } = props
@@ -67,7 +85,7 @@ const NavbarBookmarks = props => {
   const isListRoute = Boolean(listToAddRoute[location.pathname])
   const addEnabled = Boolean(addRoute) && hasActionPermission(location.pathname, 'add', userData)
 
-  const isSearchRoute = isListRoute || isEmailRoute(location.pathname)
+  const isSearchRoute = (isListRoute && !noSearchRoutes.includes(location.pathname)) || isEmailRoute(location.pathname)
   const handleSearch = () => {
     if (!isSearchRoute) return
     document.getElementById('navbar-advanced-search-trigger')?.click()
@@ -108,6 +126,14 @@ const NavbarBookmarks = props => {
   const handleDownload = () => {
     if (!downloadButtonId) return
     document.getElementById(downloadButtonId)?.click()
+  }
+
+  const sendEmailRoute = findSendEmailRoute(location.pathname)
+  const sendEmailRouteMatches = Boolean(sendEmailRoute)
+  const sendEmailEnabled = sendEmailRouteMatches && hasActionPermission(sendEmailRoute.resource, 'edit', userData)
+  const handleSendEmail = () => {
+    if (!sendEmailEnabled) return
+    document.getElementById(sendEmailRoute.buttonId)?.click()
   }
 
   return (
@@ -155,7 +181,11 @@ const NavbarBookmarks = props => {
             <Search className='ficon' />
           </NavLink>
           <UncontrolledTooltip placement='bottom' target='navbar-search-btn'>
-            {isSearchRoute ? 'Advanced Search' : 'Search (open a list page first)'}
+            {isSearchRoute
+              ? 'Advanced Search'
+              : isListRoute
+                ? 'Advanced Search (not available on this page)'
+                : 'Search (open a list page first)'}
           </UncontrolledTooltip>
         </NavItem>
         <NavItem className='d-none d-lg-block'>
@@ -196,6 +226,21 @@ const NavbarBookmarks = props => {
             {downloadEnabled ? 'Download PDF' : 'Download PDF (open an invoice, contract or quotation first)'}
           </UncontrolledTooltip>
         </NavItem>
+        {sendEmailRouteMatches && (
+          <NavItem className='d-none d-lg-block'>
+            <NavLink
+              className='nav-link-style'
+              id='navbar-send-email-btn'
+              style={{ opacity: sendEmailEnabled ? 1 : 0.35, pointerEvents: sendEmailEnabled ? 'auto' : 'none' }}
+              onClick={handleSendEmail}
+            >
+              <Send className='ficon' />
+            </NavLink>
+            <UncontrolledTooltip placement='bottom' target='navbar-send-email-btn'>
+              {sendEmailEnabled ? 'Send Email' : "Send Email (you don't have permission)"}
+            </UncontrolledTooltip>
+          </NavItem>
+        )}
       </ul>
     </>
   )

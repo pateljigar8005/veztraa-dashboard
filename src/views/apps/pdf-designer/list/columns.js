@@ -115,7 +115,7 @@ export const columns = [
                 confirmDelete({
                   text: `This will permanently delete "${row.name}".`,
                   onConfirm: () =>
-                    store.dispatch(deletePdfDesignerTemplate(row.id)).then(() => toast.success('PDF designer template deleted'))
+                    store.dispatch(deletePdfDesignerTemplate(row.id)).unwrap().then(() => toast.success('PDF designer template deleted')).catch(err => toast.error(err?.message || 'Failed to delete'))
                 })
               }}
             >

@@ -63,12 +63,16 @@ export const uploadCaseStudyCoverImage = createAsyncThunk(
 
 export const deleteCaseStudy = createAsyncThunk(
   'appCaseStudies/deleteCaseStudy',
-  async (id, { dispatch, getState }) => {
-    await axios.delete(`/case-studies/${id}`)
-    await dispatch(getData(getState().caseStudies.params))
-    await dispatch(getAllData())
-    return id
-  }
+  async (id, { dispatch, getState }) => {    try {
+
+      await axios.delete(`/case-studies/${id}`)
+      await dispatch(getData(getState().caseStudies.params))
+      await dispatch(getAllData())
+      return id
+  
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to delete')
+    }}
 )
 
 export const appCaseStudiesSlice = createSlice({

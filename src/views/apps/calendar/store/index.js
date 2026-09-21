@@ -53,9 +53,13 @@ export const updateEvent = createAsyncThunk('appCalendar/updateEvent', async (ev
 })
 
 export const removeEvent = createAsyncThunk('appCalendar/removeEvent', async (id, { dispatch }) => {
-  await axios.delete(`/calendar-events/${id}`)
-  await dispatch(fetchEvents())
-  return id
+  try {
+    await axios.delete(`/calendar-events/${id}`)
+    await dispatch(fetchEvents())
+    return id
+  } catch (err) {
+    throw new Error(err?.response?.data?.message || 'Failed to delete event')
+  }
 })
 
 export const fetchKanbanTaskEvents = createAsyncThunk('appCalendar/fetchKanbanTaskEvents', async () => {
@@ -72,7 +76,11 @@ export const fetchKanbanTaskEvents = createAsyncThunk('appCalendar/fetchKanbanTa
       extendedProps: {
         calendar: 'Kanban Tasks',
         source: 'kanban',
-        taskId: task.id
+        taskId: task.id,
+        // Same value the Kanban board itself uses (low/medium/high/urgent -
+        // see kanbanOptions.js's priorityColors) - Calendar.js colors these
+        // events by this instead of a single fixed source color.
+        priority: task.priority
       }
     }))
   return { events, tasks }
@@ -92,7 +100,11 @@ export const fetchTodoTaskEvents = createAsyncThunk('appCalendar/fetchTodoTaskEv
       extendedProps: {
         calendar: 'To-Do',
         source: 'todo',
-        taskId: task.id
+        taskId: task.id,
+        // Same low/medium/high/urgent field Kanban tasks use (see
+        // fetchKanbanTaskEvents above) - Todo used to have only a
+        // free-form `tags` array instead of a real priority column.
+        priority: task.priority
       }
     }))
   return { events, tasks }

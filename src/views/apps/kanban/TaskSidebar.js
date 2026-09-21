@@ -260,7 +260,7 @@ const TaskSidebar = props => {
             <div className='kanban-comments border-top pt-1'>
               <Label className='form-label'>Comments ({comments.length})</Label>
               {comments.map(c => (
-                <div key={c.id} className='d-flex mb-1'>
+                <div key={c.id} className='d-flex align-items-start mb-1'>
                   <Avatar
                     initials
                     size='sm'

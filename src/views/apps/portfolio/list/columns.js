@@ -130,7 +130,7 @@ export const getColumns = dragEnabled => [
                 confirmDelete({
                   text: `This will permanently delete "${row.title}".`,
                   onConfirm: () =>
-                    store.dispatch(deletePortfolioItem(row.id)).then(() => toast.success('Portfolio item deleted'))
+                    store.dispatch(deletePortfolioItem(row.id)).unwrap().then(() => toast.success('Portfolio item deleted')).catch(err => toast.error(err?.message || 'Failed to delete'))
                 })
               }}
             >

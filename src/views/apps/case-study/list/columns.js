@@ -130,7 +130,7 @@ export const getColumns = dragEnabled => [
                 confirmDelete({
                   text: `This will permanently delete "${row.title}".`,
                   onConfirm: () =>
-                    store.dispatch(deleteCaseStudy(row.id)).then(() => toast.success('Case study deleted'))
+                    store.dispatch(deleteCaseStudy(row.id)).unwrap().then(() => toast.success('Case study deleted')).catch(err => toast.error(err?.message || 'Failed to delete'))
                 })
               }}
             >

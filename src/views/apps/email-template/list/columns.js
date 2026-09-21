@@ -105,7 +105,7 @@ export const columns = [
                 confirmDelete({
                   text: `This will permanently delete "${row.name}".`,
                   onConfirm: () =>
-                    store.dispatch(deleteEmailTemplate(row.id)).then(() => toast.success('Email template deleted'))
+                    store.dispatch(deleteEmailTemplate(row.id)).unwrap().then(() => toast.success('Email template deleted')).catch(err => toast.error(err?.message || 'Failed to delete'))
                 })
               }}
             >

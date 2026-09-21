@@ -17,6 +17,9 @@ import { getData as getTeamMemberData } from '@src/views/apps/team-member/store'
 import { getData as getPortfolioItemData } from '@src/views/apps/portfolio/store'
 import { getData as getCaseStudyData } from '@src/views/apps/case-study/store'
 import { getData as getJobListingData } from '@src/views/apps/job-listing/store'
+import { getData as getContactSubmissionData } from '@src/views/apps/contact-submission/store'
+import { getData as getJobApplicationData } from '@src/views/apps/job-application/store'
+import { getAllData as getApiKeyAllData } from '@src/views/apps/api-key/store'
 import { getData as getUserData } from '@src/views/apps/user/store'
 import { getData as getPdfDesignerTemplateData } from '@src/views/apps/pdf-designer/store'
 import { getAllData as getRolesAllData } from '@src/views/apps/roles-permissions/roles/store'
@@ -47,6 +50,9 @@ const registry = [
   { pattern: /^\/portfolio$/, refetch: (d, g) => d(getPortfolioItemData(g().portfolioItems.params)) },
   { pattern: /^\/case-study$/, refetch: (d, g) => d(getCaseStudyData(g().caseStudies.params)) },
   { pattern: /^\/job-listing$/, refetch: (d, g) => d(getJobListingData(g().jobListings.params)) },
+  { pattern: /^\/contact-submission$/, refetch: (d, g) => d(getContactSubmissionData(g().contactSubmissions.params)) },
+  { pattern: /^\/job-application$/, refetch: (d, g) => d(getJobApplicationData(g().jobApplications.params)) },
+  { pattern: /^\/api-key$/, refetch: d => d(getApiKeyAllData()) },
   { pattern: /^\/user$/, refetch: (d, g) => d(getUserData(g().users.params)) },
   { pattern: /^\/pdf-designer$/, refetch: (d, g) => d(getPdfDesignerTemplateData(g().pdfDesignerTemplates.params)) },
   { pattern: /^\/roles$/, refetch: d => d(getRolesAllData()) },

@@ -52,12 +52,16 @@ export const uploadAvatar = createAsyncThunk('appUsers/uploadAvatar', async ({ i
   return response.data.data
 })
 
-export const deleteUser = createAsyncThunk('appUsers/deleteUser', async (id, { dispatch, getState }) => {
-  await axios.delete(`/users/${id}`)
-  await dispatch(getData(getState().users.params))
-  await dispatch(getAllData())
-  return id
-})
+export const deleteUser = createAsyncThunk('appUsers/deleteUser', async (id, { dispatch, getState }) => {  try {
+
+    await axios.delete(`/users/${id}`)
+    await dispatch(getData(getState().users.params))
+    await dispatch(getAllData())
+    return id
+
+  } catch (err) {
+    throw new Error(err?.response?.data?.message || 'Failed to delete')
+  }})
 
 export const appUsersSlice = createSlice({
   name: 'appUsers',

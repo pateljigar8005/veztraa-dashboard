@@ -13,7 +13,8 @@ export const getData = createAsyncThunk('appHolidays/getData', async params => {
       perPage: params.perPage || 10,
       q: params.q || '',
       sortColumn: params.sortColumn || 'date',
-      sortDirection: params.sort || 'asc'
+      sortDirection: params.sort || 'asc',
+      ...params.filters
     }
   })
   return {
@@ -56,12 +57,16 @@ export const updateHoliday = createAsyncThunk(
   }
 )
 
-export const deleteHoliday = createAsyncThunk('appHolidays/deleteHoliday', async (id, { dispatch, getState }) => {
-  await axios.delete(`/holidays/${id}`)
-  await dispatch(getData(getState().holidays.params))
-  await dispatch(getAllData())
-  return id
-})
+export const deleteHoliday = createAsyncThunk('appHolidays/deleteHoliday', async (id, { dispatch, getState }) => {  try {
+
+    await axios.delete(`/holidays/${id}`)
+    await dispatch(getData(getState().holidays.params))
+    await dispatch(getAllData())
+    return id
+
+  } catch (err) {
+    throw new Error(err?.response?.data?.message || 'Failed to delete')
+  }})
 
 export const appHolidaysSlice = createSlice({
   name: 'appHolidays',

@@ -48,12 +48,16 @@ export const updateCurrency = createAsyncThunk(
 
 export const deleteCurrency = createAsyncThunk(
   'appCurrencies/deleteCurrency',
-  async (id, { dispatch, getState }) => {
-    await axios.delete(`/currencies/${id}`)
-    await dispatch(getData(getState().currencies.params))
-    await dispatch(getAllData())
-    return id
-  }
+  async (id, { dispatch, getState }) => {    try {
+
+      await axios.delete(`/currencies/${id}`)
+      await dispatch(getData(getState().currencies.params))
+      await dispatch(getAllData())
+      return id
+  
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to delete')
+    }}
 )
 
 export const appCurrenciesSlice = createSlice({

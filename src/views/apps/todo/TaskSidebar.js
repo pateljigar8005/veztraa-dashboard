@@ -12,9 +12,10 @@ import DateField from '../shared/DateField'
 import useHolidayDates from '@hooks/useHolidayDates'
 import useWeekendDays from '@hooks/useWeekendDays'
 import { isObjEmpty, selectThemeColors, resolveAvatarUrl, uploadEditorImage } from '@utils'
+import { priorityOptions } from '../kanban/kanbanOptions'
 import '@styles/react/libs/react-select/_react-select.scss'
 
-const capitalize = string => string.charAt(0).toUpperCase() + string.slice(1)
+const defaultPriorityOption = priorityOptions.find(o => o.value === 'medium')
 
 const ModalHeader = props => {
   const { children, store, handleTaskSidebar, important, setImportant, deleteTask, dispatch } = props
@@ -51,7 +52,7 @@ const TaskSidebar = props => {
 
   const [assigneeOptions, setAssigneeOptions] = useState([])
   const [assignee, setAssignee] = useState(null)
-  const [tags, setTags] = useState([])
+  const [priority, setPriority] = useState(defaultPriorityOption)
   const [desc, setDesc] = useState('')
   const [completed, setCompleted] = useState(false)
   const [important, setImportant] = useState(false)
@@ -81,14 +82,6 @@ const TaskSidebar = props => {
       )
     })
   }, [])
-
-  const tagOptions = [
-    { value: 'team', label: 'Team' },
-    { value: 'low', label: 'Low' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'high', label: 'High' },
-    { value: 'update', label: 'Update' }
-  ]
 
   const AssigneeComponent = ({ data, ...props }) => {
     return (
@@ -139,19 +132,12 @@ const TaskSidebar = props => {
       )
       setDueDate(selectedTask.dueDate || null)
       setDesc(typeof selectedTask.description === 'string' ? selectedTask.description : '')
-
-      if (selectedTask.tags.length) {
-        const tags = []
-        selectedTask.tags.map(tag => {
-          tags.push({ value: tag, label: capitalize(tag) })
-        })
-        setTags(tags)
-      }
+      setPriority(priorityOptions.find(o => o.value === selectedTask.priority) || defaultPriorityOption)
     }
   }
 
   const handleSidebarClosed = () => {
-    setTags([])
+    setPriority(defaultPriorityOption)
     setDesc('')
     setValue('title', '')
     setAssignee(null)
@@ -193,7 +179,7 @@ const TaskSidebar = props => {
       title: data.title,
       description: desc,
       due_date: dueDate,
-      tags: tags.map(tag => tag.value),
+      priority: priority ? priority.value : 'medium',
       assigned_to: assignee ? assignee.value : null,
       is_completed: completed,
       is_important: important
@@ -270,21 +256,18 @@ const TaskSidebar = props => {
             />
           </div>
           <div className='mb-1'>
-            <Label className='form-label' for='task-tags'>
-              Tags
+            <Label className='form-label' for='task-priority'>
+              Priority
             </Label>
             <Select
-              isMulti
-              id='task-tags'
+              id='task-priority'
               className='react-select'
               classNamePrefix='select'
               isClearable={false}
-              options={tagOptions}
+              options={priorityOptions}
               theme={selectThemeColors}
-              value={tags}
-              onChange={data => {
-                setTags(data !== null ? [...data] : [])
-              }}
+              value={priority}
+              onChange={data => setPriority(data)}
             />
           </div>
           <div className='mb-1'>

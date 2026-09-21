@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom'
 import classnames from 'classnames'
 import PerfectScrollbar from 'react-perfect-scrollbar'
-import { Mail, Star, Check, Trash, Plus } from 'react-feather'
+import { Mail, Star, Check, Trash } from 'react-feather'
 import { Button, ListGroup, ListGroupItem } from 'reactstrap'
+import { priorityOptions, priorityColors } from '../kanban/kanbanOptions'
 
 const TodoSidebar = props => {
   const { handleTaskSidebar, setMainSidebar, mainSidebar, dispatch, getTasks, params } = props
@@ -11,12 +12,12 @@ const TodoSidebar = props => {
     dispatch(getTasks({ ...params, filter }))
   }
 
-  const handleTag = tag => {
-    dispatch(getTasks({ ...params, tag }))
+  const handlePriority = priority => {
+    dispatch(getTasks({ ...params, priority }))
   }
 
   const handleActiveItem = value => {
-    if ((params.filter && params.filter === value) || (params.tag && params.tag === value)) {
+    if ((params.filter && params.filter === value) || (params.priority && params.priority === value)) {
       return true
     } else {
       return false
@@ -48,7 +49,7 @@ const TodoSidebar = props => {
                   action
                   tag={Link}
                   to={'/todo/'}
-                  active={params.filter === '' && params.tag === ''}
+                  active={params.filter === '' && params.priority === ''}
                   onClick={() => handleFilter('')}
                 >
                   <Mail className='me-75' size={18} />
@@ -85,66 +86,24 @@ const TodoSidebar = props => {
                   <span className='align-middle'>Deleted</span>
                 </ListGroupItem>
               </ListGroup>
-              <div className='mt-3 px-2 d-flex justify-content-between'>
-                <h6 className='section-label mb-1'>Tags</h6>
-                <Plus className='cursor-pointer' size={14} />
+              <div className='mt-3 px-2'>
+                <h6 className='section-label mb-1'>Priority</h6>
               </div>
               <ListGroup className='list-group-labels'>
-                <ListGroupItem
-                  active={handleActiveItem('team')}
-                  className='d-flex align-items-center'
-                  tag={Link}
-                  to='/todo/tag/team'
-                  onClick={() => handleTag('team')}
-                  action
-                >
-                  <span className='bullet bullet-sm bullet-primary me-1'></span>
-                  <span className='align-middle'>Team</span>
-                </ListGroupItem>
-                <ListGroupItem
-                  active={handleActiveItem('low')}
-                  className='d-flex align-items-center'
-                  tag={Link}
-                  to='/todo/tag/low'
-                  onClick={() => handleTag('low')}
-                  action
-                >
-                  <span className='bullet bullet-sm bullet-success me-1'></span>
-                  <span className='align-middle'>Low</span>
-                </ListGroupItem>
-                <ListGroupItem
-                  active={handleActiveItem('medium')}
-                  className='d-flex align-items-center'
-                  tag={Link}
-                  to='/todo/tag/medium'
-                  onClick={() => handleTag('medium')}
-                  action
-                >
-                  <span className='bullet bullet-sm bullet-warning me-1'></span>
-                  <span className='align-middle'>Medium</span>
-                </ListGroupItem>
-                <ListGroupItem
-                  active={handleActiveItem('high')}
-                  className='d-flex align-items-center'
-                  tag={Link}
-                  to='/todo/tag/high'
-                  onClick={() => handleTag('high')}
-                  action
-                >
-                  <span className='bullet bullet-sm bullet-danger me-1'></span>
-                  <span className='align-middle'>High</span>
-                </ListGroupItem>
-                <ListGroupItem
-                  active={handleActiveItem('update')}
-                  className='d-flex align-items-center'
-                  tag={Link}
-                  to='/todo/tag/update'
-                  onClick={() => handleTag('update')}
-                  action
-                >
-                  <span className='bullet bullet-sm bullet-info me-1'></span>
-                  <span className='align-middle'>Update</span>
-                </ListGroupItem>
+                {priorityOptions.map(option => (
+                  <ListGroupItem
+                    key={option.value}
+                    active={handleActiveItem(option.value)}
+                    className='d-flex align-items-center'
+                    tag={Link}
+                    to={`/todo/priority/${option.value}`}
+                    onClick={() => handlePriority(option.value)}
+                    action
+                  >
+                    <span className={`bullet bullet-sm bullet-${priorityColors[option.value]} me-1`}></span>
+                    <span className='align-middle'>{option.label}</span>
+                  </ListGroupItem>
+                ))}
               </ListGroup>
             </PerfectScrollbar>
           </div>

@@ -7,7 +7,7 @@ export const getTasks = createAsyncThunk('appTodo/getTasks', async params => {
       filter: params.filter || '',
       q: params.q || '',
       sortBy: params.sortBy || '',
-      tag: params.tag || ''
+      priority: params.priority || ''
     }
   })
   return { params, data: response.data.data }
@@ -25,11 +25,15 @@ export const updateTask = createAsyncThunk('appTodo/updateTask', async ({ id, ..
   return response.data.data
 })
 
-export const deleteTask = createAsyncThunk('appTodo/deleteTask', async (taskId, { dispatch, getState }) => {
-  await axios.delete(`/todos/${taskId}`)
-  await dispatch(getTasks(getState().todo.params))
-  return taskId
-})
+export const deleteTask = createAsyncThunk('appTodo/deleteTask', async (taskId, { dispatch, getState }) => {  try {
+
+    await axios.delete(`/todos/${taskId}`)
+    await dispatch(getTasks(getState().todo.params))
+    return taskId
+
+  } catch (err) {
+    throw new Error(err?.response?.data?.message || 'Failed to delete')
+  }})
 
 export const persistTaskOrder = createAsyncThunk('appTodo/persistTaskOrder', async ids => {
   await axios.post('/todos/reorder', { ids })
@@ -66,7 +70,7 @@ export const appTodoSlice = createSlice({
       filter: '',
       q: '',
       sort: '',
-      tag: ''
+      priority: ''
     }
   },
   reducers: {

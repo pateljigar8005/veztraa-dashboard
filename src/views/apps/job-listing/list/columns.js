@@ -91,7 +91,7 @@ export const columns = [
                 confirmDelete({
                   text: `This will permanently delete "${row.title}".`,
                   onConfirm: () =>
-                    store.dispatch(deleteJobListing(row.id)).then(() => toast.success('Job listing deleted'))
+                    store.dispatch(deleteJobListing(row.id)).unwrap().then(() => toast.success('Job listing deleted')).catch(err => toast.error(err?.message || 'Failed to delete'))
                 })
               }}
             >

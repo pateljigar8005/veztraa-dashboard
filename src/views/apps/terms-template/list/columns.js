@@ -69,7 +69,7 @@ export const columns = [
                 confirmDelete({
                   text: `This will permanently delete "${row.name}".`,
                   onConfirm: () =>
-                    store.dispatch(deleteTermsTemplate(row.id)).then(() => toast.success('Terms & Conditions deleted'))
+                    store.dispatch(deleteTermsTemplate(row.id)).unwrap().then(() => toast.success('Terms & Conditions deleted')).catch(err => toast.error(err?.message || 'Failed to delete'))
                 })
               }}
             >

@@ -51,12 +51,16 @@ export const updatePdfDesignerTemplate = createAsyncThunk(
 
 export const deletePdfDesignerTemplate = createAsyncThunk(
   'appPdfDesignerTemplates/deletePdfDesignerTemplate',
-  async (id, { dispatch, getState }) => {
-    await axios.delete(`/pdf-designer-templates/${id}`)
-    await dispatch(getData(getState().pdfDesignerTemplates.params))
-    await dispatch(getAllData())
-    return id
-  }
+  async (id, { dispatch, getState }) => {    try {
+
+      await axios.delete(`/pdf-designer-templates/${id}`)
+      await dispatch(getData(getState().pdfDesignerTemplates.params))
+      await dispatch(getAllData())
+      return id
+  
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to delete')
+    }}
 )
 
 export const appPdfDesignerTemplatesSlice = createSlice({

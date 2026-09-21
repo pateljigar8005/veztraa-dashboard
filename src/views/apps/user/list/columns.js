@@ -149,7 +149,7 @@ export const columns = [
                 e.preventDefault()
                 confirmDelete({
                   text: `This will permanently delete "${row.fullName}".`,
-                  onConfirm: () => store.dispatch(deleteUser(row.id)).then(() => toast.success('User deleted'))
+                  onConfirm: () => store.dispatch(deleteUser(row.id)).unwrap().then(() => toast.success('User deleted')).catch(err => toast.error(err?.message || 'Failed to delete'))
                 })
               }}
             >

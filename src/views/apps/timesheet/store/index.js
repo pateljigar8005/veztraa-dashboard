@@ -46,12 +46,16 @@ export const updateTimesheet = createAsyncThunk(
   }
 )
 
-export const deleteTimesheet = createAsyncThunk('appTimesheets/deleteTimesheet', async (id, { dispatch, getState }) => {
-  await axios.delete(`/timesheets/${id}`)
-  await dispatch(getData(getState().timesheets.params))
-  await dispatch(getAllData())
-  return id
-})
+export const deleteTimesheet = createAsyncThunk('appTimesheets/deleteTimesheet', async (id, { dispatch, getState }) => {  try {
+
+    await axios.delete(`/timesheets/${id}`)
+    await dispatch(getData(getState().timesheets.params))
+    await dispatch(getAllData())
+    return id
+
+  } catch (err) {
+    throw new Error(err?.response?.data?.message || 'Failed to delete')
+  }})
 
 export const appTimesheetsSlice = createSlice({
   name: 'appTimesheets',

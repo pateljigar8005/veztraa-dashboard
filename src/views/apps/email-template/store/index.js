@@ -50,12 +50,16 @@ export const updateEmailTemplate = createAsyncThunk(
 
 export const deleteEmailTemplate = createAsyncThunk(
   'appEmailTemplates/deleteEmailTemplate',
-  async (id, { dispatch, getState }) => {
-    await axios.delete(`/email-templates/${id}`)
-    await dispatch(getData(getState().emailTemplates.params))
-    await dispatch(getAllData())
-    return id
-  }
+  async (id, { dispatch, getState }) => {    try {
+
+      await axios.delete(`/email-templates/${id}`)
+      await dispatch(getData(getState().emailTemplates.params))
+      await dispatch(getAllData())
+      return id
+  
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to delete')
+    }}
 )
 
 export const appEmailTemplatesSlice = createSlice({

@@ -4,9 +4,9 @@ import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useDispatch, useSelector } from 'react-redux'
-import { Edit2, Trash2, Send, ChevronDown, ChevronRight } from 'react-feather'
+import { CreditCard, Edit2, Trash2, ChevronDown, ChevronRight } from 'react-feather'
 import { pdf, ReportDocument } from '@veztraa/report-renderer'
-import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Table, Collapse } from 'reactstrap'
+import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Table, Collapse, Modal, ModalHeader, ModalBody } from 'reactstrap'
 import { getInvoice, updateInvoice } from '../store'
 import { invoiceStatusOptions } from '../../quotation/documentOptions'
 import RecordPaymentModal from '../RecordPaymentModal'
@@ -53,6 +53,7 @@ const InvoiceView = () => {
   const store = useSelector(state => state.invoice)
 
   const [payments, setPayments] = useState([])
+  const [paymentsListOpen, setPaymentsListOpen] = useState(false)
   const [recordPaymentOpen, setRecordPaymentOpen] = useState(false)
   const [editingPayment, setEditingPayment] = useState(null)
   const [termsOpen, setTermsOpen] = useState(false)
@@ -384,74 +385,6 @@ const InvoiceView = () => {
             </Collapse>
           </Card>
         )}
-
-        <Card>
-          <CardHeader>
-            <CardTitle tag='h4'>Payments</CardTitle>
-          </CardHeader>
-          <CardBody>
-            {payments.length === 0 ? (
-              <p className='text-muted mb-0'>No payments recorded yet.</p>
-            ) : (
-              <Table responsive className='mb-0'>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Amount</th>
-                    <th>Rate</th>
-                    <th>Method</th>
-                    <th>Notes</th>
-                    <th className='text-end'>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {payments.map(p => (
-                    <tr key={p.id}>
-                      <td>{p.payment_date}</td>
-                      <td>
-                        {invoice.currency} {formatAmount(p.amount)}
-                      </td>
-                      <td>{p.rate_to_inr ? `₹${Number(p.rate_to_inr).toFixed(2)}` : '-'}</td>
-                      <td>{p.payment_method_name || '-'}</td>
-                      <td>{p.notes || '-'}</td>
-                      <td className='text-end'>
-                        <Button
-                          className='btn-icon me-50'
-                          color='flat-primary'
-                          size='sm'
-                          onClick={() => {
-                            setEditingPayment(p)
-                            setRecordPaymentOpen(true)
-                          }}
-                        >
-                          <Edit2 size={14} className='text-primary' />
-                        </Button>
-                        <Button
-                          className='btn-icon'
-                          color='flat-danger'
-                          size='sm'
-                          onClick={() =>
-                            confirmDelete({
-                              text: `This will permanently delete this payment of ${invoice.currency} ${formatAmount(p.amount)}.`,
-                              onConfirm: () =>
-                                axios.delete(`/invoice-payments/${p.id}`).then(() => {
-                                  toast.success('Payment deleted')
-                                  loadPayments()
-                                  dispatch(getInvoice(id))
-                                })
-                            })
-                          }
-                        >
-                          <Trash2 size={14} className='text-danger' />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            )}
-          </CardBody>
-        </Card>
       </Col>
 
       <Col xl={3} md={4} sm={12}>
@@ -466,7 +399,7 @@ const InvoiceView = () => {
               </Label>
               <Select
                 inputId='invoice-status'
-                className='react-select mb-2'
+                className='react-select'
                 classNamePrefix='select'
                 theme={selectThemeColors}
                 options={invoiceStatusOptions}
@@ -474,27 +407,16 @@ const InvoiceView = () => {
                 onChange={handleStatusChange}
                 isDisabled={!currentUserCan('/invoice', 'edit')}
               />
-              <Button
-                color='primary'
-                block
-                onClick={() => {
-                  setEditingPayment(null)
-                  setRecordPaymentOpen(true)
-                }}
-              >
-                + Record Payment
+              <Button color='primary' block onClick={() => setPaymentsListOpen(true)}>
+                <CreditCard size={14} className='me-50' />
+                Payments
               </Button>
               {currentUserCan('/invoice', 'edit') && (
-                <Button
-                  color='primary'
-                  outline
-                  block
-                  className='mt-1'
-                  disabled={preparingEmail}
-                  onClick={handleSendEmail}
-                >
-                  <Send size={14} className='me-50' />
-                  {preparingEmail ? 'Preparing…' : 'Send Email'}
+                // No longer shown here - triggered from the navbar's Send
+                // Email icon instead (see NavbarBookmarks.js), same
+                // hidden-trigger pattern as invoice-download-pdf-btn below.
+                <Button id='invoice-send-email-btn' className='d-none' disabled={preparingEmail} onClick={handleSendEmail}>
+                  Send Email
                 </Button>
               )}
               <Button
@@ -536,6 +458,84 @@ const InvoiceView = () => {
           )}
         </div>
       </Col>
+
+      <Modal isOpen={paymentsListOpen} toggle={() => setPaymentsListOpen(!paymentsListOpen)} size='lg'>
+        <ModalHeader toggle={() => setPaymentsListOpen(!paymentsListOpen)}>Payments</ModalHeader>
+        <ModalBody>
+          <div className='d-flex justify-content-end mb-1'>
+            <Button
+              color='primary'
+              size='sm'
+              onClick={() => {
+                setEditingPayment(null)
+                setRecordPaymentOpen(true)
+              }}
+            >
+              + Record Payment
+            </Button>
+          </div>
+          {payments.length === 0 ? (
+            <p className='text-muted mb-0'>No payments recorded yet.</p>
+          ) : (
+            <Table responsive className='mb-0'>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Amount</th>
+                  <th>Rate</th>
+                  <th>Method</th>
+                  <th>Notes</th>
+                  <th className='text-end'>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.map(p => (
+                  <tr key={p.id}>
+                    <td>{p.payment_date}</td>
+                    <td>
+                      {invoice.currency} {formatAmount(p.amount)}
+                    </td>
+                    <td>{p.rate_to_inr ? `₹${Number(p.rate_to_inr).toFixed(2)}` : '-'}</td>
+                    <td>{p.payment_method_name || '-'}</td>
+                    <td>{p.notes || '-'}</td>
+                    <td className='text-end'>
+                      <Button
+                        className='btn-icon me-50'
+                        color='flat-primary'
+                        size='sm'
+                        onClick={() => {
+                          setEditingPayment(p)
+                          setRecordPaymentOpen(true)
+                        }}
+                      >
+                        <Edit2 size={14} className='text-primary' />
+                      </Button>
+                      <Button
+                        className='btn-icon'
+                        color='flat-danger'
+                        size='sm'
+                        onClick={() =>
+                          confirmDelete({
+                            text: `This will permanently delete this payment of ${invoice.currency} ${formatAmount(p.amount)}.`,
+                            onConfirm: () =>
+                              axios.delete(`/invoice-payments/${p.id}`).then(() => {
+                                toast.success('Payment deleted')
+                                loadPayments()
+                                dispatch(getInvoice(id))
+                              })
+                          })
+                        }
+                      >
+                        <Trash2 size={14} className='text-danger' />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+        </ModalBody>
+      </Modal>
 
       <RecordPaymentModal
         isOpen={recordPaymentOpen}

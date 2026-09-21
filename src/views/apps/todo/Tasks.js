@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import Avatar from '@components/avatar'
 import { resolveAvatarUrl } from '@utils'
 import { persistTaskOrder } from './store'
+import { priorityColors } from '../kanban/kanbanOptions'
 import classnames from 'classnames'
 import { ReactSortable } from 'react-sortablejs'
 import PerfectScrollbar from 'react-perfect-scrollbar'
@@ -38,30 +39,11 @@ const Tasks = props => {
     handleTaskSidebar()
   }
 
-  const resolveAvatarVariant = tags => {
-    if (tags.includes('high')) return 'light-primary'
-    if (tags.includes('medium')) return 'light-warning'
-    if (tags.includes('low')) return 'light-success'
-    if (tags.includes('update')) return 'light-danger'
-    if (tags.includes('team')) return 'light-info'
-    return 'light-primary'
-  }
-
-  const renderTags = arr => {
-    const badgeColor = {
-      team: 'light-primary',
-      low: 'light-success',
-      medium: 'light-warning',
-      high: 'light-danger',
-      update: 'light-info'
-    }
-
-    return arr.map(item => (
-      <Badge className='text-capitalize' key={item} color={badgeColor[item]} pill>
-        {item}
-      </Badge>
-    ))
-  }
+  const renderPriorityBadge = priority => (
+    <Badge className='text-capitalize' color={`light-${priorityColors[priority] || 'secondary'}`} pill>
+      {priority}
+    </Badge>
+  )
 
   const renderAvatar = obj => {
     const item = obj.assignee
@@ -70,7 +52,7 @@ const Tasks = props => {
     if (avatarUrl) {
       return <Avatar img={avatarUrl} imgHeight='32' imgWidth='32' />
     }
-    return <Avatar color={resolveAvatarVariant(obj.tags)} content={item.fullName} initials />
+    return <Avatar color={`light-${priorityColors[obj.priority] || 'secondary'}`} content={item.fullName} initials />
   }
 
   const renderTasks = () => {
@@ -128,9 +110,7 @@ const Tasks = props => {
                       <span className='todo-title'>{item.title}</span>
                     </div>
                     <div className='todo-item-action mt-lg-0 mt-50'>
-                      {item.tags && item.tags.length ? (
-                        <div className='badge-wrapper me-1'>{renderTags(item.tags)}</div>
-                      ) : null}
+                      {item.priority ? <div className='badge-wrapper me-1'>{renderPriorityBadge(item.priority)}</div> : null}
                       {item.dueDate ? (
                         <small className='text-nowrap text-muted me-1'>
                           {new Date(item.dueDate).toLocaleString('default', { month: 'short' })}{' '}

@@ -51,12 +51,16 @@ export const updateContract = createAsyncThunk(
 
 export const deleteContract = createAsyncThunk(
   'appContracts/deleteContract',
-  async (id, { dispatch, getState }) => {
-    await axios.delete(`/contracts/${id}`)
-    await dispatch(getData(getState().contracts.params))
-    await dispatch(getAllData())
-    return id
-  }
+  async (id, { dispatch, getState }) => {    try {
+
+      await axios.delete(`/contracts/${id}`)
+      await dispatch(getData(getState().contracts.params))
+      await dispatch(getAllData())
+      return id
+  
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to delete')
+    }}
 )
 
 export const appContractsSlice = createSlice({

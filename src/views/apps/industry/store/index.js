@@ -46,12 +46,16 @@ export const updateIndustry = createAsyncThunk(
   }
 )
 
-export const deleteIndustry = createAsyncThunk('appIndustries/deleteIndustry', async (id, { dispatch, getState }) => {
-  await axios.delete(`/industries/${id}`)
-  await dispatch(getData(getState().industries.params))
-  await dispatch(getAllData())
-  return id
-})
+export const deleteIndustry = createAsyncThunk('appIndustries/deleteIndustry', async (id, { dispatch, getState }) => {  try {
+
+    await axios.delete(`/industries/${id}`)
+    await dispatch(getData(getState().industries.params))
+    await dispatch(getAllData())
+    return id
+
+  } catch (err) {
+    throw new Error(err?.response?.data?.message || 'Failed to delete')
+  }})
 
 export const appIndustriesSlice = createSlice({
   name: 'appIndustries',

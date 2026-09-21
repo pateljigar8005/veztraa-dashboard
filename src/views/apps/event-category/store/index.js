@@ -51,12 +51,16 @@ export const updateEventCategory = createAsyncThunk(
 
 export const deleteEventCategory = createAsyncThunk(
   'appEventCategories/deleteEventCategory',
-  async (id, { dispatch, getState }) => {
-    await axios.delete(`/event-categories/${id}`)
-    await dispatch(getData(getState().eventCategories.params))
-    await dispatch(getAllData())
-    return id
-  }
+  async (id, { dispatch, getState }) => {    try {
+
+      await axios.delete(`/event-categories/${id}`)
+      await dispatch(getData(getState().eventCategories.params))
+      await dispatch(getAllData())
+      return id
+  
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to delete')
+    }}
 )
 
 export const appEventCategoriesSlice = createSlice({

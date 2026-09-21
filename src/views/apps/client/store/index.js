@@ -46,12 +46,16 @@ export const updateClient = createAsyncThunk(
   }
 )
 
-export const deleteClient = createAsyncThunk('appClients/deleteClient', async (id, { dispatch, getState }) => {
-  await axios.delete(`/clients/${id}`)
-  await dispatch(getData(getState().clients.params))
-  await dispatch(getAllData())
-  return id
-})
+export const deleteClient = createAsyncThunk('appClients/deleteClient', async (id, { dispatch, getState }) => {  try {
+
+    await axios.delete(`/clients/${id}`)
+    await dispatch(getData(getState().clients.params))
+    await dispatch(getAllData())
+    return id
+
+  } catch (err) {
+    throw new Error(err?.response?.data?.message || 'Failed to delete')
+  }})
 
 export const appClientsSlice = createSlice({
   name: 'appClients',

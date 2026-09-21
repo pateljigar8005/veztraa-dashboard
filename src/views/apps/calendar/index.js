@@ -27,25 +27,16 @@ import { handleSelectTask } from '../kanban/store'
 import { selectTask, updateTask as updateTodoTask, addTask as addTodoTask, deleteTask as deleteTodoTask } from '../todo/store'
 import '@styles/react/apps/app-calendar.scss'
 
-// Kanban/Todo tiles aren't real event_categories rows (they're derived,
-// read-only entries from those two other apps - see fetchKanbanTaskEvents/
-// fetchTodoTaskEvents in store/index.js), so their color stays fixed here
-// rather than living in the admin-manageable category list.
-const taskSourceColors = {
-  'Kanban Tasks': 'secondary',
-  'To-Do': 'dark'
-}
-
 const CalendarComponent = () => {
   const dispatch = useDispatch()
   const store = useSelector(state => state.calendar)
   const kanbanStore = useSelector(state => state.kanban)
   const todoStore = useSelector(state => state.todo)
 
-  const calendarsColor = {
-    ...Object.fromEntries(store.eventCategories.map(c => [c.name, c.color])),
-    ...taskSourceColors
-  }
+  // Kanban/Todo tiles color by task priority instead (see Calendar.js's
+  // eventClassNames + kanbanOptions.js's priorityColors) - this only needs
+  // to cover real, admin-managed event_categories rows.
+  const calendarsColor = Object.fromEntries(store.eventCategories.map(c => [c.name, c.color]))
 
   const [calendarApi, setCalendarApi] = useState(null)
   const [addSidebarOpen, setAddSidebarOpen] = useState(false)
@@ -60,20 +51,6 @@ const CalendarComponent = () => {
   const handleAddEventSidebar = () => setAddSidebarOpen(!addSidebarOpen)
 
   const toggleSidebar = val => setLeftSidebarOpen(val)
-
-  const blankEvent = {
-    title: '',
-    start: '',
-    end: '',
-    allDay: false,
-    url: '',
-    extendedProps: {
-      calendar: '',
-      guests: [],
-      location: '',
-      description: ''
-    }
-  }
 
   const refetchEvents = () => {
     if (calendarApi !== null) {
@@ -127,7 +104,6 @@ const CalendarComponent = () => {
               isRtl={isRtl}
               store={store}
               dispatch={dispatch}
-              blankEvent={blankEvent}
               calendarApi={calendarApi}
               selectEvent={selectEvent}
               updateEvent={updateEvent}

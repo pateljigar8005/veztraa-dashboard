@@ -50,12 +50,16 @@ export const updateTermsTemplate = createAsyncThunk(
 
 export const deleteTermsTemplate = createAsyncThunk(
   'appTermsTemplates/deleteTermsTemplate',
-  async (id, { dispatch, getState }) => {
-    await axios.delete(`/terms-templates/${id}`)
-    await dispatch(getData(getState().termsTemplates.params))
-    await dispatch(getAllData())
-    return id
-  }
+  async (id, { dispatch, getState }) => {    try {
+
+      await axios.delete(`/terms-templates/${id}`)
+      await dispatch(getData(getState().termsTemplates.params))
+      await dispatch(getAllData())
+      return id
+  
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to delete')
+    }}
 )
 
 export const appTermsTemplatesSlice = createSlice({

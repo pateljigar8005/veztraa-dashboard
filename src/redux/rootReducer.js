@@ -28,6 +28,9 @@ import caseStudies from '@src/views/apps/case-study/store'
 import jobListings from '@src/views/apps/job-listing/store'
 import timesheets from '@src/views/apps/timesheet/store'
 import timesheetActivities from '@src/views/apps/timesheet-activity/store'
+import contactSubmissions from '@src/views/apps/contact-submission/store'
+import jobApplications from '@src/views/apps/job-application/store'
+import apiKeys from '@src/views/apps/api-key/store'
 
 const rootReducer = {
   auth,
@@ -59,7 +62,10 @@ const rootReducer = {
   caseStudies,
   jobListings,
   timesheets,
-  timesheetActivities
+  timesheetActivities,
+  contactSubmissions,
+  jobApplications,
+  apiKeys
 }
 
 export default rootReducer

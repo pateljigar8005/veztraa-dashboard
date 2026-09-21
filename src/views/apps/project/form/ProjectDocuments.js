@@ -36,7 +36,7 @@ const ProjectDocuments = ({ projectId }) => {
   const handleDelete = doc => {
     confirmDelete({
       text: `This will permanently delete "${doc.file_name}".`,
-      onConfirm: () => dispatch(deleteProjectDocument(doc.id)).then(() => toast.success('Document deleted'))
+      onConfirm: () => dispatch(deleteProjectDocument(doc.id)).unwrap().then(() => toast.success('Document deleted')).catch(err => toast.error(err?.message || 'Failed to delete'))
     })
   }
 

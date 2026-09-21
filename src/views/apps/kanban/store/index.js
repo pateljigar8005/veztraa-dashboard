@@ -23,12 +23,16 @@ export const updateBoardTitle = createAsyncThunk('appKanban/updateBoardTitle', a
   return response.data.data
 })
 
-export const deleteBoard = createAsyncThunk('appKanban/deleteBoard', async (id, { dispatch }) => {
-  await axios.delete(`/kanban-boards/${id}`)
-  await dispatch(fetchBoards())
-  await dispatch(fetchTasks())
-  return id
-})
+export const deleteBoard = createAsyncThunk('appKanban/deleteBoard', async (id, { dispatch }) => {  try {
+
+    await axios.delete(`/kanban-boards/${id}`)
+    await dispatch(fetchBoards())
+    await dispatch(fetchTasks())
+    return id
+
+  } catch (err) {
+    throw new Error(err?.response?.data?.message || 'Failed to delete')
+  }})
 
 export const clearTasks = createAsyncThunk('appKanban/clearTasks', async (boardId, { dispatch }) => {
   await axios.delete(`/kanban-boards/${boardId}/tasks`)
@@ -48,11 +52,15 @@ export const updateTask = createAsyncThunk('appKanban/updateTask', async ({ id, 
   return response.data.data
 })
 
-export const deleteTask = createAsyncThunk('appKanban/deleteTask', async (id, { dispatch }) => {
-  await axios.delete(`/kanban-tasks/${id}`)
-  await dispatch(fetchTasks())
-  return id
-})
+export const deleteTask = createAsyncThunk('appKanban/deleteTask', async (id, { dispatch }) => {  try {
+
+    await axios.delete(`/kanban-tasks/${id}`)
+    await dispatch(fetchTasks())
+    return id
+
+  } catch (err) {
+    throw new Error(err?.response?.data?.message || 'Failed to delete')
+  }})
 
 export const moveTaskToBoard = createAsyncThunk(
   'appKanban/moveTaskToBoard',
@@ -80,11 +88,15 @@ export const addComment = createAsyncThunk('appKanban/addComment', async ({ task
   await dispatch(fetchTasks())
 })
 
-export const deleteComment = createAsyncThunk('appKanban/deleteComment', async ({ id, taskId }, { dispatch }) => {
-  await axios.delete(`/kanban-task-comments/${id}`)
-  await dispatch(fetchComments(taskId))
-  await dispatch(fetchTasks())
-})
+export const deleteComment = createAsyncThunk('appKanban/deleteComment', async ({ id, taskId }, { dispatch }) => {  try {
+
+    await axios.delete(`/kanban-task-comments/${id}`)
+    await dispatch(fetchComments(taskId))
+    await dispatch(fetchTasks())
+
+  } catch (err) {
+    throw new Error(err?.response?.data?.message || 'Failed to delete')
+  }})
 
 export const getTaskAttachments = createAsyncThunk('appKanban/getTaskAttachments', async taskId => {
   const response = await axios.get(`/kanban-tasks/${taskId}/attachments`)

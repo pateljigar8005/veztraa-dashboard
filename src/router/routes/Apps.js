@@ -76,6 +76,15 @@ const CaseStudyForm = lazy(() => import('../../views/apps/case-study/form'))
 const JobListingList = lazy(() => import('../../views/apps/job-listing/list'))
 const JobListingForm = lazy(() => import('../../views/apps/job-listing/form'))
 
+const ContactSubmissionList = lazy(() => import('../../views/apps/contact-submission/list'))
+const ContactSubmissionView = lazy(() => import('../../views/apps/contact-submission/view'))
+
+const JobApplicationList = lazy(() => import('../../views/apps/job-application/list'))
+const JobApplicationView = lazy(() => import('../../views/apps/job-application/view'))
+
+const ApiKeyList = lazy(() => import('../../views/apps/api-key/list'))
+const ApiKeyAccessHistory = lazy(() => import('../../views/apps/api-key/view'))
+
 const AppRoutes = [
   {
     element: <Email />,
@@ -111,7 +120,7 @@ const AppRoutes = [
   },
   {
     element: <Todo />,
-    path: '/todo/tag/:tag',
+    path: '/todo/priority/:priority',
     meta: {
       appLayout: true,
       className: 'todo-application'
@@ -455,6 +464,30 @@ const AppRoutes = [
   {
     element: <JobListingForm />,
     path: '/job-listing/edit/:id'
+  },
+  {
+    element: <ContactSubmissionList />,
+    path: '/contact-submission'
+  },
+  {
+    element: <ContactSubmissionView />,
+    path: '/contact-submission/view/:id'
+  },
+  {
+    element: <JobApplicationList />,
+    path: '/job-application'
+  },
+  {
+    element: <JobApplicationView />,
+    path: '/job-application/view/:id'
+  },
+  {
+    element: <ApiKeyList />,
+    path: '/api-key'
+  },
+  {
+    element: <ApiKeyAccessHistory />,
+    path: '/api-key/:id/logs'
   }
 ]
 

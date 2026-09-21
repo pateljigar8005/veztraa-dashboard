@@ -46,12 +46,16 @@ export const updateProject = createAsyncThunk(
   }
 )
 
-export const deleteProject = createAsyncThunk('appProjects/deleteProject', async (id, { dispatch, getState }) => {
-  await axios.delete(`/projects/${id}`)
-  await dispatch(getData(getState().projects.params))
-  await dispatch(getAllData())
-  return id
-})
+export const deleteProject = createAsyncThunk('appProjects/deleteProject', async (id, { dispatch, getState }) => {  try {
+
+    await axios.delete(`/projects/${id}`)
+    await dispatch(getData(getState().projects.params))
+    await dispatch(getAllData())
+    return id
+
+  } catch (err) {
+    throw new Error(err?.response?.data?.message || 'Failed to delete')
+  }})
 
 export const getProjectDocuments = createAsyncThunk('appProjects/getProjectDocuments', async projectId => {
   const response = await axios.get(`/projects/${projectId}/documents`)

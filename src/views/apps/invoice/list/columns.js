@@ -148,7 +148,7 @@ export const columns = [
                 e.preventDefault()
                 confirmDelete({
                   text: `This will permanently delete the invoice for "${row.contact_name}".`,
-                  onConfirm: () => store.dispatch(deleteInvoice(row.id)).then(() => toast.success('Invoice deleted'))
+                  onConfirm: () => store.dispatch(deleteInvoice(row.id)).unwrap().then(() => toast.success('Invoice deleted')).catch(err => toast.error(err?.message || 'Failed to delete'))
                 })
               }}
             >

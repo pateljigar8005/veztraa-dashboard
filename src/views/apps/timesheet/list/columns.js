@@ -115,7 +115,7 @@ export const columns = [
                 e.preventDefault()
                 confirmDelete({
                   text: 'This will permanently delete this timesheet entry.',
-                  onConfirm: () => store.dispatch(deleteTimesheet(row.id)).then(() => toast.success('Timesheet entry deleted'))
+                  onConfirm: () => store.dispatch(deleteTimesheet(row.id)).unwrap().then(() => toast.success('Timesheet entry deleted')).catch(err => toast.error(err?.message || 'Failed to delete'))
                 })
               }}
             >

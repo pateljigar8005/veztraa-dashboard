@@ -51,12 +51,16 @@ export const updateQuotation = createAsyncThunk(
 
 export const deleteQuotation = createAsyncThunk(
   'appQuotations/deleteQuotation',
-  async (id, { dispatch, getState }) => {
-    await axios.delete(`/quotations/${id}`)
-    await dispatch(getData(getState().quotations.params))
-    await dispatch(getAllData())
-    return id
-  }
+  async (id, { dispatch, getState }) => {    try {
+
+      await axios.delete(`/quotations/${id}`)
+      await dispatch(getData(getState().quotations.params))
+      await dispatch(getAllData())
+      return id
+  
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to delete')
+    }}
 )
 
 export const appQuotationsSlice = createSlice({

@@ -22,7 +22,7 @@ const TODO = () => {
     filter: paramsURL.filter || '',
     q: query || '',
     sortBy: sort || '',
-    tag: paramsURL.tag || ''
+    priority: paramsURL.priority || ''
   }
 
   const handleMainSidebar = () => setMainSidebar(!mainSidebar)
@@ -34,10 +34,10 @@ const TODO = () => {
         filter: paramsURL.filter || '',
         q: query || '',
         sortBy: sort || '',
-        tag: paramsURL.tag || ''
+        priority: paramsURL.priority || ''
       })
     )
-  }, [store.tasks.length, paramsURL.filter, paramsURL.tag, query, sort])
+  }, [store.tasks.length, paramsURL.filter, paramsURL.priority, query, sort])
 
   return (
     <Fragment>

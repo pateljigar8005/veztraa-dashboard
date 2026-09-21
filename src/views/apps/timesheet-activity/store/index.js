@@ -51,12 +51,16 @@ export const updateTimesheetActivity = createAsyncThunk(
 
 export const deleteTimesheetActivity = createAsyncThunk(
   'appTimesheetActivities/deleteTimesheetActivity',
-  async (id, { dispatch, getState }) => {
-    await axios.delete(`/timesheet-activities/${id}`)
-    await dispatch(getData(getState().timesheetActivities.params))
-    await dispatch(getAllData())
-    return id
-  }
+  async (id, { dispatch, getState }) => {    try {
+
+      await axios.delete(`/timesheet-activities/${id}`)
+      await dispatch(getData(getState().timesheetActivities.params))
+      await dispatch(getAllData())
+      return id
+  
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to delete')
+    }}
 )
 
 export const appTimesheetActivitiesSlice = createSlice({

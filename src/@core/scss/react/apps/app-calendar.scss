@@ -1,5 +1,43 @@
 @import '../../base/pages/app-calendar.scss';
 
+// A fixed `height` on the FullCalendar instance (see Calendar.js) fixes the
+// *overall* grid height, but FullCalendar's own row-balancing still sets
+// each week row's height (as an inline style) proportional to that row's
+// content - a week with a "+more" link still ends up taller than a quieter
+// week even so. Forcing every day cell to the same explicit height (with
+// !important to beat that inline style) is the only way to make every row
+// in view actually match - dayMaxEvents (2, see Calendar.js) already caps
+// what a cell can show, so this comfortably fits the day number + 2 events
+// + a "+more" link without clipping, same content every cell ever needs to
+// fit regardless of which row it's in.
+.fc-daygrid-day-frame {
+  height: 130px !important;
+  overflow: hidden;
+}
+
+// Below 700px the view-switcher (Month/Week/Day/List) wraps onto its own
+// row below the prev/next/title row (see the existing fc-toolbar-chunk
+// margin-top rule in base/pages/app-calendar.scss for that breakpoint) -
+// but it keeps its natural compact width there, left-aligned with empty
+// space beside it. Stretching the button group (and each button within it
+// equally) to fill that row instead, same width as the row above it.
+@media (max-width: 700px) {
+  .app-calendar {
+    .fc-header-toolbar {
+      .fc-toolbar-chunk:last-of-type {
+        width: 100%;
+        .fc-button-group {
+          display: flex;
+          width: 100%;
+          .fc-button {
+            flex: 1;
+          }
+        }
+      }
+    }
+  }
+}
+
 .event-sidebar {
   .badge:empty {
     display: inline-block;

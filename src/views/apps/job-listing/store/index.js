@@ -51,12 +51,16 @@ export const updateJobListing = createAsyncThunk(
 
 export const deleteJobListing = createAsyncThunk(
   'appJobListings/deleteJobListing',
-  async (id, { dispatch, getState }) => {
-    await axios.delete(`/job-listings/${id}`)
-    await dispatch(getData(getState().jobListings.params))
-    await dispatch(getAllData())
-    return id
-  }
+  async (id, { dispatch, getState }) => {    try {
+
+      await axios.delete(`/job-listings/${id}`)
+      await dispatch(getData(getState().jobListings.params))
+      await dispatch(getAllData())
+      return id
+  
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to delete')
+    }}
 )
 
 export const appJobListingsSlice = createSlice({

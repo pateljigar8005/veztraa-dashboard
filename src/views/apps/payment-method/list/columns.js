@@ -86,7 +86,7 @@ export const columns = [
                 confirmDelete({
                   text: `This will permanently delete "${row.name}".`,
                   onConfirm: () =>
-                    store.dispatch(deletePaymentMethod(row.id)).then(() => toast.success('Payment Method deleted'))
+                    store.dispatch(deletePaymentMethod(row.id)).unwrap().then(() => toast.success('Payment Method deleted')).catch(err => toast.error(err?.message || 'Failed to delete'))
                 })
               }}
             >

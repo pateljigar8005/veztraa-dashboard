@@ -63,12 +63,16 @@ export const uploadPortfolioItemImage = createAsyncThunk(
 
 export const deletePortfolioItem = createAsyncThunk(
   'appPortfolioItems/deletePortfolioItem',
-  async (id, { dispatch, getState }) => {
-    await axios.delete(`/portfolio-items/${id}`)
-    await dispatch(getData(getState().portfolioItems.params))
-    await dispatch(getAllData())
-    return id
-  }
+  async (id, { dispatch, getState }) => {    try {
+
+      await axios.delete(`/portfolio-items/${id}`)
+      await dispatch(getData(getState().portfolioItems.params))
+      await dispatch(getAllData())
+      return id
+  
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to delete')
+    }}
 )
 
 export const appPortfolioItemsSlice = createSlice({
