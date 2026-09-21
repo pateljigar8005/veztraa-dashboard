@@ -1,6 +1,7 @@
 import navbar from './navbar'
 import layout from './layout'
 import auth from './authentication'
+import dashboard from '@src/views/dashboard/store'
 import todo from '@src/views/apps/todo/store'
 import chat from '@src/views/apps/chat/store'
 import users from '@src/views/apps/user/store'
@@ -34,6 +35,7 @@ import apiKeys from '@src/views/apps/api-key/store'
 
 const rootReducer = {
   auth,
+  dashboard,
   todo,
   chat,
   email,
