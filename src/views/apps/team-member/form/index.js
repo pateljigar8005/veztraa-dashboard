@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
 import ImageUploadField from '../../shared/ImageUploadField'
 import { resolveAvatarUrl } from '@utils'
+import HistoryModal from '../../activity-log/HistoryModal'
 import { addTeamMember, updateTeamMember, getTeamMember, uploadTeamMemberPhoto } from '../store'
 
 const defaultValues = {
@@ -116,6 +117,7 @@ const TeamMemberForm = () => {
           <Card>
             <CardHeader>
               <CardTitle tag='h4'>{isEdit ? 'Edit Team Member' : 'Add Team Member'}</CardTitle>
+              {isEdit && <HistoryModal entityType='team_member' entityId={Number(id)} buttonId='team-member-history-btn' />}
             </CardHeader>
             <CardBody>
               <Row>

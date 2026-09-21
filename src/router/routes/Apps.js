@@ -84,6 +84,7 @@ const JobApplicationView = lazy(() => import('../../views/apps/job-application/v
 
 const ApiKeyList = lazy(() => import('../../views/apps/api-key/list'))
 const ApiKeyAccessHistory = lazy(() => import('../../views/apps/api-key/view'))
+const ActivityLogList = lazy(() => import('../../views/apps/activity-log/list'))
 
 const AppRoutes = [
   {
@@ -488,6 +489,10 @@ const AppRoutes = [
   {
     element: <ApiKeyAccessHistory />,
     path: '/api-key/:id/logs'
+  },
+  {
+    element: <ActivityLogList />,
+    path: '/activity-log'
   }
 ]
 

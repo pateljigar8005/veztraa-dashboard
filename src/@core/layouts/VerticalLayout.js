@@ -16,6 +16,7 @@ import { useLayout } from '@hooks/useLayout'
 import { useNavbarType } from '@hooks/useNavbarType'
 import { useFooterType } from '@hooks/useFooterType'
 import { useEmailUnreadPolling } from '@hooks/useEmailUnreadPolling'
+import { useNotificationPolling } from '@hooks/useNotificationPolling'
 import { useNavbarColor } from '@hooks/useNavbarColor'
 import '@styles/base/core/menu/menu-types/vertical-menu.scss'
 import '@styles/base/core/menu/menu-types/vertical-overlay-menu.scss'
@@ -35,6 +36,7 @@ const VerticalLayout = props => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
 
   useEmailUnreadPolling()
+  useNotificationPolling()
 
   const dispatch = useDispatch()
   const layoutStore = useSelector(state => state.layout)

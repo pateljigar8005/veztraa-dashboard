@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
 import axios from 'axios'
@@ -11,6 +11,7 @@ import InputPasswordToggle from '@components/input-password-toggle'
 import ImageUploadField from '../../shared/ImageUploadField'
 import { Editor } from '@veztraa/editor'
 import { getUserData, resolveAvatarUrl, uploadEditorImage } from '@utils'
+import HistoryModal from '../../activity-log/HistoryModal'
 
 const PASSWORD_PLACEHOLDER = '••••••••'
 
@@ -196,259 +197,256 @@ const UserForm = () => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle tag='h4'>{selfMode ? 'Account Settings' : isEdit ? 'Edit User' : 'Add New User'}</CardTitle>
-      </CardHeader>
-      <CardBody>
-        <Form onSubmit={handleSubmit(onSubmit)}>
-          <Row>
-            <Col md={12} className='mb-2'>
-              <Label className='form-label d-block'>Profile Picture</Label>
-              <ImageUploadField
-                preview={avatarPreview}
-                onFileSelect={handleAvatarChange}
-                onRemove={handleRemoveAvatar}
-                helperText='JPG, PNG, GIF or WebP — max 2MB.'
-              />
-            </Col>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='first_name'>
-                First Name <span className='text-danger'>*</span>
-              </Label>
-              <Controller
-                name='first_name'
-                control={control}
-                render={({ field }) => (
-                  <Input id='first_name' placeholder='John' invalid={errors.first_name && true} {...field} />
-                )}
-              />
-            </Col>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='last_name'>
-                Last Name <span className='text-danger'>*</span>
-              </Label>
-              <Controller
-                name='last_name'
-                control={control}
-                render={({ field }) => (
-                  <Input id='last_name' placeholder='Doe' invalid={errors.last_name && true} {...field} />
-                )}
-              />
-            </Col>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='email'>
-                Email <span className='text-danger'>*</span>
-              </Label>
-              {emailUsernameMode ? (
-                <Controller
-                  name='email'
-                  control={control}
-                  render={({ field }) => (
-                    <InputGroup>
-                      <Input id='email' placeholder='dhruvit' invalid={errors.email && true} disabled={selfMode} {...field} />
-                      <InputGroupText>{`@${mailDomain}`}</InputGroupText>
-                    </InputGroup>
-                  )}
+    <Fragment>
+      <Card>
+        <CardHeader>
+          <CardTitle tag='h4'>{selfMode ? 'Account Settings' : isEdit ? 'Edit User' : 'Add New User'}</CardTitle>
+        </CardHeader>
+        <CardBody>
+          <Form onSubmit={handleSubmit(onSubmit)}>
+            <Row>
+              <Col md={12} className='mb-2'>
+                <Label className='form-label d-block'>Profile Picture</Label>
+                <ImageUploadField
+                  preview={avatarPreview}
+                  onFileSelect={handleAvatarChange}
+                  onRemove={handleRemoveAvatar}
+                  helperText='JPG, PNG, GIF or WebP — max 2MB.'
                 />
-              ) : (
-                <Controller
-                  name='email'
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      type='email'
-                      id='email'
-                      placeholder='john.doe@example.com'
-                      invalid={errors.email && true}
-                      disabled={selfMode}
-                      {...field}
-                    />
-                  )}
-                />
-              )}
-              {selfMode && <FormText color='muted'>Contact an admin to change your login email.</FormText>}
-              {!selfMode && emailUsernameMode && (
-                <FormText color='muted'>Also this user's company mailbox - creates it on save if it doesn't exist yet.</FormText>
-              )}
-            </Col>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='phone'>
-                Phone <span className='text-danger'>*</span>
-              </Label>
-              <Controller
-                name='phone'
-                control={control}
-                render={({ field }) => (
-                  <Input id='phone' placeholder='(397) 294-5153' invalid={errors.phone && true} {...field} />
-                )}
-              />
-            </Col>
-            {
-                                                                             }
-            {!selfMode && (
-              <Col md={6} className='mb-1'>
-                <Label className='form-label' for='password'>
-                  Password {!isEdit && <span className='text-danger'>*</span>}
-                </Label>
-                <Controller
-                  name='password'
-                  control={control}
-                  render={({ field }) => (
-                    <InputPasswordToggle
-                      id='password'
-                      invalid={errors.password && true}
-                      {...field}
-                      onFocus={e => {
-                        if (isEdit) e.target.select()
-                      }}
-                    />
-                  )}
-                />
-                <FormText color='muted'>
-                  {isEdit
-                    ? 'Leave as-is to keep the current password - the eye icon reveals what you type, not the existing one'
-                    : 'Minimum 6 characters'}
-                </FormText>
               </Col>
-            )}
-            {!selfMode && (
-              <Col md={6}>
-                <Label className='form-label' for='user-role'>
-                  User Role
-                </Label>
-                <Input
-                  type='select'
-                  id='user-role'
-                  value={roleId}
-                  onChange={e => {
-                    setRoleId(e.target.value)
-                    setExtraDirty(true)
-                  }}
-                >
-                  {roles.map(role => (
-                    <option key={role.id} value={role.id}>
-                      {role.name}
-                    </option>
-                  ))}
-                </Input>
-              </Col>
-            )}
-          </Row>
-
-          <h5 className='mb-1 mt-2'>Email Settings</h5>
-          <p className='text-muted small'>
-            {selfMode
-              ? 'Your email signature and how Compose uses it.'
-              : "Login details for this user's own email account."}
-          </p>
-          {
-                                          }
-          {!selfMode && (
-            <div className='d-flex align-items-center mb-1' style={{ gap: '0.5rem' }}>
-              <div className='form-switch'>
-                <Input
-                  type='switch'
-                  id='same_password_as_login'
-                  checked={samePasswordAsLogin}
-                  onChange={e => {
-                    setSamePasswordAsLogin(e.target.checked)
-                    setExtraDirty(true)
-                  }}
-                />
-              </div>
-              <Label className='form-label mb-0' htmlFor='same_password_as_login'>
-                Use the same password for the company mailbox as the login password
-              </Label>
-            </div>
-          )}
-          <Row>
-            {
-                                                                }
-            {!selfMode && !emailUsernameMode && (
               <Col md={6} className='mb-1'>
-                <Label className='form-label' for='email_login'>
-                  {mailDomain ? 'Company Mailbox' : 'Email'}
+                <Label className='form-label' for='first_name'>
+                  First Name <span className='text-danger'>*</span>
                 </Label>
                 <Controller
-                  name='email_login'
+                  name='first_name'
                   control={control}
                   render={({ field }) => (
-                    <Input type='email' id='email_login' placeholder='john.doe@example.com' {...field} />
+                    <Input id='first_name' placeholder='John' invalid={errors.first_name && true} {...field} />
                   )}
                 />
-                {mailDomain && (
-                  <FormText color='muted'>Leave blank if this user doesn't need a company mailbox.</FormText>
-                )}
               </Col>
-            )}
-            {!selfMode && (
               <Col md={6} className='mb-1'>
-                <Label className='form-label' for='email_login_password'>
-                  {emailUsernameMode ? 'Mailbox Password' : 'Password'}
+                <Label className='form-label' for='last_name'>
+                  Last Name <span className='text-danger'>*</span>
                 </Label>
-                {samePasswordAsLogin ? (
-                  <InputPasswordToggle
-                    id='email_login_password'
-                    value={watchedPassword}
-                    disabled
-                    onChange={() => {}}
+                <Controller
+                  name='last_name'
+                  control={control}
+                  render={({ field }) => (
+                    <Input id='last_name' placeholder='Doe' invalid={errors.last_name && true} {...field} />
+                  )}
+                />
+              </Col>
+              <Col md={6} className='mb-1'>
+                <Label className='form-label' for='email'>
+                  Email <span className='text-danger'>*</span>
+                </Label>
+                {emailUsernameMode ? (
+                  <Controller
+                    name='email'
+                    control={control}
+                    render={({ field }) => (
+                      <InputGroup>
+                        <Input id='email' placeholder='dhruvit' invalid={errors.email && true} disabled={selfMode} {...field} />
+                        <InputGroupText>{`@${mailDomain}`}</InputGroupText>
+                      </InputGroup>
+                    )}
                   />
                 ) : (
                   <Controller
-                    name='email_login_password'
+                    name='email'
                     control={control}
-                    render={({ field }) => <InputPasswordToggle id='email_login_password' {...field} />}
+                    render={({ field }) => (
+                      <Input
+                        type='email'
+                        id='email'
+                        placeholder='john.doe@example.com'
+                        invalid={errors.email && true}
+                        disabled={selfMode}
+                        {...field}
+                      />
+                    )}
                   />
                 )}
-                <FormText color='muted'>
-                  {samePasswordAsLogin
-                    ? 'Mirrors the login password above - type a new login password to change this too.'
-                    : emailUsernameMode
-                    ? "The eye icon reveals this mailbox's real, current password. Required to create the mailbox above on save; changing it here updates the real mailbox's password too."
-                    : "The eye icon reveals this mailbox account's real, current password."}
-                </FormText>
+                {selfMode && <FormText color='muted'>Contact an admin to change your login email.</FormText>}
+                {!selfMode && emailUsernameMode && (
+                  <FormText color='muted'>Also this user's company mailbox - creates it on save if it doesn't exist yet.</FormText>
+                )}
               </Col>
-            )}
-            <Col md={12} className='mb-1'>
-              <Label className='form-label' for='email_signature'>
-                Email Signature
-              </Label>
-              <Controller
-                name='email_signature'
-                control={control}
-                render={({ field }) => (
-                  <Editor
-                    value={field.value}
-                    onChange={field.onChange}
-                    height={350}
-                    placeholder="This user's email signature"
-                    onImageUpload={uploadEditorImage}
-                  />
-                )}
-              />
-              <FormText color='muted'>Used when Compose auto-appends the signature below.</FormText>
-            </Col>
-            <Col md={12} className='mb-2 mt-50'>
-              <div className='form-switch d-flex align-items-center'>
-                <Input
-                  type='switch'
-                  id='email_signature_auto_append'
-                  checked={autoAppendSignature}
-                  onChange={e => {
-                    setAutoAppendSignature(e.target.checked)
-                    setExtraDirty(true)
-                  }}
+              <Col md={6} className='mb-1'>
+                <Label className='form-label' for='phone'>
+                  Phone <span className='text-danger'>*</span>
+                </Label>
+                <Controller
+                  name='phone'
+                  control={control}
+                  render={({ field }) => (
+                    <Input id='phone' placeholder='(397) 294-5153' invalid={errors.phone && true} {...field} />
+                  )}
                 />
-                <Label className='form-check-label mb-0 ms-50' for='email_signature_auto_append'>
-                  Auto-append signature when composing
+              </Col>
+              {!selfMode && (
+                <Col md={6} className='mb-1'>
+                  <Label className='form-label' for='password'>
+                    Password {!isEdit && <span className='text-danger'>*</span>}
+                  </Label>
+                  <Controller
+                    name='password'
+                    control={control}
+                    render={({ field }) => (
+                      <InputPasswordToggle
+                        id='password'
+                        invalid={errors.password && true}
+                        {...field}
+                        onFocus={e => {
+                          if (isEdit) e.target.select()
+                        }}
+                      />
+                    )}
+                  />
+                  <FormText color='muted'>
+                    {isEdit
+                      ? 'Leave as-is to keep the current password - the eye icon reveals what you type, not the existing one'
+                      : 'Minimum 6 characters'}
+                  </FormText>
+                </Col>
+              )}
+              {!selfMode && (
+                <Col md={6}>
+                  <Label className='form-label' for='user-role'>
+                    User Role
+                  </Label>
+                  <Input
+                    type='select'
+                    id='user-role'
+                    value={roleId}
+                    onChange={e => {
+                      setRoleId(e.target.value)
+                      setExtraDirty(true)
+                    }}
+                  >
+                    {roles.map(role => (
+                      <option key={role.id} value={role.id}>
+                        {role.name}
+                      </option>
+                    ))}
+                  </Input>
+                </Col>
+              )}
+            </Row>
+
+            <h5 className='mb-1 mt-2'>Email Settings</h5>
+            <p className='text-muted small'>
+              {selfMode
+                ? 'Your email signature and how Compose uses it.'
+                : "Login details for this user's own email account."}
+            </p>
+            {!selfMode && (
+              <div className='d-flex align-items-center mb-1' style={{ gap: '0.5rem' }}>
+                <div className='form-switch'>
+                  <Input
+                    type='switch'
+                    id='same_password_as_login'
+                    checked={samePasswordAsLogin}
+                    onChange={e => {
+                      setSamePasswordAsLogin(e.target.checked)
+                      setExtraDirty(true)
+                    }}
+                  />
+                </div>
+                <Label className='form-label mb-0' htmlFor='same_password_as_login'>
+                  Use the same password for the company mailbox as the login password
                 </Label>
               </div>
-            </Col>
-          </Row>
-        </Form>
-      </CardBody>
-    </Card>
+            )}
+            <Row>
+              {!selfMode && !emailUsernameMode && (
+                <Col md={6} className='mb-1'>
+                  <Label className='form-label' for='email_login'>
+                    {mailDomain ? 'Company Mailbox' : 'Email'}
+                  </Label>
+                  <Controller
+                    name='email_login'
+                    control={control}
+                    render={({ field }) => (
+                      <Input type='email' id='email_login' placeholder='john.doe@example.com' {...field} />
+                    )}
+                  />
+                  {mailDomain && (
+                    <FormText color='muted'>Leave blank if this user doesn't need a company mailbox.</FormText>
+                  )}
+                </Col>
+              )}
+              {!selfMode && (
+                <Col md={6} className='mb-1'>
+                  <Label className='form-label' for='email_login_password'>
+                    {emailUsernameMode ? 'Mailbox Password' : 'Password'}
+                  </Label>
+                  {samePasswordAsLogin ? (
+                    <InputPasswordToggle
+                      id='email_login_password'
+                      value={watchedPassword}
+                      disabled
+                      onChange={() => {}}
+                    />
+                  ) : (
+                    <Controller
+                      name='email_login_password'
+                      control={control}
+                      render={({ field }) => <InputPasswordToggle id='email_login_password' {...field} />}
+                    />
+                  )}
+                  <FormText color='muted'>
+                    {samePasswordAsLogin
+                      ? 'Mirrors the login password above - type a new login password to change this too.'
+                      : emailUsernameMode
+                      ? "The eye icon reveals this mailbox's real, current password. Required to create the mailbox above on save; changing it here updates the real mailbox's password too."
+                      : "The eye icon reveals this mailbox account's real, current password."}
+                  </FormText>
+                </Col>
+              )}
+              <Col md={12} className='mb-1'>
+                <Label className='form-label' for='email_signature'>
+                  Email Signature
+                </Label>
+                <Controller
+                  name='email_signature'
+                  control={control}
+                  render={({ field }) => (
+                    <Editor
+                      value={field.value}
+                      onChange={field.onChange}
+                      height={350}
+                      placeholder="This user's email signature"
+                      onImageUpload={uploadEditorImage}
+                    />
+                  )}
+                />
+                <FormText color='muted'>Used when Compose auto-appends the signature below.</FormText>
+              </Col>
+              <Col md={12} className='mb-2 mt-50'>
+                <div className='form-switch d-flex align-items-center'>
+                  <Input
+                    type='switch'
+                    id='email_signature_auto_append'
+                    checked={autoAppendSignature}
+                    onChange={e => {
+                      setAutoAppendSignature(e.target.checked)
+                      setExtraDirty(true)
+                    }}
+                  />
+                  <Label className='form-check-label mb-0 ms-50' for='email_signature_auto_append'>
+                    Auto-append signature when composing
+                  </Label>
+                </div>
+              </Col>
+            </Row>
+          </Form>
+        </CardBody>
+      </Card>
+      {isEdit && <HistoryModal entityType='user' entityId={Number(id)} buttonId='user-history-btn' />}
+    </Fragment>
   )
 }
 

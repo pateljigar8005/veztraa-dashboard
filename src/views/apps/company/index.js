@@ -25,6 +25,7 @@ import {
 import { Settings, Mail, FileText, Send, Sun, Server, Trash2 } from 'react-feather'
 import InputPasswordToggle from '@components/input-password-toggle'
 import AdminEmailsTab from './AdminEmailsTab'
+import HistoryModal from '../activity-log/HistoryModal'
 import { selectThemeColors, getUserData } from '@utils'
 import { confirmDelete } from '@src/utility/confirmDelete'
 
@@ -268,6 +269,10 @@ const CompanySettings = () => {
       `}</style>
       <CardHeader>
         <CardTitle tag='h4'>Company Settings</CardTitle>
+        {/* HistoryModal renders a hidden trigger + a portal-rendered Modal - it
+            doesn't need to be a sibling of Card via a Fragment wrapper like
+            the other forms, just anywhere inside this render tree. */}
+        <HistoryModal entityType='company_setting' entityId={0} buttonId='company-history-btn' />
       </CardHeader>
       <CardBody className='d-flex flex-column flex-grow-1' style={{ minHeight: 0 }}>
         <div className='d-flex flex-column flex-md-row flex-fill' style={{ minHeight: 0 }}>

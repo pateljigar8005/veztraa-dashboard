@@ -44,6 +44,40 @@ export const deleteJobApplication = createAsyncThunk(
   }
 )
 
+// Manual hiring pipeline (New -> Reviewing -> Shortlisted -> Rejected/Hired) -
+// see JobApplicationController::updateStatus(). Re-fetches the list so the
+// Status column reflects the change without a full page reload.
+export const updateJobApplicationStatus = createAsyncThunk(
+  'appJobApplications/updateJobApplicationStatus',
+  async ({ id, status }, { dispatch, getState }) => {
+    try {
+      const response = await axios.put(`/job-applications/${id}/status`, { status })
+      await dispatch(getData(getState().jobApplications.params))
+      await dispatch(getAllData())
+      return response.data.data
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to update status')
+    }
+  }
+)
+
+export const getJobApplicationNotes = createAsyncThunk('appJobApplications/getJobApplicationNotes', async id => {
+  const response = await axios.get(`/job-applications/${id}/notes`)
+  return response.data.data.notes
+})
+
+export const addJobApplicationNote = createAsyncThunk(
+  'appJobApplications/addJobApplicationNote',
+  async ({ id, note }, { dispatch }) => {
+    try {
+      await axios.post(`/job-applications/${id}/notes`, { note })
+      await dispatch(getJobApplicationNotes(id))
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to add note')
+    }
+  }
+)
+
 export const appJobApplicationsSlice = createSlice({
   name: 'appJobApplications',
   initialState: {
@@ -51,7 +85,8 @@ export const appJobApplicationsSlice = createSlice({
     total: 1,
     params: {},
     allData: [],
-    selectedJobApplication: null
+    selectedJobApplication: null,
+    notes: []
   },
   reducers: {},
   extraReducers: builder => {
@@ -66,6 +101,12 @@ export const appJobApplicationsSlice = createSlice({
       })
       .addCase(getJobApplication.fulfilled, (state, action) => {
         state.selectedJobApplication = action.payload
+      })
+      .addCase(updateJobApplicationStatus.fulfilled, (state, action) => {
+        state.selectedJobApplication = action.payload
+      })
+      .addCase(getJobApplicationNotes.fulfilled, (state, action) => {
+        state.notes = action.payload
       })
   }
 })

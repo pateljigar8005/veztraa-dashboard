@@ -9,6 +9,23 @@ import { formatDate } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
 
+// See job_applications.status - New -> Reviewing -> Shortlisted -> Rejected/Hired.
+const statusColorObj = {
+  new: 'light-primary',
+  reviewing: 'light-info',
+  shortlisted: 'light-warning',
+  rejected: 'light-danger',
+  hired: 'light-success'
+}
+
+const statusLabelObj = {
+  new: 'New',
+  reviewing: 'Reviewing',
+  shortlisted: 'Shortlisted',
+  rejected: 'Rejected',
+  hired: 'Hired'
+}
+
 export const columns = [
   {
     name: 'Applicant',
@@ -53,6 +70,16 @@ export const columns = [
     sortField: 'created_at',
     selector: row => row.created_at,
     cell: row => <span>{formatDate(row.created_at, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+  },
+  {
+    name: 'Status',
+    minWidth: '130px',
+    selector: row => row.status,
+    cell: row => (
+      <Badge className='text-capitalize' color={statusColorObj[row.status] || 'light-secondary'} pill>
+        {statusLabelObj[row.status] || row.status}
+      </Badge>
+    )
   },
   {
     name: 'Actions',

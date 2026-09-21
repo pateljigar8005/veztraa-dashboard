@@ -1,4 +1,4 @@
-import { DollarSign, FileText, Edit3, Users, Briefcase, Clock, Mail, Send } from 'react-feather'
+import { DollarSign, FileText, Edit3, Users, Briefcase, Clock } from 'react-feather'
 import { formatAmount } from '@utils'
 
 // One entry per dashboard block id - the same ids DashboardController::summary()
@@ -23,6 +23,15 @@ import { formatAmount } from '@utils'
 // (UpcomingCard) instead, so there's exactly one place to check for what
 // needs attention rather than the same task also living in a separate
 // summary card.
+//
+// Contact Us and Job Applications have no card here either, for the same
+// reason - their unread counts now live in the navbar notification bell
+// and as a badge directly on their own sidebar nav items (see
+// VerticalNavMenuLink.js's UNREAD_SELECTORS), which is a shorter path to
+// "something needs my attention" than a dashboard card. The KPI strip's
+// "Unread Enquiries" figure still reads `blocks.contactSubmissions`/
+// `blocks.jobApplications` directly from the store (see KpiStrip.js), so
+// the API still returns both blocks - they're just not turned into cards.
 export const dashboardBlocks = [
   {
     id: 'invoiceApp',
@@ -91,27 +100,7 @@ export const dashboardBlocks = [
     color: 'success',
     path: '/timesheet',
     stats: data => [{ label: 'Hours this week', value: formatAmount(data.hours_this_week) }]
-  },
-  {
-    id: 'contactSubmissions',
-    section: 'Website',
-    title: 'Contact Us',
-    icon: Mail,
-    color: 'primary',
-    path: '/contact-submission',
-    stats: data => [{ label: 'Unread', value: data.unread }],
-    items: data => (data.recent || []).map(r => ({ id: r.id, label: r.name, sub: r.reference_id }))
-  },
-  {
-    id: 'jobApplications',
-    section: 'Website',
-    title: 'Job Applications',
-    icon: Send,
-    color: 'info',
-    path: '/job-application',
-    stats: data => [{ label: 'Unread', value: data.unread }],
-    items: data => (data.recent || []).map(r => ({ id: r.id, label: r.name, sub: r.reference_id }))
   }
 ]
 
-export const dashboardSections = ['Billing', 'Apps & Pages', 'Website']
+export const dashboardSections = ['Billing', 'Apps & Pages']

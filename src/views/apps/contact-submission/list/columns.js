@@ -9,6 +9,19 @@ import { formatDate } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
 
+// See contacts.status - New -> Contacted -> Closed.
+const statusColorObj = {
+  new: 'light-primary',
+  contacted: 'light-warning',
+  closed: 'light-success'
+}
+
+const statusLabelObj = {
+  new: 'New',
+  contacted: 'Contacted',
+  closed: 'Closed'
+}
+
 export const columns = [
   {
     name: 'From',
@@ -59,6 +72,16 @@ export const columns = [
     sortField: 'created_at',
     selector: row => row.created_at,
     cell: row => <span>{formatDate(row.created_at, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+  },
+  {
+    name: 'Status',
+    minWidth: '120px',
+    selector: row => row.status,
+    cell: row => (
+      <Badge className='text-capitalize' color={statusColorObj[row.status] || 'light-secondary'} pill>
+        {statusLabelObj[row.status] || row.status}
+      </Badge>
+    )
   },
   {
     name: 'Actions',

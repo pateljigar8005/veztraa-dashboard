@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch, useStore } from 'react-redux'
-import { Menu, CornerDownLeft, RefreshCw, PlusCircle, Search, Save, Download, Send } from 'react-feather'
+import { Menu, CornerDownLeft, RefreshCw, PlusCircle, Search, Save, Download, Send, Clock } from 'react-feather'
 import { NavItem, NavLink, UncontrolledTooltip } from 'reactstrap'
 import { hasActionPermission, inferRouteAction } from '@src/utility/navPermissions'
 import { refetchForRoute } from '@src/utility/refreshRegistry'
@@ -65,6 +65,53 @@ const sendEmailButtonIdByRoute = [
   { pattern: /^\/quotation\/view\/[^/]+$/, buttonId: 'quotation-send-email-btn', resource: '/quotation' }
 ]
 const findSendEmailRoute = pathname => sendEmailButtonIdByRoute.find(i => i.pattern.test(pathname)) || null
+
+// Every module with real ActivityLogger::log() calls on its controller
+// (see the matching ActivityLogger import in each one - Client, Company
+// Settings, Contract, Currency, Invoice, Payment Method, Project,
+// Quotation, Role, Service Item, Terms Template, Timesheet, User) renders
+// a hidden
+// <HistoryModal buttonId='<module>-history-btn' /> (see
+// src/views/apps/activity-log/HistoryModal.js) instead of a visible button
+// on the page itself, so every record's History action comes from this one
+// navbar icon. Gated by the 'activityLogs' permission entry
+// (ActivityLogController is hard admin-only server-side), not each
+// module's own resource - History is about who-did-what across the app,
+// not a capability of any one module. Company Settings has no :id in its
+// URL (a singleton record, see ActivityLog::forEntity()'s entityId=0
+// sentinel) so it matches on the bare route instead of an /edit/:id one;
+// User's form doubles as /account-settings (self-service), which gets the
+// same button id since it's the same UserForm component.
+const historyButtonIdByRoute = [
+  { pattern: /^\/invoice\/view\/[^/]+$/, buttonId: 'invoice-history-btn' },
+  { pattern: /^\/contract\/view\/[^/]+$/, buttonId: 'contract-history-btn' },
+  { pattern: /^\/quotation\/view\/[^/]+$/, buttonId: 'quotation-history-btn' },
+  { pattern: /^\/client\/edit\/[^/]+$/, buttonId: 'client-history-btn' },
+  { pattern: /^\/client\/view\/[^/]+$/, buttonId: 'client-view-history-btn' },
+  { pattern: /^\/currency\/edit\/[^/]+$/, buttonId: 'currency-history-btn' },
+  { pattern: /^\/payment-method\/edit\/[^/]+$/, buttonId: 'payment-method-history-btn' },
+  { pattern: /^\/project\/edit\/[^/]+$/, buttonId: 'project-history-btn' },
+  { pattern: /^\/roles\/edit\/[^/]+$/, buttonId: 'role-history-btn' },
+  { pattern: /^\/service-item\/edit\/[^/]+$/, buttonId: 'service-item-history-btn' },
+  { pattern: /^\/terms-template\/edit\/[^/]+$/, buttonId: 'terms-template-history-btn' },
+  { pattern: /^\/user\/edit\/[^/]+$/, buttonId: 'user-history-btn' },
+  { pattern: /^\/account-settings$/, buttonId: 'user-history-btn' },
+  { pattern: /^\/timesheet\/edit\/[^/]+$/, buttonId: 'timesheet-history-btn' },
+  { pattern: /^\/company$/, buttonId: 'company-history-btn' },
+  { pattern: /^\/event-category\/edit\/[^/]+$/, buttonId: 'event-category-history-btn' },
+  { pattern: /^\/industry\/edit\/[^/]+$/, buttonId: 'industry-history-btn' },
+  { pattern: /^\/timesheet-activity\/edit\/[^/]+$/, buttonId: 'timesheet-activity-history-btn' },
+  { pattern: /^\/email-template\/edit\/[^/]+$/, buttonId: 'email-template-history-btn' },
+  { pattern: /^\/holiday\/edit\/[^/]+$/, buttonId: 'holiday-history-btn' },
+  { pattern: /^\/pdf-designer\/edit\/[^/]+$/, buttonId: 'pdf-designer-history-btn' },
+  { pattern: /^\/team-member\/edit\/[^/]+$/, buttonId: 'team-member-history-btn' },
+  { pattern: /^\/portfolio\/edit\/[^/]+$/, buttonId: 'portfolio-history-btn' },
+  { pattern: /^\/case-study\/edit\/[^/]+$/, buttonId: 'case-study-history-btn' },
+  { pattern: /^\/job-listing\/edit\/[^/]+$/, buttonId: 'job-listing-history-btn' },
+  { pattern: /^\/contact-submission\/view\/[^/]+$/, buttonId: 'contact-submission-history-btn' },
+  { pattern: /^\/job-application\/view\/[^/]+$/, buttonId: 'job-application-history-btn' }
+]
+const findHistoryRoute = pathname => historyButtonIdByRoute.find(i => i.pattern.test(pathname)) || null
 
 const NavbarBookmarks = props => {
   const { setMenuVisibility } = props
@@ -134,6 +181,14 @@ const NavbarBookmarks = props => {
   const handleSendEmail = () => {
     if (!sendEmailEnabled) return
     document.getElementById(sendEmailRoute.buttonId)?.click()
+  }
+
+  const historyRoute = findHistoryRoute(location.pathname)
+  const historyRouteMatches = Boolean(historyRoute)
+  const historyEnabled = historyRouteMatches && hasActionPermission('/activity-log', 'view', userData)
+  const handleHistory = () => {
+    if (!historyEnabled) return
+    document.getElementById(historyRoute.buttonId)?.click()
   }
 
   return (
@@ -238,6 +293,21 @@ const NavbarBookmarks = props => {
             </NavLink>
             <UncontrolledTooltip placement='bottom' target='navbar-send-email-btn'>
               {sendEmailEnabled ? 'Send Email' : "Send Email (you don't have permission)"}
+            </UncontrolledTooltip>
+          </NavItem>
+        )}
+        {historyRouteMatches && (
+          <NavItem className='d-none d-lg-block'>
+            <NavLink
+              className='nav-link-style'
+              id='navbar-history-btn'
+              style={{ opacity: historyEnabled ? 1 : 0.35, pointerEvents: historyEnabled ? 'auto' : 'none' }}
+              onClick={handleHistory}
+            >
+              <Clock className='ficon' />
+            </NavLink>
+            <UncontrolledTooltip placement='bottom' target='navbar-history-btn'>
+              {historyEnabled ? 'History' : "History (you don't have permission)"}
             </UncontrolledTooltip>
           </NavItem>
         )}

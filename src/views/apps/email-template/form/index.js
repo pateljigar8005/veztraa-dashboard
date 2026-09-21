@@ -9,6 +9,7 @@ import { uploadEditorImage, selectThemeColors } from '@utils'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormText } from 'reactstrap'
+import HistoryModal from '../../activity-log/HistoryModal'
 import { addEmailTemplate, updateEmailTemplate, getEmailTemplate } from '../store'
 
 const defaultValues = { name: '', subject: '' }
@@ -79,6 +80,7 @@ const EmailTemplateForm = () => {
     <Card>
       <CardHeader>
         <CardTitle tag='h4'>{isEdit ? 'Edit Email Template' : 'Add New Email Template'}</CardTitle>
+        {isEdit && <HistoryModal entityType='email_template' entityId={Number(id)} buttonId='email-template-history-btn' />}
       </CardHeader>
       <CardBody>
         <Form onSubmit={handleSubmit(onSubmit)}>

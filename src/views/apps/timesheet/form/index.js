@@ -12,6 +12,7 @@ import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, Fo
 import { selectThemeColors, getUserData, uploadEditorImage } from '@utils'
 import DateField from '../../shared/DateField'
 import { addTimesheet, updateTimesheet, getTimesheet } from '../store'
+import HistoryModal from '../../activity-log/HistoryModal'
 
 const defaultValues = {
   user_id: '',
@@ -133,6 +134,7 @@ const TimesheetForm = () => {
     <Card>
       <CardHeader>
         <CardTitle tag='h4'>{isEdit ? 'Edit Timesheet Entry' : 'Add Timesheet Entry'}</CardTitle>
+        {isEdit && <HistoryModal entityType='timesheet' entityId={Number(id)} buttonId='timesheet-history-btn' />}
       </CardHeader>
       <CardBody>
         <Form onSubmit={handleSubmit(onSubmit)}>

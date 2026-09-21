@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select, { components } from 'react-select'
-import { X, Trash2, Send } from 'react-feather'
+import { X, Trash2, Send, Clock } from 'react-feather'
 import { useForm, Controller } from 'react-hook-form'
 import { Modal, ModalBody, ModalFooter, Button, Form, Input, Label, FormFeedback } from 'reactstrap'
 import { useDispatch, useSelector } from 'react-redux'
@@ -11,11 +11,15 @@ import { taskTypeOptions, priorityOptions } from './kanbanOptions'
 import Avatar from '@components/avatar'
 import TaskAttachments from './TaskAttachments'
 import DateField from '../shared/DateField'
+import HistoryModal from '../activity-log/HistoryModal'
 import useHolidayDates from '@hooks/useHolidayDates'
 import useWeekendDays from '@hooks/useWeekendDays'
 import { isObjEmpty, selectThemeColors, resolveAvatarUrl } from '@utils'
 import { confirmDelete } from '@src/utility/confirmDelete'
+import { currentUserCan } from '@src/utility/navPermissions'
 import '@styles/react/libs/react-select/_react-select.scss'
+
+const KANBAN_TASK_HISTORY_BTN = 'kanban-task-history-btn'
 
 const defaultValues = {
   title: ''
@@ -125,6 +129,7 @@ const TaskSidebar = props => {
 
   const selectedTaskTypeOption = taskTypeOptions.find(i => i.value === taskType) || null
   const selectedPriorityOption = priorityOptions.find(i => i.value === priority) || null
+  const canViewHistory = currentUserCan('/activity-log', 'view')
 
   const AssigneeOption = ({ data, ...optionProps }) => (
     <components.Option {...optionProps} data={data}>
@@ -300,18 +305,41 @@ const TaskSidebar = props => {
             </div>
           )}
         </ModalBody>
-        <ModalFooter>
-          <Button type='submit' color='primary'>
-            Save
-          </Button>
-          {selectedTask?.id && (
-            <Button type='button' outline color='danger' onClick={handleDeleteTask}>
-              <Trash2 size={14} className='me-50' />
-              Delete
+        <ModalFooter className='d-flex justify-content-between'>
+          <div>
+            {selectedTask?.id && canViewHistory && (
+              <Button
+                type='button'
+                outline
+                color='secondary'
+                onClick={() => document.getElementById(KANBAN_TASK_HISTORY_BTN)?.click()}
+              >
+                <Clock size={14} className='me-50' />
+                History
+              </Button>
+            )}
+          </div>
+          <div className='d-flex' style={{ gap: '0.5rem' }}>
+            <Button type='submit' color='primary'>
+              Save
             </Button>
-          )}
+            {selectedTask?.id && (
+              <Button type='button' outline color='danger' onClick={handleDeleteTask}>
+                <Trash2 size={14} className='me-50' />
+                Delete
+              </Button>
+            )}
+          </div>
         </ModalFooter>
       </Form>
+      {selectedTask?.id && (
+        <HistoryModal
+          entityType='kanban_task'
+          entityId={selectedTask.id}
+          entityLabel={selectedTask.title}
+          buttonId={KANBAN_TASK_HISTORY_BTN}
+        />
+      )}
     </Modal>
   )
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
 import axios from 'axios'
@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
 import { selectThemeColors } from '@utils'
 import { addClient, updateClient, getClient } from '../store'
+import HistoryModal from '../../activity-log/HistoryModal'
 
 const defaultValues = {
   first_name: '',
@@ -108,123 +109,126 @@ const ClientForm = () => {
   const selectedCurrencyOption = currencyOptions.find(c => c.value === currencyId) || null
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle tag='h4'>{isEdit ? 'Edit Client' : 'Add New Client'}</CardTitle>
-      </CardHeader>
-      <CardBody>
-        <Form onSubmit={handleSubmit(onSubmit)}>
-          <Row>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='first_name'>
-                First Name <span className='text-danger'>*</span>
-              </Label>
-              <Controller
-                name='first_name'
-                control={control}
-                render={({ field }) => (
-                  <Input id='first_name' placeholder='John' invalid={errors.first_name && true} {...field} />
-                )}
-              />
-            </Col>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='last_name'>
-                Last Name <span className='text-danger'>*</span>
-              </Label>
-              <Controller
-                name='last_name'
-                control={control}
-                render={({ field }) => (
-                  <Input id='last_name' placeholder='Doe' invalid={errors.last_name && true} {...field} />
-                )}
-              />
-            </Col>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='company_name'>
-                Company Name
-              </Label>
-              <Controller
-                name='company_name'
-                control={control}
-                render={({ field }) => <Input id='company_name' placeholder='Acme Corporation' {...field} />}
-              />
-            </Col>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='industry'>
-                Industry
-              </Label>
-              <Select
-                inputId='industry'
-                isClearable
-                classNamePrefix='select'
-                className='react-select'
-                theme={selectThemeColors}
-                options={industryOptions}
-                value={selectedIndustryOption}
-                onChange={option => setValue('industry_id', option ? option.value : '', { shouldDirty: true })}
-                placeholder='Select industry...'
-              />
-            </Col>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='email'>
-                Email <span className='text-danger'>*</span>
-              </Label>
-              <Controller
-                name='email'
-                control={control}
-                render={({ field }) => (
-                  <Input
-                    type='email'
-                    id='email'
-                    placeholder='john.doe@example.com'
-                    invalid={errors.email && true}
-                    {...field}
-                  />
-                )}
-              />
-            </Col>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='phone'>
-                Phone
-              </Label>
-              <Controller
-                name='phone'
-                control={control}
-                render={({ field }) => <Input id='phone' placeholder='(397) 294-5153' {...field} />}
-              />
-            </Col>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='currency_id'>
-                Currency
-              </Label>
-              <Select
-                inputId='currency_id'
-                isClearable
-                classNamePrefix='select'
-                className='react-select'
-                theme={selectThemeColors}
-                options={currencyOptions}
-                value={selectedCurrencyOption}
-                onChange={option => setValue('currency_id', option ? option.value : '', { shouldDirty: true })}
-                placeholder='Select currency...'
-              />
-            </Col>
-            <Col md={12}>
-              <Label className='form-label' for='address'>
-                Address
-              </Label>
-              <Controller
-                name='address'
-                control={control}
-                render={({ field }) => (
-                  <Input type='textarea' rows='2' id='address' placeholder='1307 Lady Bug Drive, New York' {...field} />
-                )}
-              />
-            </Col>
-          </Row>
-        </Form>
-      </CardBody>
-    </Card>
+    <Fragment>
+      <Card>
+        <CardHeader>
+          <CardTitle tag='h4'>{isEdit ? 'Edit Client' : 'Add New Client'}</CardTitle>
+        </CardHeader>
+        <CardBody>
+          <Form onSubmit={handleSubmit(onSubmit)}>
+            <Row>
+              <Col md={6} className='mb-1'>
+                <Label className='form-label' for='first_name'>
+                  First Name <span className='text-danger'>*</span>
+                </Label>
+                <Controller
+                  name='first_name'
+                  control={control}
+                  render={({ field }) => (
+                    <Input id='first_name' placeholder='John' invalid={errors.first_name && true} {...field} />
+                  )}
+                />
+              </Col>
+              <Col md={6} className='mb-1'>
+                <Label className='form-label' for='last_name'>
+                  Last Name <span className='text-danger'>*</span>
+                </Label>
+                <Controller
+                  name='last_name'
+                  control={control}
+                  render={({ field }) => (
+                    <Input id='last_name' placeholder='Doe' invalid={errors.last_name && true} {...field} />
+                  )}
+                />
+              </Col>
+              <Col md={6} className='mb-1'>
+                <Label className='form-label' for='company_name'>
+                  Company Name
+                </Label>
+                <Controller
+                  name='company_name'
+                  control={control}
+                  render={({ field }) => <Input id='company_name' placeholder='Acme Corporation' {...field} />}
+                />
+              </Col>
+              <Col md={6} className='mb-1'>
+                <Label className='form-label' for='industry'>
+                  Industry
+                </Label>
+                <Select
+                  inputId='industry'
+                  isClearable
+                  classNamePrefix='select'
+                  className='react-select'
+                  theme={selectThemeColors}
+                  options={industryOptions}
+                  value={selectedIndustryOption}
+                  onChange={option => setValue('industry_id', option ? option.value : '', { shouldDirty: true })}
+                  placeholder='Select industry...'
+                />
+              </Col>
+              <Col md={6} className='mb-1'>
+                <Label className='form-label' for='email'>
+                  Email <span className='text-danger'>*</span>
+                </Label>
+                <Controller
+                  name='email'
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      type='email'
+                      id='email'
+                      placeholder='john.doe@example.com'
+                      invalid={errors.email && true}
+                      {...field}
+                    />
+                  )}
+                />
+              </Col>
+              <Col md={6} className='mb-1'>
+                <Label className='form-label' for='phone'>
+                  Phone
+                </Label>
+                <Controller
+                  name='phone'
+                  control={control}
+                  render={({ field }) => <Input id='phone' placeholder='(397) 294-5153' {...field} />}
+                />
+              </Col>
+              <Col md={6} className='mb-1'>
+                <Label className='form-label' for='currency_id'>
+                  Currency
+                </Label>
+                <Select
+                  inputId='currency_id'
+                  isClearable
+                  classNamePrefix='select'
+                  className='react-select'
+                  theme={selectThemeColors}
+                  options={currencyOptions}
+                  value={selectedCurrencyOption}
+                  onChange={option => setValue('currency_id', option ? option.value : '', { shouldDirty: true })}
+                  placeholder='Select currency...'
+                />
+              </Col>
+              <Col md={12}>
+                <Label className='form-label' for='address'>
+                  Address
+                </Label>
+                <Controller
+                  name='address'
+                  control={control}
+                  render={({ field }) => (
+                    <Input type='textarea' rows='2' id='address' placeholder='1307 Lady Bug Drive, New York' {...field} />
+                  )}
+                />
+              </Col>
+            </Row>
+          </Form>
+        </CardBody>
+      </Card>
+      {isEdit && <HistoryModal entityType='client' entityId={Number(id)} buttonId='client-history-btn' />}
+    </Fragment>
   )
 }
 

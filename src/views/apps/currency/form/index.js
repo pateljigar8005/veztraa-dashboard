@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { Fragment, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
 import toast from 'react-hot-toast'
@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
 import { selectThemeColors } from '@utils'
 import { addCurrency, updateCurrency, getCurrency } from '../store'
+import HistoryModal from '../../activity-log/HistoryModal'
 
 const statusOptions = [
   { value: true, label: 'Active' },
@@ -85,66 +86,69 @@ const CurrencyForm = () => {
   const selectedStatusOption = statusOptions.find(i => i.value === (isActive !== false)) || statusOptions[0]
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle tag='h4'>{isEdit ? 'Edit Currency' : 'Add New Currency'}</CardTitle>
-      </CardHeader>
-      <CardBody>
-        <Form onSubmit={handleSubmit(onSubmit)}>
-          <Row>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='name'>
-                Name <span className='text-danger'>*</span>
-              </Label>
-              <Controller
-                name='name'
-                control={control}
-                render={({ field }) => (
-                  <Input id='name' placeholder='US Dollar' invalid={errors.name && true} {...field} />
-                )}
-              />
-            </Col>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='icon'>
-                Icon <span className='text-danger'>*</span>
-              </Label>
-              <Controller
-                name='icon'
-                control={control}
-                render={({ field }) => <Input id='icon' placeholder='$' invalid={errors.icon && true} {...field} />}
-              />
-            </Col>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='rate'>
-                Rate <span className='text-danger'>*</span>
-              </Label>
-              <Controller
-                name='rate'
-                control={control}
-                render={({ field }) => (
-                  <Input id='rate' type='number' step='0.01' placeholder='1.00' invalid={errors.rate && true} {...field} />
-                )}
-              />
-            </Col>
-            <Col md={6}>
-              <Label className='form-label' for='status'>
-                Status
-              </Label>
-              <Select
-                inputId='status'
-                classNamePrefix='select'
-                className='react-select'
-                theme={selectThemeColors}
-                options={statusOptions}
-                value={selectedStatusOption}
-                onChange={option => setValue('is_active', option.value, { shouldDirty: true })}
-                isSearchable={false}
-              />
-            </Col>
-          </Row>
-        </Form>
-      </CardBody>
-    </Card>
+    <Fragment>
+      <Card>
+        <CardHeader>
+          <CardTitle tag='h4'>{isEdit ? 'Edit Currency' : 'Add New Currency'}</CardTitle>
+        </CardHeader>
+        <CardBody>
+          <Form onSubmit={handleSubmit(onSubmit)}>
+            <Row>
+              <Col md={6} className='mb-1'>
+                <Label className='form-label' for='name'>
+                  Name <span className='text-danger'>*</span>
+                </Label>
+                <Controller
+                  name='name'
+                  control={control}
+                  render={({ field }) => (
+                    <Input id='name' placeholder='US Dollar' invalid={errors.name && true} {...field} />
+                  )}
+                />
+              </Col>
+              <Col md={6} className='mb-1'>
+                <Label className='form-label' for='icon'>
+                  Icon <span className='text-danger'>*</span>
+                </Label>
+                <Controller
+                  name='icon'
+                  control={control}
+                  render={({ field }) => <Input id='icon' placeholder='$' invalid={errors.icon && true} {...field} />}
+                />
+              </Col>
+              <Col md={6} className='mb-1'>
+                <Label className='form-label' for='rate'>
+                  Rate <span className='text-danger'>*</span>
+                </Label>
+                <Controller
+                  name='rate'
+                  control={control}
+                  render={({ field }) => (
+                    <Input id='rate' type='number' step='0.01' placeholder='1.00' invalid={errors.rate && true} {...field} />
+                  )}
+                />
+              </Col>
+              <Col md={6}>
+                <Label className='form-label' for='status'>
+                  Status
+                </Label>
+                <Select
+                  inputId='status'
+                  classNamePrefix='select'
+                  className='react-select'
+                  theme={selectThemeColors}
+                  options={statusOptions}
+                  value={selectedStatusOption}
+                  onChange={option => setValue('is_active', option.value, { shouldDirty: true })}
+                  isSearchable={false}
+                />
+              </Col>
+            </Row>
+          </Form>
+        </CardBody>
+      </Card>
+      {isEdit && <HistoryModal entityType='currency' entityId={Number(id)} buttonId='currency-history-btn' />}
+    </Fragment>
   )
 }
 

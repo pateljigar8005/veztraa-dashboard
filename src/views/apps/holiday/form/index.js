@@ -6,6 +6,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormText } from 'reactstrap'
 import DateField from '../../shared/DateField'
+import HistoryModal from '../../activity-log/HistoryModal'
 import { addHoliday, updateHoliday, getHoliday } from '../store'
 
 const defaultValues = { name: '', date: '' }
@@ -65,6 +66,7 @@ const HolidayForm = () => {
     <Card>
       <CardHeader>
         <CardTitle tag='h4'>{isEdit ? 'Edit Holiday' : 'Add New Holiday'}</CardTitle>
+        {isEdit && <HistoryModal entityType='holiday' entityId={Number(id)} buttonId='holiday-history-btn' />}
       </CardHeader>
       <CardBody>
         <Form onSubmit={handleSubmit(onSubmit)}>

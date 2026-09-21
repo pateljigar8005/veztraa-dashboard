@@ -54,7 +54,8 @@ export const menuPermissionGroups = [
       { id: 'currencies', title: 'Currency' },
       { id: 'industries', title: 'Industry' },
       { id: 'timesheetActivities', title: 'Timesheet Activity' },
-      { id: 'apiKeys', title: 'API Keys' }
+      { id: 'apiKeys', title: 'API Keys' },
+      { id: 'activityLogs', title: 'Activity Log' }
     ]
   }
 ]

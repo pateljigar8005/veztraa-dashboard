@@ -3,9 +3,20 @@ import classnames from 'classnames'
 import { useSelector } from 'react-redux'
 import { Badge } from 'reactstrap'
 
+// Same "small red pill on the nav item" treatment as Email's own unread
+// count, extended to Contact Us/Job Applications - both read from the
+// notification poll's per-type breakdown (see src/redux/notifications.js,
+// NotificationController::index()'s `byType`) instead of a dedicated
+// endpoint each, since that data is already being polled for the bell.
+const UNREAD_SELECTORS = {
+  email: state => state.email.unreadCount,
+  contactSubmissions: state => state.notifications.byType.contact,
+  jobApplications: state => state.notifications.byType.job_application
+}
+
 const VerticalNavMenuLink = ({ item, activeItem }) => {
   const LinkTag = item.externalLink ? 'a' : NavLink
-  const emailUnread = useSelector(state => (item.id === 'email' ? state.email.unreadCount : 0))
+  const unreadCount = useSelector(state => UNREAD_SELECTORS[item.id]?.(state) || 0)
 
   return (
     <li
@@ -30,7 +41,7 @@ const VerticalNavMenuLink = ({ item, activeItem }) => {
                 }
                 // An inactive link isn't a flex row by default, which the
                 // right-aligned badge (ms-auto) needs.
-                if (emailUnread > 0) {
+                if (unreadCount > 0) {
                   return 'd-flex align-items-center'
                 }
               }
@@ -44,9 +55,9 @@ const VerticalNavMenuLink = ({ item, activeItem }) => {
         {item.icon}
         <span className='menu-item text-truncate'>{item.title}</span>
 
-        {emailUnread > 0 ? (
+        {unreadCount > 0 ? (
           <Badge className='menu-unread-badge ms-auto me-1' color='danger' pill>
-            {emailUnread > 99 ? '99+' : emailUnread}
+            {unreadCount > 99 ? '99+' : unreadCount}
           </Badge>
         ) : null}
 

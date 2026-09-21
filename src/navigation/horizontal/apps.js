@@ -24,7 +24,8 @@ import {
   Sun,
   Tag,
   BarChart2,
-  Key
+  Key,
+  Activity
 } from 'react-feather'
 
 export default [
@@ -259,6 +260,12 @@ export default [
         title: 'API Keys',
         icon: <Key />,
         navLink: '/api-key'
+      },
+      {
+        id: 'activityLogs',
+        title: 'Activity Log',
+        icon: <Activity />,
+        navLink: '/activity-log'
       }
     ]
   }

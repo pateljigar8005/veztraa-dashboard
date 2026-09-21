@@ -38,7 +38,15 @@ const ComposePopup = ({
   // below) - both controls are irrelevant/confusing in that flow, so the
   // caller opts out of them here. The Email app's own Compose leaves this
   // false and keeps both.
-  hideTemplateAndDraft = false
+  hideTemplateAndDraft = false,
+  // Invoice/Quotation/Contract "Send Email" only - which record this send
+  // is about (relatedType: 'invoice'|'contract'|'quotation', relatedId:
+  // that record's id), passed straight through to POST /mailbox/send so
+  // MailboxOutbox::processOne() can log "Emailed to ..." on that record's
+  // own History once the send actually goes out (see that method's own
+  // comment). Left undefined for the Email app's own regular Compose.
+  relatedType,
+  relatedId
 }) => {
   const dispatch = useDispatch()
 
@@ -305,6 +313,8 @@ const ComposePopup = ({
         draft_uid: draftUid,
         scheduled_at: scheduledAt,
         company_mailbox_id: adminMailboxId || null,
+        related_type: relatedType || null,
+        related_id: relatedId || null,
         attachments
       })
     )

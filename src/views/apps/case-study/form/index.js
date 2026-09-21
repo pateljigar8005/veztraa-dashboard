@@ -21,6 +21,7 @@ import {
 import { X } from 'react-feather'
 import ImageUploadField from '../../shared/ImageUploadField'
 import { resolveAvatarUrl } from '@utils'
+import HistoryModal from '../../activity-log/HistoryModal'
 import { addCaseStudy, updateCaseStudy, getCaseStudy, getAllData, uploadCaseStudyCoverImage } from '../store'
 
 const slugify = value =>
@@ -195,6 +196,7 @@ const CaseStudyForm = () => {
           <Card>
             <CardHeader>
               <CardTitle tag='h4'>{isEdit ? 'Edit Case Study' : 'Add Case Study'}</CardTitle>
+              {isEdit && <HistoryModal entityType='case_study' entityId={Number(id)} buttonId='case-study-history-btn' />}
             </CardHeader>
             <CardBody>
               <Row>

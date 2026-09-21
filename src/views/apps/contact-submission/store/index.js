@@ -44,6 +44,40 @@ export const deleteContactSubmission = createAsyncThunk(
   }
 )
 
+// Manual lead pipeline (New -> Contacted -> Closed) - see
+// ContactController::updateStatus(). Re-fetches the list so the Status
+// column reflects the change without a full page reload.
+export const updateContactSubmissionStatus = createAsyncThunk(
+  'appContactSubmissions/updateContactSubmissionStatus',
+  async ({ id, status }, { dispatch, getState }) => {
+    try {
+      const response = await axios.put(`/contacts/${id}/status`, { status })
+      await dispatch(getData(getState().contactSubmissions.params))
+      await dispatch(getAllData())
+      return response.data.data
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to update status')
+    }
+  }
+)
+
+export const getContactSubmissionNotes = createAsyncThunk('appContactSubmissions/getContactSubmissionNotes', async id => {
+  const response = await axios.get(`/contacts/${id}/notes`)
+  return response.data.data.notes
+})
+
+export const addContactSubmissionNote = createAsyncThunk(
+  'appContactSubmissions/addContactSubmissionNote',
+  async ({ id, note }, { dispatch }) => {
+    try {
+      await axios.post(`/contacts/${id}/notes`, { note })
+      await dispatch(getContactSubmissionNotes(id))
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to add note')
+    }
+  }
+)
+
 export const appContactSubmissionsSlice = createSlice({
   name: 'appContactSubmissions',
   initialState: {
@@ -51,7 +85,8 @@ export const appContactSubmissionsSlice = createSlice({
     total: 1,
     params: {},
     allData: [],
-    selectedContactSubmission: null
+    selectedContactSubmission: null,
+    notes: []
   },
   reducers: {},
   extraReducers: builder => {
@@ -66,6 +101,12 @@ export const appContactSubmissionsSlice = createSlice({
       })
       .addCase(getContactSubmission.fulfilled, (state, action) => {
         state.selectedContactSubmission = action.payload
+      })
+      .addCase(updateContactSubmissionStatus.fulfilled, (state, action) => {
+        state.selectedContactSubmission = action.payload
+      })
+      .addCase(getContactSubmissionNotes.fulfilled, (state, action) => {
+        state.notes = action.payload
       })
   }
 })

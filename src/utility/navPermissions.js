@@ -69,7 +69,8 @@ const routeToMenuId = [
   { pattern: /^\/timesheet/, id: 'timesheets' },
   { pattern: /^\/contact-submission/, id: 'contactSubmissions' },
   { pattern: /^\/job-application/, id: 'jobApplications' },
-  { pattern: /^\/api-key/, id: 'apiKeys' }
+  { pattern: /^\/api-key/, id: 'apiKeys' },
+  { pattern: /^\/activity-log/, id: 'activityLogs' }
 ]
 
 export const canAccessRoute = (pathname, userData) => {
