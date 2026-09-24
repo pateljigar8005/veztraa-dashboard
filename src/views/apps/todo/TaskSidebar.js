@@ -2,7 +2,7 @@ import { useState, useEffect, Fragment } from 'react'
 import axios from 'axios'
 import classnames from 'classnames'
 import { Editor } from '@veztraa/editor'
-import { X, Star, Trash, Clock } from 'react-feather'
+import { X, Star, Trash, Clock, Send } from 'react-feather'
 import Select, { components } from 'react-select'
 import { useForm, Controller } from 'react-hook-form'
 import { Modal, ModalBody, ModalFooter, Button, Form, Input, Label, FormFeedback } from 'reactstrap'
@@ -13,11 +13,13 @@ import HistoryModal from '../activity-log/HistoryModal'
 import useHolidayDates from '@hooks/useHolidayDates'
 import useWeekendDays from '@hooks/useWeekendDays'
 import { isObjEmpty, selectThemeColors, resolveAvatarUrl, uploadEditorImage } from '@utils'
-import { priorityOptions } from '../kanban/kanbanOptions'
+import { priorityOptions, statusOptions } from './todoOptions'
+import { fetchComments, addComment, deleteComment } from './store'
 import { currentUserCan } from '@src/utility/navPermissions'
 import '@styles/react/libs/react-select/_react-select.scss'
 
 const defaultPriorityOption = priorityOptions.find(o => o.value === 'medium')
+const defaultStatusOption = statusOptions.find(o => o.value === 'not_started')
 const TODO_TASK_HISTORY_BTN = 'todo-task-history-btn'
 
 const ModalHeader = props => {
@@ -54,12 +56,14 @@ const TaskSidebar = props => {
   const { open, handleTaskSidebar, store, dispatch, updateTask, selectTask, addTask, deleteTask } = props
 
   const [assigneeOptions, setAssigneeOptions] = useState([])
-  const [assignee, setAssignee] = useState(null)
+  const [assignees, setAssignees] = useState([])
   const [priority, setPriority] = useState(defaultPriorityOption)
+  const [status, setStatus] = useState(defaultStatusOption)
   const [desc, setDesc] = useState('')
-  const [completed, setCompleted] = useState(false)
   const [important, setImportant] = useState(false)
   const [dueDate, setDueDate] = useState(null)
+  const [commentText, setCommentText] = useState('')
+  const [submittingComment, setSubmittingComment] = useState(false)
   const { holidayDates } = useHolidayDates()
   const { isWeekend } = useWeekendDays()
 
@@ -103,14 +107,18 @@ const TaskSidebar = props => {
 
   const handleSidebarTitle = () => {
     if (store && !isObjEmpty(store.selectedTask)) {
+      // Quick shortcut for the common case - the real, explicit control is
+      // the Status field below, this just flips between Completed and
+      // Not Started in one click without opening that dropdown.
+      const isCompleted = status?.value === 'completed'
       return (
         <Button
           outline
           size='sm'
-          onClick={() => setCompleted(!completed)}
-          color={completed === true ? 'success' : 'secondary'}
+          onClick={() => setStatus(statusOptions.find(o => o.value === (isCompleted ? 'not_started' : 'completed')))}
+          color={isCompleted ? 'success' : 'secondary'}
         >
-          {completed === true ? 'Completed' : 'Mark Complete'}
+          {isCompleted ? 'Completed' : 'Mark Complete'}
         </Button>
       )
     } else {
@@ -122,33 +130,42 @@ const TaskSidebar = props => {
     const { selectedTask } = store
     if (!isObjEmpty(selectedTask)) {
       setValue('title', selectedTask.title)
-      setCompleted(selectedTask.isCompleted)
       setImportant(selectedTask.isImportant)
-      setAssignee(
-        selectedTask.assignee
-          ? {
-            value: selectedTask.assignee.id,
-            label: selectedTask.assignee.fullName,
-            img: resolveAvatarUrl(selectedTask.assignee.avatar)
-          }
-          : null
+      setAssignees(
+        (selectedTask.assignees || []).map(a => ({
+          value: a.id,
+          label: a.fullName,
+          img: resolveAvatarUrl(a.avatar)
+        }))
       )
       setDueDate(selectedTask.dueDate || null)
       setDesc(typeof selectedTask.description === 'string' ? selectedTask.description : '')
       setPriority(priorityOptions.find(o => o.value === selectedTask.priority) || defaultPriorityOption)
+      setStatus(statusOptions.find(o => o.value === selectedTask.status) || defaultStatusOption)
+      dispatch(fetchComments(selectedTask.id))
     }
   }
 
   const handleSidebarClosed = () => {
     setPriority(defaultPriorityOption)
+    setStatus(defaultStatusOption)
     setDesc('')
     setValue('title', '')
-    setAssignee(null)
-    setCompleted(false)
+    setAssignees([])
     setImportant(false)
     setDueDate(null)
+    setCommentText('')
     dispatch(selectTask({}))
     clearErrors()
+  }
+
+  const handleAddComment = () => {
+    if (!commentText.trim() || isObjEmpty(store.selectedTask)) return
+    setSubmittingComment(true)
+    dispatch(addComment({ taskId: store.selectedTask.id, comment: commentText.trim() })).then(() => {
+      setCommentText('')
+      setSubmittingComment(false)
+    })
   }
 
   const canViewHistory = currentUserCan('/activity-log', 'view')
@@ -185,8 +202,8 @@ const TaskSidebar = props => {
       description: desc,
       due_date: dueDate,
       priority: priority ? priority.value : 'medium',
-      assigned_to: assignee ? assignee.value : null,
-      is_completed: completed,
+      status: status ? status.value : 'not_started',
+      assignee_ids: assignees.map(a => a.value),
       is_important: important
     }
 
@@ -233,17 +250,18 @@ const TaskSidebar = props => {
           </div>
           <div className='mb-1'>
             <Label className='form-label' for='task-assignee'>
-              Assignee
+              Assignees
             </Label>
             <Select
+              isMulti
               id='task-assignee'
               className='react-select'
               classNamePrefix='select'
               isClearable
               options={assigneeOptions}
               theme={selectThemeColors}
-              value={assignee}
-              onChange={data => setAssignee(data)}
+              value={assignees}
+              onChange={data => setAssignees(data || [])}
               components={{ Option: AssigneeComponent }}
               placeholder='Unassigned'
             />
@@ -260,20 +278,37 @@ const TaskSidebar = props => {
               options={{ disable: [...holidayDates, isWeekend] }}
             />
           </div>
-          <div className='mb-1'>
-            <Label className='form-label' for='task-priority'>
-              Priority
-            </Label>
-            <Select
-              id='task-priority'
-              className='react-select'
-              classNamePrefix='select'
-              isClearable={false}
-              options={priorityOptions}
-              theme={selectThemeColors}
-              value={priority}
-              onChange={data => setPriority(data)}
-            />
+          <div className='mb-1 d-flex' style={{ gap: '1rem' }}>
+            <div style={{ flex: 1 }}>
+              <Label className='form-label' for='task-status'>
+                Status
+              </Label>
+              <Select
+                id='task-status'
+                className='react-select'
+                classNamePrefix='select'
+                isClearable={false}
+                options={statusOptions}
+                theme={selectThemeColors}
+                value={status}
+                onChange={data => setStatus(data)}
+              />
+            </div>
+            <div style={{ flex: 1 }}>
+              <Label className='form-label' for='task-priority'>
+                Priority
+              </Label>
+              <Select
+                id='task-priority'
+                className='react-select'
+                classNamePrefix='select'
+                isClearable={false}
+                options={priorityOptions}
+                theme={selectThemeColors}
+                value={priority}
+                onChange={data => setPriority(data)}
+              />
+            </div>
           </div>
           <div className='mb-1'>
             <Label for='task-desc' className='form-label'>
@@ -281,7 +316,7 @@ const TaskSidebar = props => {
             </Label>
             <Editor value={desc} onChange={setDesc} height={300} onImageUpload={uploadEditorImage} />
           </div>
-          <div>
+          <div className='mb-1'>
             <Label className='form-label'>Attachments</Label>
             {store && !isObjEmpty(store.selectedTask) ? (
               <TaskAttachments taskId={store.selectedTask.id} />
@@ -289,6 +324,63 @@ const TaskSidebar = props => {
               <p className='text-muted small mb-0'>Save the task first to attach files.</p>
             )}
           </div>
+
+          {/* Only once the task is saved (real id, real thread to post to) -
+              same reasoning as Attachments right above. */}
+          {store && !isObjEmpty(store.selectedTask) && (
+            <div className='todo-comments border-top pt-1'>
+              <Label className='form-label'>Comments ({store.comments.length})</Label>
+              {store.comments.map(c => (
+                <div key={c.id} className='d-flex align-items-start justify-content-between mb-1'>
+                  <div className='d-flex align-items-start'>
+                    <Avatar
+                      initials
+                      size='sm'
+                      className='me-50'
+                      color='light-primary'
+                      content={c.user_name}
+                      img={resolveAvatarUrl(c.user_avatar) || undefined}
+                    />
+                    <div>
+                      <p className='mb-0'>
+                        <span className='fw-bolder'>{c.user_name}</span>{' '}
+                        <small className='text-muted'>{c.created_at?.slice(0, 16).replace('T', ' ')}</small>
+                      </p>
+                      <p className='mb-0'>{c.comment}</p>
+                    </div>
+                  </div>
+                  {/* Same task-level access as the rest of this modal, not
+                      per-comment authorship - anyone who can open this task
+                      (admin or its assignee) can clear a comment on it,
+                      matching TodoController::deleteComment()'s own check. */}
+                  <X
+                    size={14}
+                    className='cursor-pointer text-muted mt-25'
+                    onClick={() => dispatch(deleteComment({ id: c.id, taskId: store.selectedTask.id }))}
+                  />
+                </div>
+              ))}
+              <div className='d-flex align-items-start mt-1' style={{ gap: '0.5rem' }}>
+                <Input
+                  type='textarea'
+                  rows='2'
+                  placeholder='Write a comment...'
+                  value={commentText}
+                  onChange={e => setCommentText(e.target.value)}
+                />
+                <Button
+                  type='button'
+                  id='todo-add-comment-btn'
+                  color='primary'
+                  className='btn-icon'
+                  disabled={submittingComment || !commentText.trim()}
+                  onClick={handleAddComment}
+                >
+                  <Send size={14} />
+                </Button>
+              </div>
+            </div>
+          )}
         </ModalBody>
         <ModalFooter className='d-flex justify-content-between'>
           <div>

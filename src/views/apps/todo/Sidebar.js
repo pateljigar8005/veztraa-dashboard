@@ -3,7 +3,7 @@ import classnames from 'classnames'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 import { Mail, Star, Check, Trash } from 'react-feather'
 import { Button, ListGroup, ListGroupItem } from 'reactstrap'
-import { priorityOptions, priorityColors } from '../kanban/kanbanOptions'
+import { priorityOptions, priorityColors, statusOptions, statusColors } from './todoOptions'
 
 const TodoSidebar = props => {
   const { handleTaskSidebar, setMainSidebar, mainSidebar, dispatch, getTasks, params } = props
@@ -85,6 +85,25 @@ const TodoSidebar = props => {
                   <Trash className='me-75' size={18} />
                   <span className='align-middle'>Deleted</span>
                 </ListGroupItem>
+              </ListGroup>
+              <div className='mt-3 px-2'>
+                <h6 className='section-label mb-1'>Status</h6>
+              </div>
+              <ListGroup className='list-group-labels'>
+                {statusOptions.map(option => (
+                  <ListGroupItem
+                    key={option.value}
+                    active={handleActiveItem(option.value)}
+                    className='d-flex align-items-center'
+                    tag={Link}
+                    to={`/todo/${option.value}`}
+                    onClick={() => handleFilter(option.value)}
+                    action
+                  >
+                    <span className={`bullet bullet-sm bullet-${statusColors[option.value]} me-1`}></span>
+                    <span className='align-middle'>{option.label}</span>
+                  </ListGroupItem>
+                ))}
               </ListGroup>
               <div className='mt-3 px-2'>
                 <h6 className='section-label mb-1'>Priority</h6>
