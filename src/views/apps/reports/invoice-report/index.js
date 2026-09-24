@@ -11,6 +11,8 @@ import AmountField from '../../shared/AmountField'
 import { invoiceStatusOptions, currencyOptions } from '../../quotation/documentOptions'
 import { selectThemeColors, formatAmount } from '@utils'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
+import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
+import { FileText as EmptyIcon } from 'react-feather'
 
 const statusColorObj = {
   draft: 'light-secondary',
@@ -439,7 +441,7 @@ const InvoiceReport = () => {
                 className='react-dataTable'
                 data={rows}
                 paginationRowsPerPageOptions={[10, 25, 50, 100]}
-                noDataComponent={<div className='p-2'>No invoices match these filters.</div>}
+                noDataComponent={<TableEmptyState icon={EmptyIcon} noun='invoices' filtered filteredMessage='No invoices match these report filters. Try widening the date range or clearing some filters.' />}
               />
             </div>
           </Card>

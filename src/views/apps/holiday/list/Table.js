@@ -1,4 +1,5 @@
 import { Fragment, useState, useEffect } from 'react'
+import useClampPage from '@hooks/useClampPage'
 import useDebounce from '@hooks/useDebounce'
 import AdvancedSearchModal from '../../shared/AdvancedSearchModal'
 import { columns } from './columns'
@@ -11,6 +12,8 @@ import { Row, Col, Card, Input, Button } from 'reactstrap'
 import { toDateOnly } from '@utils'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
+import TableEmptyState, { hasActiveFilters } from '@src/views/apps/shared/TableEmptyState'
+import { Gift as EmptyIcon } from 'react-feather'
 
 const searchFields = [{ name: 'date', label: 'Date', type: 'date-range' }]
 
@@ -75,6 +78,8 @@ const HolidaysList = () => {
   const [filters, setFilters] = useState(defaultFilters)
 
   const debouncedSearchTerm = useDebounce(searchTerm, 400)
+
+  useClampPage({ data: store.data, total: store.total, currentPage, rowsPerPage, setCurrentPage })
 
   useEffect(() => {
     dispatch(getAllData())
@@ -187,6 +192,7 @@ const HolidaysList = () => {
       <Card>
         <div className='react-dataTable'>
           <DataTable
+            noDataComponent={<TableEmptyState icon={EmptyIcon} noun='holidays' message='Add public holidays so they show on the calendar and dashboard.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
             noHeader
             subHeader
             sortServer

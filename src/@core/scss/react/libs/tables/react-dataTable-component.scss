@@ -72,6 +72,19 @@
     }
   }
 
+  // Rows whose content can wrap onto several lines (Activity Log's
+  // description column) - the fixed 53px cell height above would otherwise
+  // let that text spill over the next row instead of the row growing.
+  // Tighter vertical padding too, since these rows are already two+ lines.
+  &.auto-height-rows {
+    .rdt_TableBody .rdt_TableRow .rdt_TableCell {
+      height: auto;
+      min-height: 0;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+  }
+
   &.roles-table {
     .rdt_TableHead .rdt_TableHeadRow .rdt_TableCol:first-child .form-check {
       transform: translateX(0);

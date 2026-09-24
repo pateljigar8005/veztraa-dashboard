@@ -1,4 +1,5 @@
 import { Fragment, useState, useEffect, useMemo, useRef } from 'react'
+import useClampPage from '@hooks/useClampPage'
 import useDebounce from '@hooks/useDebounce'
 import AdvancedSearchModal from '../../shared/AdvancedSearchModal'
 import useDragReorder from '../../shared/useDragReorder'
@@ -12,6 +13,8 @@ import { ChevronDown } from 'react-feather'
 import { Row, Col, Card, Input, Button } from 'reactstrap'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
+import TableEmptyState, { hasActiveFilters } from '@src/views/apps/shared/TableEmptyState'
+import { Users as EmptyIcon } from 'react-feather'
 
 const searchFields = [
   {
@@ -85,6 +88,8 @@ const TeamMembersList = () => {
   const dragEnabled = sortColumn === 'sort_order' && sort === 'asc'
   const columns = useMemo(() => getColumns(dragEnabled), [dragEnabled])
   const tableContainerRef = useRef(null)
+
+  useClampPage({ data: store.data, total: store.total, currentPage, rowsPerPage, setCurrentPage })
 
   useEffect(() => {
     dispatch(getAllData())
@@ -221,6 +226,7 @@ const TeamMembersList = () => {
       <Card>
         <div className='react-dataTable' ref={tableContainerRef}>
           <DataTable
+            noDataComponent={<TableEmptyState icon={EmptyIcon} noun='team members' message='Add the team members shown on your website.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
             noHeader
             subHeader
             sortServer

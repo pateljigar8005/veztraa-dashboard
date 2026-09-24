@@ -1,135 +1,118 @@
-import { useState } from 'react'
-import { Eye } from 'react-feather'
-import { Badge, Button, Modal, ModalHeader, ModalBody, UncontrolledTooltip } from 'reactstrap'
-import { formatDate } from '@utils'
-import { formatEntityType, formatFieldName, formatValue, describeFieldChange } from '@src/utility/activityLogFormat'
+import toast from 'react-hot-toast'
+import { Trash2 } from 'react-feather'
+import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
+import { store } from '@store/store'
+import { currentUserCan } from '@src/utility/navPermissions'
+import { confirmDelete } from '@src/utility/confirmDelete'
+import { deleteActivityLog } from '../store'
+import { formatEntityType, describeActivityRow, ActivityLines, ActivityDateTime } from '@src/utility/activityLogFormat'
 
-const ACTION_COLORS = {
-  create: 'light-success',
-  update: 'light-warning',
-  delete: 'light-danger'
-}
-
-const ChangesCell = ({ row }) => {
-  const [open, setOpen] = useState(false)
-  const changes = row.changes
-
-  if (!changes || Object.keys(changes).length === 0) {
-    return <span className='text-muted'>&mdash;</span>
-  }
-
-  const fields = Object.keys(changes)
-
-  return (
-    <>
-      <Button
-        id={`changes-tooltip-${row.id}`}
-        className='btn-icon'
-        color='flat-secondary'
-        size='sm'
-        onClick={() => setOpen(true)}
-      >
-        <Eye size={16} />
-      </Button>
-      <UncontrolledTooltip placement='top' target={`changes-tooltip-${row.id}`}>
-        {fields.length} field{fields.length > 1 ? 's' : ''} changed
-      </UncontrolledTooltip>
-      <Modal isOpen={open} toggle={() => setOpen(false)} size='lg'>
-        <ModalHeader toggle={() => setOpen(false)}>
-          {formatEntityType(row.entity_type)} {row.entity_label ? `- ${row.entity_label}` : ''}
-        </ModalHeader>
-        <ModalBody>
-          {/* GitLab-style unified diff (- removed line in red, + added line
-              in green) per changed field, built from our own bg-light-danger/
-              bg-light-success tokens - the same red/green vocabulary this
-              app already uses for status badges - rather than pulling in a
-              diff-rendering library for what's just single-value changes. */}
-          {fields.map(field => {
-            const { from, to } = changes[field]
-            const described = describeFieldChange(field, from, to)
-            return (
-              <div key={field} className='mb-1'>
-                <div className='fw-bolder mb-50'>{formatFieldName(field)}</div>
-                {described.type === 'notes' ? (
-                  described.lines.map((line, index) => (
-                    <div key={index} className='small'>
-                      &bull; {line}
-                    </div>
-                  ))
-                ) : (
-                  <div className='font-monospace small rounded overflow-hidden border'>
-                    <div className='bg-light-danger text-danger px-1 py-50 text-break'>
-                      <span className='me-50'>&minus;</span>
-                      {formatValue(described.from)}
-                    </div>
-                    <div className='bg-light-success text-success px-1 py-50 text-break'>
-                      <span className='me-50'>+</span>
-                      {formatValue(described.to)}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </ModalBody>
-      </Modal>
-    </>
-  )
-}
-
+// Same Description / User / Date & Time / Status layout as the per-record
+// History popup (HistoryModal.js), so a row reads the same whether it's
+// opened from a detail page or from here. The only addition is the
+// record line on top of each description - this page spans every module,
+// so "Status: Draft → Sent" alone wouldn't say which record it was.
+//
+// sortField values are ActivityLog::SORTABLE keys (server-side sort), not
+// the client-side keys HistoryModal sorts its own in-memory rows by.
 export const columns = [
   {
-    name: 'When',
-    minWidth: '160px',
+    name: 'Description',
+    sortField: 'entity_type',
     sortable: true,
-    sortField: 'created_at',
-    selector: row => row.created_at,
-    cell: row => <span>{formatDate(row.created_at, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+    minWidth: '320px',
+    selector: row => row.entity_type,
+    cell: row => {
+      const { lines } = describeActivityRow(row)
+      return (
+        <div style={{ minWidth: 0 }}>
+          <div className='fw-bolder text-truncate' title={row.entity_label || ''}>
+            {formatEntityType(row.entity_type)}
+            {row.entity_label && (
+              <span className='fw-normal text-body' style={{ opacity: 0.75 }}>
+                {' '}
+                &middot; {row.entity_label}
+              </span>
+            )}
+          </div>
+          <ActivityLines lines={lines} />
+        </div>
+      )
+    }
   },
   {
+    // Fixed widths keep these three out of the flex-grow split, so
+    // Description absorbs all the remaining space (same as HistoryModal).
     name: 'User',
-    minWidth: '200px',
-    selector: row => row.user_name,
+    right: true,
+    width: '160px',
+    selector: row => row.user_name || '',
     cell: row => (
-      <div className='d-flex flex-column overflow-hidden' style={{ minWidth: 0 }}>
-        <span className='fw-bolder text-truncate'>{row.user_name || 'System'}</span>
+      <div className='d-flex flex-column align-items-end overflow-hidden' style={{ minWidth: 0 }}>
+        <span className='text-truncate'>{row.user_name || 'System'}</span>
         {row.user_role && <small className='text-muted text-capitalize'>{row.user_role}</small>}
       </div>
     )
   },
   {
-    name: 'Action',
-    minWidth: '110px',
+    name: 'Date & Time',
+    sortField: 'created_at',
     sortable: true,
+    right: true,
+    width: '180px',
+    selector: row => row.created_at,
+    cell: row => <ActivityDateTime value={row.created_at} />
+  },
+  {
+    name: 'Status',
     sortField: 'action',
-    selector: row => row.action,
-    cell: row => (
-      <Badge color={ACTION_COLORS[row.action] || 'light-secondary'} className='text-capitalize'>
-        {row.action}
-      </Badge>
-    )
-  },
-  {
-    name: 'Entity',
-    minWidth: '260px',
     sortable: true,
-    sortField: 'entity_type',
-    selector: row => row.entity_type,
-    cell: row => (
-      <div className='d-flex flex-column overflow-hidden' style={{ minWidth: 0 }}>
-        <span className='fw-bolder'>{formatEntityType(row.entity_type)}</span>
-        {row.entity_label && (
-          <small className='text-muted text-truncate' title={row.entity_label}>
-            {row.entity_label}
-          </small>
-        )}
-      </div>
-    )
+    right: true,
+    width: '110px',
+    selector: row => row.action,
+    cell: row => {
+      const { badgeLabel, badgeColor } = describeActivityRow(row)
+      return (
+        <Badge color={badgeColor} pill>
+          {badgeLabel}
+        </Badge>
+      )
+    }
   },
   {
-    name: 'Changes',
-    center: true,
-    minWidth: '100px',
-    cell: row => <ChangesCell row={row} />
+    name: 'Actions',
+    right: true,
+    width: '90px',
+    cell: row =>
+      currentUserCan('/activity-log', 'delete') && (
+        <div className='column-action d-flex align-items-center'>
+          <Button
+            tag='a'
+            href='/'
+            id={`delete-tooltip-${row.id}`}
+            className='btn-icon'
+            color='flat-danger'
+            size='sm'
+            style={{ borderRadius: '4px', backgroundColor: '#ea54551f' }}
+            onClick={e => {
+              e.preventDefault()
+              confirmDelete({
+                text: 'This will permanently delete this activity log entry.',
+                onConfirm: () =>
+                  store
+                    .dispatch(deleteActivityLog(row.id))
+                    .unwrap()
+                    .then(() => toast.success('Activity log deleted'))
+                    .catch(err => toast.error(err?.message || 'Failed to delete'))
+              })
+            }}
+          >
+            <Trash2 size={16} className='text-danger' />
+          </Button>
+          <UncontrolledTooltip placement='top' target={`delete-tooltip-${row.id}`}>
+            Delete
+          </UncontrolledTooltip>
+        </div>
+      )
   }
 ]

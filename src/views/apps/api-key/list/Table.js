@@ -4,11 +4,13 @@ import { getAllData } from '../store'
 import CreateApiKeyModal from '../CreateApiKeyModal'
 import { useDispatch, useSelector } from 'react-redux'
 import DataTable from 'react-data-table-component'
-import { ChevronDown, Plus } from 'react-feather'
+import { ChevronDown } from 'react-feather'
 import { Row, Col, Card, Input, Button } from 'reactstrap'
 import { currentUserCan } from '@src/utility/navPermissions'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
+import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
+import { Key as EmptyIcon } from 'react-feather'
 
 const CustomHeader = ({ rowsPerPage, handlePerPage, searchTerm, handleFilter, onCreate, canCreate }) => {
   return (
@@ -39,15 +41,18 @@ const CustomHeader = ({ rowsPerPage, handlePerPage, searchTerm, handleFilter, on
           <div className='d-flex align-items-center mb-sm-0 mb-1'>
             <Input
               id='search-api-key'
-              className='w-100 me-1'
+              className='w-100'
               type='text'
               placeholder='Search'
               value={searchTerm}
               onChange={e => handleFilter(e.target.value)}
             />
+            {/* No visible trigger - the navbar's Add icon clicks this
+                (NavbarBookmarks.js's listToAddButtonId), since creating a
+                key is a modal here rather than an /api-key/add page. */}
             {canCreate && (
-              <Button color='primary' className='text-nowrap' onClick={onCreate}>
-                <Plus size={14} className='me-50' /> Create API Key
+              <Button id='api-key-create-btn' className='d-none' onClick={onCreate}>
+                Create API Key
               </Button>
             )}
           </div>
@@ -84,6 +89,7 @@ const ApiKeysTable = () => {
       <Card>
         <div className='react-dataTable'>
           <DataTable
+            noDataComponent={<TableEmptyState icon={EmptyIcon} noun='API keys' message='Create an API key to let your website read and submit data.' filtered={Boolean(searchTerm)} />}
             noHeader
             subHeader
             pagination
