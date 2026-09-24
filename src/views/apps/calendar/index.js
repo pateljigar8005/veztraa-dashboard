@@ -4,7 +4,6 @@ import { Row, Col } from 'reactstrap'
 import Calendar from './Calendar'
 import SidebarLeft from './SidebarLeft'
 import AddEventSidebar from './AddEventSidebar'
-import KanbanTaskSidebar from '../kanban/TaskSidebar'
 import TodoTaskSidebar from '../todo/TaskSidebar'
 import { useRTL } from '@hooks/useRTL'
 import useHolidayDates from '@hooks/useHolidayDates'
@@ -13,7 +12,6 @@ import { useSelector, useDispatch } from 'react-redux'
 import {
   fetchEvents,
   fetchEventCategories,
-  fetchKanbanTaskEvents,
   fetchTodoTaskEvents,
   selectEvent,
   updateEvent,
@@ -23,25 +21,22 @@ import {
   addEvent,
   removeEvent
 } from './store'
-import { handleSelectTask } from '../kanban/store'
 import { selectTask, updateTask as updateTodoTask, addTask as addTodoTask, deleteTask as deleteTodoTask } from '../todo/store'
 import '@styles/react/apps/app-calendar.scss'
 
 const CalendarComponent = () => {
   const dispatch = useDispatch()
   const store = useSelector(state => state.calendar)
-  const kanbanStore = useSelector(state => state.kanban)
   const todoStore = useSelector(state => state.todo)
 
-  // Kanban/Todo tiles color by task priority instead (see Calendar.js's
-  // eventClassNames + kanbanOptions.js's priorityColors) - this only needs
+  // Todo tiles color by task priority instead (see Calendar.js's
+  // eventClassNames + todoOptions.js's priorityColors) - this only needs
   // to cover real, admin-managed event_categories rows.
   const calendarsColor = Object.fromEntries(store.eventCategories.map(c => [c.name, c.color]))
 
   const [calendarApi, setCalendarApi] = useState(null)
   const [addSidebarOpen, setAddSidebarOpen] = useState(false)
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false)
-  const [kanbanTaskSidebarOpen, setKanbanTaskSidebarOpen] = useState(false)
   const [todoTaskSidebarOpen, setTodoTaskSidebarOpen] = useState(false)
 
   const [isRtl] = useRTL()
@@ -58,24 +53,18 @@ const CalendarComponent = () => {
     }
   }
 
-  const handleTaskEventClick = (source, taskId) => {
-    if (source === 'kanban') {
-      const task = store.kanbanTasks.find(t => t.id === taskId)
-      if (!task) return
-      dispatch(handleSelectTask(task))
-      setKanbanTaskSidebarOpen(true)
-    } else {
-      const task = store.todoTasks.find(t => t.id === taskId)
-      if (!task) return
-      dispatch(selectTask(task))
-      setTodoTaskSidebarOpen(true)
-    }
+  // Only Todo events are clickable task tiles now - the only source left
+  // after Kanban's removal.
+  const handleTaskEventClick = taskId => {
+    const task = store.todoTasks.find(t => t.id === taskId)
+    if (!task) return
+    dispatch(selectTask(task))
+    setTodoTaskSidebarOpen(true)
   }
 
   useEffect(() => {
     dispatch(fetchEventCategories())
     dispatch(fetchEvents())
-    dispatch(fetchKanbanTaskEvents())
     dispatch(fetchTodoTaskEvents())
   }, [])
 
@@ -141,11 +130,6 @@ const CalendarComponent = () => {
         isHoliday={isHoliday}
         getHolidayName={getHolidayName}
         isWeekend={isWeekend}
-      />
-      <KanbanTaskSidebar
-        sidebarOpen={kanbanTaskSidebarOpen}
-        selectedTask={kanbanStore.selectedTask}
-        handleTaskSidebarToggle={() => setKanbanTaskSidebarOpen(false)}
       />
       <TodoTaskSidebar
         open={todoTaskSidebarOpen}

@@ -98,7 +98,7 @@ const HolidayForm = () => {
             </Col>
           </Row>
           <p className='text-muted small mb-0'>
-            This date is blocked from Todo/Kanban due dates and shown as a holiday on the Calendar for everyone,
+            This date is blocked from Todo due dates and shown as a holiday on the Calendar for everyone,
             company-wide.
           </p>
         </Form>

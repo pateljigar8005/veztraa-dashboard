@@ -43,12 +43,6 @@ export default [
     navLink: '/email'
   },
   {
-    id: 'kanban',
-    title: 'Kanban',
-    icon: <CheckSquare size={20} />,
-    navLink: '/kanban'
-  },
-  {
     id: 'todo',
     title: 'Todo',
     icon: <CheckSquare size={20} />,

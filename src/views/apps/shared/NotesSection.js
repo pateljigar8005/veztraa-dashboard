@@ -4,8 +4,7 @@ import { Send } from 'react-feather'
 import Avatar from '@components/avatar'
 import { resolveAvatarUrl } from '@utils'
 
-// Timestamped note log - same shape as Kanban's task comments
-// (kanban/TaskSidebar.js) reused here for Contact Us/Job Application
+// Timestamped note log reused here for Contact Us/Job Application
 // follow-up notes, so both places look and behave the same way.
 const NotesSection = ({ notes, onAddNote, canAdd = true, submitting = false }) => {
   const [text, setText] = useState('')

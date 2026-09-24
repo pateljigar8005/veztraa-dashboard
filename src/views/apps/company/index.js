@@ -457,7 +457,7 @@ const CompanySettings = () => {
               <h6 className='mb-1'>Weekend Days</h6>
               <p className='text-muted small mb-2'>
                 Same "grey out and block" treatment as a Holiday (see the Holidays settings page) on the Calendar
-                and Todo/Kanban due-date pickers, every week instead of a one-time date.
+                and Todo due-date pickers, every week instead of a one-time date.
               </p>
               <Row>
                 <Col md={12}>

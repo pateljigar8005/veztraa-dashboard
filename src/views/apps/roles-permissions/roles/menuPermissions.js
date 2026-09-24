@@ -6,7 +6,6 @@ export const menuPermissionGroups = [
       { id: 'chat', title: 'Chat' },
       { id: 'todo', title: 'Todo' },
       { id: 'calendar', title: 'Calendar' },
-      { id: 'kanban', title: 'Kanban' },
       { id: 'projects', title: 'Project' },
       { id: 'timesheets', title: 'Timesheet' }
     ]

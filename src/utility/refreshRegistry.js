@@ -23,11 +23,9 @@ import { getAllData as getApiKeyAllData } from '@src/views/apps/api-key/store'
 import { getData as getUserData } from '@src/views/apps/user/store'
 import { getData as getPdfDesignerTemplateData } from '@src/views/apps/pdf-designer/store'
 import { getAllData as getRolesAllData } from '@src/views/apps/roles-permissions/roles/store'
-import { fetchTasks as fetchKanbanTasks, fetchBoards as fetchKanbanBoards } from '@src/views/apps/kanban/store'
 import { getTasks as getTodoTasks } from '@src/views/apps/todo/store'
 import {
   fetchEvents as fetchCalendarEvents,
-  fetchKanbanTaskEvents as fetchCalendarKanbanEvents,
   fetchTodoTaskEvents as fetchCalendarTodoEvents
 } from '@src/views/apps/calendar/store'
 
@@ -56,13 +54,11 @@ const registry = [
   { pattern: /^\/user$/, refetch: (d, g) => d(getUserData(g().users.params)) },
   { pattern: /^\/pdf-designer$/, refetch: (d, g) => d(getPdfDesignerTemplateData(g().pdfDesignerTemplates.params)) },
   { pattern: /^\/roles$/, refetch: d => d(getRolesAllData()) },
-  { pattern: /^\/kanban$/, refetch: d => { d(fetchKanbanBoards()); d(fetchKanbanTasks()) } },
   { pattern: /^\/todo(\/.*)?$/, refetch: (d, g) => d(getTodoTasks(g().todo.params)) },
   {
     pattern: /^\/calendar$/,
     refetch: (d, g) => {
       d(fetchCalendarEvents(g().calendar.selectedCalendars))
-      d(fetchCalendarKanbanEvents())
       d(fetchCalendarTodoEvents())
     }
   }

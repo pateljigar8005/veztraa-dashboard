@@ -1,25 +1,23 @@
 import { Link } from 'react-router-dom'
-import { Trello, CheckSquare, Calendar, Gift, Coffee } from 'react-feather'
+import { CheckSquare, Calendar, Gift, Coffee } from 'react-feather'
 import { Card, CardBody, Badge } from 'reactstrap'
 import Timeline from '@components/timeline'
-import { priorityColors } from '../apps/kanban/kanbanOptions'
+import { priorityColors } from '../apps/todo/todoOptions'
 
 // Merged, date-sorted timeline from DashboardController::summary()'s
-// `upcoming` array - Kanban tasks/Todos (both overdue and due this week),
-// Calendar events starting soon, and upcoming Holidays, already permission-
-// and own-records-scoped server-side (see that endpoint's own comment).
-// This is the one place Kanban/Todo/Calendar items show up on the
-// dashboard - they have no separate summary card of their own (see
-// blockConfig.js's own note) specifically so an overdue task can't be
-// missed by only living in a stat nobody happens to look at. Rendered with
-// the theme's own Timeline component (src/@core/components/timeline)
-// rather than a plain list, for the connecting-line/dot look already used
-// elsewhere in this Vuexy theme.
+// `upcoming` array - Todos (both overdue and due this week), Calendar
+// events starting soon, and upcoming Holidays, already permission- and
+// own-records-scoped server-side (see that endpoint's own comment). This
+// is the one place Todo/Calendar items show up on the dashboard - they
+// have no separate summary card of their own (see blockConfig.js's own
+// note) specifically so an overdue task can't be missed by only living in
+// a stat nobody happens to look at. Rendered with the theme's own Timeline
+// component (src/@core/components/timeline) rather than a plain list, for
+// the connecting-line/dot look already used elsewhere in this Vuexy theme.
 const TYPE_META = {
-  kanban: { icon: <Trello size={12} />, color: 'primary', path: '/kanban', label: 'Kanban task' },
-  todo: { icon: <CheckSquare size={12} />, color: 'info', path: '/todo', label: 'Todo' },
-  calendar: { icon: <Calendar size={12} />, color: 'warning', path: '/calendar', label: 'Event' },
-  holiday: { icon: <Gift size={12} />, color: 'secondary', path: '/holiday', label: 'Holiday' }
+  todo: { icon: <CheckSquare size={12} />, color: 'info', path: id => `/todo?task=${id}`, label: 'Todo' },
+  calendar: { icon: <Calendar size={12} />, color: 'warning', path: () => '/calendar', label: 'Event' },
+  holiday: { icon: <Gift size={12} />, color: 'secondary', path: id => `/holiday/edit/${id}`, label: 'Holiday' }
 }
 
 const relativeLabel = value => {
@@ -62,7 +60,7 @@ const UpcomingCard = ({ items }) => (
             const meta = TYPE_META[item.type]
             return {
               title: (
-                <Link to={meta.path} className='text-body'>
+                <Link to={meta.path(item.id)} className='text-body'>
                   {item.title}
                 </Link>
               ),

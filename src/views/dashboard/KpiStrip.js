@@ -19,9 +19,8 @@ const buildKpis = blocks => {
     })
   }
 
-  if (blocks.kanban || blocks.todo) {
-    const openTasks = (blocks.kanban?.total || 0) + (blocks.todo?.pending || 0)
-    kpis.push({ icon: CheckSquare, color: 'info', label: 'Open Tasks', value: openTasks })
+  if (blocks.todo) {
+    kpis.push({ icon: CheckSquare, color: 'info', label: 'Open Tasks', value: blocks.todo.pending || 0 })
   }
 
   if (blocks.contactSubmissions || blocks.jobApplications) {

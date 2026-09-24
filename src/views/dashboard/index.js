@@ -25,7 +25,7 @@ const renderBlockCard = (block, data) => (
 
 // Personalized per role: DashboardController::summary() on the API side
 // already omits any block the current role can't view (admin gets all of
-// them) and scopes Kanban/Todo/Timesheet/Calendar to the caller's own
+// them) and scopes Todo/Timesheet/Calendar to the caller's own
 // records for a non-admin - this just renders whatever came back, grouped
 // under the same Billing/Apps & Pages/Website sections the Roles &
 // Permissions matrix already uses (dashboardSections). A section with no
@@ -89,8 +89,8 @@ const Dashboard = () => {
                       )}
                       {/* Fills the row whatever the count is, same reasoning as
                           KpiStrip's own colWidth - a lone leftover card (e.g.
-                          just Timesheet in Apps & Pages now that Kanban/Todo/
-                          Calendar moved into Upcoming) takes the full row
+                          just Timesheet in Apps & Pages now that Todo/Calendar
+                          moved into Upcoming) takes the full row
                           instead of leaving a dangling empty half. */}
                       {otherBlocks.map(block => (
                         <Col md={12 / otherBlocks.length} key={block.id}>

@@ -41,7 +41,6 @@ const routeToMenuId = [
   { pattern: /^\/chat/, id: 'chat' },
   { pattern: /^\/todo/, id: 'todo' },
   { pattern: /^\/calendar/, id: 'calendar' },
-  { pattern: /^\/kanban/, id: 'kanban' },
   { pattern: /^\/project/, id: 'projects' },
   { pattern: /^\/client/, id: 'clients' },
   { pattern: /^\/quotation/, id: 'quotations' },

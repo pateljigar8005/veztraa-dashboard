@@ -3,7 +3,6 @@ import { lazy } from 'react'
 const Chat = lazy(() => import('../../views/apps/chat'))
 const Todo = lazy(() => import('../../views/apps/todo'))
 const Email = lazy(() => import('../../views/apps/email'))
-const Kanban = lazy(() => import('../../views/apps/kanban'))
 const Calendar = lazy(() => import('../../views/apps/calendar'))
 
 const InvoiceList = lazy(() => import('../../views/apps/invoice/list'))
@@ -130,14 +129,6 @@ const AppRoutes = [
   {
     element: <Calendar />,
     path: '/calendar'
-  },
-  {
-    element: <Kanban />,
-    path: '/kanban',
-    meta: {
-      appLayout: true,
-      className: 'kanban-application'
-    }
   },
   {
     element: <InvoiceList />,

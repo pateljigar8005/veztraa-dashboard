@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 
 // blocks: keyed by the same module ids as navPermissions.js's routeToMenuId
-// (invoiceApp, kanban, ...) - the server (DashboardController::summary())
+// (invoiceApp, todo, ...) - the server (DashboardController::summary())
 // already decides which keys are present for the current user's role, so
 // the UI just renders whatever came back, nothing more.
 export const getSummary = createAsyncThunk('appDashboard/getSummary', async () => {

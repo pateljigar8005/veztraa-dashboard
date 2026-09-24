@@ -17,7 +17,7 @@ import { formatAmount } from '@utils'
 // combine into one shared CombinedChartCard instead of a card each (see
 // index.js). Everything else here is a plain BlockCard.
 //
-// Kanban, Todo, Calendar, and Holidays deliberately have no card here -
+// Todo, Calendar, and Holidays deliberately have no card here -
 // they're all "things with a due date/start time", and every one of them
 // (overdue and upcoming alike) already lives in the Upcoming timeline
 // (UpcomingCard) instead, so there's exactly one place to check for what

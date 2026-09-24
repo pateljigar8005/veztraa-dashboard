@@ -11,7 +11,7 @@ const hasSession = () => Boolean(localStorage.getItem('userData') && useJwt.getT
 // useEmailUnreadPolling.js (runs only while logged in, checks for a live
 // session before every request, skips hidden tabs). No client-side
 // permission pre-check here (unlike the email one) - the endpoint itself
-// is gated per source (contactSubmissions/jobApplications/kanban/todo), and
+// is gated per source (contactSubmissions/jobApplications/todo), and
 // most roles have at least one of those, so it always polls while a
 // session exists rather than guessing which permission to check first.
 export const useNotificationPolling = () => {
