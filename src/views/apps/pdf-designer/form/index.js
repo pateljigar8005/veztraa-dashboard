@@ -8,7 +8,6 @@ import { Card, CardBody, Row, Col, Label, Input } from 'reactstrap'
 import { selectThemeColors } from '@utils'
 import { addPdfDesignerTemplate, updatePdfDesignerTemplate, getPdfDesignerTemplate } from '../store'
 import { PDF_DESIGNER_SCOPE_ID } from '@src/utility/reportDesignerStyleGuard'
-import HistoryModal from '../../activity-log/HistoryModal'
 
 const typeOptions = [
   { value: 'invoice', label: 'Invoice' },
@@ -168,7 +167,6 @@ const PdfDesignerTemplateForm = () => {
   return (
     <Card>
       <CardBody>
-        {isEdit && <HistoryModal entityType='pdf_designer_template' entityId={Number(id)} buttonId='pdf-designer-history-btn' />}
         <Row className='mb-1'>
           <Col md={4} className='mb-1 mb-md-0'>
             <Label className='form-label' for='name'>
