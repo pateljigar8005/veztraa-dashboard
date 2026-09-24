@@ -8,8 +8,9 @@ import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
 import { formatAmount } from '@utils'
+import SourceReference from '../SourceReference'
 
-const statusColorObj = {
+export const statusColorObj = {
   draft: 'light-secondary',
   sent: 'light-info',
   paid: 'light-success',
@@ -36,6 +37,12 @@ export const columns = [
         <span className='fw-bolder'>{row.invoice_number}</span>
       </Link>
     )
+  },
+  {
+    name: 'Reference',
+    minWidth: '170px',
+    selector: row => row.quotation_number || row.contract_number || '',
+    cell: row => <SourceReference invoice={row} empty={<span className='text-muted'>-</span>} />
   },
   {
     name: 'Customer',

@@ -15,9 +15,31 @@ import LineItemsTable from '../../shared/LineItemsTable'
 import DateField from '../../shared/DateField'
 import AmountField from '../../shared/AmountField'
 import { addInvoice, updateInvoice, getInvoice } from '../store'
+import SourceReference from '../SourceReference'
 import { discountTypeOptions } from '../../quotation/documentOptions'
+import { invoiceableContractStatuses } from '../../contract/contractOptions'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/base/pages/app-invoice.scss'
+
+// YYYY-MM-DD + N days, done on the date parts directly - new Date(str)
+// parses as UTC and can shift the day in some timezones.
+const addDays = (value, days) => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || '')
+  if (days === null || days === undefined || !match) return null
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+  if (isNaN(date.getTime())) return null
+  date.setDate(date.getDate() + Number(days))
+  const pad = n => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
+// Today as local YYYY-MM-DD - toISOString() is UTC, which is still
+// yesterday in India until 05:30.
+const localToday = () => {
+  const now = new Date()
+  const pad = n => String(n).padStart(2, '0')
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+}
 
 const defaultValues = {
   contact_name: '',
@@ -25,7 +47,7 @@ const defaultValues = {
   email: '',
   phone: '',
   billing_address: '',
-  issue_date: new Date().toISOString().slice(0, 10),
+  issue_date: localToday(),
   due_date: '',
   status: 'draft',
   tax_rate: 0,
@@ -33,11 +55,17 @@ const defaultValues = {
   line_items: [{ description: '', qty: 1, rate: 0 }]
 }
 
+
 const InvoiceForm = () => {
   const { id } = useParams()
   const [searchParams] = useSearchParams()
   const preselectedClientId = searchParams.get('client_id')
   const cloneId = searchParams.get('clone')
+  // "Convert to Invoice" on a quotation / "Create Invoice" on a contract
+  // (see quotation/view and contract/view) - pre-fills this form from that
+  // record and links the new invoice back to it.
+  const fromQuotationId = searchParams.get('from_quotation')
+  const fromContractId = searchParams.get('from_contract')
   const isEdit = Boolean(id)
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -53,6 +81,10 @@ const InvoiceForm = () => {
   const [catalogOpen, setCatalogOpen] = useState(false)
   const [taxEnabled, setTaxEnabled] = useState(true)
   const [defaultDueDays, setDefaultDueDays] = useState(null)
+  // { quotation_id, quotation_number, quotation_exists, contract_id, ... } -
+  // the same shape InvoiceController::serialize() returns, whichever of
+  // edit/clone/convert filled it in.
+  const [source, setSource] = useState({})
 
   const {
     control,
@@ -126,6 +158,92 @@ const InvoiceForm = () => {
     else if (cloneId) dispatch(getInvoice(cloneId))
   }, [id, cloneId])
 
+  // Convert a quotation: everything billable carries over (line items,
+  // currency, tax, discount, terms, payment method). The issue date resets
+  // to today - the invoice is being raised now, not when it was quoted.
+  useEffect(() => {
+    if (isEdit || !fromQuotationId) return
+    axios
+      .get(`/quotations/${fromQuotationId}`)
+      .then(response => {
+        const q = response.data.data
+        reset({
+          ...defaultValues,
+          contact_name: q.contact_name || '',
+          company_name: q.company_name || '',
+          email: q.email || '',
+          phone: q.phone || '',
+          billing_address: q.billing_address || '',
+          tax_rate: q.tax_rate || 0,
+          discount_value: q.discount_value || 0,
+          line_items: q.line_items && q.line_items.length ? q.line_items : defaultValues.line_items
+        })
+        setValue('client_id', q.client_id || '')
+        setValue('status', 'draft')
+        setValue('currency', q.currency || 'USD')
+        setValue('payment_method_id', q.payment_method_id || '')
+        setValue('terms_template_id', q.terms_template_id || '')
+        setValue('discount_type', q.discount_type || '$')
+        setTermsContent(q.terms_content || '')
+        setPaymentMethodContent(q.payment_method_content || '')
+        setSource({ quotation_id: q.id, quotation_number: q.quotation_number, quotation_exists: true })
+        setExtraDirty(true)
+      })
+      .catch(() => toast.error('Could not load that quotation'))
+  }, [fromQuotationId])
+
+  // Invoice under a contract: a contract has no line items or currency of
+  // its own, so only the client/contact, terms and payment method carry
+  // over - the currency comes from the client, and line items start empty
+  // since each invoice under a (usually recurring) contract bills something
+  // different.
+  useEffect(() => {
+    if (isEdit || !fromContractId) return
+    axios
+      .get(`/contracts/${fromContractId}`)
+      .then(response => {
+        const ct = response.data.data
+        // Also enforced server-side - this just says so up front instead of
+        // only once the user has filled the whole form in and hit Save.
+        if (!invoiceableContractStatuses.includes(ct.status)) {
+          toast.error('This contract is not Active or Signed yet - the invoice will be rejected on save')
+        }
+        reset({
+          ...defaultValues,
+          contact_name: ct.contact_name || '',
+          company_name: ct.company_name || '',
+          email: ct.email || '',
+          phone: ct.phone || '',
+          billing_address: ct.billing_address || ''
+        })
+        setValue('client_id', ct.client_id || '')
+        setValue('status', 'draft')
+        setValue('payment_method_id', ct.payment_method_id || '')
+        setValue('terms_template_id', ct.terms_template_id || '')
+        setValue('discount_type', '$')
+        setTermsContent(ct.terms_content || '')
+        setPaymentMethodContent(ct.payment_method_content || '')
+        setSource({ contract_id: ct.id, contract_number: ct.contract_number, contract_exists: true })
+        setExtraDirty(true)
+        if (ct.client_id) {
+          axios
+            .get(`/clients/${ct.client_id}`)
+            .then(res => res.data.data.currency_icon && setValue('currency', res.data.data.currency_icon))
+            .catch(() => {})
+        }
+      })
+      .catch(() => toast.error('Could not load that contract'))
+  }, [fromContractId])
+
+  // A converted invoice starts with today's issue date but no due date -
+  // fill it from Company Settings' default due days once that has loaded,
+  // same as picking an issue date by hand would.
+  useEffect(() => {
+    if (isEdit || (!fromQuotationId && !fromContractId) || (!source.quotation_id && !source.contract_id)) return
+    const due = addDays(defaultValues.issue_date, defaultDueDays)
+    if (due) setValue('due_date', due)
+  }, [source, defaultDueDays])
+
   useEffect(() => {
     const sourceId = isEdit ? Number(id) : Number(cloneId)
     if (sourceId && store.selectedInvoice && store.selectedInvoice.id === sourceId) {
@@ -150,6 +268,16 @@ const InvoiceForm = () => {
       setValue('discount_type', inv.discount_type || '$')
       setTermsContent(inv.terms_content || '')
       setPaymentMethodContent(inv.payment_method_content || '')
+      // A clone keeps the original's link too - e.g. next month's invoice
+      // cloned from this month's still belongs to the same contract.
+      setSource({
+        quotation_id: inv.quotation_id,
+        quotation_number: inv.quotation_number,
+        quotation_exists: inv.quotation_exists,
+        contract_id: inv.contract_id,
+        contract_number: inv.contract_number,
+        contract_exists: inv.contract_exists
+      })
     }
   }, [store.selectedInvoice])
 
@@ -167,15 +295,8 @@ const InvoiceForm = () => {
 
   const handleIssueDateChange = onChange => value => {
     onChange(value)
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || '')
-    if (defaultDueDays === null || defaultDueDays === undefined || !match) return
-
-    const due = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
-    if (isNaN(due.getTime())) return
-
-    due.setDate(due.getDate() + Number(defaultDueDays))
-    const pad = n => String(n).padStart(2, '0')
-    setValue('due_date', `${due.getFullYear()}-${pad(due.getMonth() + 1)}-${pad(due.getDate())}`, { shouldDirty: true })
+    const due = addDays(value, defaultDueDays)
+    if (due) setValue('due_date', due, { shouldDirty: true })
   }
 
   const handleAddFromCatalog = items => {
@@ -215,12 +336,22 @@ const InvoiceForm = () => {
         discount_value: Number(data.discount_value) || 0,
         discount_type: discountType || '$'
       }
+      // Only set on create - an edit never re-points an existing invoice
+      // at a different quotation/contract (Invoice::update() leaves columns
+      // it isn't sent alone).
+      if (!isEdit) {
+        payload.quotation_id = source.quotation_id || null
+        payload.contract_id = source.contract_id || null
+      }
 
       const action = isEdit ? updateInvoice({ id: Number(id), ...payload }) : addInvoice(payload)
-      dispatch(action).then(result => {
-        toast.success(isEdit ? 'Invoice updated' : 'Invoice added')
-        navigate(`/invoice/view/${result.payload.id}`)
-      })
+      dispatch(action)
+        .unwrap()
+        .then(invoice => {
+          toast.success(isEdit ? 'Invoice updated' : 'Invoice added')
+          navigate(`/invoice/view/${invoice.id}`)
+        })
+        .catch(err => toast.error(err?.message || 'Failed to save invoice'))
     } else {
       for (const key of ['contact_name', 'issue_date', 'due_date']) {
         if (!data[key] || data[key].length === 0) {
@@ -363,6 +494,14 @@ const InvoiceForm = () => {
                   <CardTitle tag='h4'>Invoice Details</CardTitle>
                 </CardHeader>
                 <CardBody>
+                  {(source.quotation_id || source.contract_id) && (
+                    <div className='mb-1'>
+                      <Label className='form-label'>Created From</Label>
+                      <div>
+                        <SourceReference invoice={source} />
+                      </div>
+                    </div>
+                  )}
                   <Label className='form-label'>Currency</Label>
                   <Select
                     className='react-select mb-1'

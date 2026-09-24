@@ -25,7 +25,14 @@ const AdvancedSearchModal = ({ isOpen, toggle, title = 'Advanced Search', fields
   const setValue = (key, val) => setFormValues(prev => ({ ...prev, [key]: val }))
 
   const handleApply = () => {
-    const cleaned = Object.fromEntries(Object.entries(formValues).filter(([, v]) => v !== '' && v !== null && v !== undefined))
+    // An empty array (an isMulti select cleared out) means the same thing
+    // as '' /null/undefined here - "not filtering on this" - so it's
+    // dropped the same way, not sent through as assignee_id: [].
+    const cleaned = Object.fromEntries(
+      Object.entries(formValues).filter(
+        ([, v]) => v !== '' && v !== null && v !== undefined && !(Array.isArray(v) && v.length === 0)
+      )
+    )
     onApply(cleaned)
     toggle()
   }
@@ -41,6 +48,31 @@ const AdvancedSearchModal = ({ isOpen, toggle, title = 'Advanced Search', fields
 
     switch (field.type) {
       case 'select':
+        // isMulti is opt-in per field (e.g. Todo's Assignee filter, admin
+        // only - see Tasks.js) - every other select-type field across the
+        // app is untouched, still a single value in formValues.
+        if (field.isMulti) {
+          const selected = Array.isArray(formValues[field.name]) ? formValues[field.name] : []
+          return (
+            <Col md={6} className='mb-1' key={field.name}>
+              <Label className='form-label' for={`adv-search-${field.name}`}>
+                {field.label}
+              </Label>
+              <Select
+                isMulti
+                inputId={`adv-search-${field.name}`}
+                isClearable
+                className='react-select'
+                classNamePrefix='select'
+                theme={selectThemeColors}
+                options={options}
+                value={options.filter(o => selected.map(String).includes(String(o.value)))}
+                onChange={picked => setValue(field.name, (picked || []).map(o => o.value))}
+                placeholder={`Select ${field.label.toLowerCase()}...`}
+              />
+            </Col>
+          )
+        }
         return (
           <Col md={6} className='mb-1' key={field.name}>
             <Label className='form-label' for={`adv-search-${field.name}`}>

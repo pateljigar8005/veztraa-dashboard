@@ -10,6 +10,7 @@ import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Table, 
 import { getInvoice, updateInvoice } from '../store'
 import { invoiceStatusOptions } from '../../quotation/documentOptions'
 import RecordPaymentModal from '../RecordPaymentModal'
+import SourceReference from '../SourceReference'
 import ComposePopup from '../../email/ComposePopup'
 import HistoryModal from '../../activity-log/HistoryModal'
 import { selectThemeColors, formatAmount } from '@utils'
@@ -131,10 +132,13 @@ const InvoiceView = () => {
 
   const handleStatusChange = option => {
     if (!option) return
-    dispatch(updateInvoice({ id: Number(id), status: option.value })).then(() => {
-      dispatch(getInvoice(id))
-      toast.success('Status updated')
-    })
+    dispatch(updateInvoice({ id: Number(id), status: option.value }))
+      .unwrap()
+      .then(() => {
+        dispatch(getInvoice(id))
+        toast.success('Status updated')
+      })
+      .catch(err => toast.error(err?.message || 'Failed to update status'))
   }
 
   if (!invoice || invoice.id !== Number(id)) {
@@ -235,6 +239,9 @@ const InvoiceView = () => {
                 <p className='text-muted mb-0'>
                   Issue: {invoice.issue_date} • Due: {invoice.due_date}
                 </p>
+                <div className='mt-25'>
+                  <SourceReference invoice={invoice} />
+                </div>
               </div>
               {currentUserCan('/invoice', 'edit') && (
                 <div className='mt-md-0 mt-2'>

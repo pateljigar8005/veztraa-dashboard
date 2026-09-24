@@ -4,13 +4,14 @@ import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useDispatch, useSelector } from 'react-redux'
-import { Edit2, ChevronDown, ChevronRight } from 'react-feather'
+import { Edit2, ChevronDown, ChevronRight, FileText } from 'react-feather'
 import { pdf, ReportDocument } from '@veztraa/report-renderer'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Table, Collapse } from 'reactstrap'
 import { getQuotation, updateQuotation } from '../store'
 import { quotationStatusOptions } from '../documentOptions'
 import ComposePopup from '../../email/ComposePopup'
 import HistoryModal from '../../activity-log/HistoryModal'
+import LinkedInvoicesCard from '../../invoice/LinkedInvoicesCard'
 import { selectThemeColors, formatAmount } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { renderEmailTemplate } from '@src/utility/renderEmailTemplate'
@@ -220,11 +221,18 @@ const QuotationView = () => {
                   Issue: {quotation.issue_date} • Valid Until: {quotation.valid_until}
                 </p>
               </div>
-              {currentUserCan('/quotation', 'edit') && (
+              {(currentUserCan('/quotation', 'edit') || currentUserCan('/invoice', 'add')) && (
                 <div className='mt-md-0 mt-2'>
-                  <Button tag={Link} to={`/quotation/edit/${quotation.id}`} color='primary' outline>
-                    <Edit2 size={14} className='me-50' /> Edit
-                  </Button>
+                  {currentUserCan('/quotation', 'edit') && (
+                    <Button tag={Link} to={`/quotation/edit/${quotation.id}`} color='primary' outline>
+                      <Edit2 size={14} className='me-50' /> Edit
+                    </Button>
+                  )}
+                  {currentUserCan('/invoice', 'add') && (
+                    <Button tag={Link} to={`/invoice/add?from_quotation=${quotation.id}`} color='primary' className='ms-50'>
+                      <FileText size={14} className='me-50' /> Convert to Invoice
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
@@ -412,6 +420,8 @@ const QuotationView = () => {
               )}
             </CardBody>
           </Card>
+
+          <LinkedInvoicesCard filterKey='quotation_id' id={quotation.id} emptyText='Not converted to an invoice yet.' />
 
           {pdfTemplate && (
             <Card>

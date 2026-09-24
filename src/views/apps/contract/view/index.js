@@ -4,13 +4,14 @@ import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useDispatch, useSelector } from 'react-redux'
-import { Edit2, ChevronDown, ChevronRight } from 'react-feather'
+import { Edit2, ChevronDown, ChevronRight, FileText } from 'react-feather'
 import { pdf, ReportDocument } from '@veztraa/report-renderer'
-import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Collapse } from 'reactstrap'
+import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Collapse, UncontrolledTooltip } from 'reactstrap'
 import { getContract, updateContract } from '../store'
-import { frequencyOptions, contractStatusOptions } from '../contractOptions'
+import { frequencyOptions, contractStatusOptions, invoiceableContractStatuses } from '../contractOptions'
 import ComposePopup from '../../email/ComposePopup'
 import HistoryModal from '../../activity-log/HistoryModal'
+import LinkedInvoicesCard from '../../invoice/LinkedInvoicesCard'
 import { selectThemeColors } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { renderEmailTemplate } from '@src/utility/renderEmailTemplate'
@@ -215,11 +216,36 @@ const ContractView = () => {
                   {contract.end_date ? ` • End: ${contract.end_date}` : ''}
                 </p>
               </div>
-              {currentUserCan('/contract', 'edit') && (
+              {(currentUserCan('/contract', 'edit') || currentUserCan('/invoice', 'add')) && (
                 <div className='mt-md-0 mt-2'>
-                  <Button tag={Link} to={`/contract/edit/${contract.id}`} color='primary' outline>
-                    <Edit2 size={14} className='me-50' /> Edit
-                  </Button>
+                  {currentUserCan('/contract', 'edit') && (
+                    <Button tag={Link} to={`/contract/edit/${contract.id}`} color='primary' outline>
+                      <Edit2 size={14} className='me-50' /> Edit
+                    </Button>
+                  )}
+                  {/* Nothing to invoice on a draft at all, so the button isn't
+                      shown - an expired/terminated contract keeps it (disabled,
+                      with the reason) since it did once have invoices. */}
+                  {currentUserCan('/invoice', 'add') &&
+                    contract.status !== 'draft' &&
+                    (invoiceableContractStatuses.includes(contract.status) ? (
+                      <Button tag={Link} to={`/invoice/add?from_contract=${contract.id}`} color='primary' className='ms-50'>
+                        <FileText size={14} className='me-50' /> Create Invoice
+                      </Button>
+                    ) : (
+                      // A disabled button swallows hover events, so the
+                      // tooltip hangs off this wrapper instead.
+                      <>
+                        <span id='create-invoice-disabled' className='d-inline-block ms-50'>
+                          <Button color='primary' disabled>
+                            <FileText size={14} className='me-50' /> Create Invoice
+                          </Button>
+                        </span>
+                        <UncontrolledTooltip placement='top' target='create-invoice-disabled'>
+                          Set the contract to Active or Signed to create an invoice under it
+                        </UncontrolledTooltip>
+                      </>
+                    ))}
                 </div>
               )}
             </div>
@@ -349,6 +375,10 @@ const ContractView = () => {
               )}
             </CardBody>
           </Card>
+
+          {contract.status !== 'draft' && (
+            <LinkedInvoicesCard filterKey='contract_id' id={contract.id} emptyText='No invoices under this contract yet.' />
+          )}
 
           {pdfTemplate && (
             <Card>
