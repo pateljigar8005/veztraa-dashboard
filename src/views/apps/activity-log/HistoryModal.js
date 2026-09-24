@@ -4,18 +4,17 @@ import ReactPaginate from 'react-paginate'
 import DataTable from 'react-data-table-component'
 import { Clock, Search, ChevronDown } from 'react-feather'
 import { Badge, Button, Input, InputGroup, InputGroupText, Modal, ModalHeader, ModalBody, Spinner } from 'reactstrap'
-import { formatDate } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
-import { formatFieldName, formatValue, describeFieldChange } from '@src/utility/activityLogFormat'
+import { describeActivityRow, ActivityLines, ActivityDateTime } from '@src/utility/activityLogFormat'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 
 // Reusable "History" popup for a single record's own timeline - backs onto
 // GET /activity-logs/{entityType}/{entityId} (ActivityLogController::
 // forEntity(), admin-only), the same activity_logs rows the Activity Log
 // list page shows, just scoped to one record. Uses the same
-// formatFieldName/formatValue as that list page's own diff modal
-// (src/utility/activityLogFormat.js) so a fix to how a value renders never
-// has to be made twice.
+// describeActivityRow()/<ActivityLines> as that list page
+// (src/utility/activityLogFormat.js) so a fix to how a row reads never has
+// to be made twice.
 //
 // The table itself is the real react-data-table-component DataTable, wired
 // exactly the way every list page's own Table.js wires it (sortServer +
@@ -32,56 +31,6 @@ import '@styles/react/libs/tables/react-dataTable-component.scss'
 // History icon (historyButtonIdByRoute) instead of a button on the page
 // itself, so every document detail page's History action lives in one
 // place in the navbar rather than a differently-styled button per module.
-const ACTION_META = {
-  create: { label: 'Created', color: 'light-success' },
-  update: { label: 'Edited', color: 'light-warning' },
-  delete: { label: 'Deleted', color: 'light-danger' }
-}
-
-// One row's changes -> {badge, description}. `payment_recorded`/
-// `email_sent` (see InvoicePaymentController and MailboxOutbox::
-// processOne() respectively) get their own bold-title treatment instead
-// of a bulleted from/to line, same idea as this app's other "this one
-// field means something more specific than a generic edit" cases.
-const describeRow = row => {
-  if (row.action === 'create') {
-    return { badgeLabel: ACTION_META.create.label, badgeColor: ACTION_META.create.color, lines: [{ bold: `${formatFieldName(row.entity_type)} created` }] }
-  }
-  if (row.action === 'delete') {
-    return { badgeLabel: ACTION_META.delete.label, badgeColor: ACTION_META.delete.color, lines: [{ bold: `${formatFieldName(row.entity_type)} deleted` }] }
-  }
-
-  const changes = row.changes || {}
-  if (changes.payment_recorded) {
-    return {
-      badgeLabel: 'Payment',
-      badgeColor: 'light-success',
-      lines: [{ bold: 'Payment recorded', muted: formatValue(changes.payment_recorded.to) }]
-    }
-  }
-  if (changes.email_sent) {
-    const { recipients, subject } = changes.email_sent.to || {}
-    return {
-      badgeLabel: 'Sent',
-      badgeColor: 'light-success',
-      lines: [{ bold: `Emailed to ${(recipients || []).join(', ') || 'recipient'}`, muted: subject }]
-    }
-  }
-
-  const fields = Object.keys(changes)
-  const lines = fields.flatMap(field => {
-    const described = describeFieldChange(field, changes[field].from, changes[field].to)
-    return described.type === 'notes'
-      ? described.lines.map(line => ({ bullet: line }))
-      : [{ bullet: `${formatFieldName(field)}: ${formatValue(described.from)} → ${formatValue(described.to)}` }]
-  })
-
-  return {
-    badgeLabel: ACTION_META.update.label,
-    badgeColor: ACTION_META.update.color,
-    lines: lines.length ? lines : [{ bold: `${formatFieldName(row.entity_type)} updated` }]
-  }
-}
 
 // Description is the only column with anything worth reading at length -
 // the other three stay narrow (minWidth only, no grow) instead of the row
@@ -93,27 +42,7 @@ const columns = [
     sortable: true,
     minWidth: '320px',
     selector: row => row.lines[0]?.bold || row.lines[0]?.bullet || '',
-    cell: row => (
-      <div className='py-50' style={{ fontSize: '0.95rem' }}>
-        {row.lines.map((line, index) =>
-          line.bullet ? (
-            <div key={index}>&bull; {line.bullet}</div>
-          ) : (
-            <div key={index}>
-              <span>{line.bold}</span>
-              {/* text-muted in this theme is quite low-contrast - text-body
-                  at a slightly reduced opacity keeps this line clearly
-                  secondary to the title above it without being hard to read. */}
-              {line.muted && (
-                <div className='text-body' style={{ opacity: 0.75 }}>
-                  {line.muted}
-                </div>
-              )}
-            </div>
-          )
-        )}
-      </div>
-    )
+    cell: row => <ActivityLines lines={row.lines} />
   },
   {
     // width (not minWidth) - a fixed width takes a column out of the
@@ -137,7 +66,7 @@ const columns = [
     right: true,
     width: '180px',
     selector: row => row.created_at,
-    cell: row => formatDate(row.created_at, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    cell: row => <ActivityDateTime value={row.created_at} />
   },
   {
     name: 'Status',
@@ -176,7 +105,7 @@ const HistoryModal = ({ entityType, entityId, entityLabel, buttonId }) => {
     setLoading(true)
     axios
       .get(`/activity-logs/${entityType}/${entityId}`)
-      .then(response => setRows(response.data.data.activityLogs.map(row => ({ ...row, ...describeRow(row) }))))
+      .then(response => setRows(response.data.data.activityLogs.map(row => ({ ...row, ...describeActivityRow(row) }))))
       .catch(() => setRows([]))
       .finally(() => setLoading(false))
   }, [open, entityType, entityId])
@@ -324,7 +253,7 @@ const HistoryModal = ({ entityType, entityId, entityLabel, buttonId }) => {
               defaultSortField='created_at'
               defaultSortAsc={false}
               sortIcon={<ChevronDown />}
-              className='react-dataTable'
+              className='react-dataTable auto-height-rows'
               paginationComponent={CustomPagination}
             />
           )}

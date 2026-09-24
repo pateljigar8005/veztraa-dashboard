@@ -1,3 +1,5 @@
+import { formatDate } from '@utils'
+
 // Shared formatting for anything rendering an activity_logs row's `changes`
 // object - the Activity Log list page's own diff modal
 // (src/views/apps/activity-log/list/columns.js) and the per-record History
@@ -18,7 +20,7 @@ export const formatEntityType = value =>
 
 // A changed field's key is either a plain column name ('email') or, for
 // Role.permissions (see ActivityLogger::diffPermissions()), a
-// "module.action" pair ('kanban.add') - rendered as "Kanban → Add" rather
+// "module.action" pair ('todo.add') - rendered as "Todo → Add" rather
 // than left as a raw dotted key.
 export const formatFieldName = field =>
   field
@@ -121,9 +123,110 @@ export const describeLineItemsChange = (from, to) => {
 // strings, currently just line_items) - callers branch on `type` instead
 // of special-casing field names themselves, so a future field needing the
 // same "not a plain scalar" treatment only has to be added here once.
+// A before/after longer than this (a rich-text body, a whole PDF designer
+// layout, ...) isn't readable as "old → new" on one line - it only gets a
+// plain "<Field> updated" note instead.
+const MAX_DIFF_VALUE_LENGTH = 80
+const isPlainObject = value => value !== null && typeof value === 'object' && !Array.isArray(value)
+
 export const describeFieldChange = (field, from, to) => {
   if (field === 'line_items') {
     return { type: 'notes', lines: describeLineItemsChange(from, to) }
   }
+  if (
+    isPlainObject(from) ||
+    isPlainObject(to) ||
+    formatValue(from).length > MAX_DIFF_VALUE_LENGTH ||
+    formatValue(to).length > MAX_DIFF_VALUE_LENGTH
+  ) {
+    return { type: 'notes', lines: [`${formatFieldName(field)} updated`] }
+  }
   return { type: 'diff', from, to }
 }
+
+export const ACTION_META = {
+  create: { label: 'Created', color: 'light-success' },
+  update: { label: 'Edited', color: 'light-warning' },
+  delete: { label: 'Deleted', color: 'light-danger' }
+}
+
+// One row's changes -> {badgeLabel, badgeColor, lines}, shared by the
+// Activity Log list page and the per-record History popup so both read
+// the same way. `payment_recorded`/`email_sent` (see
+// InvoicePaymentController and MailboxOutbox::processOne() respectively)
+// get their own bold-title treatment instead of a bulleted from/to line,
+// same idea as this app's other "this one field means something more
+// specific than a generic edit" cases.
+export const describeActivityRow = row => {
+  if (row.action === 'create') {
+    return { badgeLabel: ACTION_META.create.label, badgeColor: ACTION_META.create.color, lines: [{ bold: `${formatEntityType(row.entity_type)} created` }] }
+  }
+  if (row.action === 'delete') {
+    return { badgeLabel: ACTION_META.delete.label, badgeColor: ACTION_META.delete.color, lines: [{ bold: `${formatEntityType(row.entity_type)} deleted` }] }
+  }
+
+  const changes = row.changes || {}
+  if (changes.payment_recorded) {
+    return {
+      badgeLabel: 'Payment',
+      badgeColor: 'light-success',
+      lines: [{ bold: 'Payment recorded', muted: formatValue(changes.payment_recorded.to) }]
+    }
+  }
+  if (changes.email_sent) {
+    const { recipients, subject } = changes.email_sent.to || {}
+    return {
+      badgeLabel: 'Sent',
+      badgeColor: 'light-success',
+      lines: [{ bold: `Emailed to ${(recipients || []).join(', ') || 'recipient'}`, muted: subject }]
+    }
+  }
+
+  const lines = Object.keys(changes).flatMap(field => {
+    const described = describeFieldChange(field, changes[field].from, changes[field].to)
+    return described.type === 'notes'
+      ? described.lines.map(line => ({ bullet: line }))
+      : [{ bullet: `${formatFieldName(field)}: ${formatValue(described.from)} → ${formatValue(described.to)}` }]
+  })
+
+  return {
+    badgeLabel: ACTION_META.update.label,
+    badgeColor: ACTION_META.update.color,
+    lines: lines.length ? lines : [{ bold: `${formatEntityType(row.entity_type)} updated` }]
+  }
+}
+
+// The description cell body both tables render - title/bullet lines plus
+// an optional muted sub-line.
+export const ActivityLines = ({ lines }) => (
+  <div style={{ fontSize: '0.95rem' }}>
+    {lines.map((line, index) =>
+      line.bullet ? (
+        <div key={index}>&bull; {line.bullet}</div>
+      ) : (
+        <div key={index}>
+          <span>{line.bold}</span>
+          {/* text-muted in this theme is quite low-contrast - text-body
+              at a slightly reduced opacity keeps this line clearly
+              secondary to the title above it without being hard to read. */}
+          {line.muted && (
+            <div className='text-body' style={{ opacity: 0.75 }}>
+              {line.muted}
+            </div>
+          )}
+        </div>
+      )
+    )}
+  </div>
+)
+
+// Date & Time column cell - date on top, time on its own line beneath it,
+// right-aligned to match the column.
+export const ActivityDateTime = ({ value }) => (
+  <div className='text-end'>
+    <div>{formatDate(value, { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+    <small className='text-body' style={{ opacity: 0.75 }}>
+      {formatDate(value, { hour: '2-digit', minute: '2-digit' })}
+    </small>
+  </div>
+)
