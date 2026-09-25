@@ -41,30 +41,18 @@ const isAccountSettingsRoute = pathname => pathname === '/account-settings'
 
 const isEmailRoute = pathname => /^\/email(\/[^/]+)?$/.test(pathname)
 
-// Todo's sub-routes (/todo/important, /todo/priority/high, ...) aren't in
-// listToAddRoute the way other list pages are - Todo's own "Add Task" is
-// already a visible button in its sidebar, not something this navbar
-// needs to drive - but it does wire up the same Advanced Search modal
-// (Tasks.js), so the Search icon still needs to recognize the route.
+// Todo owns its Add button, but still uses the navbar search action.
 const isTodoRoute = pathname => /^\/todo(\/.*)?$/.test(pathname)
 
-// List pages whose "add" is a modal on the page itself rather than an
-// /add route - the Add icon clicks this hidden button instead of
-// navigating. Kept out of listToAddRoute on purpose, since that map also
-// decides isListRoute for the other icons.
+// Modal-based add actions use a hidden page button instead of navigation.
 const listToAddButtonId = {
   '/api-key': 'api-key-create-btn'
 }
 
-// listToAddRoute (below) covers every list page, but not every one of
-// those actually wires up the Advanced Search modal (AdvancedSearchModal +
-// the hidden #navbar-advanced-search-trigger button its list/ renders) -
-// these four don't, so without this the Search icon looks enabled there
-// but silently does nothing when clicked.
+// These list routes do not render the shared advanced-search trigger.
 const noSearchRoutes = ['/email-template', '/terms-template', '/roles']
 
-// `label` is the icon's tooltip on that route - it's a PDF on a document
-// view page but an .xlsx export on the Activity Log list / Timesheet Report.
+// The action label varies between document downloads and spreadsheet exports.
 const downloadButtonIdByRoute = [
   { pattern: /^\/invoice\/view\/[^/]+$/, buttonId: 'invoice-download-pdf-btn', label: 'Download PDF' },
   { pattern: /^\/contract\/view\/[^/]+$/, buttonId: 'contract-download-pdf-btn', label: 'Download PDF' },
@@ -74,10 +62,7 @@ const downloadButtonIdByRoute = [
 ]
 const findDownloadRoute = pathname => downloadButtonIdByRoute.find(i => i.pattern.test(pathname)) || null
 
-// Same three routes as the download button above - each has its own
-// "Send Email" button/handler already (see <module>/view/index.js's
-// handleSendEmail), gated behind that module's own 'edit' permission, same
-// as the button itself is.
+// These detail pages expose their own permission-gated send buttons.
 const sendEmailButtonIdByRoute = [
   { pattern: /^\/invoice\/view\/[^/]+$/, buttonId: 'invoice-send-email-btn', resource: '/invoice' },
   { pattern: /^\/contract\/view\/[^/]+$/, buttonId: 'contract-send-email-btn', resource: '/contract' },
@@ -85,22 +70,7 @@ const sendEmailButtonIdByRoute = [
 ]
 const findSendEmailRoute = pathname => sendEmailButtonIdByRoute.find(i => i.pattern.test(pathname)) || null
 
-// Every module with real ActivityLogger::log() calls on its controller
-// (see the matching ActivityLogger import in each one - Client, Company
-// Settings, Contract, Currency, Invoice, Payment Method, Project,
-// Quotation, Role, Service Item, Terms Template, Timesheet, User) renders
-// a hidden
-// <HistoryModal buttonId='<module>-history-btn' /> (see
-// src/views/apps/activity-log/HistoryModal.js) instead of a visible button
-// on the page itself, so every record's History action comes from this one
-// navbar icon. Gated by the 'activityLogs' permission entry
-// (ActivityLogController is hard admin-only server-side), not each
-// module's own resource - History is about who-did-what across the app,
-// not a capability of any one module. Company Settings has no :id in its
-// URL (a singleton record, see ActivityLog::forEntity()'s entityId=0
-// sentinel) so it matches on the bare route instead of an /edit/:id one;
-// User's form doubles as /account-settings (self-service), which gets the
-// same button id since it's the same UserForm component.
+// Detail pages expose a hidden history button that this navbar triggers.
 const historyButtonIdByRoute = [
   { pattern: /^\/invoice\/view\/[^/]+$/, buttonId: 'invoice-history-btn' },
   { pattern: /^\/contract\/view\/[^/]+$/, buttonId: 'contract-history-btn' },

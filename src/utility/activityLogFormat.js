@@ -1,27 +1,15 @@
 import { formatDate } from '@utils'
 
-// Shared formatting for anything rendering an activity_logs row's `changes`
-// object - the Activity Log list page's own diff modal
-// (src/views/apps/activity-log/list/columns.js) and the per-record History
-// popup (src/views/apps/activity-log/HistoryModal.js). Both need the exact
-// same value formatting, so it lives here once rather than risking the two
-// drifting apart (a fix applied to only one place silently reappearing in
-// the other).
+// Shared formatting for activity-log list and record-history views.
 
-// entity_type/field names are stored as lowercase, underscore-separated
-// slugs (see ActivityLogger::log() callers, e.g. 'service_item',
-// 'payment_method') - this is purely a display transform, it never changes
-// what's persisted.
+// Stored slugs are converted only for display.
 export const formatEntityType = value =>
   (value || '')
     .split('_')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
 
-// A changed field's key is either a plain column name ('email') or, for
-// Role.permissions (see ActivityLogger::diffPermissions()), a
-// "module.action" pair ('todo.add') - rendered as "Todo → Add" rather
-// than left as a raw dotted key.
+// Format dotted permission keys such as "todo.add" as "Todo → Add".
 export const formatFieldName = field =>
   field
     .split('.')
@@ -31,13 +19,7 @@ export const formatFieldName = field =>
 const MAX_VALUE_LENGTH = 160
 const truncate = text => (text.length > MAX_VALUE_LENGTH ? `${text.slice(0, MAX_VALUE_LENGTH)}…` : text)
 
-// ActivityLogger::diff() hands back real decoded values for JSON columns
-// (line_items, ...), not a raw JSON string - this still has to turn
-// whatever shape shows up into something readable rather than dumping it
-// as-is, since a raw object/array would otherwise print as
-// "[object Object]" and a full rich-text field (Contract.body,
-// TermsTemplate.content, ...) would print its entire content as one
-// unbroken line.
+// Convert decoded JSON values into readable, bounded text.
 export const formatValue = value => {
   if (value === null || value === undefined || value === '') return '—'
   if (typeof value === 'boolean') return value ? 'Yes' : 'No'
@@ -72,12 +54,7 @@ export const formatValue = value => {
 
 const lineItemLabel = item => item?.description || item?.name || 'Line item'
 
-// line_items (Invoice/Quotation) needs its own diff, not the generic
-// "dump the whole array" formatValue() gives every other field - a
-// service item's description is free text nobody needs word-for-word in
-// an audit trail (so a pure text edit just says "Service item updated"),
-// but its quantity/amount are numbers worth showing exactly, so those get
-// a real before/after per item that actually changed.
+// Show useful quantity and amount changes without dumping full line items.
 export const describeLineItemsChange = (from, to) => {
   const fromItems = Array.isArray(from) ? from : []
   const toItems = Array.isArray(to) ? to : []
@@ -105,9 +82,7 @@ export const describeLineItemsChange = (from, to) => {
       fieldChanges.push(`Amount: ${formatValue(oldItem.rate)} → ${formatValue(newItem.rate)}`)
     }
 
-    // Each changed field is its own bullet line, not comma-joined onto one -
-    // a single long "Quantity: 2 → 1, Amount: 8000 → 7500" line is exactly
-    // the "wall of text" this whole diff was built to avoid.
+    // Keep each field change on its own line for readability.
     if (fieldChanges.length > 0) {
       fieldChanges.forEach(change => lines.push(`${lineItemLabel(newItem)}: ${change}`))
     } else if (String(oldItem.description ?? '') !== String(newItem.description ?? '')) {

@@ -8,17 +8,7 @@ import { Bell, Mail, Send, CheckSquare, AtSign, X } from 'react-feather'
 import { Badge, Button, DropdownMenu, DropdownItem, DropdownToggle, UncontrolledDropdown, Spinner } from 'reactstrap'
 import { dismissNotification, dismissAllNotifications, markAllNotificationsRead, markNotificationRead } from '@store/notifications'
 
-// Real data from GET /notifications (see src/redux/notifications.js,
-// polled by useNotificationPolling.js) - the API already permission-gates
-// and own-records-scopes everything in it, so this just renders whatever
-// came back. "Mark all as read"/per-item dismiss (the X) both clear an item
-// for good (see NotificationController::dismiss()/dismissAll()) - a
-// contact/job_application item's dismiss is its real is_read flag, a
-// todo_overdue item's is fingerprinted to its current due_date (resurfaces
-// if that date changes), and a mention is deleted outright (it exists only
-// as a notification). Opening a mention (clicking through) is a separate,
-// lighter action (markNotificationRead) that only clears its unread badge -
-// it stays in this list, shown muted, until explicitly cleared.
+// The API handles permission filtering; this component renders the returned items.
 const TYPE_META = {
   contact: { icon: <Mail size={14} />, color: 'primary' },
   job_application: { icon: <Send size={14} />, color: 'info' },
@@ -26,12 +16,7 @@ const TYPE_META = {
   mention: { icon: <AtSign size={14} />, color: 'warning' }
 }
 
-// item.date is either a full 'YYYY-MM-DD HH:MM:SS' (contact/job_application,
-// from created_at) or a bare 'YYYY-MM-DD' (todo_overdue, from due_date) -
-// a bare date string parses as UTC midnight in JS and can
-// silently shift by a day depending on the browser's local timezone (see
-// CLAUDE.md's date-math note), so it's always given an explicit local time
-// instead of being handed to `new Date()` as-is.
+// Add local midnight when the API returns a date without a time.
 const relativeTime = value => {
   const isoLocal = value.length > 10 ? value.replace(' ', 'T') : `${value}T00:00:00`
   const diffMs = Date.now() - new Date(isoLocal).getTime()
@@ -50,8 +35,7 @@ const NotificationDropdown = () => {
   const [dismissingKey, setDismissingKey] = useState(null)
 
   const handleDismiss = (e, item) => {
-    // Stop the click from also following the surrounding <Link> - dismiss
-    // clears the item in place, it shouldn't also navigate away.
+    // Dismissing should not follow the surrounding link.
     e.preventDefault()
     e.stopPropagation()
     const key = `${item.type}-${item.id}`
@@ -111,11 +95,7 @@ const NotificationDropdown = () => {
             {items.map(item => {
               const meta = TYPE_META[item.type]
               const key = `${item.type}-${item.id}`
-              // Opening a notification to look at it clears the unread badge
-              // for it, but must NOT remove it from this list - only an
-              // explicit clear (the X below) does that. Only 'mention' has
-              // this read-but-still-shown state today (see
-              // NotificationController::markRead()'s own note).
+              // Marking a mention read keeps it visible until it is dismissed.
               const handleOpen = () => {
                 if (item.type === 'mention' && !item.is_read) {
                   dispatch(markNotificationRead({ type: item.type, id: item.id }))
@@ -128,8 +108,6 @@ const NotificationDropdown = () => {
                       <Avatar icon={meta?.icon} color={meta?.color || 'secondary'} />
                     </div>
                     <div className='list-item-body flex-grow-1' style={{ minWidth: 0 }}>
-                      {/* Time sits on the title line, right-aligned next to
-                          the dismiss X, rather than on a line of its own. */}
                       <p className='media-heading d-flex align-items-center'>
                         <span
                           className={classnames('text-truncate me-auto', item.is_read ? 'fw-normal' : 'fw-bolder')}
@@ -139,13 +117,6 @@ const NotificationDropdown = () => {
                         </span>
                         <small className='text-muted text-nowrap ms-50'>{relativeTime(item.date)}</small>
                       </p>
-                      {/* mb-0: the theme's .notification-text margin was there
-                          to space it from the time line that used to follow.
-                          Wraps onto multiple lines rather than truncating -
-                          a mention's subtitle (task title + comment text,
-                          see NotificationController::index()) can run long,
-                          and clipping it hid the actual content instead of
-                          just taking a bit more vertical space. */}
                       <small className='notification-text d-block mb-0'>{item.subtitle}</small>
                     </div>
                     <Button

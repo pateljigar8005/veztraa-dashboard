@@ -8,29 +8,8 @@ import { currentUserCan } from '@src/utility/navPermissions'
 import { describeActivityRow, ActivityLines, ActivityDateTime } from '@src/utility/activityLogFormat'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 
-// Reusable "History" popup for a single record's own timeline - backs onto
-// GET /activity-logs/{entityType}/{entityId} (ActivityLogController::
-// forEntity(), admin-only), the same activity_logs rows the Activity Log
-// list page shows, just scoped to one record. Uses the same
-// describeActivityRow()/<ActivityLines> as that list page
-// (src/utility/activityLogFormat.js) so a fix to how a row reads never has
-// to be made twice.
-//
-// The table itself is the real react-data-table-component DataTable, wired
-// exactly the way every list page's own Table.js wires it (sortServer +
-// paginationServer + a ReactPaginate paginationComponent, className=
-// 'react-dataTable' so react-dataTable-component.scss's styling actually
-// applies) - a hand-rolled <table> here kept drifting from the rest of the
-// app's look (header size/weight, sort icons, ...) piece by piece; using
-// the same component the rest of the app uses ends that for good instead
-// of chasing each mismatch as it's noticed.
-//
-// No visible trigger of its own - `buttonId` is a hidden button (same
-// className='d-none' + id pattern as <module>-send-email-btn/<module>-
-// download-pdf-btn in each view/index.js), clicked by NavbarBookmarks.js's
-// History icon (historyButtonIdByRoute) instead of a button on the page
-// itself, so every document detail page's History action lives in one
-// place in the navbar rather than a differently-styled button per module.
+// Record history uses the shared activity formatter and a hidden trigger
+// so the navbar can open the same modal from every detail page.
 
 // Description is the only column with anything worth reading at length -
 // the other three stay narrow (minWidth only, no grow) instead of the row
@@ -45,12 +24,6 @@ const columns = [
     cell: row => <ActivityLines lines={row.lines} />
   },
   {
-    // width (not minWidth) - a fixed width takes a column out of the
-    // flex-grow distribution entirely, instead of it also claiming a
-    // share of whatever space is left over (which is what was stretching
-    // this and the next two columns wider than their content needed).
-    // Description above, the only column left without a fixed width,
-    // absorbs 100% of what's left as a result.
     name: 'User',
     sortField: 'user_name',
     sortable: true,
@@ -84,10 +57,7 @@ const columns = [
 ]
 
 const HistoryModal = ({ entityType, entityId, entityLabel, buttonId }) => {
-  // ActivityLogController::forEntity() is hard admin-only server-side
-  // (same as ApiTokenController) - this mirrors that with the same
-  // routeToMenuId entry ('activityLogs') the Activity Log list page's own
-  // route is gated by, rather than hardcoding role === 'admin' here too.
+  // Use the same permission check as the activity-log page.
   const canView = currentUserCan('/activity-log', 'view')
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -136,11 +106,7 @@ const HistoryModal = ({ entityType, entityId, entityLabel, buttonId }) => {
     })
   }, [rows, dateFrom, dateTo, search, sortColumn, sortDirection])
 
-  // Same client-side pagination shape as every other list page's
-  // ReactPaginate (see e.g. contact-submission/list/Table.js's
-  // CustomPagination) - a plain page/perPage slice here instead of a
-  // server round-trip, since a single record's whole history is already
-  // one small fetch (see the effect above), not worth re-querying per page.
+  // The full history is already loaded, so pagination stays client-side.
   useEffect(() => {
     setCurrentPage(1)
   }, [dateFrom, dateTo, search, rowsPerPage, rows])

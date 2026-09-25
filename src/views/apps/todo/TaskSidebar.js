@@ -19,11 +19,7 @@ import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
 import '@styles/react/libs/react-select/_react-select.scss'
 
-// Typing '@' followed by a name (no whitespace yet) shows a picker of the
-// task's own assignee options (already loaded for the Assignee field above -
-// no extra fetch) - selecting one inserts "@Full Name " and records the
-// user's id alongside the comment text. Shared between the new-comment box
-// and each comment's own inline edit mode.
+// Suggest task assignees while the user is typing an @mention.
 const MentionTextarea = ({ id, value, onChange, onMention, assigneeOptions, placeholder, rows = 2 }) => {
   const textareaRef = useRef(null)
   const [mentionQuery, setMentionQuery] = useState(null)
@@ -102,8 +98,7 @@ const MentionTextarea = ({ id, value, onChange, onMention, assigneeOptions, plac
               className='d-flex align-items-center px-1 py-50'
               style={{ cursor: 'pointer' }}
               onMouseDown={e => {
-                // preventDefault keeps the textarea's selection/focus intact
-                // through the click - a plain onClick would blur it first.
+                // Keep the textarea focused so the mention is inserted at the cursor.
                 e.preventDefault()
                 pickMention(o)
               }}
@@ -122,8 +117,7 @@ const MentionTextarea = ({ id, value, onChange, onMention, assigneeOptions, plac
   )
 }
 
-// Wraps each @mentioned name (ground truth from the API's own
-// CommentMention::forComments() join, not a regex guess) in a styled span.
+// Highlight only mentions returned by the API.
 const renderCommentText = (text, mentions) => {
   const names = (mentions || []).map(m => m.name).filter(Boolean).sort((a, b) => b.length - a.length)
   if (names.length === 0) {
@@ -256,9 +250,7 @@ const TaskSidebar = props => {
 
   const handleSidebarTitle = () => {
     if (store && !isObjEmpty(store.selectedTask)) {
-      // Quick shortcut for the common case - the real, explicit control is
-      // the Status field below, this just flips between Completed and
-      // Not Started in one click without opening that dropdown.
+      // Toggle the common completed/not-started transition from the header.
       const isCompleted = status?.value === 'completed'
       return (
         <Button
