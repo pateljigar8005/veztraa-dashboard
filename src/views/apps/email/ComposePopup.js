@@ -14,7 +14,7 @@ import '@styles/react/libs/flatpickr/flatpickr.scss'
 import { sendMessage, saveDraft, removeMessageFromList } from './store'
 import EmailRecipientsInput from './EmailRecipientsInput'
 import { getFileTypeIcon } from '../shared/getFileTypeIcon'
-import { getUserData, uploadEditorImage, selectThemeColors } from '@utils'
+import { getUserData, uploadEditorImage, selectThemeColors, sortOptions } from '@utils'
 
 const blank = { to: '', cc: '', bcc: '', subject: '', body: '' }
 
@@ -95,7 +95,7 @@ const ComposePopup = ({
         ; (contactsRes?.data?.data?.contacts || [])
           .forEach(c => addOption(c.email, c.name ? `${c.name} <${c.email}>` : c.email))
 
-      setContactOptions(options)
+      setContactOptions(sortOptions(options))
     })
   }, [composeOpen])
 
@@ -108,13 +108,15 @@ const ComposePopup = ({
       .then(response => {
         const templates = response.data?.data?.emailTemplates || []
         setTemplateOptions(
-          templates
-            .filter(
-              t =>
-                t.is_active &&
-                (isAdmin || !t.visible_role_ids?.length || t.visible_role_ids.includes(currentUser?.role_id))
-            )
-            .map(t => ({ value: t.id, label: t.name, subject: t.subject, content: t.content }))
+          sortOptions(
+            templates
+              .filter(
+                t =>
+                  t.is_active &&
+                  (isAdmin || !t.visible_role_ids?.length || t.visible_role_ids.includes(currentUser?.role_id))
+              )
+              .map(t => ({ value: t.id, label: t.name, subject: t.subject, content: t.content }))
+          )
         )
       })
       .catch(() => { })

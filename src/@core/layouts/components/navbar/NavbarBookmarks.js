@@ -214,16 +214,27 @@ const NavbarBookmarks = props => {
     document.getElementById(sendEmailRoute.buttonId)?.click()
   }
 
-  // Activity Log list only - its ticked rows live in the activityLogs slice
-  // (setSelectedIds), and the delete itself (confirm + request) is the list
-  // page's own hidden #activity-log-bulk-delete-btn, same as Download.
+  // Every list page with a bulk-delete icon ticks rows into its own slice
+  // (setSelectedIds/setSelectedUids) rather than local component state, so
+  // this icon can read the count directly instead of a DOM lookup - the
+  // delete itself (confirm + request) is still that list page's own hidden
+  // button, same idea as Download/Send Email above. Both selectors are read
+  // unconditionally (hooks can't be called conditionally); which one
+  // actually applies is picked below based on the current route.
   const isActivityLogListRoute = /^\/activity-log\/?$/.test(location.pathname)
-  const bulkDeleteCount = useSelector(state => state.activityLogs.selectedIds.length)
-  const bulkDeleteVisible = isActivityLogListRoute && hasActionPermission('/activity-log', 'delete', userData)
+  const activityLogSelectedCount = useSelector(state => state.activityLogs.selectedIds.length)
+  const emailSelectedCount = useSelector(state => state.email.selectedUids.length)
+  const bulkDeleteRoute = isActivityLogListRoute
+    ? { buttonId: 'activity-log-bulk-delete-btn', resource: '/activity-log', count: activityLogSelectedCount }
+    : isEmailRoute(location.pathname)
+      ? { buttonId: 'email-bulk-delete-btn', resource: '/email', count: emailSelectedCount }
+      : null
+  const bulkDeleteCount = bulkDeleteRoute?.count || 0
+  const bulkDeleteVisible = Boolean(bulkDeleteRoute) && hasActionPermission(bulkDeleteRoute.resource, 'delete', userData)
   const bulkDeleteEnabled = bulkDeleteVisible && bulkDeleteCount > 0
   const handleBulkDelete = () => {
     if (!bulkDeleteEnabled) return
-    document.getElementById('activity-log-bulk-delete-btn')?.click()
+    document.getElementById(bulkDeleteRoute.buttonId)?.click()
   }
 
   const historyRoute = findHistoryRoute(location.pathname)

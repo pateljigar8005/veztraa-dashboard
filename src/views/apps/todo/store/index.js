@@ -79,10 +79,25 @@ export const fetchComments = createAsyncThunk('appTodo/fetchComments', async tas
   return response.data.data.comments
 })
 
-export const addComment = createAsyncThunk('appTodo/addComment', async ({ taskId, comment }, { dispatch }) => {
-  await axios.post(`/todos/${taskId}/comments`, { comment })
-  await dispatch(fetchComments(taskId))
-})
+export const addComment = createAsyncThunk(
+  'appTodo/addComment',
+  async ({ taskId, comment, mentionedUserIds = [] }, { dispatch }) => {
+    await axios.post(`/todos/${taskId}/comments`, { comment, mentioned_user_ids: mentionedUserIds })
+    await dispatch(fetchComments(taskId))
+  }
+)
+
+export const editComment = createAsyncThunk(
+  'appTodo/editComment',
+  async ({ id, taskId, comment, mentionedUserIds = [] }, { dispatch }) => {
+    try {
+      await axios.put(`/todo-comments/${id}`, { comment, mentioned_user_ids: mentionedUserIds })
+      await dispatch(fetchComments(taskId))
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to update comment')
+    }
+  }
+)
 
 export const deleteComment = createAsyncThunk('appTodo/deleteComment', async ({ id, taskId }, { dispatch }) => {  try {
 

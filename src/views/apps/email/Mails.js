@@ -6,7 +6,7 @@ import MailCardContextMenu from './MailCardContextMenu'
 import toast from 'react-hot-toast'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 import ReactPaginate from 'react-paginate'
-import { Menu, Search, Trash2, X } from 'react-feather'
+import { Menu, Search } from 'react-feather'
 import { Input, InputGroup, InputGroupText, Spinner, Button } from 'reactstrap'
 import { confirmDelete } from '@src/utility/confirmDelete'
 import { formatRelativeDate } from '@utils'
@@ -18,7 +18,8 @@ import {
   deleteMessage,
   removeMessageFromList,
   toggleFlag,
-  updateMessageFlag
+  updateMessageFlag,
+  setSelectedUids as setSelectedUidsAction
 } from './store'
 
 // Mail just moved (e.g. to Trash) shows in the destination folder under a
@@ -55,7 +56,16 @@ const Mails = props => {
 
   const { messages, messagesLoading } = store
 
-  const [selectedUids, setSelectedUids] = useState([])
+  // Lives in the email slice, not local state - see setSelectedUids' own
+  // comment (store/index.js) for why: the navbar's bulk-delete icon
+  // (NavbarBookmarks.js) needs to read the ticked count too, same idea as
+  // Activity Log's selectedIds. This local wrapper keeps every call site
+  // below (setSelectedUids(prev => ...) / setSelectedUids([])) unchanged.
+  const selectedUids = store.selectedUids
+  const setSelectedUids = updater => {
+    dispatch(setSelectedUidsAction(typeof updater === 'function' ? updater(selectedUids) : updater))
+  }
+
   useEffect(() => {
     setSelectedUids([])
   }, [store.params.folder, store.params.q])
@@ -110,10 +120,6 @@ const Mails = props => {
 
   const toggleSelect = uid => {
     setSelectedUids(prev => (prev.includes(uid) ? prev.filter(u => u !== uid) : [...prev, uid]))
-  }
-
-  const toggleSelectAll = () => {
-    setSelectedUids(prev => (prev.length === messages.length ? [] : messages.map(m => m.uid)))
   }
 
   const handleBulkDelete = () => {
@@ -222,8 +228,13 @@ const Mails = props => {
                 onChange={e => setQuery(e.target.value)}
               />
             </InputGroup>
-            {
-                                                                        }
+            {/* Same hidden-trigger pattern as Activity Log's own bulk-delete
+                icon (NavbarBookmarks.js's bulkDeleteRoute) - only does
+                anything once rows are ticked (handleBulkDelete no-ops
+                otherwise). */}
+            <Button id='email-bulk-delete-btn' className='d-none' onClick={handleBulkDelete}>
+              Delete selected
+            </Button>
             {store.lastSyncedAt && (
               <span className='text-muted text-nowrap ms-1' style={{ fontSize: '0.75rem' }}>
                 Synced {formatRelativeDate(store.lastSyncedAt)}
@@ -231,31 +242,6 @@ const Mails = props => {
             )}
           </div>
         </div>
-
-        {messages.length > 0 && (
-          <div className='app-action'>
-            <div className='form-check d-flex align-items-center' style={{ gap: '0.75rem' }}>
-              <Input
-                type='checkbox'
-                checked={selectedUids.length === messages.length}
-                onChange={toggleSelectAll}
-              />
-              <span className='fw-bold' style={{ visibility: selectedUids.length > 0 ? 'visible' : 'hidden' }}>
-                {selectedUids.length} selected
-              </span>
-            </div>
-            <div className='action-right' style={{ visibility: selectedUids.length > 0 ? 'visible' : 'hidden' }}>
-              <Button color='flat-danger' size='sm' onClick={handleBulkDelete}>
-                <Trash2 size={14} className='me-50' />
-                Delete
-              </Button>
-              <Button color='flat-secondary' size='sm' onClick={() => setSelectedUids([])}>
-                <X size={14} className='me-50' />
-                Clear
-              </Button>
-            </div>
-          </div>
-        )}
 
         <PerfectScrollbar className='email-user-list' options={{ wheelPropagation: false }}>
           {messagesLoading ? (

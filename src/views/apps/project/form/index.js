@@ -8,7 +8,7 @@ import { Editor } from '@veztraa/editor'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
-import { selectThemeColors, uploadEditorImage } from '@utils'
+import { selectThemeColors, uploadEditorImage, sortOptions } from '@utils'
 import ProjectDocuments from './ProjectDocuments'
 import DateField from '../../shared/DateField'
 import AmountField from '../../shared/AmountField'
@@ -56,7 +56,7 @@ const ProjectForm = () => {
   useEffect(() => {
     axios.get('/clients', { params: { perPage: 100 } }).then(response => {
       const clients = response.data.data.clients
-      setClientOptions(clients.map(c => ({ value: c.id, label: c.fullName || `${c.first_name} ${c.last_name}` })))
+      setClientOptions(sortOptions(clients.map(c => ({ value: c.id, label: c.fullName || `${c.first_name} ${c.last_name}` }))))
     })
     axios.get('/currencies', { params: { perPage: 100 } }).then(response => {
       setCurrencyOptions(

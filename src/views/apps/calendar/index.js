@@ -1,10 +1,10 @@
 import { Fragment, useState, useEffect } from 'react'
 import classnames from 'classnames'
+import { useNavigate } from 'react-router-dom'
 import { Row, Col } from 'reactstrap'
 import Calendar from './Calendar'
 import SidebarLeft from './SidebarLeft'
 import AddEventSidebar from './AddEventSidebar'
-import TodoTaskSidebar from '../todo/TaskSidebar'
 import { useRTL } from '@hooks/useRTL'
 import useHolidayDates from '@hooks/useHolidayDates'
 import useWeekendDays from '@hooks/useWeekendDays'
@@ -21,13 +21,12 @@ import {
   addEvent,
   removeEvent
 } from './store'
-import { selectTask, updateTask as updateTodoTask, addTask as addTodoTask, deleteTask as deleteTodoTask } from '../todo/store'
 import '@styles/react/apps/app-calendar.scss'
 
 const CalendarComponent = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const store = useSelector(state => state.calendar)
-  const todoStore = useSelector(state => state.todo)
 
   // Todo tiles color by task priority instead (see Calendar.js's
   // eventClassNames + todoOptions.js's priorityColors) - this only needs
@@ -37,7 +36,6 @@ const CalendarComponent = () => {
   const [calendarApi, setCalendarApi] = useState(null)
   const [addSidebarOpen, setAddSidebarOpen] = useState(false)
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false)
-  const [todoTaskSidebarOpen, setTodoTaskSidebarOpen] = useState(false)
 
   const [isRtl] = useRTL()
   const { holidayDates, isHoliday, getHolidayName } = useHolidayDates()
@@ -54,12 +52,13 @@ const CalendarComponent = () => {
   }
 
   // Only Todo events are clickable task tiles now - the only source left
-  // after Kanban's removal.
+  // after Kanban's removal. Redirects to the Todo page's own `?task=` deep
+  // link (already used by the notification bell's mention/overdue items -
+  // see NotificationController.php) instead of opening a second, local copy
+  // of TaskSidebar in place - one real task view, not two independent mounts
+  // of the same component that could drift out of sync with each other.
   const handleTaskEventClick = taskId => {
-    const task = store.todoTasks.find(t => t.id === taskId)
-    if (!task) return
-    dispatch(selectTask(task))
-    setTodoTaskSidebarOpen(true)
+    navigate(`/todo?task=${taskId}`)
   }
 
   useEffect(() => {
@@ -130,16 +129,6 @@ const CalendarComponent = () => {
         isHoliday={isHoliday}
         getHolidayName={getHolidayName}
         isWeekend={isWeekend}
-      />
-      <TodoTaskSidebar
-        open={todoTaskSidebarOpen}
-        handleTaskSidebar={() => setTodoTaskSidebarOpen(false)}
-        store={todoStore}
-        dispatch={dispatch}
-        updateTask={updateTodoTask}
-        selectTask={selectTask}
-        addTask={addTodoTask}
-        deleteTask={deleteTodoTask}
       />
     </Fragment>
   )

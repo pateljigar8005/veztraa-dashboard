@@ -1,25 +1,29 @@
 import { useState } from 'react'
+import classnames from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import Avatar from '@components/avatar'
 import PerfectScrollbar from 'react-perfect-scrollbar'
-import { Bell, Mail, Send, CheckSquare, X } from 'react-feather'
+import { Bell, Mail, Send, CheckSquare, AtSign, X } from 'react-feather'
 import { Badge, Button, DropdownMenu, DropdownItem, DropdownToggle, UncontrolledDropdown, Spinner } from 'reactstrap'
-import { dismissNotification, dismissAllNotifications } from '@store/notifications'
+import { dismissNotification, dismissAllNotifications, markAllNotificationsRead, markNotificationRead } from '@store/notifications'
 
 // Real data from GET /notifications (see src/redux/notifications.js,
 // polled by useNotificationPolling.js) - the API already permission-gates
 // and own-records-scopes everything in it, so this just renders whatever
-// came back. "Mark all as read"/per-item dismiss both go through
-// NotificationDismissal server-side (see NotificationController::dismiss()/
-// dismissAll()) - a contact/job_application item's dismiss is its real
-// is_read flag, and a todo_overdue item's dismiss is fingerprinted to its
-// current due_date, so it resurfaces on its own if that date changes
-// instead of staying hidden forever.
+// came back. "Mark all as read"/per-item dismiss (the X) both clear an item
+// for good (see NotificationController::dismiss()/dismissAll()) - a
+// contact/job_application item's dismiss is its real is_read flag, a
+// todo_overdue item's is fingerprinted to its current due_date (resurfaces
+// if that date changes), and a mention is deleted outright (it exists only
+// as a notification). Opening a mention (clicking through) is a separate,
+// lighter action (markNotificationRead) that only clears its unread badge -
+// it stays in this list, shown muted, until explicitly cleared.
 const TYPE_META = {
   contact: { icon: <Mail size={14} />, color: 'primary' },
   job_application: { icon: <Send size={14} />, color: 'info' },
-  todo_overdue: { icon: <CheckSquare size={14} />, color: 'danger' }
+  todo_overdue: { icon: <CheckSquare size={14} />, color: 'danger' },
+  mention: { icon: <AtSign size={14} />, color: 'warning' }
 }
 
 // item.date is either a full 'YYYY-MM-DD HH:MM:SS' (contact/job_application,
@@ -41,6 +45,7 @@ const relativeTime = value => {
 const NotificationDropdown = () => {
   const dispatch = useDispatch()
   const { count, items } = useSelector(state => state.notifications)
+  const [markingAll, setMarkingAll] = useState(false)
   const [clearingAll, setClearingAll] = useState(false)
   const [dismissingKey, setDismissingKey] = useState(null)
 
@@ -52,6 +57,11 @@ const NotificationDropdown = () => {
     const key = `${item.type}-${item.id}`
     setDismissingKey(key)
     dispatch(dismissNotification({ type: item.type, id: item.id })).finally(() => setDismissingKey(null))
+  }
+
+  const handleMarkAllRead = () => {
+    setMarkingAll(true)
+    dispatch(markAllNotificationsRead()).finally(() => setMarkingAll(false))
   }
 
   const handleClearAll = () => {
@@ -79,14 +89,13 @@ const NotificationDropdown = () => {
               </Badge>
             )}
             {count > 0 && (
-              <Button
-                color='link'
-                size='sm'
-                className='p-0'
-                disabled={clearingAll}
-                onClick={handleClearAll}
-              >
-                {clearingAll ? <Spinner size='sm' /> : 'Mark all as read'}
+              <Button color='link' size='sm' className='p-0 me-1' disabled={markingAll} onClick={handleMarkAllRead}>
+                {markingAll ? <Spinner size='sm' /> : 'Mark all as read'}
+              </Button>
+            )}
+            {items.length > 0 && (
+              <Button color='link' size='sm' className='p-0' disabled={clearingAll} onClick={handleClearAll}>
+                {clearingAll ? <Spinner size='sm' /> : 'Clear all'}
               </Button>
             )}
           </DropdownItem>
@@ -94,13 +103,27 @@ const NotificationDropdown = () => {
         {items.length === 0 ? (
           <li className='p-2 text-center text-muted'>You're all caught up.</li>
         ) : (
-          <PerfectScrollbar component='li' className='media-list scrollable-container' options={{ wheelPropagation: false }}>
+          <PerfectScrollbar
+            component='li'
+            className='media-list scrollable-container'
+            options={{ wheelPropagation: false, suppressScrollX: true }}
+          >
             {items.map(item => {
               const meta = TYPE_META[item.type]
               const key = `${item.type}-${item.id}`
+              // Opening a notification to look at it clears the unread badge
+              // for it, but must NOT remove it from this list - only an
+              // explicit clear (the X below) does that. Only 'mention' has
+              // this read-but-still-shown state today (see
+              // NotificationController::markRead()'s own note).
+              const handleOpen = () => {
+                if (item.type === 'mention' && !item.is_read) {
+                  dispatch(markNotificationRead({ type: item.type, id: item.id }))
+                }
+              }
               return (
-                <Link key={key} className='d-flex' to={meta ? item.path : '/'}>
-                  <div className='list-item d-flex align-items-start'>
+                <Link key={key} className='d-flex' to={meta ? item.path : '/'} onClick={handleOpen}>
+                  <div className={classnames('list-item d-flex align-items-start', { 'opacity-50': item.is_read })}>
                     <div className='me-1'>
                       <Avatar icon={meta?.icon} color={meta?.color || 'secondary'} />
                     </div>
@@ -108,12 +131,22 @@ const NotificationDropdown = () => {
                       {/* Time sits on the title line, right-aligned next to
                           the dismiss X, rather than on a line of its own. */}
                       <p className='media-heading d-flex align-items-center'>
-                        <span className='fw-bolder text-truncate me-auto'>{item.title}</span>
+                        <span
+                          className={classnames('text-truncate me-auto', item.is_read ? 'fw-normal' : 'fw-bolder')}
+                          style={{ minWidth: 0 }}
+                        >
+                          {item.title}
+                        </span>
                         <small className='text-muted text-nowrap ms-50'>{relativeTime(item.date)}</small>
                       </p>
                       {/* mb-0: the theme's .notification-text margin was there
-                          to space it from the time line that used to follow. */}
-                      <small className='notification-text d-block text-truncate mb-0'>{item.subtitle}</small>
+                          to space it from the time line that used to follow.
+                          Wraps onto multiple lines rather than truncating -
+                          a mention's subtitle (task title + comment text,
+                          see NotificationController::index()) can run long,
+                          and clipping it hid the actual content instead of
+                          just taking a bit more vertical space. */}
+                      <small className='notification-text d-block mb-0'>{item.subtitle}</small>
                     </div>
                     <Button
                       color='flat-secondary'

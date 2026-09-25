@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useForm, Controller } from 'react-hook-form'
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Row, Col, Label, Input, FormFeedback } from 'reactstrap'
-import { selectThemeColors, formatAmount } from '@utils'
+import { selectThemeColors, formatAmount, sortOptions } from '@utils'
 import DateField from '../shared/DateField'
 import AmountField from '../shared/AmountField'
 
@@ -34,7 +34,7 @@ const RecordPaymentModal = ({ isOpen, toggle, invoiceId, currency, balanceDue, p
     if (isOpen) {
       axios.get('/payment-methods', { params: { perPage: 100 } }).then(response => {
         setPaymentMethodOptions(
-          response.data.data.paymentMethods.filter(m => m.is_active).map(m => ({ value: m.id, label: m.name }))
+          sortOptions(response.data.data.paymentMethods.filter(m => m.is_active).map(m => ({ value: m.id, label: m.name })))
         )
       })
 

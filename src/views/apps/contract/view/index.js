@@ -214,6 +214,7 @@ const ContractView = () => {
                   {frequencyLabel(contract.frequency)}
                   {contract.start_date ? ` • Start: ${contract.start_date}` : ''}
                   {contract.end_date ? ` • End: ${contract.end_date}` : ''}
+                  {contract.next_invoice_date ? ` • Next invoice: ${contract.next_invoice_date}` : ''}
                 </p>
               </div>
               {(currentUserCan('/contract', 'edit') || currentUserCan('/invoice', 'add')) && (

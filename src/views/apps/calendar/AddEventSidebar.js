@@ -8,7 +8,7 @@ import Flatpickr from 'react-flatpickr'
 import Select, { components } from 'react-select'
 import { useForm, Controller } from 'react-hook-form'
 import { Button, Modal, ModalBody, ModalFooter, Label, Input, Form } from 'reactstrap'
-import { selectThemeColors, isObjEmpty, toDateOnly } from '@utils'
+import { selectThemeColors, isObjEmpty, toDateOnly, sortOptions } from '@utils'
 import { fetchEvents } from './store'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/flatpickr/flatpickr.scss'
@@ -54,14 +54,14 @@ const AddEventSidebar = props => {
   const [calendarLabel, setCalendarLabel] = useState([])
   const [userOptions, setUserOptions] = useState([])
 
-  const options = eventCategories.map(c => ({ value: c.id, label: c.name, color: c.color }))
+  const options = sortOptions(eventCategories.map(c => ({ value: c.id, label: c.name, color: c.color })))
 
   useEffect(() => {
     if (!open || userOptions.length) return
     axios.get('/users', { params: { perPage: 200 } }).then(response => {
       const users = response.data?.data?.users || []
       setUserOptions(
-        users.filter(u => u.is_active).map(u => ({ value: u.id, label: u.fullName, avatar: u.avatar }))
+        sortOptions(users.filter(u => u.is_active).map(u => ({ value: u.id, label: u.fullName, avatar: u.avatar })))
       )
     })
   }, [open])

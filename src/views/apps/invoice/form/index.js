@@ -7,7 +7,7 @@ import Select from 'react-select'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Row, Col, Card, CardHeader, CardTitle, CardBody, Form, Label, Input } from 'reactstrap'
-import { selectThemeColors, formatAmount } from '@utils'
+import { selectThemeColors, formatAmount, sortOptions } from '@utils'
 import CatalogModal from '../../shared/CatalogModal'
 import TermsSection from '../../shared/TermsSection'
 import PaymentMethodSection from '../../shared/PaymentMethodSection'
@@ -113,33 +113,39 @@ const InvoiceForm = () => {
   useEffect(() => {
     axios.get('/clients', { params: { perPage: 100 } }).then(response => {
       setClientOptions(
-        response.data.data.clients.map(c => ({
-          value: c.id,
-          label: c.fullName,
-          company_name: c.company_name,
-          email: c.email,
-          phone: c.phone,
-          address: c.address,
-          currency_icon: c.currency_icon
-        }))
+        sortOptions(
+          response.data.data.clients.map(c => ({
+            value: c.id,
+            label: c.fullName,
+            company_name: c.company_name,
+            email: c.email,
+            phone: c.phone,
+            address: c.address,
+            currency_icon: c.currency_icon
+          }))
+        )
       )
     })
     axios.get('/currencies', { params: { perPage: 100 } }).then(response => {
       setCurrencyOptions(
-        response.data.data.currencies
-          .filter(c => c.is_active)
-          .map(c => ({ value: c.icon, label: `${c.name} (${c.icon})` }))
+        sortOptions(
+          response.data.data.currencies
+            .filter(c => c.is_active)
+            .map(c => ({ value: c.icon, label: `${c.name} (${c.icon})` }))
+        )
       )
     })
     axios.get('/payment-methods', { params: { perPage: 100 } }).then(response => {
       setPaymentMethodOptions(
-        response.data.data.paymentMethods
-          .filter(m => m.is_active)
-          .map(m => ({ value: m.id, label: m.name, content: m.description }))
+        sortOptions(
+          response.data.data.paymentMethods
+            .filter(m => m.is_active)
+            .map(m => ({ value: m.id, label: m.name, content: m.description }))
+        )
       )
     })
     axios.get('/terms-templates', { params: { perPage: 100 } }).then(response => {
-      setTemplateOptions(response.data.data.termsTemplates.map(t => ({ value: t.id, label: t.name, content: t.content })))
+      setTemplateOptions(sortOptions(response.data.data.termsTemplates.map(t => ({ value: t.id, label: t.name, content: t.content }))))
     })
     axios.get('/company').then(response => {
       setTaxEnabled(!!response.data.data.tax_enabled)
@@ -192,11 +198,10 @@ const InvoiceForm = () => {
       .catch(() => toast.error('Could not load that quotation'))
   }, [fromQuotationId])
 
-  // Invoice under a contract: a contract has no line items or currency of
-  // its own, so only the client/contact, terms and payment method carry
-  // over - the currency comes from the client, and line items start empty
-  // since each invoice under a (usually recurring) contract bills something
-  // different.
+  // Invoice under a contract: everything billable carries over (line items,
+  // currency, tax, discount, terms, payment method) same as converting a
+  // quotation above - a contract's own line items are the default billing
+  // for each occurrence, editable per-invoice before sending.
   useEffect(() => {
     if (isEdit || !fromContractId) return
     axios
@@ -214,23 +219,21 @@ const InvoiceForm = () => {
           company_name: ct.company_name || '',
           email: ct.email || '',
           phone: ct.phone || '',
-          billing_address: ct.billing_address || ''
+          billing_address: ct.billing_address || '',
+          tax_rate: ct.tax_rate || 0,
+          discount_value: ct.discount_value || 0,
+          line_items: ct.line_items && ct.line_items.length ? ct.line_items : defaultValues.line_items
         })
         setValue('client_id', ct.client_id || '')
         setValue('status', 'draft')
+        setValue('currency', ct.currency || 'USD')
         setValue('payment_method_id', ct.payment_method_id || '')
         setValue('terms_template_id', ct.terms_template_id || '')
-        setValue('discount_type', '$')
+        setValue('discount_type', ct.discount_type || '$')
         setTermsContent(ct.terms_content || '')
         setPaymentMethodContent(ct.payment_method_content || '')
         setSource({ contract_id: ct.id, contract_number: ct.contract_number, contract_exists: true })
         setExtraDirty(true)
-        if (ct.client_id) {
-          axios
-            .get(`/clients/${ct.client_id}`)
-            .then(res => res.data.data.currency_icon && setValue('currency', res.data.data.currency_icon))
-            .catch(() => {})
-        }
       })
       .catch(() => toast.error('Could not load that contract'))
   }, [fromContractId])

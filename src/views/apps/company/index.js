@@ -26,7 +26,7 @@ import { Settings, Mail, FileText, Send, Sun, Server, Trash2 } from 'react-feath
 import InputPasswordToggle from '@components/input-password-toggle'
 import AdminEmailsTab from './AdminEmailsTab'
 import HistoryModal from '../activity-log/HistoryModal'
-import { selectThemeColors, getUserData } from '@utils'
+import { selectThemeColors, getUserData, sortOptions } from '@utils'
 import { confirmDelete } from '@src/utility/confirmDelete'
 
 const encryptionOptions = [
@@ -135,30 +135,32 @@ const CompanySettings = () => {
   useEffect(() => {
     axios.get('/currencies', { params: { perPage: 100 } }).then(response => {
       const active = response.data.data.currencies.filter(c => c.is_active)
-      setCurrencyOptions(active.map(c => ({ value: c.id, label: `${c.name} (${c.icon})` })))
+      setCurrencyOptions(sortOptions(active.map(c => ({ value: c.id, label: `${c.name} (${c.icon})` }))))
     })
 
     axios.get('/pdf-designer-templates', { params: { perPage: 100 } }).then(response => {
-      const options = response.data.data.pdfDesignerTemplates
-        .filter(t => t.is_active)
-        .map(t => ({ value: t.id, label: t.name }))
+      const options = sortOptions(
+        response.data.data.pdfDesignerTemplates.filter(t => t.is_active).map(t => ({ value: t.id, label: t.name }))
+      )
       setInvoicePdfOptions(options)
       setContractPdfOptions(options)
       setQuotationPdfOptions(options)
     })
 
     axios.get('/email-templates', { params: { perPage: 100 } }).then(response => {
-      const options = response.data.data.emailTemplates
-        .filter(t => t.is_active)
-        .map(t => ({ value: t.id, label: t.name }))
+      const options = sortOptions(
+        response.data.data.emailTemplates.filter(t => t.is_active).map(t => ({ value: t.id, label: t.name }))
+      )
       setEmailTemplateOptions(options)
     })
 
     axios.get('/company-mailboxes').then(response => {
-      const options = (response.data.data.companyMailboxes || []).map(m => ({
-        value: m.id,
-        label: m.label ? `${m.label} (${m.email})` : m.email
-      }))
+      const options = sortOptions(
+        (response.data.data.companyMailboxes || []).map(m => ({
+          value: m.id,
+          label: m.label ? `${m.label} (${m.email})` : m.email
+        }))
+      )
       setAdminMailboxOptions(options)
     })
   }, [])

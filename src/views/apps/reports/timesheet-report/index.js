@@ -7,7 +7,7 @@ import DataTable from 'react-data-table-component'
 import { Search, RotateCcw, Clock, FileText, Folder, TrendingUp } from 'react-feather'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Spinner } from 'reactstrap'
 import DateField from '../../shared/DateField'
-import { selectThemeColors, getUserData } from '@utils'
+import { selectThemeColors, getUserData, sortOptions } from '@utils'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
 import { Clock as EmptyIcon } from 'react-feather'
@@ -97,18 +97,18 @@ const TimesheetReport = () => {
     if (admin) {
       axios
         .get('/users', { params: { perPage: 100 } })
-        .then(response => setUserOptions(response.data.data.users.map(u => ({ value: u.id, label: u.fullName }))))
+        .then(response => setUserOptions(sortOptions(response.data.data.users.map(u => ({ value: u.id, label: u.fullName })))))
         .catch(() => {})
     }
     axios
       .get('/projects', { params: { perPage: 100 } })
-      .then(response => setProjectOptions(response.data.data.projects.map(p => ({ value: p.id, label: p.name }))))
+      .then(response => setProjectOptions(sortOptions(response.data.data.projects.map(p => ({ value: p.id, label: p.name })))))
       .catch(() => {})
     axios
       .get('/timesheet-activities', { params: { perPage: 100 } })
       .then(response => {
         const active = response.data.data.timesheetActivities.filter(a => a.is_active)
-        setActivityOptions(active.map(a => ({ value: a.id, label: a.name })))
+        setActivityOptions(sortOptions(active.map(a => ({ value: a.id, label: a.name }))))
       })
       .catch(() => {})
   }, [])

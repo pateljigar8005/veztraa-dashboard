@@ -4,6 +4,12 @@ import { resizeToFit, uploadToR2 } from './imageUpload'
 
 export const isObjEmpty = obj => Object.keys(obj).length === 0
 
+// A-Z by label for react-select `options` arrays built from a real record
+// list (clients, users, templates, ...) - deliberately NOT used on a small
+// fixed-choice list (priority/status/frequency/discount type) where the
+// existing order is itself meaningful, not incidental.
+export const sortOptions = options => [...options].sort((a, b) => String(a.label).localeCompare(String(b.label)))
+
 // R2-hosted images come back as an already-absolute URL (custom domain);
 // only a legacy pre-R2 relative path (e.g. "/public/avatars/xxx.jpg") needs
 // the API base URL prefixed.
@@ -92,6 +98,20 @@ export const formatRecipients = to =>
     .map(r => (typeof r === 'string' ? r : r?.name || r?.email || ''))
     .filter(Boolean)
     .join(', ')
+
+// The real profile picture to show for a mail row/header, when the API has
+// attached one (see MessageAvatarEnricher on the backend - it only attaches
+// avatarUrl when the address is one of our own Users with a picture
+// uploaded, so most mail simply won't have one and the caller falls back to
+// initials). Matches whichever party displayName/correspondentName already
+// shows: the sender for a received message, or the first recipient for a
+// Sent/Scheduled one.
+export const correspondentAvatarUrl = (mail, isSent) => {
+  if (isSent) {
+    return mail?.to?.[0]?.avatarUrl || null
+  }
+  return mail?.from?.avatarUrl || null
+}
 
 export const isUserLoggedIn = () => localStorage.getItem('userData')
 export const getUserData = () => JSON.parse(localStorage.getItem('userData'))

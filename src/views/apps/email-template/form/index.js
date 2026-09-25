@@ -5,7 +5,7 @@ import axios from 'axios'
 import Select from 'react-select'
 import toast from 'react-hot-toast'
 import { Editor } from '@veztraa/editor'
-import { uploadEditorImage, selectThemeColors } from '@utils'
+import { uploadEditorImage, selectThemeColors, sortOptions } from '@utils'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormText } from 'reactstrap'
@@ -39,7 +39,7 @@ const EmailTemplateForm = () => {
 
   useEffect(() => {
     axios.get('/roles').then(response => {
-      setRoleOptions((response.data.data || []).map(r => ({ value: r.id, label: r.name })))
+      setRoleOptions(sortOptions((response.data.data || []).map(r => ({ value: r.id, label: r.name }))))
     })
   }, [])
 

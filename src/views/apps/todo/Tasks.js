@@ -1,10 +1,11 @@
 import axios from 'axios'
 import { Link } from 'react-router-dom'
 import Avatar from '@components/avatar'
-import { resolveAvatarUrl, getUserData } from '@utils'
+import { resolveAvatarUrl, getUserData, sortOptions } from '@utils'
 import { persistTaskOrder } from './store'
 import { priorityOptions, priorityColors, statusOptions, statusColors } from './todoOptions'
 import AdvancedSearchModal from '../shared/AdvancedSearchModal'
+import GripVerticalIcon from '../shared/GripVerticalIcon'
 import classnames from 'classnames'
 import { useState } from 'react'
 import { ReactSortable } from 'react-sortablejs'
@@ -41,7 +42,7 @@ const buildAdvancedSearchFields = isAdmin => [
     type: 'select',
     isMulti: isAdmin,
     fetchOptions: () =>
-      axios.get('/users', { params: { perPage: 100 } }).then(response => response.data.data.users.map(u => ({ value: u.id, label: u.fullName })))
+      axios.get('/users', { params: { perPage: 100 } }).then(response => sortOptions(response.data.data.users.map(u => ({ value: u.id, label: u.fullName }))))
   },
   { name: 'adv_status', label: 'Status', type: 'select', options: statusOptions },
   { name: 'priority', label: 'Priority', type: 'select', options: priorityOptions },
@@ -164,7 +165,7 @@ const Tasks = props => {
                 >
                   <div className='todo-title-wrapper'>
                     <div className='todo-title-area'>
-                      <MoreVertical className='drag-icon' />
+                      <GripVerticalIcon className='drag-icon' />
                       <div className='form-check'>
                         <Input
                           type='checkbox'

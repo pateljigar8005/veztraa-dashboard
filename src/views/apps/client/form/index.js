@@ -7,7 +7,7 @@ import Select from 'react-select'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
-import { selectThemeColors } from '@utils'
+import { selectThemeColors, sortOptions } from '@utils'
 import { addClient, updateClient, getClient } from '../store'
 import HistoryModal from '../../activity-log/HistoryModal'
 
@@ -48,11 +48,11 @@ const ClientForm = () => {
   useEffect(() => {
     axios.get('/currencies', { params: { perPage: 100 } }).then(response => {
       const active = response.data.data.currencies.filter(c => c.is_active)
-      setCurrencyOptions(active.map(c => ({ value: c.id, label: `${c.name} (${c.icon})` })))
+      setCurrencyOptions(sortOptions(active.map(c => ({ value: c.id, label: `${c.name} (${c.icon})` }))))
     })
     axios.get('/industries', { params: { perPage: 100 } }).then(response => {
       const active = response.data.data.industries.filter(i => i.is_active)
-      setIndustryOptions(active.map(i => ({ value: i.id, label: i.name })))
+      setIndustryOptions(sortOptions(active.map(i => ({ value: i.id, label: i.name }))))
     })
   }, [])
 

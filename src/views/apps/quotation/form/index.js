@@ -7,7 +7,7 @@ import Select from 'react-select'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
-import { selectThemeColors, formatAmount } from '@utils'
+import { selectThemeColors, formatAmount, sortOptions } from '@utils'
 import CatalogModal from '../../shared/CatalogModal'
 import TermsSection from '../../shared/TermsSection'
 import PaymentMethodSection from '../../shared/PaymentMethodSection'
@@ -79,33 +79,39 @@ const QuotationForm = () => {
   useEffect(() => {
     axios.get('/clients', { params: { perPage: 100 } }).then(response => {
       setClientOptions(
-        response.data.data.clients.map(c => ({
-          value: c.id,
-          label: c.fullName,
-          company_name: c.company_name,
-          email: c.email,
-          phone: c.phone,
-          address: c.address,
-          currency_icon: c.currency_icon
-        }))
+        sortOptions(
+          response.data.data.clients.map(c => ({
+            value: c.id,
+            label: c.fullName,
+            company_name: c.company_name,
+            email: c.email,
+            phone: c.phone,
+            address: c.address,
+            currency_icon: c.currency_icon
+          }))
+        )
       )
     })
     axios.get('/currencies', { params: { perPage: 100 } }).then(response => {
       setCurrencyOptions(
-        response.data.data.currencies
-          .filter(c => c.is_active)
-          .map(c => ({ value: c.icon, label: `${c.name} (${c.icon})` }))
+        sortOptions(
+          response.data.data.currencies
+            .filter(c => c.is_active)
+            .map(c => ({ value: c.icon, label: `${c.name} (${c.icon})` }))
+        )
       )
     })
     axios.get('/payment-methods', { params: { perPage: 100 } }).then(response => {
       setPaymentMethodOptions(
-        response.data.data.paymentMethods
-          .filter(m => m.is_active)
-          .map(m => ({ value: m.id, label: m.name, content: m.description }))
+        sortOptions(
+          response.data.data.paymentMethods
+            .filter(m => m.is_active)
+            .map(m => ({ value: m.id, label: m.name, content: m.description }))
+        )
       )
     })
     axios.get('/terms-templates', { params: { perPage: 100 } }).then(response => {
-      setTemplateOptions(response.data.data.termsTemplates.map(t => ({ value: t.id, label: t.name, content: t.content })))
+      setTemplateOptions(sortOptions(response.data.data.termsTemplates.map(t => ({ value: t.id, label: t.name, content: t.content }))))
     })
     axios.get('/company').then(response => {
       setTaxEnabled(!!response.data.data.tax_enabled)

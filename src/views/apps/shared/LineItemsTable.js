@@ -3,18 +3,8 @@ import { Controller } from 'react-hook-form'
 import { X } from 'react-feather'
 import { CardBody, Table, Input, Button } from 'reactstrap'
 import AmountField from './AmountField'
+import GripVerticalIcon from './GripVerticalIcon'
 import { formatAmount } from '@utils'
-
-const GripIcon = ({ size = 14, className }) => (
-  <svg width={size} height={size} viewBox='0 0 10 16' fill='currentColor' className={className}>
-    <circle cx='2' cy='2' r='1.5' />
-    <circle cx='8' cy='2' r='1.5' />
-    <circle cx='2' cy='8' r='1.5' />
-    <circle cx='8' cy='8' r='1.5' />
-    <circle cx='2' cy='14' r='1.5' />
-    <circle cx='8' cy='14' r='1.5' />
-  </svg>
-)
 
 const LineItemsTable = ({ control, fields, lineItems, remove, move, onAddItem, onOpenCatalog }) => {
   const dragIndex = useRef(null)
@@ -65,7 +55,7 @@ const LineItemsTable = ({ control, fields, lineItems, remove, move, onAddItem, o
                   style={overIndex === index ? { borderTop: '2px solid #7367f0' } : undefined}
                 >
                   <td className='align-middle text-center' style={{ cursor: 'grab', paddingRight: 0 }}>
-                    <GripIcon size={12} className='text-muted' />
+                    <GripVerticalIcon size={12} className='drag-handle text-muted' />
                   </td>
                   <td style={{ paddingLeft: '1rem' }}>
                     <Controller

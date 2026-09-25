@@ -1,8 +1,8 @@
-import { useState, useEffect, Fragment } from 'react'
+import { useState, useEffect, useRef, Fragment } from 'react'
 import axios from 'axios'
 import classnames from 'classnames'
 import { Editor } from '@veztraa/editor'
-import { X, Star, Trash, Clock, Send } from 'react-feather'
+import { X, Star, Trash, Clock, Send, Edit2, Check } from 'react-feather'
 import Select, { components } from 'react-select'
 import { useForm, Controller } from 'react-hook-form'
 import { Modal, ModalBody, ModalFooter, Button, Form, Input, Label, FormFeedback } from 'reactstrap'
@@ -12,11 +12,144 @@ import DateField from '../shared/DateField'
 import HistoryModal from '../activity-log/HistoryModal'
 import useHolidayDates from '@hooks/useHolidayDates'
 import useWeekendDays from '@hooks/useWeekendDays'
-import { isObjEmpty, selectThemeColors, resolveAvatarUrl, uploadEditorImage } from '@utils'
+import { isObjEmpty, selectThemeColors, resolveAvatarUrl, uploadEditorImage, getUserData, sortOptions } from '@utils'
 import { priorityOptions, statusOptions } from './todoOptions'
-import { fetchComments, addComment, deleteComment } from './store'
+import { fetchComments, addComment, editComment, deleteComment } from './store'
 import { currentUserCan } from '@src/utility/navPermissions'
+import { confirmDelete } from '@src/utility/confirmDelete'
 import '@styles/react/libs/react-select/_react-select.scss'
+
+// Typing '@' followed by a name (no whitespace yet) shows a picker of the
+// task's own assignee options (already loaded for the Assignee field above -
+// no extra fetch) - selecting one inserts "@Full Name " and records the
+// user's id alongside the comment text. Shared between the new-comment box
+// and each comment's own inline edit mode.
+const MentionTextarea = ({ id, value, onChange, onMention, assigneeOptions, placeholder, rows = 2 }) => {
+  const textareaRef = useRef(null)
+  const [mentionQuery, setMentionQuery] = useState(null)
+  const [mentionStart, setMentionStart] = useState(null)
+
+  const handleChange = e => {
+    const newValue = e.target.value
+    const cursor = e.target.selectionStart
+    onChange(newValue)
+
+    const uptoCursor = newValue.slice(0, cursor)
+    const at = uptoCursor.lastIndexOf('@')
+    if (at === -1 || /\s/.test(uptoCursor.slice(at + 1))) {
+      setMentionQuery(null)
+      setMentionStart(null)
+      return
+    }
+    setMentionQuery(uptoCursor.slice(at + 1))
+    setMentionStart(at)
+  }
+
+  const filteredOptions =
+    mentionQuery !== null
+      ? assigneeOptions.filter(o => o.label.toLowerCase().includes(mentionQuery.toLowerCase())).slice(0, 6)
+      : []
+
+  const pickMention = option => {
+    const textarea = textareaRef.current
+    const cursor = textarea ? textarea.selectionStart : value.length
+    const before = value.slice(0, mentionStart)
+    const after = value.slice(cursor)
+    const inserted = `@${option.label} `
+    onChange(before + inserted + after)
+    onMention(option.value)
+    setMentionQuery(null)
+    setMentionStart(null)
+    requestAnimationFrame(() => {
+      if (!textarea) return
+      const pos = before.length + inserted.length
+      textarea.focus()
+      textarea.setSelectionRange(pos, pos)
+    })
+  }
+
+  return (
+    <div className='position-relative flex-grow-1'>
+      <Input
+        id={id}
+        innerRef={textareaRef}
+        type='textarea'
+        rows={rows}
+        placeholder={placeholder}
+        value={value}
+        onChange={handleChange}
+      />
+      {mentionQuery !== null && filteredOptions.length > 0 && (
+        <div
+          className='mention-suggestions'
+          style={{
+            position: 'absolute',
+            bottom: '100%',
+            left: 0,
+            zIndex: 10,
+            width: '100%',
+            maxHeight: '10rem',
+            overflowY: 'auto',
+            background: 'var(--bs-body-bg, #fff)',
+            border: '1px solid #d8d6de',
+            borderRadius: '0.357rem',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+          }}
+        >
+          {filteredOptions.map(o => (
+            <div
+              key={o.value}
+              className='d-flex align-items-center px-1 py-50'
+              style={{ cursor: 'pointer' }}
+              onMouseDown={e => {
+                // preventDefault keeps the textarea's selection/focus intact
+                // through the click - a plain onClick would blur it first.
+                e.preventDefault()
+                pickMention(o)
+              }}
+            >
+              {o.img ? (
+                <img className='d-block rounded-circle me-50' src={o.img} height='20' width='20' alt={o.label} />
+              ) : (
+                <Avatar initials size='sm' className='me-50' color='light-primary' content={o.label} />
+              )}
+              <span>{o.label}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Wraps each @mentioned name (ground truth from the API's own
+// CommentMention::forComments() join, not a regex guess) in a styled span.
+const renderCommentText = (text, mentions) => {
+  const names = (mentions || []).map(m => m.name).filter(Boolean).sort((a, b) => b.length - a.length)
+  if (names.length === 0) {
+    return text
+  }
+
+  const escaped = names.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+  const pattern = new RegExp(`@(${escaped.join('|')})\\b`, 'g')
+
+  const parts = []
+  let lastIndex = 0
+  let match
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index))
+    }
+    parts.push(
+      <strong key={match.index} className='text-primary'>
+        {match[0]}
+      </strong>
+    )
+    lastIndex = match.index + match[0].length
+  }
+  parts.push(text.slice(lastIndex))
+  return parts
+}
 
 const defaultPriorityOption = priorityOptions.find(o => o.value === 'medium')
 const defaultStatusOption = statusOptions.find(o => o.value === 'not_started')
@@ -26,8 +159,14 @@ const ModalHeader = props => {
   const { children, store, handleTaskSidebar, important, setImportant, deleteTask, dispatch } = props
 
   const handleDeleteTask = () => {
-    dispatch(deleteTask(store.selectedTask.id))
-    handleTaskSidebar()
+    confirmDelete({
+      title: `Delete "${store.selectedTask.title}"?`,
+      text: "You won't be able to revert this!",
+      onConfirm: () => {
+        dispatch(deleteTask(store.selectedTask.id))
+        handleTaskSidebar()
+      }
+    })
   }
 
   return (
@@ -63,7 +202,15 @@ const TaskSidebar = props => {
   const [important, setImportant] = useState(false)
   const [dueDate, setDueDate] = useState(null)
   const [commentText, setCommentText] = useState('')
+  const [commentMentionIds, setCommentMentionIds] = useState([])
   const [submittingComment, setSubmittingComment] = useState(false)
+  const [editingCommentId, setEditingCommentId] = useState(null)
+  const [editText, setEditText] = useState('')
+  const [editMentionIds, setEditMentionIds] = useState([])
+  const [savingEdit, setSavingEdit] = useState(false)
+  const currentUser = getUserData()
+  const isAdmin = (currentUser?.role || '').toLowerCase() === 'admin'
+  const canModifyComment = c => isAdmin || (currentUser && c.user_id === currentUser.id)
   const { holidayDates } = useHolidayDates()
   const { isWeekend } = useWeekendDays()
 
@@ -81,11 +228,13 @@ const TaskSidebar = props => {
   useEffect(() => {
     axios.get('/users', { params: { perPage: 100 } }).then(response => {
       setAssigneeOptions(
-        response.data.data.users.map(u => ({
-          value: u.id,
-          label: u.fullName,
-          img: resolveAvatarUrl(u.avatar)
-        }))
+        sortOptions(
+          response.data.data.users.map(u => ({
+            value: u.id,
+            label: u.fullName,
+            img: resolveAvatarUrl(u.avatar)
+          }))
+        )
       )
     })
   }, [])
@@ -155,6 +304,8 @@ const TaskSidebar = props => {
     setImportant(false)
     setDueDate(null)
     setCommentText('')
+    setCommentMentionIds([])
+    setEditingCommentId(null)
     dispatch(selectTask({}))
     clearErrors()
   }
@@ -162,9 +313,48 @@ const TaskSidebar = props => {
   const handleAddComment = () => {
     if (!commentText.trim() || isObjEmpty(store.selectedTask)) return
     setSubmittingComment(true)
-    dispatch(addComment({ taskId: store.selectedTask.id, comment: commentText.trim() })).then(() => {
+    dispatch(addComment({ taskId: store.selectedTask.id, comment: commentText.trim(), mentionedUserIds: commentMentionIds })).then(() => {
       setCommentText('')
+      setCommentMentionIds([])
       setSubmittingComment(false)
+    })
+  }
+
+  const handleStartEditComment = c => {
+    setEditingCommentId(c.id)
+    setEditText(c.comment)
+    setEditMentionIds((c.mentions || []).map(m => m.id))
+  }
+
+  const handleCancelEditComment = () => {
+    setEditingCommentId(null)
+    setEditText('')
+    setEditMentionIds([])
+  }
+
+  const handleSaveEditComment = () => {
+    if (!editText.trim()) return
+    setSavingEdit(true)
+    dispatch(
+      editComment({
+        id: editingCommentId,
+        taskId: store.selectedTask.id,
+        comment: editText.trim(),
+        mentionedUserIds: editMentionIds
+      })
+    )
+      .unwrap()
+      .then(() => {
+        setSavingEdit(false)
+        handleCancelEditComment()
+      })
+      .catch(() => setSavingEdit(false))
+  }
+
+  const handleDeleteComment = c => {
+    confirmDelete({
+      text: "You won't be able to revert this!",
+      onConfirm: () => dispatch(deleteComment({ id: c.id, taskId: store.selectedTask.id }))
     })
   }
 
@@ -219,16 +409,22 @@ const TaskSidebar = props => {
     <Modal
       isOpen={open}
       toggle={handleTaskSidebar}
-      centered
-      size='xl'
+      modalClassName='modal-slide-in'
+      contentClassName='overflow-hidden'
+      className='sidebar-half'
       onOpened={handleSidebarOpened}
       onClosed={handleSidebarClosed}
     >
-      <Form id='form-modal-todo' className='todo-modal' onSubmit={handleSubmit(onSubmit)}>
+      <Form
+        id='form-modal-todo'
+        className='todo-modal d-flex flex-column'
+        style={{ height: '100%' }}
+        onSubmit={handleSubmit(onSubmit)}
+      >
         <ModalHeader store={store} dispatch={dispatch} important={important} deleteTask={deleteTask} setImportant={setImportant} handleTaskSidebar={handleTaskSidebar}>
           {handleSidebarTitle()}
         </ModalHeader>
-        <ModalBody className='flex-grow-1' style={{ maxHeight: '65vh', overflowY: 'auto' }}>
+        <ModalBody className='flex-grow-1' style={{ overflowY: 'auto' }}>
           <div className='mb-1'>
             <Label className='form-label' for='task-title'>
               Title <span className='text-danger'>*</span>
@@ -332,7 +528,7 @@ const TaskSidebar = props => {
               <Label className='form-label'>Comments ({store.comments.length})</Label>
               {store.comments.map(c => (
                 <div key={c.id} className='d-flex align-items-start justify-content-between mb-1'>
-                  <div className='d-flex align-items-start'>
+                  <div className='d-flex align-items-start flex-grow-1' style={{ minWidth: 0 }}>
                     <Avatar
                       initials
                       size='sm'
@@ -341,32 +537,70 @@ const TaskSidebar = props => {
                       content={c.user_name}
                       img={resolveAvatarUrl(c.user_avatar) || undefined}
                     />
-                    <div>
-                      <p className='mb-0'>
-                        <span className='fw-bolder'>{c.user_name}</span>{' '}
-                        <small className='text-muted'>{c.created_at?.slice(0, 16).replace('T', ' ')}</small>
-                      </p>
-                      <p className='mb-0'>{c.comment}</p>
-                    </div>
+                    {editingCommentId === c.id ? (
+                      <div className='flex-grow-1'>
+                        <MentionTextarea
+                          value={editText}
+                          onChange={setEditText}
+                          onMention={id => setEditMentionIds(prev => (prev.includes(id) ? prev : [...prev, id]))}
+                          assigneeOptions={assigneeOptions}
+                          rows={2}
+                        />
+                        <div className='mt-50' style={{ display: 'flex', gap: '0.5rem' }}>
+                          <Button
+                            type='button'
+                            size='sm'
+                            color='primary'
+                            disabled={savingEdit || !editText.trim()}
+                            onClick={handleSaveEditComment}
+                          >
+                            <Check size={14} className='me-25' /> Save
+                          </Button>
+                          <Button type='button' size='sm' color='flat-secondary' onClick={handleCancelEditComment}>
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ minWidth: 0 }}>
+                        <p className='mb-0'>
+                          <span className='fw-bolder'>{c.user_name}</span>{' '}
+                          <small className='text-muted'>{c.created_at?.slice(0, 16).replace('T', ' ')}</small>
+                          {c.updated_at && <small className='text-muted'> (edited)</small>}
+                        </p>
+                        <p className='mb-0'>{renderCommentText(c.comment, c.mentions)}</p>
+                      </div>
+                    )}
                   </div>
-                  {/* Same task-level access as the rest of this modal, not
-                      per-comment authorship - anyone who can open this task
-                      (admin or its assignee) can clear a comment on it,
-                      matching TodoController::deleteComment()'s own check. */}
-                  <X
-                    size={14}
-                    className='cursor-pointer text-muted mt-25'
-                    onClick={() => dispatch(deleteComment({ id: c.id, taskId: store.selectedTask.id }))}
-                  />
+                  {/* Author (or admin) only, matching TodoController's
+                      updateComment()/deleteComment() ownership check - a
+                      task's other assignees can read the thread but not
+                      touch someone else's comment. */}
+                  {editingCommentId !== c.id && canModifyComment(c) && (
+                    <div className='d-flex align-items-center flex-shrink-0' style={{ gap: '0.5rem' }}>
+                      <Edit2
+                        size={14}
+                        className='cursor-pointer text-muted mt-25'
+                        onClick={() => handleStartEditComment(c)}
+                      />
+                      <X
+                        size={14}
+                        className='cursor-pointer text-muted mt-25'
+                        onClick={() => handleDeleteComment(c)}
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
               <div className='d-flex align-items-start mt-1' style={{ gap: '0.5rem' }}>
-                <Input
-                  type='textarea'
-                  rows='2'
-                  placeholder='Write a comment...'
+                <MentionTextarea
+                  id='todo-comment-input'
                   value={commentText}
-                  onChange={e => setCommentText(e.target.value)}
+                  onChange={setCommentText}
+                  onMention={id => setCommentMentionIds(prev => (prev.includes(id) ? prev : [...prev, id]))}
+                  assigneeOptions={assigneeOptions}
+                  placeholder='Write a comment... (type @ to mention someone)'
+                  rows={2}
                 />
                 <Button
                   type='button'
