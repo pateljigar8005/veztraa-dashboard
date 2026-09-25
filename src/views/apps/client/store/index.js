@@ -30,19 +30,27 @@ export const getClient = createAsyncThunk('appClients/getClient', async id => {
 })
 
 export const addClient = createAsyncThunk('appClients/addClient', async (client, { dispatch, getState }) => {
-  const response = await axios.post('/clients', client)
-  await dispatch(getData(getState().clients.params))
-  await dispatch(getAllData())
-  return response.data.data
+  try {
+    const response = await axios.post('/clients', client)
+    await dispatch(getData(getState().clients.params))
+    await dispatch(getAllData())
+    return response.data.data
+  } catch (err) {
+    throw new Error(err?.response?.data?.message || 'Failed to save client')
+  }
 })
 
 export const updateClient = createAsyncThunk(
   'appClients/updateClient',
   async ({ id, ...client }, { dispatch, getState }) => {
-    const response = await axios.put(`/clients/${id}`, client)
-    await dispatch(getData(getState().clients.params))
-    await dispatch(getAllData())
-    return response.data.data
+    try {
+      const response = await axios.put(`/clients/${id}`, client)
+      await dispatch(getData(getState().clients.params))
+      await dispatch(getAllData())
+      return response.data.data
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to save client')
+    }
   }
 )
 
