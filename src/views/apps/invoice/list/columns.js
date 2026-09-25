@@ -29,7 +29,7 @@ export const columns = [
   {
     name: 'Invoice #',
     sortable: true,
-    minWidth: '140px',
+    width: '150px',
     sortField: 'id',
     selector: row => row.invoice_number,
     cell: row => (
@@ -40,7 +40,7 @@ export const columns = [
   },
   {
     name: 'Reference',
-    minWidth: '170px',
+    width: '180px',
     selector: row => row.quotation_number || row.contract_number || '',
     cell: row => <SourceReference invoice={row} empty={<span className='text-muted'>-</span>} />
   },
@@ -63,7 +63,7 @@ export const columns = [
   },
   {
     name: 'Due Date',
-    minWidth: '140px',
+    width: '150px',
     sortable: true,
     sortField: 'due_date',
     selector: row => row.due_date,
@@ -71,7 +71,7 @@ export const columns = [
   },
   {
     name: 'Total',
-    minWidth: '120px',
+    width: '140px',
     selector: row => row.total,
     cell: row => (
       <span>
@@ -81,7 +81,7 @@ export const columns = [
   },
   {
     name: 'Balance Due',
-    minWidth: '130px',
+    width: '150px',
     selector: row => row.balance_due,
     cell: row => (
       <span className={Number(row.balance_due) > 0 ? 'text-danger' : 'text-success'}>
@@ -91,7 +91,7 @@ export const columns = [
   },
   {
     name: 'Status',
-    minWidth: '120px',
+    width: '130px',
     sortable: true,
     sortField: 'status',
     selector: row => row.status,
@@ -104,7 +104,7 @@ export const columns = [
   {
     name: 'Actions',
     right: true,
-    minWidth: '130px',
+    width: '150px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
         <Button

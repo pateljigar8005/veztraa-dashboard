@@ -28,13 +28,13 @@ export const columns = [
   },
   {
     name: 'Subject',
-    minWidth: '260px',
+    width: '280px',
     selector: row => row.subject,
     cell: row => <span className='text-truncate'>{row.subject || '-'}</span>
   },
   {
     name: 'Visibility',
-    minWidth: '130px',
+    width: '150px',
     selector: row => row.visible_role_ids?.length || 0,
     cell: row =>
       row.visible_role_ids?.length ? (
@@ -46,8 +46,16 @@ export const columns = [
       )
   },
   {
+    name: 'Created',
+    width: '180px',
+    sortable: true,
+    sortField: 'created_at',
+    selector: row => row.created_at,
+    cell: row => <span>{row.created_at}</span>
+  },
+  {
     name: 'Status',
-    minWidth: '110px',
+    width: '130px',
     sortable: true,
     sortField: 'status',
     selector: row => row.status,
@@ -58,17 +66,9 @@ export const columns = [
     )
   },
   {
-    name: 'Created',
-    minWidth: '160px',
-    sortable: true,
-    sortField: 'created_at',
-    selector: row => row.created_at,
-    cell: row => <span>{row.created_at}</span>
-  },
-  {
     name: 'Actions',
     right: true,
-    minWidth: '90px',
+    width: '120px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
         {currentUserCan('/email-template', 'edit') && (

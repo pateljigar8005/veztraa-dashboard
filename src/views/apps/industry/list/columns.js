@@ -27,8 +27,16 @@ export const columns = [
     )
   },
   {
+    name: 'Created',
+    width: '180px',
+    sortable: true,
+    sortField: 'created_at',
+    selector: row => row.created_at,
+    cell: row => <span>{row.created_at}</span>
+  },
+  {
     name: 'Status',
-    minWidth: '120px',
+    width: '130px',
     sortable: true,
     sortField: 'status',
     selector: row => row.status,
@@ -39,17 +47,9 @@ export const columns = [
     )
   },
   {
-    name: 'Created',
-    minWidth: '160px',
-    sortable: true,
-    sortField: 'created_at',
-    selector: row => row.created_at,
-    cell: row => <span>{row.created_at}</span>
-  },
-  {
     name: 'Actions',
     right: true,
-    minWidth: '90px',
+    width: '120px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
         {currentUserCan('/industry', 'edit') && (

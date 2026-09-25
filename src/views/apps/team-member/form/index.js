@@ -13,10 +13,7 @@ import { addTeamMember, updateTeamMember, getTeamMember, uploadTeamMemberPhoto }
 const defaultValues = {
   full_name: '',
   role_title: '',
-  introduction: '',
-  email: '',
-  phone: '',
-  address: ''
+  introduction: ''
 }
 
 const TeamMemberForm = () => {
@@ -54,10 +51,7 @@ const TeamMemberForm = () => {
       reset({
         full_name: member.full_name || '',
         role_title: member.role_title || '',
-        introduction: member.introduction || '',
-        email: member.email || '',
-        phone: member.phone || '',
-        address: member.address || ''
+        introduction: member.introduction || ''
       })
       setIsActive(member.is_active !== false)
       setPhotoPreview(resolveAvatarUrl(member.photo))
@@ -93,9 +87,6 @@ const TeamMemberForm = () => {
       full_name: data.full_name,
       role_title: data.role_title,
       introduction: data.introduction,
-      email: data.email,
-      phone: data.phone,
-      address: data.address,
       is_active: isActive
     }
 
@@ -175,41 +166,6 @@ const TeamMemberForm = () => {
                 onRemove={handleRemovePhoto}
                 helperText='JPG, PNG or WebP — max 2MB.'
               />
-
-              <hr className='my-2' />
-              <h6 className='mb-1'>Contact Details</h6>
-              <Row>
-                <Col md={6} className='mb-1'>
-                  <Label className='form-label' for='email'>
-                    Email
-                  </Label>
-                  <Controller
-                    name='email'
-                    control={control}
-                    render={({ field }) => <Input type='email' id='email' placeholder='e.g. member@example.com' {...field} />}
-                  />
-                </Col>
-                <Col md={6} className='mb-1'>
-                  <Label className='form-label' for='phone'>
-                    Phone
-                  </Label>
-                  <Controller
-                    name='phone'
-                    control={control}
-                    render={({ field }) => <Input id='phone' placeholder='e.g. +91 98765 43210' {...field} />}
-                  />
-                </Col>
-                <Col md={12}>
-                  <Label className='form-label' for='address'>
-                    Address
-                  </Label>
-                  <Controller
-                    name='address'
-                    control={control}
-                    render={({ field }) => <Input type='textarea' rows='2' id='address' placeholder='Street, City, State, Country' {...field} />}
-                  />
-                </Col>
-              </Row>
 
               <hr className='my-2' />
               <h6 className='mb-1'>Visibility</h6>

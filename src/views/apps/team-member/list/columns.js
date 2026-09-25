@@ -48,22 +48,21 @@ export const getColumns = dragEnabled => [
           <Link to={`/team-member/edit/${row.id}`} className='user_name text-truncate text-body' title={row.full_name}>
             <span className='fw-bolder'>{row.full_name}</span>
           </Link>
-          <small className='text-truncate text-muted mb-0' title={row.role_title}>
-            {row.role_title}
-          </small>
         </div>
       </div>
     )
   },
   {
-    name: 'Email',
-    minWidth: '200px',
-    selector: row => row.email,
-    cell: row => <span>{row.email || '-'}</span>
+    name: 'Role / Title',
+    width: '240px',
+    sortable: true,
+    sortField: 'role_title',
+    selector: row => row.role_title,
+    cell: row => <span>{row.role_title || '-'}</span>
   },
   {
     name: 'Status',
-    minWidth: '120px',
+    width: '130px',
     sortable: true,
     sortField: 'status',
     selector: row => row.status,
@@ -76,7 +75,7 @@ export const getColumns = dragEnabled => [
   {
     name: 'Actions',
     right: true,
-    minWidth: '90px',
+    width: '120px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
         {currentUserCan('/team-member', 'edit') && (

@@ -28,7 +28,7 @@ export const columns = [
   {
     name: 'Quotation #',
     sortable: true,
-    minWidth: '140px',
+    width: '180px',
     sortField: 'id',
     selector: row => row.quotation_number,
     cell: row => (
@@ -56,7 +56,7 @@ export const columns = [
   },
   {
     name: 'Issue Date',
-    minWidth: '140px',
+    width: '150px',
     sortable: true,
     sortField: 'issue_date',
     selector: row => row.issue_date,
@@ -64,7 +64,7 @@ export const columns = [
   },
   {
     name: 'Total',
-    minWidth: '120px',
+    width: '140px',
     selector: row => row.total,
     cell: row => (
       <span>
@@ -74,7 +74,7 @@ export const columns = [
   },
   {
     name: 'Status',
-    minWidth: '120px',
+    width: '130px',
     sortable: true,
     sortField: 'status',
     selector: row => row.status,
@@ -87,7 +87,7 @@ export const columns = [
   {
     name: 'Actions',
     right: true,
-    minWidth: '130px',
+    width: '150px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
         <Button

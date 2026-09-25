@@ -34,14 +34,14 @@ export const columns = [
   {
     name: 'Project',
     sortable: true,
-    minWidth: '180px',
+    width: '190px',
     sortField: 'project_name',
     selector: row => row.project_name,
     cell: row => <span className='text-truncate'>{row.project_name}</span>
   },
   {
     name: 'Date',
-    minWidth: '130px',
+    width: '140px',
     sortable: true,
     sortField: 'date',
     selector: row => row.date,
@@ -49,7 +49,7 @@ export const columns = [
   },
   {
     name: 'Activity',
-    minWidth: '150px',
+    width: '160px',
     sortable: true,
     sortField: 'activity_name',
     selector: row => row.activity_name,
@@ -57,7 +57,7 @@ export const columns = [
   },
   {
     name: 'Hours',
-    minWidth: '100px',
+    width: '110px',
     sortable: true,
     sortField: 'hours',
     selector: row => row.hours,
@@ -65,7 +65,7 @@ export const columns = [
   },
   {
     name: 'Description',
-    minWidth: '200px',
+    width: '220px',
     selector: row => row.description,
     cell: row => {
       const plain = row.description ? htmlToString(row.description) : ''
@@ -79,7 +79,7 @@ export const columns = [
   {
     name: 'Actions',
     right: true,
-    minWidth: '90px',
+    width: '120px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
         {currentUserCan('/timesheet', 'edit') && (

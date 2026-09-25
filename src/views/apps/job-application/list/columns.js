@@ -51,7 +51,7 @@ export const columns = [
   },
   {
     name: 'Area of Expertise',
-    minWidth: '200px',
+    width: '240px',
     sortable: true,
     sortField: 'area_of_expertise',
     selector: row => row.area_of_expertise,
@@ -59,13 +59,13 @@ export const columns = [
   },
   {
     name: 'Phone',
-    minWidth: '140px',
+    width: '150px',
     selector: row => row.phone,
     cell: row => <span>{row.phone || '-'}</span>
   },
   {
     name: 'Submitted',
-    minWidth: '160px',
+    width: '180px',
     sortable: true,
     sortField: 'created_at',
     selector: row => row.created_at,
@@ -73,7 +73,7 @@ export const columns = [
   },
   {
     name: 'Status',
-    minWidth: '130px',
+    width: '150px',
     selector: row => row.status,
     cell: row => (
       <Badge className='text-capitalize' color={statusColorObj[row.status] || 'light-secondary'} pill>
@@ -84,7 +84,7 @@ export const columns = [
   {
     name: 'Actions',
     right: true,
-    minWidth: '100px',
+    width: '120px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
         <Button

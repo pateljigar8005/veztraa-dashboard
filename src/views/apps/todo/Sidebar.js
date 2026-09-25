@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import classnames from 'classnames'
 import PerfectScrollbar from 'react-perfect-scrollbar'
-import { Mail, Star, Check, Trash } from 'react-feather'
+import { Mail, Star, Check } from 'react-feather'
 import { Button, ListGroup, ListGroupItem } from 'reactstrap'
 import { priorityOptions, priorityColors, statusOptions, statusColors } from './todoOptions'
 
@@ -74,16 +74,6 @@ const TodoSidebar = props => {
                 >
                   <Check className='me-75' size={18} />
                   <span className='align-middle'>Completed</span>
-                </ListGroupItem>
-                <ListGroupItem
-                  tag={Link}
-                  to={'/todo/deleted'}
-                  active={handleActiveItem('deleted')}
-                  onClick={() => handleFilter('deleted')}
-                  action
-                >
-                  <Trash className='me-75' size={18} />
-                  <span className='align-middle'>Deleted</span>
                 </ListGroupItem>
               </ListGroup>
               <div className='mt-3 px-2'>

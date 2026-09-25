@@ -38,7 +38,7 @@ export const columns = [
   },
   {
     name: 'Category',
-    minWidth: '160px',
+    width: '170px',
     sortable: true,
     sortField: 'category',
     selector: row => row.category,
@@ -46,7 +46,7 @@ export const columns = [
   },
   {
     name: 'Price',
-    minWidth: '160px',
+    width: '170px',
     sortable: true,
     sortField: 'price',
     selector: row => row.price,
@@ -58,7 +58,7 @@ export const columns = [
   },
   {
     name: 'Status',
-    minWidth: '120px',
+    width: '130px',
     sortable: true,
     sortField: 'status',
     selector: row => row.status,
@@ -71,7 +71,7 @@ export const columns = [
   {
     name: 'Actions',
     right: true,
-    minWidth: '90px',
+    width: '120px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
         {currentUserCan('/service-item', 'edit') && (
