@@ -42,7 +42,7 @@ export const columns = [
   },
   {
     name: 'Start Date',
-    minWidth: '140px',
+    width: '150px',
     sortable: true,
     sortField: 'start_date',
     selector: row => row.start_date,
@@ -50,7 +50,7 @@ export const columns = [
   },
   {
     name: 'Budget',
-    minWidth: '140px',
+    width: '160px',
     sortable: true,
     sortField: 'budget',
     selector: row => row.budget,
@@ -65,7 +65,7 @@ export const columns = [
   },
   {
     name: 'Status',
-    minWidth: '140px',
+    width: '150px',
     sortable: true,
     sortField: 'status',
     selector: row => row.status,
@@ -78,7 +78,7 @@ export const columns = [
   {
     name: 'Actions',
     right: true,
-    minWidth: '90px',
+    width: '120px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
         {currentUserCan('/project', 'edit') && (

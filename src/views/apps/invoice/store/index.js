@@ -31,19 +31,27 @@ export const getInvoice = createAsyncThunk('appInvoice/getInvoice', async id => 
 })
 
 export const addInvoice = createAsyncThunk('appInvoice/addInvoice', async (invoice, { dispatch, getState }) => {
-  const response = await axios.post('/invoices', invoice)
-  await dispatch(getData(getState().invoice.params))
-  await dispatch(getAllData())
-  return response.data.data
+  try {
+    const response = await axios.post('/invoices', invoice)
+    await dispatch(getData(getState().invoice.params))
+    await dispatch(getAllData())
+    return response.data.data
+  } catch (err) {
+    throw new Error(err?.response?.data?.message || 'Failed to save invoice')
+  }
 })
 
 export const updateInvoice = createAsyncThunk(
   'appInvoice/updateInvoice',
   async ({ id, ...invoice }, { dispatch, getState }) => {
-    const response = await axios.put(`/invoices/${id}`, invoice)
-    await dispatch(getData(getState().invoice.params))
-    await dispatch(getAllData())
-    return response.data.data
+    try {
+      const response = await axios.put(`/invoices/${id}`, invoice)
+      await dispatch(getData(getState().invoice.params))
+      await dispatch(getAllData())
+      return response.data.data
+    } catch (err) {
+      throw new Error(err?.response?.data?.message || 'Failed to save invoice')
+    }
   }
 )
 

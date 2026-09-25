@@ -1,5 +1,6 @@
 import { Fragment, useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import classnames from 'classnames'
 import Tasks from './Tasks'
 import Sidebar from './Sidebar'
@@ -13,31 +14,53 @@ const TODO = () => {
   const [query, setQuery] = useState('')
   const [mainSidebar, setMainSidebar] = useState(false)
   const [openTaskSidebar, setOpenTaskSidebar] = useState(false)
+  // Assignee/due-date-range - the Advanced Search modal's own filters, on
+  // top of the sidebar's Status/Priority/My-Tasks links and the plain
+  // title search above.
+  const [advancedFilters, setAdvancedFilters] = useState({})
 
   const dispatch = useDispatch()
   const store = useSelector(state => state.todo)
 
   const paramsURL = useParams()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const taskParam = Number(searchParams.get('task')) || null
   const params = {
     filter: paramsURL.filter || '',
     q: query || '',
     sortBy: sort || '',
-    priority: paramsURL.priority || ''
+    priority: paramsURL.priority || '',
+    ...advancedFilters
   }
 
   const handleMainSidebar = () => setMainSidebar(!mainSidebar)
   const handleTaskSidebar = () => setOpenTaskSidebar(!openTaskSidebar)
 
   useEffect(() => {
-    dispatch(
-      getTasks({
-        filter: paramsURL.filter || '',
-        q: query || '',
-        sortBy: sort || '',
-        priority: paramsURL.priority || ''
+    dispatch(getTasks(params))
+  }, [store.tasks.length, paramsURL.filter, paramsURL.priority, query, sort, advancedFilters])
+
+  // ?task=<id> (from a notification or the Dashboard's Upcoming card)
+  // opens that todo's sidebar, then drops the param so closing the
+  // sidebar/refreshing doesn't reopen it. Keyed on the param itself, not
+  // mount - clicking a notification while already on /todo only changes
+  // the query string, it doesn't remount this page.
+  useEffect(() => {
+    if (!taskParam) return
+    dispatch(getTasks(params))
+      .unwrap()
+      .then(({ data }) => {
+        const task = data.find(t => t.id === taskParam)
+        if (task) {
+          dispatch(selectTask(task))
+          setOpenTaskSidebar(true)
+        } else {
+          toast.error('That todo no longer exists or you no longer have access to it')
+        }
       })
-    )
-  }, [store.tasks.length, paramsURL.filter, paramsURL.priority, query, sort])
+      .catch(() => {})
+      .finally(() => setSearchParams({}, { replace: true }))
+  }, [taskParam])
 
   return (
     <Fragment>
@@ -78,6 +101,8 @@ const TODO = () => {
                 reOrderTasks={reOrderTasks}
                 handleMainSidebar={handleMainSidebar}
                 handleTaskSidebar={handleTaskSidebar}
+                advancedFilters={advancedFilters}
+                setAdvancedFilters={setAdvancedFilters}
               />
             ) : null}
 

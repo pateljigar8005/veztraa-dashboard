@@ -14,7 +14,7 @@ import '@styles/react/libs/flatpickr/flatpickr.scss'
 import { sendMessage, saveDraft, removeMessageFromList } from './store'
 import EmailRecipientsInput from './EmailRecipientsInput'
 import { getFileTypeIcon } from '../shared/getFileTypeIcon'
-import { getUserData, uploadEditorImage, selectThemeColors } from '@utils'
+import { getUserData, uploadEditorImage, selectThemeColors, sortOptions } from '@utils'
 
 const blank = { to: '', cc: '', bcc: '', subject: '', body: '' }
 
@@ -38,7 +38,15 @@ const ComposePopup = ({
   // below) - both controls are irrelevant/confusing in that flow, so the
   // caller opts out of them here. The Email app's own Compose leaves this
   // false and keeps both.
-  hideTemplateAndDraft = false
+  hideTemplateAndDraft = false,
+  // Invoice/Quotation/Contract "Send Email" only - which record this send
+  // is about (relatedType: 'invoice'|'contract'|'quotation', relatedId:
+  // that record's id), passed straight through to POST /mailbox/send so
+  // MailboxOutbox::processOne() can log "Emailed to ..." on that record's
+  // own History once the send actually goes out (see that method's own
+  // comment). Left undefined for the Email app's own regular Compose.
+  relatedType,
+  relatedId
 }) => {
   const dispatch = useDispatch()
 
@@ -87,7 +95,7 @@ const ComposePopup = ({
         ; (contactsRes?.data?.data?.contacts || [])
           .forEach(c => addOption(c.email, c.name ? `${c.name} <${c.email}>` : c.email))
 
-      setContactOptions(options)
+      setContactOptions(sortOptions(options))
     })
   }, [composeOpen])
 
@@ -100,13 +108,15 @@ const ComposePopup = ({
       .then(response => {
         const templates = response.data?.data?.emailTemplates || []
         setTemplateOptions(
-          templates
-            .filter(
-              t =>
-                t.is_active &&
-                (isAdmin || !t.visible_role_ids?.length || t.visible_role_ids.includes(currentUser?.role_id))
-            )
-            .map(t => ({ value: t.id, label: t.name, subject: t.subject, content: t.content }))
+          sortOptions(
+            templates
+              .filter(
+                t =>
+                  t.is_active &&
+                  (isAdmin || !t.visible_role_ids?.length || t.visible_role_ids.includes(currentUser?.role_id))
+              )
+              .map(t => ({ value: t.id, label: t.name, subject: t.subject, content: t.content }))
+          )
         )
       })
       .catch(() => { })
@@ -305,6 +315,8 @@ const ComposePopup = ({
         draft_uid: draftUid,
         scheduled_at: scheduledAt,
         company_mailbox_id: adminMailboxId || null,
+        related_type: relatedType || null,
+        related_id: relatedId || null,
         attachments
       })
     )

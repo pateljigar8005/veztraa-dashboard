@@ -13,3 +13,7 @@ export const contractStatusOptions = [
   { value: 'expired', label: 'Expired' },
   { value: 'terminated', label: 'Terminated' }
 ]
+
+// Only a contract that's actually in force can have invoices raised under
+// it - mirrors InvoiceController::INVOICEABLE_CONTRACT_STATUSES.
+export const invoiceableContractStatuses = ['active', 'signed']

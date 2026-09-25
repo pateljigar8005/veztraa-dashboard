@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useDispatch, useStore } from 'react-redux'
-import { Menu, CornerDownLeft, RefreshCw, PlusCircle, Search, Save, Download, Send } from 'react-feather'
-import { NavItem, NavLink, UncontrolledTooltip } from 'reactstrap'
+import { useDispatch, useSelector, useStore } from 'react-redux'
+import { Menu, CornerDownLeft, RefreshCw, PlusCircle, Search, Save, Download, Send, Clock, Trash2 } from 'react-feather'
+import { Badge, NavItem, NavLink, UncontrolledTooltip } from 'reactstrap'
 import { hasActionPermission, inferRouteAction } from '@src/utility/navPermissions'
 import { refetchForRoute } from '@src/utility/refreshRegistry'
 
@@ -41,30 +41,65 @@ const isAccountSettingsRoute = pathname => pathname === '/account-settings'
 
 const isEmailRoute = pathname => /^\/email(\/[^/]+)?$/.test(pathname)
 
-// listToAddRoute (below) covers every list page, but not every one of
-// those actually wires up the Advanced Search modal (AdvancedSearchModal +
-// the hidden #navbar-advanced-search-trigger button its list/ renders) -
-// these four don't, so without this the Search icon looks enabled there
-// but silently does nothing when clicked.
+// Todo owns its Add button, but still uses the navbar search action.
+const isTodoRoute = pathname => /^\/todo(\/.*)?$/.test(pathname)
+
+// Modal-based add actions use a hidden page button instead of navigation.
+const listToAddButtonId = {
+  '/api-key': 'api-key-create-btn'
+}
+
+// These list routes do not render the shared advanced-search trigger.
 const noSearchRoutes = ['/email-template', '/terms-template', '/roles']
 
+// The action label varies between document downloads and spreadsheet exports.
 const downloadButtonIdByRoute = [
-  { pattern: /^\/invoice\/view\/[^/]+$/, buttonId: 'invoice-download-pdf-btn' },
-  { pattern: /^\/contract\/view\/[^/]+$/, buttonId: 'contract-download-pdf-btn' },
-  { pattern: /^\/quotation\/view\/[^/]+$/, buttonId: 'quotation-download-pdf-btn' }
+  { pattern: /^\/invoice\/view\/[^/]+$/, buttonId: 'invoice-download-pdf-btn', label: 'Download PDF' },
+  { pattern: /^\/contract\/view\/[^/]+$/, buttonId: 'contract-download-pdf-btn', label: 'Download PDF' },
+  { pattern: /^\/quotation\/view\/[^/]+$/, buttonId: 'quotation-download-pdf-btn', label: 'Download PDF' },
+  { pattern: /^\/activity-log\/?$/, buttonId: 'activity-log-export-btn', label: 'Export to Excel' },
+  { pattern: /^\/reports\/timesheet\/?$/, buttonId: 'timesheet-report-export-btn', label: 'Export to Excel' }
 ]
-const findDownloadButtonId = pathname => downloadButtonIdByRoute.find(i => i.pattern.test(pathname))?.buttonId || null
+const findDownloadRoute = pathname => downloadButtonIdByRoute.find(i => i.pattern.test(pathname)) || null
 
-// Same three routes as the download button above - each has its own
-// "Send Email" button/handler already (see <module>/view/index.js's
-// handleSendEmail), gated behind that module's own 'edit' permission, same
-// as the button itself is.
+// These detail pages expose their own permission-gated send buttons.
 const sendEmailButtonIdByRoute = [
   { pattern: /^\/invoice\/view\/[^/]+$/, buttonId: 'invoice-send-email-btn', resource: '/invoice' },
   { pattern: /^\/contract\/view\/[^/]+$/, buttonId: 'contract-send-email-btn', resource: '/contract' },
   { pattern: /^\/quotation\/view\/[^/]+$/, buttonId: 'quotation-send-email-btn', resource: '/quotation' }
 ]
 const findSendEmailRoute = pathname => sendEmailButtonIdByRoute.find(i => i.pattern.test(pathname)) || null
+
+// Detail pages expose a hidden history button that this navbar triggers.
+const historyButtonIdByRoute = [
+  { pattern: /^\/invoice\/view\/[^/]+$/, buttonId: 'invoice-history-btn' },
+  { pattern: /^\/contract\/view\/[^/]+$/, buttonId: 'contract-history-btn' },
+  { pattern: /^\/quotation\/view\/[^/]+$/, buttonId: 'quotation-history-btn' },
+  { pattern: /^\/client\/edit\/[^/]+$/, buttonId: 'client-history-btn' },
+  { pattern: /^\/client\/view\/[^/]+$/, buttonId: 'client-view-history-btn' },
+  { pattern: /^\/currency\/edit\/[^/]+$/, buttonId: 'currency-history-btn' },
+  { pattern: /^\/payment-method\/edit\/[^/]+$/, buttonId: 'payment-method-history-btn' },
+  { pattern: /^\/project\/edit\/[^/]+$/, buttonId: 'project-history-btn' },
+  { pattern: /^\/roles\/edit\/[^/]+$/, buttonId: 'role-history-btn' },
+  { pattern: /^\/service-item\/edit\/[^/]+$/, buttonId: 'service-item-history-btn' },
+  { pattern: /^\/terms-template\/edit\/[^/]+$/, buttonId: 'terms-template-history-btn' },
+  { pattern: /^\/user\/edit\/[^/]+$/, buttonId: 'user-history-btn' },
+  { pattern: /^\/account-settings$/, buttonId: 'user-history-btn' },
+  { pattern: /^\/timesheet\/edit\/[^/]+$/, buttonId: 'timesheet-history-btn' },
+  { pattern: /^\/company$/, buttonId: 'company-history-btn' },
+  { pattern: /^\/event-category\/edit\/[^/]+$/, buttonId: 'event-category-history-btn' },
+  { pattern: /^\/industry\/edit\/[^/]+$/, buttonId: 'industry-history-btn' },
+  { pattern: /^\/timesheet-activity\/edit\/[^/]+$/, buttonId: 'timesheet-activity-history-btn' },
+  { pattern: /^\/email-template\/edit\/[^/]+$/, buttonId: 'email-template-history-btn' },
+  { pattern: /^\/holiday\/edit\/[^/]+$/, buttonId: 'holiday-history-btn' },
+  { pattern: /^\/team-member\/edit\/[^/]+$/, buttonId: 'team-member-history-btn' },
+  { pattern: /^\/portfolio\/edit\/[^/]+$/, buttonId: 'portfolio-history-btn' },
+  { pattern: /^\/case-study\/edit\/[^/]+$/, buttonId: 'case-study-history-btn' },
+  { pattern: /^\/job-listing\/edit\/[^/]+$/, buttonId: 'job-listing-history-btn' },
+  { pattern: /^\/contact-submission\/view\/[^/]+$/, buttonId: 'contact-submission-history-btn' },
+  { pattern: /^\/job-application\/view\/[^/]+$/, buttonId: 'job-application-history-btn' }
+]
+const findHistoryRoute = pathname => historyButtonIdByRoute.find(i => i.pattern.test(pathname)) || null
 
 const NavbarBookmarks = props => {
   const { setMenuVisibility } = props
@@ -82,10 +117,22 @@ const NavbarBookmarks = props => {
   }
 
   const addRoute = listToAddRoute[location.pathname]
+  const addButtonId = listToAddButtonId[location.pathname]
   const isListRoute = Boolean(listToAddRoute[location.pathname])
-  const addEnabled = Boolean(addRoute) && hasActionPermission(location.pathname, 'add', userData)
+  const addEnabled = Boolean(addRoute || addButtonId) && hasActionPermission(location.pathname, 'add', userData)
+  const handleAdd = () => {
+    if (!addEnabled) return
+    if (addButtonId) {
+      document.getElementById(addButtonId)?.click()
+      return
+    }
+    navigate(addRoute)
+  }
 
-  const isSearchRoute = (isListRoute && !noSearchRoutes.includes(location.pathname)) || isEmailRoute(location.pathname)
+  const isSearchRoute =
+    (isListRoute && !noSearchRoutes.includes(location.pathname)) ||
+    isEmailRoute(location.pathname) ||
+    isTodoRoute(location.pathname)
   const handleSearch = () => {
     if (!isSearchRoute) return
     document.getElementById('navbar-advanced-search-trigger')?.click()
@@ -121,7 +168,8 @@ const NavbarBookmarks = props => {
     window.location.reload()
   }
 
-  const downloadButtonId = findDownloadButtonId(location.pathname)
+  const downloadRoute = findDownloadRoute(location.pathname)
+  const downloadButtonId = downloadRoute?.buttonId || null
   const downloadEnabled = Boolean(downloadButtonId)
   const handleDownload = () => {
     if (!downloadButtonId) return
@@ -134,6 +182,37 @@ const NavbarBookmarks = props => {
   const handleSendEmail = () => {
     if (!sendEmailEnabled) return
     document.getElementById(sendEmailRoute.buttonId)?.click()
+  }
+
+  // Every list page with a bulk-delete icon ticks rows into its own slice
+  // (setSelectedIds/setSelectedUids) rather than local component state, so
+  // this icon can read the count directly instead of a DOM lookup - the
+  // delete itself (confirm + request) is still that list page's own hidden
+  // button, same idea as Download/Send Email above. Both selectors are read
+  // unconditionally (hooks can't be called conditionally); which one
+  // actually applies is picked below based on the current route.
+  const isActivityLogListRoute = /^\/activity-log\/?$/.test(location.pathname)
+  const activityLogSelectedCount = useSelector(state => state.activityLogs.selectedIds.length)
+  const emailSelectedCount = useSelector(state => state.email.selectedUids.length)
+  const bulkDeleteRoute = isActivityLogListRoute
+    ? { buttonId: 'activity-log-bulk-delete-btn', resource: '/activity-log', count: activityLogSelectedCount }
+    : isEmailRoute(location.pathname)
+      ? { buttonId: 'email-bulk-delete-btn', resource: '/email', count: emailSelectedCount }
+      : null
+  const bulkDeleteCount = bulkDeleteRoute?.count || 0
+  const bulkDeleteVisible = Boolean(bulkDeleteRoute) && hasActionPermission(bulkDeleteRoute.resource, 'delete', userData)
+  const bulkDeleteEnabled = bulkDeleteVisible && bulkDeleteCount > 0
+  const handleBulkDelete = () => {
+    if (!bulkDeleteEnabled) return
+    document.getElementById(bulkDeleteRoute.buttonId)?.click()
+  }
+
+  const historyRoute = findHistoryRoute(location.pathname)
+  const historyRouteMatches = Boolean(historyRoute)
+  const historyEnabled = historyRouteMatches && hasActionPermission('/activity-log', 'view', userData)
+  const handleHistory = () => {
+    if (!historyEnabled) return
+    document.getElementById(historyRoute.buttonId)?.click()
   }
 
   return (
@@ -151,14 +230,14 @@ const NavbarBookmarks = props => {
             className='nav-link-style'
             id='navbar-add-btn'
             style={{ opacity: addEnabled ? 1 : 0.35, pointerEvents: addEnabled ? 'auto' : 'none' }}
-            onClick={() => addEnabled && navigate(addRoute)}
+            onClick={handleAdd}
           >
             <PlusCircle className='ficon' />
           </NavLink>
           <UncontrolledTooltip placement='bottom' target='navbar-add-btn'>
             {addEnabled
               ? 'Add'
-              : listToAddRoute[location.pathname]
+              : listToAddRoute[location.pathname] || addButtonId
                 ? "Add (you don't have permission)"
                 : 'Add (open a list page first)'}
           </UncontrolledTooltip>
@@ -223,7 +302,7 @@ const NavbarBookmarks = props => {
             <Download className='ficon' />
           </NavLink>
           <UncontrolledTooltip placement='bottom' target='navbar-download-btn'>
-            {downloadEnabled ? 'Download PDF' : 'Download PDF (open an invoice, contract or quotation first)'}
+            {downloadEnabled ? downloadRoute.label : 'Download PDF (open an invoice, contract or quotation first)'}
           </UncontrolledTooltip>
         </NavItem>
         {sendEmailRouteMatches && (
@@ -238,6 +317,41 @@ const NavbarBookmarks = props => {
             </NavLink>
             <UncontrolledTooltip placement='bottom' target='navbar-send-email-btn'>
               {sendEmailEnabled ? 'Send Email' : "Send Email (you don't have permission)"}
+            </UncontrolledTooltip>
+          </NavItem>
+        )}
+        {bulkDeleteVisible && (
+          <NavItem className='d-none d-lg-block'>
+            <NavLink
+              className='nav-link-style position-relative'
+              id='navbar-bulk-delete-btn'
+              style={{ opacity: bulkDeleteEnabled ? 1 : 0.35, pointerEvents: bulkDeleteEnabled ? 'auto' : 'none' }}
+              onClick={handleBulkDelete}
+            >
+              <Trash2 className='ficon' />
+              {bulkDeleteEnabled && (
+                <Badge pill color='danger' className='badge-up'>
+                  {bulkDeleteCount}
+                </Badge>
+              )}
+            </NavLink>
+            <UncontrolledTooltip placement='bottom' target='navbar-bulk-delete-btn'>
+              {bulkDeleteEnabled ? `Delete selected (${bulkDeleteCount})` : 'Delete selected (tick rows first)'}
+            </UncontrolledTooltip>
+          </NavItem>
+        )}
+        {historyRouteMatches && (
+          <NavItem className='d-none d-lg-block'>
+            <NavLink
+              className='nav-link-style'
+              id='navbar-history-btn'
+              style={{ opacity: historyEnabled ? 1 : 0.35, pointerEvents: historyEnabled ? 'auto' : 'none' }}
+              onClick={handleHistory}
+            >
+              <Clock className='ficon' />
+            </NavLink>
+            <UncontrolledTooltip placement='bottom' target='navbar-history-btn'>
+              {historyEnabled ? 'History' : "History (you don't have permission)"}
             </UncontrolledTooltip>
           </NavItem>
         )}

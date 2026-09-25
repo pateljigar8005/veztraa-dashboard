@@ -4,11 +4,13 @@ import toast from 'react-hot-toast'
 import * as XLSX from 'xlsx'
 import Select from 'react-select'
 import DataTable from 'react-data-table-component'
-import { Search, RotateCcw, Download, Clock, FileText, Folder, TrendingUp } from 'react-feather'
+import { Search, RotateCcw, Clock, FileText, Folder, TrendingUp } from 'react-feather'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Spinner } from 'reactstrap'
 import DateField from '../../shared/DateField'
-import { selectThemeColors, getUserData } from '@utils'
+import { selectThemeColors, getUserData, sortOptions } from '@utils'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
+import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
+import { Clock as EmptyIcon } from 'react-feather'
 
 const isAdmin = () => (getUserData()?.role || '').toLowerCase() === 'admin'
 
@@ -95,18 +97,18 @@ const TimesheetReport = () => {
     if (admin) {
       axios
         .get('/users', { params: { perPage: 100 } })
-        .then(response => setUserOptions(response.data.data.users.map(u => ({ value: u.id, label: u.fullName }))))
+        .then(response => setUserOptions(sortOptions(response.data.data.users.map(u => ({ value: u.id, label: u.fullName })))))
         .catch(() => {})
     }
     axios
       .get('/projects', { params: { perPage: 100 } })
-      .then(response => setProjectOptions(response.data.data.projects.map(p => ({ value: p.id, label: p.name }))))
+      .then(response => setProjectOptions(sortOptions(response.data.data.projects.map(p => ({ value: p.id, label: p.name })))))
       .catch(() => {})
     axios
       .get('/timesheet-activities', { params: { perPage: 100 } })
       .then(response => {
         const active = response.data.data.timesheetActivities.filter(a => a.is_active)
-        setActivityOptions(active.map(a => ({ value: a.id, label: a.name })))
+        setActivityOptions(sortOptions(active.map(a => ({ value: a.id, label: a.name }))))
       })
       .catch(() => {})
   }, [])
@@ -239,9 +241,12 @@ const TimesheetReport = () => {
               {loading ? <Spinner size='sm' className='me-50' /> : <Search size={14} className='me-50' />}
               Run Report
             </Button>
-            <Button color='success' onClick={handleExport} disabled={exporting || !rows.length}>
-              <Download size={14} className='me-50' />
-              {exporting ? 'Exporting...' : 'Export to Excel'}
+            {/* No visible trigger - the navbar's Download icon clicks this
+                (NavbarBookmarks.js's downloadButtonIdByRoute). Left enabled
+                with no rows so handleExport's "run the report first" toast
+                still shows instead of the click silently doing nothing. */}
+            <Button id='timesheet-report-export-btn' className='d-none' onClick={handleExport} disabled={exporting}>
+              Export to Excel
             </Button>
           </div>
         </CardHeader>
@@ -347,7 +352,7 @@ const TimesheetReport = () => {
                 className='react-dataTable'
                 data={rows}
                 paginationRowsPerPageOptions={[10, 25, 50, 100]}
-                noDataComponent={<div className='p-2'>No timesheet entries match these filters.</div>}
+                noDataComponent={<TableEmptyState icon={EmptyIcon} noun='timesheet entries' filtered filteredMessage='No timesheet entries match these report filters. Try widening the date range or clearing some filters.' />}
               />
             </div>
           </Card>

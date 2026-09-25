@@ -102,11 +102,6 @@
             &:not(:first-child) {
               border-top: 1px solid $border-color;
             }
-            &:hover {
-              transform: translateY(-4px);
-              box-shadow: 0 3px 10px 0 $border-color;
-              transition: all 0.2s;
-            }
             .todo-title-wrapper {
               display: flex;
               justify-content: space-between;

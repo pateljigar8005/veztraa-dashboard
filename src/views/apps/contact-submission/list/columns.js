@@ -9,6 +9,19 @@ import { formatDate } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
 
+// See contacts.status - New -> Contacted -> Closed.
+const statusColorObj = {
+  new: 'light-primary',
+  contacted: 'light-warning',
+  closed: 'light-success'
+}
+
+const statusLabelObj = {
+  new: 'New',
+  contacted: 'Contacted',
+  closed: 'Closed'
+}
+
 export const columns = [
   {
     name: 'From',
@@ -34,7 +47,7 @@ export const columns = [
   },
   {
     name: 'Company',
-    minWidth: '160px',
+    width: '170px',
     sortable: true,
     sortField: 'company_name',
     selector: row => row.company_name,
@@ -42,28 +55,38 @@ export const columns = [
   },
   {
     name: 'Service Required',
-    minWidth: '180px',
+    width: '220px',
     selector: row => row.service_required,
     cell: row => <span className='text-truncate'>{row.service_required || '-'}</span>
   },
   {
     name: 'Budget',
-    minWidth: '140px',
+    width: '150px',
     selector: row => row.project_budget,
     cell: row => <span>{row.project_budget || '-'}</span>
   },
   {
     name: 'Submitted',
-    minWidth: '160px',
+    width: '180px',
     sortable: true,
     sortField: 'created_at',
     selector: row => row.created_at,
     cell: row => <span>{formatDate(row.created_at, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
   },
   {
+    name: 'Status',
+    width: '140px',
+    selector: row => row.status,
+    cell: row => (
+      <Badge className='text-capitalize' color={statusColorObj[row.status] || 'light-secondary'} pill>
+        {statusLabelObj[row.status] || row.status}
+      </Badge>
+    )
+  },
+  {
     name: 'Actions',
     right: true,
-    minWidth: '100px',
+    width: '120px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
         <Button

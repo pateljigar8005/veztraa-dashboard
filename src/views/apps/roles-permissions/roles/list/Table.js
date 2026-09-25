@@ -7,6 +7,8 @@ import { ChevronDown } from 'react-feather'
 import { Row, Col, Card, Input } from 'reactstrap'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
+import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
+import { Shield as EmptyIcon } from 'react-feather'
 
 const CustomHeader = ({ rowsPerPage, handlePerPage, searchTerm, handleFilter }) => {
   return (
@@ -74,6 +76,7 @@ const RolesTable = () => {
       <Card>
         <div className='react-dataTable'>
           <DataTable
+            noDataComponent={<TableEmptyState icon={EmptyIcon} noun='roles' message='Create a role to control what each group of users can access.' filtered={Boolean(searchTerm)} />}
             noHeader
             subHeader
             pagination

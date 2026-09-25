@@ -10,7 +10,9 @@ import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Table, 
 import { getInvoice, updateInvoice } from '../store'
 import { invoiceStatusOptions } from '../../quotation/documentOptions'
 import RecordPaymentModal from '../RecordPaymentModal'
+import SourceReference from '../SourceReference'
 import ComposePopup from '../../email/ComposePopup'
+import HistoryModal from '../../activity-log/HistoryModal'
 import { selectThemeColors, formatAmount } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
@@ -130,10 +132,13 @@ const InvoiceView = () => {
 
   const handleStatusChange = option => {
     if (!option) return
-    dispatch(updateInvoice({ id: Number(id), status: option.value })).then(() => {
-      dispatch(getInvoice(id))
-      toast.success('Status updated')
-    })
+    dispatch(updateInvoice({ id: Number(id), status: option.value }))
+      .unwrap()
+      .then(() => {
+        dispatch(getInvoice(id))
+        toast.success('Status updated')
+      })
+      .catch(err => toast.error(err?.message || 'Failed to update status'))
   }
 
   if (!invoice || invoice.id !== Number(id)) {
@@ -227,35 +232,27 @@ const InvoiceView = () => {
     <Row>
       <Col xl={9} md={8} sm={12}>
         <Card>
-          <CardBody className='d-flex justify-content-between flex-md-row flex-column'>
-            <div>
-              <h3 className='mb-0'>{invoice.invoice_number}</h3>
-              <p className='text-muted mb-1'>
-                {invoice.contact_name}
-                {invoice.company_name ? ` • ${invoice.company_name}` : ''}
-              </p>
-              <p className='mb-0'>
-                {invoice.email} {invoice.phone ? `• ${invoice.phone}` : ''}
-              </p>
-              <p className='mb-0'>
-                Issue: {invoice.issue_date} • Due: {invoice.due_date}
-              </p>
-            </div>
-            {currentUserCan('/invoice', 'edit') && (
-              <div className='mt-md-0 mt-2'>
-                <Button tag={Link} to={`/invoice/edit/${invoice.id}`} color='primary' outline>
-                  <Edit2 size={14} className='me-50' /> Edit
-                </Button>
-              </div>
-            )}
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle tag='h4'>Bill To</CardTitle>
-          </CardHeader>
           <CardBody>
+            <div className='d-flex justify-content-between flex-md-row flex-column mb-2'>
+              <div>
+                <h3 className='mb-0'>{invoice.invoice_number}</h3>
+                <p className='text-muted mb-0'>
+                  Issue: {invoice.issue_date} • Due: {invoice.due_date}
+                </p>
+                <div className='mt-25'>
+                  <SourceReference invoice={invoice} />
+                </div>
+              </div>
+              {currentUserCan('/invoice', 'edit') && (
+                <div className='mt-md-0 mt-2'>
+                  <Button tag={Link} to={`/invoice/edit/${invoice.id}`} color='primary' outline>
+                    <Edit2 size={14} className='me-50' /> Edit
+                  </Button>
+                </div>
+              )}
+            </div>
+            <hr />
+            <h6 className='mb-1'>Bill To</h6>
             <Row>
               <Col md={6} className='mb-1'>
                 <p className='text-muted mb-25'>Contact Name</p>
@@ -427,6 +424,7 @@ const InvoiceView = () => {
               >
                 Download PDF
               </Button>
+              <HistoryModal entityType='invoice' entityId={invoice.id} entityLabel={invoice.invoice_number} buttonId='invoice-history-btn' />
               {!pdfTemplate && (
                 <p className='text-muted small mb-0 mt-50'>
                   No Invoice PDF template selected in <Link to='/company'>Company Settings</Link>.
@@ -560,6 +558,8 @@ const InvoiceView = () => {
         adminMailboxEmail={companySettings?.invoice_email_mailbox_email}
         container='body'
         hideTemplateAndDraft
+        relatedType='invoice'
+        relatedId={invoice.id}
       />
     </Row>
   )

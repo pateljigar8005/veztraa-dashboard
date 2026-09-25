@@ -7,6 +7,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
 import { selectThemeColors } from '@utils'
+import HistoryModal from '../../activity-log/HistoryModal'
 import { addEventCategory, updateEventCategory, getEventCategory } from '../store'
 
 const statusOptions = [
@@ -98,6 +99,7 @@ const EventCategoryForm = () => {
     <Card>
       <CardHeader>
         <CardTitle tag='h4'>{isEdit ? 'Edit Event Category' : 'Add New Event Category'}</CardTitle>
+        {isEdit && <HistoryModal entityType='event_category' entityId={Number(id)} buttonId='event-category-history-btn' />}
       </CardHeader>
       <CardBody>
         <Form onSubmit={handleSubmit(onSubmit)}>

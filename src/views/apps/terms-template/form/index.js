@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
 import toast from 'react-hot-toast'
@@ -8,6 +8,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
 import { addTermsTemplate, updateTermsTemplate, getTermsTemplate } from '../store'
+import HistoryModal from '../../activity-log/HistoryModal'
 
 const defaultValues = { name: '' }
 
@@ -57,41 +58,44 @@ const TermsTemplateForm = () => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle tag='h4'>{isEdit ? 'Edit Terms & Conditions' : 'Add New Terms & Conditions'}</CardTitle>
-      </CardHeader>
-      <CardBody>
-        <Form onSubmit={handleSubmit(onSubmit)}>
-          <Row>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='name'>
-                Template Name <span className='text-danger'>*</span>
-              </Label>
-              <Controller
-                name='name'
-                control={control}
-                render={({ field }) => (
-                  <Input id='name' placeholder='Standard Terms' invalid={errors.name && true} {...field} />
-                )}
-              />
-            </Col>
-            <Col md={12}>
-              <Label className='form-label'>Content</Label>
-              <Editor
-                value={content}
-                onChange={value => {
-                  setContent(value)
-                  setExtraDirty(true)
-                }}
-                height={500}
-                onImageUpload={uploadEditorImage}
-              />
-            </Col>
-          </Row>
-        </Form>
-      </CardBody>
-    </Card>
+    <Fragment>
+      <Card>
+        <CardHeader>
+          <CardTitle tag='h4'>{isEdit ? 'Edit Terms & Conditions' : 'Add New Terms & Conditions'}</CardTitle>
+        </CardHeader>
+        <CardBody>
+          <Form onSubmit={handleSubmit(onSubmit)}>
+            <Row>
+              <Col md={6} className='mb-1'>
+                <Label className='form-label' for='name'>
+                  Template Name <span className='text-danger'>*</span>
+                </Label>
+                <Controller
+                  name='name'
+                  control={control}
+                  render={({ field }) => (
+                    <Input id='name' placeholder='Standard Terms' invalid={errors.name && true} {...field} />
+                  )}
+                />
+              </Col>
+              <Col md={12}>
+                <Label className='form-label'>Content</Label>
+                <Editor
+                  value={content}
+                  onChange={value => {
+                    setContent(value)
+                    setExtraDirty(true)
+                  }}
+                  height={500}
+                  onImageUpload={uploadEditorImage}
+                />
+              </Col>
+            </Row>
+          </Form>
+        </CardBody>
+      </Card>
+      {isEdit && <HistoryModal entityType='terms_template' entityId={Number(id)} buttonId='terms-template-history-btn' />}
+    </Fragment>
   )
 }
 

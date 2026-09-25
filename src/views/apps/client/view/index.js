@@ -6,6 +6,7 @@ import { Edit2, FileText, PenTool, DollarSign } from 'react-feather'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Badge, Button, Table } from 'reactstrap'
 import { getClient } from '../store'
 import { formatAmount } from '@utils'
+import HistoryModal from '../../activity-log/HistoryModal'
 
 const statusColorObj = {
   draft: 'light-secondary',
@@ -76,6 +77,7 @@ const ClientView = () => {
             <Button tag={Link} to={`/client/edit/${client.id}`} color='primary' outline>
               <Edit2 size={14} className='me-50' /> Edit Client
             </Button>
+            <HistoryModal entityType='client' entityId={client.id} entityLabel={client.fullName} buttonId='client-view-history-btn' />
           </div>
         </CardBody>
       </Card>

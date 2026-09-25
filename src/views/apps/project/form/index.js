@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
 import axios from 'axios'
@@ -8,13 +8,14 @@ import { Editor } from '@veztraa/editor'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
-import { selectThemeColors, uploadEditorImage } from '@utils'
+import { selectThemeColors, uploadEditorImage, sortOptions } from '@utils'
 import ProjectDocuments from './ProjectDocuments'
 import DateField from '../../shared/DateField'
 import AmountField from '../../shared/AmountField'
 import { addProject, updateProject, getProject } from '../store'
 import { statusOptions } from '../statusOptions'
 import { budgetTypeOptions } from '../budgetTypeOptions'
+import HistoryModal from '../../activity-log/HistoryModal'
 
 const defaultValues = {
   name: '',
@@ -55,7 +56,7 @@ const ProjectForm = () => {
   useEffect(() => {
     axios.get('/clients', { params: { perPage: 100 } }).then(response => {
       const clients = response.data.data.clients
-      setClientOptions(clients.map(c => ({ value: c.id, label: c.fullName || `${c.first_name} ${c.last_name}` })))
+      setClientOptions(sortOptions(clients.map(c => ({ value: c.id, label: c.fullName || `${c.first_name} ${c.last_name}` }))))
     })
     axios.get('/currencies', { params: { perPage: 100 } }).then(response => {
       setCurrencyOptions(
@@ -119,144 +120,147 @@ const ProjectForm = () => {
   const selectedBudgetTypeOption = budgetTypeOptions.find(i => i.value === budgetType) || null
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle tag='h4'>{isEdit ? 'Edit Project' : 'Add New Project'}</CardTitle>
-      </CardHeader>
-      <CardBody>
-        <Form onSubmit={handleSubmit(onSubmit)}>
-          <Row>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='name'>
-                Project Name <span className='text-danger'>*</span>
-              </Label>
-              <Controller
-                name='name'
-                control={control}
-                render={({ field }) => (
-                  <Input id='name' placeholder='Website Redesign' invalid={errors.name && true} {...field} />
+    <Fragment>
+      <Card>
+        <CardHeader>
+          <CardTitle tag='h4'>{isEdit ? 'Edit Project' : 'Add New Project'}</CardTitle>
+        </CardHeader>
+        <CardBody>
+          <Form onSubmit={handleSubmit(onSubmit)}>
+            <Row>
+              <Col md={6} className='mb-1'>
+                <Label className='form-label' for='name'>
+                  Project Name <span className='text-danger'>*</span>
+                </Label>
+                <Controller
+                  name='name'
+                  control={control}
+                  render={({ field }) => (
+                    <Input id='name' placeholder='Website Redesign' invalid={errors.name && true} {...field} />
+                  )}
+                />
+              </Col>
+              <Col md={6} className='mb-1'>
+                <Label className='form-label' for='client_id'>
+                  Client
+                </Label>
+                <Select
+                  inputId='client_id'
+                  isClearable
+                  classNamePrefix='select'
+                  className='react-select'
+                  theme={selectThemeColors}
+                  options={clientOptions}
+                  value={selectedClientOption}
+                  onChange={option => setValue('client_id', option ? option.value : '', { shouldDirty: true })}
+                  placeholder='Select client...'
+                />
+              </Col>
+              <Col md={4} className='mb-1'>
+                <Label className='form-label' for='status'>
+                  Status
+                </Label>
+                <Select
+                  inputId='status'
+                  classNamePrefix='select'
+                  className='react-select'
+                  theme={selectThemeColors}
+                  options={statusOptions}
+                  value={selectedStatusOption}
+                  onChange={option => setValue('status', option ? option.value : 'planning', { shouldDirty: true })}
+                  placeholder='Select status...'
+                />
+              </Col>
+              <Col md={4} className='mb-1'>
+                <Label className='form-label' for='start_date'>
+                  Start Date
+                </Label>
+                <Controller
+                  name='start_date'
+                  control={control}
+                  render={({ field }) => <DateField id='start_date' value={field.value} onChange={field.onChange} />}
+                />
+              </Col>
+              <Col md={4} className='mb-1'>
+                <Label className='form-label' for='end_date'>
+                  End Date
+                </Label>
+                <Controller
+                  name='end_date'
+                  control={control}
+                  render={({ field }) => <DateField id='end_date' value={field.value} onChange={field.onChange} />}
+                />
+              </Col>
+              <Col md={4} className='mb-1'>
+                <Label className='form-label' for='currency'>
+                  Currency
+                </Label>
+                <Select
+                  inputId='currency'
+                  classNamePrefix='select'
+                  className='react-select'
+                  theme={selectThemeColors}
+                  options={currencyOptions}
+                  value={selectedCurrencyOption}
+                  onChange={option => setValue('currency', option ? option.value : 'USD', { shouldDirty: true })}
+                  placeholder='Select currency...'
+                />
+              </Col>
+              <Col md={4} className='mb-1'>
+                <Label className='form-label' for='budget_type'>
+                  Budget Type
+                </Label>
+                <Select
+                  inputId='budget_type'
+                  isClearable
+                  classNamePrefix='select'
+                  className='react-select'
+                  theme={selectThemeColors}
+                  options={budgetTypeOptions}
+                  value={selectedBudgetTypeOption}
+                  onChange={option => setValue('budget_type', option ? option.value : '', { shouldDirty: true })}
+                  placeholder='Select budget type...'
+                />
+              </Col>
+              <Col md={4} className='mb-1'>
+                <Label className='form-label' for='budget'>
+                  Budget
+                </Label>
+                <Controller
+                  name='budget'
+                  control={control}
+                  render={({ field }) => (
+                    <AmountField id='budget' placeholder='15000' value={field.value} onChange={field.onChange} />
+                  )}
+                />
+              </Col>
+              <Col md={12} className='mb-1'>
+                <Label className='form-label'>Description</Label>
+                <Editor
+                  value={description}
+                  onChange={value => {
+                    setDescription(value)
+                    setExtraDirty(true)
+                  }}
+                  height={400}
+                  onImageUpload={uploadEditorImage}
+                />
+              </Col>
+              <Col md={12}>
+                <hr className='my-1' />
+                <h6 className='mb-1'>Project Documents</h6>
+                {isEdit ? (
+                  <ProjectDocuments projectId={Number(id)} />
+                ) : (
+                  <p className='text-muted small mb-0'>Save the project first to attach documents.</p>
                 )}
-              />
-            </Col>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='client_id'>
-                Client
-              </Label>
-              <Select
-                inputId='client_id'
-                isClearable
-                classNamePrefix='select'
-                className='react-select'
-                theme={selectThemeColors}
-                options={clientOptions}
-                value={selectedClientOption}
-                onChange={option => setValue('client_id', option ? option.value : '', { shouldDirty: true })}
-                placeholder='Select client...'
-              />
-            </Col>
-            <Col md={4} className='mb-1'>
-              <Label className='form-label' for='status'>
-                Status
-              </Label>
-              <Select
-                inputId='status'
-                classNamePrefix='select'
-                className='react-select'
-                theme={selectThemeColors}
-                options={statusOptions}
-                value={selectedStatusOption}
-                onChange={option => setValue('status', option ? option.value : 'planning', { shouldDirty: true })}
-                placeholder='Select status...'
-              />
-            </Col>
-            <Col md={4} className='mb-1'>
-              <Label className='form-label' for='start_date'>
-                Start Date
-              </Label>
-              <Controller
-                name='start_date'
-                control={control}
-                render={({ field }) => <DateField id='start_date' value={field.value} onChange={field.onChange} />}
-              />
-            </Col>
-            <Col md={4} className='mb-1'>
-              <Label className='form-label' for='end_date'>
-                End Date
-              </Label>
-              <Controller
-                name='end_date'
-                control={control}
-                render={({ field }) => <DateField id='end_date' value={field.value} onChange={field.onChange} />}
-              />
-            </Col>
-            <Col md={4} className='mb-1'>
-              <Label className='form-label' for='currency'>
-                Currency
-              </Label>
-              <Select
-                inputId='currency'
-                classNamePrefix='select'
-                className='react-select'
-                theme={selectThemeColors}
-                options={currencyOptions}
-                value={selectedCurrencyOption}
-                onChange={option => setValue('currency', option ? option.value : 'USD', { shouldDirty: true })}
-                placeholder='Select currency...'
-              />
-            </Col>
-            <Col md={4} className='mb-1'>
-              <Label className='form-label' for='budget_type'>
-                Budget Type
-              </Label>
-              <Select
-                inputId='budget_type'
-                isClearable
-                classNamePrefix='select'
-                className='react-select'
-                theme={selectThemeColors}
-                options={budgetTypeOptions}
-                value={selectedBudgetTypeOption}
-                onChange={option => setValue('budget_type', option ? option.value : '', { shouldDirty: true })}
-                placeholder='Select budget type...'
-              />
-            </Col>
-            <Col md={4} className='mb-1'>
-              <Label className='form-label' for='budget'>
-                Budget
-              </Label>
-              <Controller
-                name='budget'
-                control={control}
-                render={({ field }) => (
-                  <AmountField id='budget' placeholder='15000' value={field.value} onChange={field.onChange} />
-                )}
-              />
-            </Col>
-            <Col md={12} className='mb-1'>
-              <Label className='form-label'>Description</Label>
-              <Editor
-                value={description}
-                onChange={value => {
-                  setDescription(value)
-                  setExtraDirty(true)
-                }}
-                height={400}
-                onImageUpload={uploadEditorImage}
-              />
-            </Col>
-            <Col md={12}>
-              <hr className='my-1' />
-              <h6 className='mb-1'>Project Documents</h6>
-              {isEdit ? (
-                <ProjectDocuments projectId={Number(id)} />
-              ) : (
-                <p className='text-muted small mb-0'>Save the project first to attach documents.</p>
-              )}
-            </Col>
-          </Row>
-        </Form>
-      </CardBody>
-    </Card>
+              </Col>
+            </Row>
+          </Form>
+        </CardBody>
+      </Card>
+      {isEdit && <HistoryModal entityType='project' entityId={Number(id)} buttonId='project-history-btn' />}
+    </Fragment>
   )
 }
 

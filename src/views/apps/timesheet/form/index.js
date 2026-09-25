@@ -9,9 +9,10 @@ import { Editor } from '@veztraa/editor'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormText } from 'reactstrap'
-import { selectThemeColors, getUserData, uploadEditorImage } from '@utils'
+import { selectThemeColors, getUserData, uploadEditorImage, sortOptions } from '@utils'
 import DateField from '../../shared/DateField'
 import { addTimesheet, updateTimesheet, getTimesheet } from '../store'
+import HistoryModal from '../../activity-log/HistoryModal'
 
 const defaultValues = {
   user_id: '',
@@ -56,14 +57,14 @@ const TimesheetForm = () => {
 
   useEffect(() => {
     axios.get('/users', { params: { perPage: 100 } }).then(response => {
-      setUserOptions(response.data.data.users.map(u => ({ value: u.id, label: u.fullName })))
+      setUserOptions(sortOptions(response.data.data.users.map(u => ({ value: u.id, label: u.fullName }))))
     })
     axios.get('/projects', { params: { perPage: 100 } }).then(response => {
-      setProjectOptions(response.data.data.projects.map(p => ({ value: p.id, label: p.name })))
+      setProjectOptions(sortOptions(response.data.data.projects.map(p => ({ value: p.id, label: p.name }))))
     })
     axios.get('/timesheet-activities', { params: { perPage: 100 } }).then(response => {
       const active = response.data.data.timesheetActivities.filter(a => a.is_active)
-      setActivityOptions(active.map(a => ({ value: a.id, label: a.name })))
+      setActivityOptions(sortOptions(active.map(a => ({ value: a.id, label: a.name }))))
     })
   }, [])
 
@@ -133,6 +134,7 @@ const TimesheetForm = () => {
     <Card>
       <CardHeader>
         <CardTitle tag='h4'>{isEdit ? 'Edit Timesheet Entry' : 'Add Timesheet Entry'}</CardTitle>
+        {isEdit && <HistoryModal entityType='timesheet' entityId={Number(id)} buttonId='timesheet-history-btn' />}
       </CardHeader>
       <CardBody>
         <Form onSubmit={handleSubmit(onSubmit)}>

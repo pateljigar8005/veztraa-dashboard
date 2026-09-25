@@ -3,12 +3,29 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import axios from 'axios'
 import toast from 'react-hot-toast'
+import Select from 'react-select'
 import { Trash2, Download } from 'react-feather'
 import { Card, CardBody, CardHeader, CardTitle, Row, Col, Button, Spinner } from 'reactstrap'
-import { getJobApplication, deleteJobApplication } from '../store'
-import { formatDate } from '@utils'
+import {
+  getJobApplication,
+  deleteJobApplication,
+  updateJobApplicationStatus,
+  getJobApplicationNotes,
+  addJobApplicationNote
+} from '../store'
+import { formatDate, selectThemeColors } from '@utils'
 import { confirmDelete } from '@src/utility/confirmDelete'
 import { currentUserCan } from '@src/utility/navPermissions'
+import HistoryModal from '../../activity-log/HistoryModal'
+import NotesSection from '../../shared/NotesSection'
+
+const statusOptions = [
+  { value: 'new', label: 'New' },
+  { value: 'reviewing', label: 'Reviewing' },
+  { value: 'shortlisted', label: 'Shortlisted' },
+  { value: 'rejected', label: 'Rejected' },
+  { value: 'hired', label: 'Hired' }
+]
 
 const Field = ({ label, children }) => (
   <Col md='6' className='mb-2'>
@@ -24,15 +41,36 @@ const JobApplicationView = () => {
   const store = useSelector(state => state.jobApplications)
 
   const [downloading, setDownloading] = useState(false)
+  const [statusSaving, setStatusSaving] = useState(false)
+  const [noteSaving, setNoteSaving] = useState(false)
+  const canEdit = currentUserCan('/job-application', 'edit')
 
   useEffect(() => {
     dispatch(getJobApplication(id))
+    dispatch(getJobApplicationNotes(id))
   }, [dispatch, id])
 
   const application = store.selectedJobApplication
 
   if (!application || application.id !== Number(id)) {
     return null
+  }
+
+  const handleStatusChange = option => {
+    setStatusSaving(true)
+    dispatch(updateJobApplicationStatus({ id: application.id, status: option.value }))
+      .unwrap()
+      .then(() => toast.success('Status updated'))
+      .catch(err => toast.error(err?.message || 'Failed to update status'))
+      .finally(() => setStatusSaving(false))
+  }
+
+  const handleAddNote = note => {
+    setNoteSaving(true)
+    return dispatch(addJobApplicationNote({ id: application.id, note }))
+      .unwrap()
+      .catch(err => toast.error(err?.message || 'Failed to add note'))
+      .finally(() => setNoteSaving(false))
   }
 
   const handleDelete = () => {
@@ -83,18 +121,38 @@ const JobApplicationView = () => {
               {application.email} {application.phone ? `• ${application.phone}` : ''}
             </p>
           </div>
-          <div className='d-flex flex-column align-items-md-end mt-md-0 mt-2'>
-            {application.has_resume && (
-              <Button color='primary' outline className='mb-1' onClick={handleDownloadResume} disabled={downloading}>
-                {downloading ? <Spinner size='sm' className='me-50' /> : <Download size={14} className='me-50' />}
-                Download Resume
-              </Button>
-            )}
-            {currentUserCan('/job-application', 'delete') && (
-              <Button color='danger' outline onClick={handleDelete}>
-                <Trash2 size={14} className='me-50' /> Delete
-              </Button>
-            )}
+          <div className='d-flex flex-column align-items-md-end mt-md-0 mt-2' style={{ gap: '0.5rem' }}>
+            <div className='d-flex align-items-center' style={{ gap: '0.5rem' }}>
+              <HistoryModal
+                entityType='job_application'
+                entityId={application.id}
+                entityLabel={application.full_name}
+                buttonId='job-application-history-btn'
+              />
+              {application.has_resume && (
+                <Button color='primary' outline onClick={handleDownloadResume} disabled={downloading}>
+                  {downloading ? <Spinner size='sm' className='me-50' /> : <Download size={14} className='me-50' />}
+                  Download Resume
+                </Button>
+              )}
+              {currentUserCan('/job-application', 'delete') && (
+                <Button color='danger' outline onClick={handleDelete}>
+                  <Trash2 size={14} className='me-50' /> Delete
+                </Button>
+              )}
+            </div>
+            <Select
+              inputId='status'
+              className='react-select'
+              classNamePrefix='select'
+              theme={selectThemeColors}
+              options={statusOptions}
+              value={statusOptions.find(o => o.value === application.status) || statusOptions[0]}
+              onChange={handleStatusChange}
+              isSearchable={false}
+              isDisabled={!canEdit || statusSaving}
+              styles={{ container: base => ({ ...base, minWidth: 180 }) }}
+            />
           </div>
         </CardBody>
       </Card>
@@ -120,6 +178,15 @@ const JobApplicationView = () => {
               </p>
             </Col>
           </Row>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle tag='h4'>Notes</CardTitle>
+        </CardHeader>
+        <CardBody>
+          <NotesSection notes={store.notes} onAddNote={handleAddNote} canAdd={canEdit} submitting={noteSaving} />
         </CardBody>
       </Card>
     </div>

@@ -20,13 +20,38 @@ export const columns = [
   },
   {
     name: 'Key',
-    minWidth: '140px',
+    width: '150px',
+    right: true,
     selector: row => row.token_hint,
     cell: row => <span className='font-monospace text-muted'>{row.token_hint}</span>
   },
   {
+    name: 'Total Hits',
+    width: '130px',
+    right: true,
+    selector: row => row.total_hits,
+    cell: row => <span>{row.total_hits}</span>
+  },
+  {
+    name: 'Last Used',
+    width: '170px',
+    right: true,
+    selector: row => row.last_used_at,
+    cell: row => <span>{row.last_used_at ? formatDate(row.last_used_at, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Never'}</span>
+  },
+  {
+    name: 'Created',
+    width: '170px',
+    right: true,
+    sortable: true,
+    sortField: 'created_at',
+    selector: row => row.created_at,
+    cell: row => <span>{formatDate(row.created_at, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+  },
+  {
     name: 'Status',
-    minWidth: '110px',
+    width: '120px',
+    right: true,
     selector: row => row.is_active,
     cell: row => (
       <div className='form-switch'>
@@ -46,29 +71,9 @@ export const columns = [
     )
   },
   {
-    name: 'Total Hits',
-    minWidth: '110px',
-    selector: row => row.total_hits,
-    cell: row => <span>{row.total_hits}</span>
-  },
-  {
-    name: 'Last Used',
-    minWidth: '160px',
-    selector: row => row.last_used_at,
-    cell: row => <span>{row.last_used_at ? formatDate(row.last_used_at, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Never'}</span>
-  },
-  {
-    name: 'Created',
-    minWidth: '160px',
-    sortable: true,
-    sortField: 'created_at',
-    selector: row => row.created_at,
-    cell: row => <span>{formatDate(row.created_at, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-  },
-  {
     name: 'Actions',
     right: true,
-    minWidth: '100px',
+    width: '140px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
         <Button

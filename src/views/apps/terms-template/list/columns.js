@@ -23,7 +23,7 @@ export const columns = [
   },
   {
     name: 'Created',
-    minWidth: '160px',
+    width: '180px',
     sortable: true,
     sortField: 'created_at',
     selector: row => row.created_at,
@@ -32,7 +32,7 @@ export const columns = [
   {
     name: 'Actions',
     right: true,
-    minWidth: '90px',
+    width: '120px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
         {currentUserCan('/terms-template', 'edit') && (

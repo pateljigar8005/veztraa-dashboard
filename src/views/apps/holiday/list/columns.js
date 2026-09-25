@@ -24,7 +24,7 @@ export const columns = [
   },
   {
     name: 'Date',
-    minWidth: '180px',
+    width: '190px',
     sortable: true,
     sortField: 'date',
     selector: row => row.date,
@@ -36,7 +36,7 @@ export const columns = [
   {
     name: 'Actions',
     right: true,
-    minWidth: '90px',
+    width: '120px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
         {currentUserCan('/holiday', 'edit') && (

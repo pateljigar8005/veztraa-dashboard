@@ -8,8 +8,16 @@ import classnames from 'classnames'
 import AdvancedSearchModal from '../shared/AdvancedSearchModal'
 import { useDispatch, useSelector } from 'react-redux'
 import { getFolderView, getMessage, clearCurrentMessage, readStoredMailboxId, storeMailboxId } from './store'
-import { getUserData } from '@utils'
+import { getUserData, sortOptions } from '@utils'
 import '@styles/react/apps/app-email.scss'
+
+// Matches useEmailUnreadPolling's cadence for the sidebar badge. Without
+// this, a message cached straight into the inbox the instant an internal
+// sender sends it (see the API's MailboxOutbox received-placeholder feature)
+// would never actually show up in an already-open list - it only ever
+// refetches today on folder/query change or during the narrow move-
+// placeholder retry window.
+const LIST_POLL_INTERVAL_MS = 15000
 
 const searchFields = [
   { name: 'from', label: 'From', type: 'text' },
@@ -63,7 +71,7 @@ const EmailApp = () => {
     axios.get('/company-mailboxes').then(response => {
       const mailboxes = response.data?.data?.companyMailboxes || []
       setMailboxOptions(
-        mailboxes.map(m => ({ value: m.id, label: m.label ? `${m.label} (${m.email})` : m.email, email: m.email }))
+        sortOptions(mailboxes.map(m => ({ value: m.id, label: m.label ? `${m.label} (${m.email})` : m.email, email: m.email })))
       )
       // A remembered mailbox that's since been deleted falls back to My Mailbox.
       setViewingMailboxId(current => {
@@ -91,6 +99,19 @@ const EmailApp = () => {
     } else {
       dispatch(clearCurrentMessage())
       setOpenMail(false)
+    }
+  }, [folder, debouncedQuery, filters, viewingMailboxId])
+
+  useEffect(() => {
+    const poll = () => {
+      if (document.hidden) return
+      dispatch(getFolderView({ folder, q: debouncedQuery, filters, adminMailboxId: viewingMailboxId, silent: true }))
+    }
+    const timer = setInterval(poll, LIST_POLL_INTERVAL_MS)
+    document.addEventListener('visibilitychange', poll)
+    return () => {
+      clearInterval(timer)
+      document.removeEventListener('visibilitychange', poll)
     }
   }, [folder, debouncedQuery, filters, viewingMailboxId])
 

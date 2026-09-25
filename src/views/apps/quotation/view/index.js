@@ -4,12 +4,14 @@ import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useDispatch, useSelector } from 'react-redux'
-import { Edit2, ChevronDown, ChevronRight } from 'react-feather'
+import { Edit2, ChevronDown, ChevronRight, FileText } from 'react-feather'
 import { pdf, ReportDocument } from '@veztraa/report-renderer'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Table, Collapse } from 'reactstrap'
 import { getQuotation, updateQuotation } from '../store'
 import { quotationStatusOptions } from '../documentOptions'
 import ComposePopup from '../../email/ComposePopup'
+import HistoryModal from '../../activity-log/HistoryModal'
+import LinkedInvoicesCard from '../../invoice/LinkedInvoicesCard'
 import { selectThemeColors, formatAmount } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { renderEmailTemplate } from '@src/utility/renderEmailTemplate'
@@ -211,35 +213,31 @@ const QuotationView = () => {
     <Row>
       <Col xl={9} md={8} sm={12}>
         <Card>
-          <CardBody className='d-flex justify-content-between flex-md-row flex-column'>
-            <div>
-              <h3 className='mb-0'>{quotation.quotation_number}</h3>
-              <p className='text-muted mb-1'>
-                {quotation.contact_name}
-                {quotation.company_name ? ` • ${quotation.company_name}` : ''}
-              </p>
-              <p className='mb-0'>
-                {quotation.email} {quotation.phone ? `• ${quotation.phone}` : ''}
-              </p>
-              <p className='mb-0'>
-                Issue: {quotation.issue_date} • Valid Until: {quotation.valid_until}
-              </p>
-            </div>
-            {currentUserCan('/quotation', 'edit') && (
-              <div className='mt-md-0 mt-2'>
-                <Button tag={Link} to={`/quotation/edit/${quotation.id}`} color='primary' outline>
-                  <Edit2 size={14} className='me-50' /> Edit
-                </Button>
-              </div>
-            )}
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle tag='h4'>Bill To</CardTitle>
-          </CardHeader>
           <CardBody>
+            <div className='d-flex justify-content-between flex-md-row flex-column mb-2'>
+              <div>
+                <h3 className='mb-0'>{quotation.quotation_number}</h3>
+                <p className='text-muted mb-0'>
+                  Issue: {quotation.issue_date} • Valid Until: {quotation.valid_until}
+                </p>
+              </div>
+              {(currentUserCan('/quotation', 'edit') || currentUserCan('/invoice', 'add')) && (
+                <div className='mt-md-0 mt-2'>
+                  {currentUserCan('/quotation', 'edit') && (
+                    <Button tag={Link} to={`/quotation/edit/${quotation.id}`} color='primary' outline>
+                      <Edit2 size={14} className='me-50' /> Edit
+                    </Button>
+                  )}
+                  {currentUserCan('/invoice', 'add') && (
+                    <Button tag={Link} to={`/invoice/add?from_quotation=${quotation.id}`} color='primary' className='ms-50'>
+                      <FileText size={14} className='me-50' /> Convert to Invoice
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+            <hr />
+            <h6 className='mb-1'>Bill To</h6>
             <Row>
               <Col md={6} className='mb-1'>
                 <p className='text-muted mb-25'>Contact Name</p>
@@ -408,6 +406,7 @@ const QuotationView = () => {
               >
                 Download PDF
               </Button>
+              <HistoryModal entityType='quotation' entityId={quotation.id} entityLabel={quotation.quotation_number} buttonId='quotation-history-btn' />
               {!pdfTemplate && (
                 <p className='text-muted small mb-0 mt-50'>
                   No Quotation PDF template selected in <Link to='/company'>Company Settings</Link>.
@@ -421,6 +420,8 @@ const QuotationView = () => {
               )}
             </CardBody>
           </Card>
+
+          <LinkedInvoicesCard filterKey='quotation_id' id={quotation.id} emptyText='Not converted to an invoice yet.' />
 
           {pdfTemplate && (
             <Card>
@@ -450,6 +451,8 @@ const QuotationView = () => {
         adminMailboxEmail={companySettings?.quotation_email_mailbox_email}
         container='body'
         hideTemplateAndDraft
+        relatedType='quotation'
+        relatedId={quotation.id}
       />
     </Row>
   )

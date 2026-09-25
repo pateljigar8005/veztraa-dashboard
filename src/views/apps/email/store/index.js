@@ -59,7 +59,10 @@ export const getMessages = createAsyncThunk('appEmail/getMessages', async ({ sil
   return { params, data: response.data.data }
 })
 
-export const getFolderView = createAsyncThunk('appEmail/getFolderView', async params => {
+// params.silent: background refresh (the list poll in index.js) - updates
+// the list without flashing the loading spinner, same reasoning as
+// getMessages' own silent param above.
+export const getFolderView = createAsyncThunk('appEmail/getFolderView', async ({ silent, ...params }) => {
   if (params.adminMailboxId) {
     const response = await axios.get(`/admin-mailbox/${params.adminMailboxId}/${params.folder}/messages`, {
       params: { page: params.page || 1, perPage: params.perPage || 20, q: params.q || '', ...params.filters }
@@ -216,11 +219,18 @@ export const appEmailSlice = createSlice({
     messageLoading: false,
     lastSyncedAt: null,
     // Unread INBOX count of the selected mailbox - drives the menu badge.
-    unreadCount: 0
+    unreadCount: 0,
+    // Rows ticked in the list - lives here rather than in Mails.js's own
+    // state so the navbar's bulk-delete icon (NavbarBookmarks.js) can read
+    // the count too, same reasoning as Activity Log's own selectedIds.
+    selectedUids: []
   },
   reducers: {
     clearCurrentMessage: state => {
       state.currentMessage = null
+    },
+    setSelectedUids: (state, action) => {
+      state.selectedUids = action.payload
     },
     removeMessageFromList: (state, action) => {
       const uids = new Set([].concat(action.payload))
@@ -272,7 +282,8 @@ export const appEmailSlice = createSlice({
       .addCase(getMessages.rejected, state => {
         state.messagesLoading = false
       })
-      .addCase(getFolderView.pending, state => {
+      .addCase(getFolderView.pending, (state, action) => {
+        if (action.meta.arg?.silent) return
         state.foldersLoading = true
         state.messagesLoading = true
       })
@@ -307,6 +318,6 @@ export const appEmailSlice = createSlice({
   }
 })
 
-export const { clearCurrentMessage, removeMessageFromList, updateMessageFlag } = appEmailSlice.actions
+export const { clearCurrentMessage, removeMessageFromList, updateMessageFlag, setSelectedUids } = appEmailSlice.actions
 
 export default appEmailSlice.reducer

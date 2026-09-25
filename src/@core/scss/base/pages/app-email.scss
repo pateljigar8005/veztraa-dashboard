@@ -95,11 +95,12 @@ $email_details_header_height: 5rem;
       .email-media-list {
         padding: 0;
         margin: 0;
-        @for $i from 1 through 5000 {
-          li:nth-child(#{$i}) {
-            animation-delay: 0.1s * $i;
-          }
-        }
+        // Vuexy template default staggered each row's fade-in by 0.1s *
+        // position (up to 5000 rows) - fine for a short demo list, but with
+        // a real inbox (and the list poll re-rendering every 15s) it reads
+        // as rows loading in one at a time rather than a list appearing.
+        // Every row still fades in (see the `li` rule below), just all
+        // together instead of staggered.
         li {
           cursor: pointer;
           transition: all 0.2s, background 0s, border-color 0s, color 0s;
@@ -109,12 +110,6 @@ $email_details_header_height: 5rem;
           background: $white;
           &.user-mail {
             padding: 14px;
-            &:hover {
-              transform: translateY(-2px);
-              box-shadow: 0 3px 10px 0 $border-color;
-              transition: all 0.2s;
-              z-index: 1;
-            }
             .mail-left {
               display: flex;
               flex-direction: column;

@@ -6,7 +6,6 @@ export const menuPermissionGroups = [
       { id: 'chat', title: 'Chat' },
       { id: 'todo', title: 'Todo' },
       { id: 'calendar', title: 'Calendar' },
-      { id: 'kanban', title: 'Kanban' },
       { id: 'projects', title: 'Project' },
       { id: 'timesheets', title: 'Timesheet' }
     ]
@@ -54,7 +53,8 @@ export const menuPermissionGroups = [
       { id: 'currencies', title: 'Currency' },
       { id: 'industries', title: 'Industry' },
       { id: 'timesheetActivities', title: 'Timesheet Activity' },
-      { id: 'apiKeys', title: 'API Keys' }
+      { id: 'apiKeys', title: 'API Keys' },
+      { id: 'activityLogs', title: 'Activity Log' }
     ]
   }
 ]

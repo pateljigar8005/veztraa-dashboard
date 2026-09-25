@@ -1,15 +1,20 @@
+import axios from 'axios'
 import { Link } from 'react-router-dom'
 import Avatar from '@components/avatar'
-import { resolveAvatarUrl } from '@utils'
+import { resolveAvatarUrl, getUserData, sortOptions } from '@utils'
 import { persistTaskOrder } from './store'
-import { priorityColors } from '../kanban/kanbanOptions'
+import { priorityOptions, priorityColors, statusOptions, statusColors } from './todoOptions'
+import AdvancedSearchModal from '../shared/AdvancedSearchModal'
+import GripVerticalIcon from '../shared/GripVerticalIcon'
 import classnames from 'classnames'
+import { useState } from 'react'
 import { ReactSortable } from 'react-sortablejs'
 import PerfectScrollbar from 'react-perfect-scrollbar'
-import { Menu, Search, MoreVertical } from 'react-feather'
+import { Menu, Search, Filter, MoreVertical } from 'react-feather'
 import {
   Input,
   Badge,
+  Button,
   InputGroup,
   DropdownMenu,
   DropdownItem,
@@ -17,6 +22,41 @@ import {
   DropdownToggle,
   UncontrolledDropdown
 } from 'reactstrap'
+
+// Status and Priority here are independent of the sidebar's own Status/
+// Priority links (different param names - adv_status vs filter, this
+// priority vs paramsURL.priority - see Todo::all()'s own note) precisely
+// so they compose with Assignee/Due Date/Important in one combined search
+// instead of just re-doing what a sidebar click already does alone.
+//
+// Assignee is isMulti for an admin only ("show me anything assigned to
+// Alice or Bob") - a non-admin's results are already scoped to their own
+// todos no matter what (see Todo::all()'s $userId ownership filter, always
+// applied first and independent of this), so picking several assignees
+// there wouldn't broaden what they can search, just add UI they don't
+// need; a single picker keeps it simple for them.
+const buildAdvancedSearchFields = isAdmin => [
+  {
+    name: 'assignee_id',
+    label: 'Assignee',
+    type: 'select',
+    isMulti: isAdmin,
+    fetchOptions: () =>
+      axios.get('/users', { params: { perPage: 100 } }).then(response => sortOptions(response.data.data.users.map(u => ({ value: u.id, label: u.fullName }))))
+  },
+  { name: 'adv_status', label: 'Status', type: 'select', options: statusOptions },
+  { name: 'priority', label: 'Priority', type: 'select', options: priorityOptions },
+  {
+    name: 'important',
+    label: 'Important',
+    type: 'select',
+    options: [
+      { value: '1', label: 'Important' },
+      { value: '0', label: 'Not Important' }
+    ]
+  },
+  { name: 'due_date', label: 'Due Date', type: 'date-range' }
+]
 
 const Tasks = props => {
   const {
@@ -31,8 +71,13 @@ const Tasks = props => {
     selectTask,
     reOrderTasks,
     handleTaskSidebar,
-    handleMainSidebar
+    handleMainSidebar,
+    advancedFilters,
+    setAdvancedFilters
   } = props
+
+  const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false)
+  const advancedSearchFields = buildAdvancedSearchFields(getUserData()?.role === 'admin')
 
   const handleTaskClick = obj => {
     dispatch(selectTask(obj))
@@ -45,15 +90,41 @@ const Tasks = props => {
     </Badge>
   )
 
-  const renderAvatar = obj => {
-    const item = obj.assignee
-    const avatarUrl = resolveAvatarUrl(item.avatar)
-
-    if (avatarUrl) {
-      return <Avatar img={avatarUrl} imgHeight='32' imgWidth='32' />
-    }
-    return <Avatar color={`light-${priorityColors[obj.priority] || 'secondary'}`} content={item.fullName} initials />
-  }
+  // A todo can have several assignees now - stacked, overlapping avatars
+  // (same treatment Kanban's own task cards used) rather than one, with a
+  // "+N" overflow avatar past the first 3 so a busy row doesn't just run
+  // off the edge of the list.
+  const renderAssignees = item => (
+    <div className='d-flex align-items-center'>
+      {item.assignees.slice(0, 3).map((a, index) => {
+        const avatarUrl = resolveAvatarUrl(a.avatar)
+        return (
+          <Avatar
+            key={a.id}
+            size='sm'
+            img={avatarUrl || undefined}
+            initials={!avatarUrl}
+            color={`light-${priorityColors[item.priority] || 'secondary'}`}
+            content={a.fullName}
+            title={a.fullName}
+            style={{ marginLeft: index === 0 ? 0 : '-0.6rem', border: '2px solid #fff' }}
+          />
+        )
+      })}
+      {item.assignees.length > 3 && (
+        <Avatar
+          size='sm'
+          color='light-secondary'
+          content={`+${item.assignees.length - 3}`}
+          title={item.assignees
+            .slice(3)
+            .map(a => a.fullName)
+            .join(', ')}
+          style={{ marginLeft: '-0.6rem', border: '2px solid #fff' }}
+        />
+      )}
+    </div>
+  )
 
   const renderTasks = () => {
     return (
@@ -94,7 +165,7 @@ const Tasks = props => {
                 >
                   <div className='todo-title-wrapper'>
                     <div className='todo-title-area'>
-                      <MoreVertical className='drag-icon' />
+                      <GripVerticalIcon className='drag-icon' />
                       <div className='form-check'>
                         <Input
                           type='checkbox'
@@ -103,13 +174,25 @@ const Tasks = props => {
                           onClick={e => e.stopPropagation()}
                           onChange={e => {
                             e.stopPropagation()
-                            dispatch(updateTask({ id: item.id, is_completed: e.target.checked }))
+                            dispatch(updateTask({ id: item.id, status: e.target.checked ? 'completed' : 'not_started' }))
                           }}
                         />
                       </div>
                       <span className='todo-title'>{item.title}</span>
                     </div>
                     <div className='todo-item-action mt-lg-0 mt-50'>
+                      {/* not_started/completed already read from the
+                          checkbox + strikethrough (classnames({completed})
+                          above) - this only calls out the states that
+                          aren't otherwise visible at a glance: in progress,
+                          in review, or stuck. */}
+                      {item.status && item.status !== 'not_started' && item.status !== 'completed' && (
+                        <div className='badge-wrapper me-1'>
+                          <Badge className='text-capitalize' color={`light-${statusColors[item.status] || 'secondary'}`} pill>
+                            {statusOptions.find(o => o.value === item.status)?.label || item.status}
+                          </Badge>
+                        </div>
+                      )}
                       {item.priority ? <div className='badge-wrapper me-1'>{renderPriorityBadge(item.priority)}</div> : null}
                       {item.dueDate ? (
                         <small className='text-nowrap text-muted me-1'>
@@ -117,7 +200,7 @@ const Tasks = props => {
                           {new Date(item.dueDate).getDate().toString().padStart(2, '0')}
                         </small>
                       ) : null}
-                      {item.assignee ? renderAvatar(item) : null}
+                      {item.assignees && item.assignees.length > 0 ? renderAssignees(item) : null}
                     </div>
                   </div>
                 </li>
@@ -158,6 +241,21 @@ const Tasks = props => {
             <Input placeholder='Search task' value={query} onChange={handleFilter} />
           </InputGroup>
         </div>
+        {/* Also the target of the navbar's own Search icon on this route
+            (see NavbarBookmarks.js's isTodoRoute) - #navbar-advanced-
+            search-trigger below is the same hidden-button pattern every
+            other list page's Advanced Search uses, so this button here is
+            just a second, always-visible way to reach the identical
+            modal. */}
+        <Button
+          id='todo-advanced-search-trigger'
+          color='flat-secondary'
+          className='btn-icon me-50'
+          onClick={() => setAdvancedSearchOpen(true)}
+          title='Advanced Search'
+        >
+          <Filter size={16} className={Object.keys(advancedFilters).length ? 'text-primary' : 'text-body'} />
+        </Button>
         <UncontrolledDropdown>
           <DropdownToggle className='hide-arrow me-1' tag='a' href='/' onClick={e => e.preventDefault()}>
             <MoreVertical className='text-body' size={16} />
@@ -181,6 +279,16 @@ const Tasks = props => {
           </DropdownMenu>
         </UncontrolledDropdown>
       </div>
+      <Button id='navbar-advanced-search-trigger' className='d-none' onClick={() => setAdvancedSearchOpen(true)} />
+      <AdvancedSearchModal
+        isOpen={advancedSearchOpen}
+        toggle={() => setAdvancedSearchOpen(!advancedSearchOpen)}
+        title='Advanced Search'
+        fields={advancedSearchFields}
+        values={advancedFilters}
+        onApply={setAdvancedFilters}
+        onClear={() => setAdvancedFilters({})}
+      />
       {renderTasks()}
     </div>
   )

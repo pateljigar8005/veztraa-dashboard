@@ -6,6 +6,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, Button } from 'reactstrap'
 import { Trash2 } from 'react-feather'
+import HistoryModal from '../../activity-log/HistoryModal'
 import { addJobListing, updateJobListing, getJobListing } from '../store'
 
 const defaultValues = {
@@ -128,6 +129,7 @@ const JobListingForm = () => {
           <Card>
             <CardHeader>
               <CardTitle tag='h4'>{isEdit ? 'Edit Job Listing' : 'Add Job Listing'}</CardTitle>
+              {isEdit && <HistoryModal entityType='job_listing' entityId={Number(id)} buttonId='job-listing-history-btn' />}
             </CardHeader>
             <CardBody>
               <Row>

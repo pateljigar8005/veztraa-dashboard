@@ -62,30 +62,6 @@ export const removeEvent = createAsyncThunk('appCalendar/removeEvent', async (id
   }
 })
 
-export const fetchKanbanTaskEvents = createAsyncThunk('appCalendar/fetchKanbanTaskEvents', async () => {
-  const response = await axios.get('/kanban-tasks')
-  const tasks = response.data.data.tasks
-  const events = tasks
-    .filter(task => task.due_date)
-    .map(task => ({
-      id: `kanban-${task.id}`,
-      title: task.title,
-      start: task.due_date,
-      allDay: true,
-      editable: false,
-      extendedProps: {
-        calendar: 'Kanban Tasks',
-        source: 'kanban',
-        taskId: task.id,
-        // Same value the Kanban board itself uses (low/medium/high/urgent -
-        // see kanbanOptions.js's priorityColors) - Calendar.js colors these
-        // events by this instead of a single fixed source color.
-        priority: task.priority
-      }
-    }))
-  return { events, tasks }
-})
-
 export const fetchTodoTaskEvents = createAsyncThunk('appCalendar/fetchTodoTaskEvents', async () => {
   const response = await axios.get('/todos')
   const tasks = response.data.data
@@ -101,9 +77,8 @@ export const fetchTodoTaskEvents = createAsyncThunk('appCalendar/fetchTodoTaskEv
         calendar: 'To-Do',
         source: 'todo',
         taskId: task.id,
-        // Same low/medium/high/urgent field Kanban tasks use (see
-        // fetchKanbanTaskEvents above) - Todo used to have only a
-        // free-form `tags` array instead of a real priority column.
+        // low/medium/high/urgent - Todo used to have only a free-form
+        // `tags` array instead of a real priority column.
         priority: task.priority
       }
     }))
@@ -115,11 +90,9 @@ export const appCalendarSlice = createSlice({
   initialState: {
     events: [],
     eventCategories: [],
-    kanbanEvents: [],
-    kanbanTasks: [],
     todoEvents: [],
     todoTasks: [],
-    taskFilters: ['Kanban Tasks', 'To-Do'],
+    taskFilters: ['To-Do'],
     selectedEvent: {},
     // Category names currently shown - seeded to "all" once categories load
     // (see fetchEventCategories.fulfilled below). Purely a client-side
@@ -164,10 +137,6 @@ export const appCalendarSlice = createSlice({
       })
       .addCase(fetchEvents.fulfilled, (state, action) => {
         state.events = action.payload
-      })
-      .addCase(fetchKanbanTaskEvents.fulfilled, (state, action) => {
-        state.kanbanEvents = action.payload.events
-        state.kanbanTasks = action.payload.tasks
       })
       .addCase(fetchTodoTaskEvents.fulfilled, (state, action) => {
         state.todoEvents = action.payload.events

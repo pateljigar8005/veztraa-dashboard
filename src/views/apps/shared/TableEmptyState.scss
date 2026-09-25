@@ -1,0 +1,19 @@
+// The tables have no loading flag of their own, so react-data-table-component
+// renders its noDataComponent for the moment before the first fetch lands too.
+// Holding it invisible for a beat means a normal load never flashes
+// "No clients yet" before the rows appear - only a genuinely empty result
+// stays long enough to be seen.
+.table-empty-state {
+  animation: table-empty-state-in 0.25s ease-out 0.35s both;
+}
+
+@keyframes table-empty-state-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

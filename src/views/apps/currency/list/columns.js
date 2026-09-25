@@ -28,7 +28,7 @@ export const columns = [
   },
   {
     name: 'Icon',
-    minWidth: '100px',
+    width: '110px',
     sortable: true,
     sortField: 'icon',
     selector: row => row.icon,
@@ -36,7 +36,7 @@ export const columns = [
   },
   {
     name: 'Rate',
-    minWidth: '140px',
+    width: '150px',
     sortable: true,
     sortField: 'rate',
     selector: row => row.rate,
@@ -44,7 +44,7 @@ export const columns = [
   },
   {
     name: 'Status',
-    minWidth: '120px',
+    width: '130px',
     sortable: true,
     sortField: 'status',
     selector: row => row.status,
@@ -57,7 +57,7 @@ export const columns = [
   {
     name: 'Actions',
     right: true,
-    minWidth: '90px',
+    width: '120px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
         {currentUserCan('/currency', 'edit') && (

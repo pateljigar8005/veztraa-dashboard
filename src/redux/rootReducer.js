@@ -1,11 +1,11 @@
 import navbar from './navbar'
 import layout from './layout'
 import auth from './authentication'
+import dashboard from '@src/views/dashboard/store'
 import todo from '@src/views/apps/todo/store'
 import chat from '@src/views/apps/chat/store'
 import users from '@src/views/apps/user/store'
 import email from '@src/views/apps/email/store'
-import kanban from '@src/views/apps/kanban/store'
 import clients from '@src/views/apps/client/store'
 import invoice from '@src/views/apps/invoice/store'
 import calendar from '@src/views/apps/calendar/store'
@@ -31,14 +31,16 @@ import timesheetActivities from '@src/views/apps/timesheet-activity/store'
 import contactSubmissions from '@src/views/apps/contact-submission/store'
 import jobApplications from '@src/views/apps/job-application/store'
 import apiKeys from '@src/views/apps/api-key/store'
+import activityLogs from '@src/views/apps/activity-log/store'
+import notifications from './notifications'
 
 const rootReducer = {
   auth,
+  dashboard,
   todo,
   chat,
   email,
   users,
-  kanban,
   navbar,
   layout,
   invoice,
@@ -65,7 +67,9 @@ const rootReducer = {
   timesheetActivities,
   contactSubmissions,
   jobApplications,
-  apiKeys
+  apiKeys,
+  activityLogs,
+  notifications
 }
 
 export default rootReducer

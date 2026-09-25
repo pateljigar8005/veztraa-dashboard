@@ -9,7 +9,7 @@ import toast from 'react-hot-toast'
 import { Menu } from 'react-feather'
 import { Card, CardBody } from 'reactstrap'
 import { toDateOnly } from '@utils'
-import { priorityColors } from '../kanban/kanbanOptions'
+import { priorityColors } from '../todo/todoOptions'
 
 const Calendar = props => {
   const calendarRef = useRef(null)
@@ -44,10 +44,7 @@ const Calendar = props => {
     return null
   }
 
-  const taskEvents = [
-    ...(store.taskFilters.includes('Kanban Tasks') ? store.kanbanEvents : []),
-    ...(store.taskFilters.includes('To-Do') ? store.todoEvents : [])
-  ]
+  const taskEvents = store.taskFilters.includes('To-Do') ? store.todoEvents : []
 
   // An event with no category (extendedProps.calendar null/undefined) is
   // never filterable - selectedCalendars only ever holds real category
@@ -60,10 +57,9 @@ const Calendar = props => {
     // moment a `url` key is present at all, and string-interpolates a
     // literal null straight into its href instead of treating it the same
     // as "no url", so clicking one navigated to `${origin}/null`. Dropping
-    // the key entirely when it's not a real URL avoids that path - Kanban/
+    // the key entirely when it's not a real URL avoids that path -
     // Todo-sourced events never had this bug because they never set a url
-    // key in the first place (see fetchKanbanTaskEvents/fetchTodoTaskEvents
-    // in store/index.js).
+    // key in the first place (see fetchTodoTaskEvents in store/index.js).
     .map(event => {
       if (event.url) return event
       const { url, ...rest } = event
@@ -103,14 +99,12 @@ const Calendar = props => {
     eventClassNames({ event: calendarEvent }) {
       const { calendar, source, priority } = calendarEvent._def.extendedProps
 
-      // Kanban/Todo tiles color by the task's own priority (same
-      // low/medium/high/urgent palette the Kanban board itself uses - see
-      // kanbanOptions.js) instead of one fixed color per source, so a
+      // Todo tiles color by the task's own priority (low/medium/high/urgent,
+      // see todoOptions.js) instead of one fixed color per source, so a
       // glance at the calendar shows what's actually urgent. Every other
       // event (Meeting/Deadline/etc.) keeps its admin-managed category
       // color.
-      const colorName =
-        source === 'kanban' || source === 'todo' ? priorityColors[priority] || 'secondary' : calendarsColor[calendar]
+      const colorName = source === 'todo' ? priorityColors[priority] || 'secondary' : calendarsColor[calendar]
 
       return [
         `bg-light-${colorName}`
@@ -127,9 +121,8 @@ const Calendar = props => {
       // popover in the first place, since the selector just won't match.
       document.querySelector('.fc-popover-close')?.click()
 
-      const source = clickedEvent._def.extendedProps.source
-      if (source === 'kanban' || source === 'todo') {
-        handleTaskEventClick(source, clickedEvent._def.extendedProps.taskId)
+      if (clickedEvent._def.extendedProps.source === 'todo') {
+        handleTaskEventClick(clickedEvent._def.extendedProps.taskId)
         return
       }
 

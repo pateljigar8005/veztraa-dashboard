@@ -11,6 +11,8 @@ import { formatDate } from '@utils'
 import { confirmDelete } from '@src/utility/confirmDelete'
 import { currentUserCan } from '@src/utility/navPermissions'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
+import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
+import { Activity as EmptyIcon } from 'react-feather'
 
 const statusColor = code => {
   if (code >= 500) return 'light-danger'
@@ -134,7 +136,7 @@ const ApiKeyAccessHistory = () => {
           className='react-dataTable'
           paginationComponent={CustomPagination}
           data={logs}
-          noDataComponent={<div className='p-2'>No requests logged yet for this key.</div>}
+          noDataComponent={<TableEmptyState icon={EmptyIcon} noun='requests' message='Requests made with this key will be logged here.' />}
         />
       </div>
     </Card>

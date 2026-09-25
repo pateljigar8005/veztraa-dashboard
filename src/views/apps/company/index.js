@@ -25,7 +25,8 @@ import {
 import { Settings, Mail, FileText, Send, Sun, Server, Trash2 } from 'react-feather'
 import InputPasswordToggle from '@components/input-password-toggle'
 import AdminEmailsTab from './AdminEmailsTab'
-import { selectThemeColors, getUserData } from '@utils'
+import HistoryModal from '../activity-log/HistoryModal'
+import { selectThemeColors, getUserData, sortOptions } from '@utils'
 import { confirmDelete } from '@src/utility/confirmDelete'
 
 const encryptionOptions = [
@@ -134,30 +135,32 @@ const CompanySettings = () => {
   useEffect(() => {
     axios.get('/currencies', { params: { perPage: 100 } }).then(response => {
       const active = response.data.data.currencies.filter(c => c.is_active)
-      setCurrencyOptions(active.map(c => ({ value: c.id, label: `${c.name} (${c.icon})` })))
+      setCurrencyOptions(sortOptions(active.map(c => ({ value: c.id, label: `${c.name} (${c.icon})` }))))
     })
 
     axios.get('/pdf-designer-templates', { params: { perPage: 100 } }).then(response => {
-      const options = response.data.data.pdfDesignerTemplates
-        .filter(t => t.is_active)
-        .map(t => ({ value: t.id, label: t.name }))
+      const options = sortOptions(
+        response.data.data.pdfDesignerTemplates.filter(t => t.is_active).map(t => ({ value: t.id, label: t.name }))
+      )
       setInvoicePdfOptions(options)
       setContractPdfOptions(options)
       setQuotationPdfOptions(options)
     })
 
     axios.get('/email-templates', { params: { perPage: 100 } }).then(response => {
-      const options = response.data.data.emailTemplates
-        .filter(t => t.is_active)
-        .map(t => ({ value: t.id, label: t.name }))
+      const options = sortOptions(
+        response.data.data.emailTemplates.filter(t => t.is_active).map(t => ({ value: t.id, label: t.name }))
+      )
       setEmailTemplateOptions(options)
     })
 
     axios.get('/company-mailboxes').then(response => {
-      const options = (response.data.data.companyMailboxes || []).map(m => ({
-        value: m.id,
-        label: m.label ? `${m.label} (${m.email})` : m.email
-      }))
+      const options = sortOptions(
+        (response.data.data.companyMailboxes || []).map(m => ({
+          value: m.id,
+          label: m.label ? `${m.label} (${m.email})` : m.email
+        }))
+      )
       setAdminMailboxOptions(options)
     })
   }, [])
@@ -268,6 +271,10 @@ const CompanySettings = () => {
       `}</style>
       <CardHeader>
         <CardTitle tag='h4'>Company Settings</CardTitle>
+        {/* HistoryModal renders a hidden trigger + a portal-rendered Modal - it
+            doesn't need to be a sibling of Card via a Fragment wrapper like
+            the other forms, just anywhere inside this render tree. */}
+        <HistoryModal entityType='company_setting' entityId={0} buttonId='company-history-btn' />
       </CardHeader>
       <CardBody className='d-flex flex-column flex-grow-1' style={{ minHeight: 0 }}>
         <div className='d-flex flex-column flex-md-row flex-fill' style={{ minHeight: 0 }}>
@@ -452,7 +459,7 @@ const CompanySettings = () => {
               <h6 className='mb-1'>Weekend Days</h6>
               <p className='text-muted small mb-2'>
                 Same "grey out and block" treatment as a Holiday (see the Holidays settings page) on the Calendar
-                and Todo/Kanban due-date pickers, every week instead of a one-time date.
+                and Todo due-date pickers, every week instead of a one-time date.
               </p>
               <Row>
                 <Col md={12}>

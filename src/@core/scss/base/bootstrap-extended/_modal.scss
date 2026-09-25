@@ -120,6 +120,25 @@
         width: $modal-slide-in-width-lg;
       }
     }
+    // Half the viewport width on real screens (e.g. Todo's TaskSidebar) -
+    // the fixed rem widths above don't scale with the window, and a fixed
+    // 50vw on a phone would be too cramped to use, so it stays full-width
+    // until the sm breakpoint.
+    &.sidebar-half {
+      width: 100%;
+      @media (min-width: (map-get($grid-breakpoints, sm))) {
+        width: 50vw;
+      }
+      // The padding-top/padding-bottom above reserves space for Vuexy's own
+      // floating, absolutely-positioned .btn-close (see the .btn-close rule
+      // below) - TaskSidebar's header is a normal in-flow custom component,
+      // not that button, so that reserved space is just dead empty bars top
+      // and bottom with nothing filling them.
+      .modal-content {
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+    }
   }
 
   .btn-close {

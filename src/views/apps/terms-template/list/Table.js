@@ -1,4 +1,5 @@
 import { Fragment, useState, useEffect } from 'react'
+import useClampPage from '@hooks/useClampPage'
 import useDebounce from '@hooks/useDebounce'
 import { columns } from './columns'
 import { getAllData, getData } from '../store'
@@ -9,6 +10,8 @@ import { ChevronDown } from 'react-feather'
 import { Row, Col, Card, Input } from 'reactstrap'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
+import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
+import { FileText as EmptyIcon } from 'react-feather'
 
 const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) => {
   return (
@@ -63,6 +66,8 @@ const TermsTemplatesList = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
   const debouncedSearchTerm = useDebounce(searchTerm, 400)
+
+  useClampPage({ data: store.data, total: store.total, currentPage, rowsPerPage, setCurrentPage })
 
   useEffect(() => {
     dispatch(getAllData())
@@ -153,6 +158,7 @@ const TermsTemplatesList = () => {
       <Card>
         <div className='react-dataTable'>
           <DataTable
+            noDataComponent={<TableEmptyState icon={EmptyIcon} noun='terms templates' message='Save terms & conditions once and reuse them on every document.' filtered={Boolean(searchTerm)} />}
             noHeader
             subHeader
             sortServer

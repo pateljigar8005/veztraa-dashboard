@@ -48,14 +48,14 @@ export const columns = [
   {
     name: 'Company',
     sortable: true,
-    minWidth: '180px',
+    width: '190px',
     sortField: 'company_name',
     selector: row => row.company_name,
     cell: row => <span className='text-truncate'>{row.company_name || '-'}</span>
   },
   {
     name: 'Industry',
-    minWidth: '160px',
+    width: '170px',
     sortable: true,
     sortField: 'industry_name',
     selector: row => row.industry_name,
@@ -63,7 +63,7 @@ export const columns = [
   },
   {
     name: 'Currency',
-    minWidth: '130px',
+    width: '160px',
     sortable: true,
     sortField: 'currency_name',
     selector: row => row.currency_name,
@@ -71,7 +71,7 @@ export const columns = [
   },
   {
     name: 'Status',
-    minWidth: '120px',
+    width: '130px',
     sortable: true,
     sortField: 'status',
     selector: row => row.status,
@@ -84,7 +84,7 @@ export const columns = [
   {
     name: 'Actions',
     right: true,
-    minWidth: '130px',
+    width: '140px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
         <Button

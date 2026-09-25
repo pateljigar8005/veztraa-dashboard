@@ -1,4 +1,5 @@
 import { Fragment, useState, useEffect } from 'react'
+import useClampPage from '@hooks/useClampPage'
 import useDebounce from '@hooks/useDebounce'
 import AdvancedSearchModal from '../../shared/AdvancedSearchModal'
 import { columns } from './columns'
@@ -10,6 +11,8 @@ import { ChevronDown } from 'react-feather'
 import { Row, Col, Card, Input, Button } from 'reactstrap'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
+import TableEmptyState, { hasActiveFilters } from '@src/views/apps/shared/TableEmptyState'
+import { Briefcase as EmptyIcon } from 'react-feather'
 
 
 const searchFields = [
@@ -80,6 +83,8 @@ const IndustriesList = () => {
   const [filters, setFilters] = useState({})
 
   const debouncedSearchTerm = useDebounce(searchTerm, 400)
+
+  useClampPage({ data: store.data, total: store.total, currentPage, rowsPerPage, setCurrentPage })
 
   useEffect(() => {
     dispatch(getAllData())
@@ -193,6 +198,7 @@ const IndustriesList = () => {
       <Card>
         <div className='react-dataTable'>
           <DataTable
+            noDataComponent={<TableEmptyState icon={EmptyIcon} noun='industries' message='Add industries to categorise your clients.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
             noHeader
             subHeader
             sortServer

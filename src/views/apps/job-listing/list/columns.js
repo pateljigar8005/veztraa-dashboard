@@ -33,7 +33,7 @@ export const columns = [
   },
   {
     name: 'Positions',
-    minWidth: '120px',
+    width: '150px',
     sortable: true,
     sortField: 'positions',
     selector: row => row.positions,
@@ -41,7 +41,7 @@ export const columns = [
   },
   {
     name: 'Status',
-    minWidth: '120px',
+    width: '130px',
     sortable: true,
     sortField: 'status',
     selector: row => row.status,
@@ -54,7 +54,7 @@ export const columns = [
   {
     name: 'Actions',
     right: true,
-    minWidth: '90px',
+    width: '120px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
         {currentUserCan('/job-listing', 'edit') && (

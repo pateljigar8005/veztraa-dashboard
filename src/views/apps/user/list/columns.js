@@ -26,34 +26,8 @@ const renderClient = row => {
 }
 
 const renderRole = row => {
-  const roleObj = {
-    subscriber: {
-      class: 'text-primary',
-      icon: User
-    },
-    maintainer: {
-      class: 'text-success',
-      icon: Database
-    },
-    editor: {
-      class: 'text-info',
-      icon: Edit2
-    },
-    author: {
-      class: 'text-warning',
-      icon: Settings
-    },
-    admin: {
-      class: 'text-danger',
-      icon: Slack
-    }
-  }
-
-  const Icon = roleObj[row.role] ? roleObj[row.role].icon : Edit2
-
   return (
     <span className='text-truncate text-capitalize align-middle'>
-      <Icon size={18} className={`${roleObj[row.role] ? roleObj[row.role].class : ''} me-50`} />
       {row.role}
     </span>
   )
@@ -83,24 +57,29 @@ export const columns = [
           >
             <span className='fw-bolder'>{row.fullName}</span>
           </Link>
-          <small className='text-truncate text-muted mb-0' title={row.email}>
-            {row.email}
-          </small>
         </div>
       </div>
     )
   },
   {
+    name: 'Email',
+    sortable: true,
+    width: '200px',
+    sortField: 'email',
+    cell: row => <span>{row.email}</span>
+  },
+  {
     name: 'Role',
     sortable: true,
-    minWidth: '172px',
+    right: true,
+    width: '150px',
     sortField: 'role',
-    selector: row => row.role,
-    cell: row => renderRole(row)
+    cell: row => <span>{row.role}</span>
   },
   {
     name: 'Status',
-    minWidth: '138px',
+    width: '140px',
+    right: true,
     sortable: true,
     sortField: 'status',
     selector: row => row.status,
@@ -113,7 +92,7 @@ export const columns = [
   {
     name: 'Actions',
     right: true,
-    minWidth: '130px',
+    width: '140px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
         {currentUserCan('/user', 'edit') && (

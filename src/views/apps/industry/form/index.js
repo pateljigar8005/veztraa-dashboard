@@ -7,6 +7,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
 import { selectThemeColors } from '@utils'
+import HistoryModal from '../../activity-log/HistoryModal'
 import { addIndustry, updateIndustry, getIndustry } from '../store'
 
 const statusOptions = [
@@ -72,6 +73,7 @@ const IndustryForm = () => {
     <Card>
       <CardHeader>
         <CardTitle tag='h4'>{isEdit ? 'Edit Industry' : 'Add New Industry'}</CardTitle>
+        {isEdit && <HistoryModal entityType='industry' entityId={Number(id)} buttonId='industry-history-btn' />}
       </CardHeader>
       <CardBody>
         <Form onSubmit={handleSubmit(onSubmit)}>

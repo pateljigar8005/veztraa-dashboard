@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } f
 import ImageUploadField from '../../shared/ImageUploadField'
 import DateField from '../../shared/DateField'
 import { resolveAvatarUrl } from '@utils'
+import HistoryModal from '../../activity-log/HistoryModal'
 import { addPortfolioItem, updatePortfolioItem, getPortfolioItem, uploadPortfolioItemImage } from '../store'
 
 const defaultValues = {
@@ -119,6 +120,7 @@ const PortfolioForm = () => {
           <Card>
             <CardHeader>
               <CardTitle tag='h4'>{isEdit ? 'Edit Portfolio Item' : 'Add Portfolio Item'}</CardTitle>
+              {isEdit && <HistoryModal entityType='portfolio_item' entityId={Number(id)} buttonId='portfolio-history-btn' />}
             </CardHeader>
             <CardBody>
               <Row>

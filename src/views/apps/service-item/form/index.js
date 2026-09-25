@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { Fragment, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
 import toast from 'react-hot-toast'
@@ -10,6 +10,7 @@ import { selectThemeColors } from '@utils'
 import AmountField from '../../shared/AmountField'
 import { addServiceItem, updateServiceItem, getServiceItem } from '../store'
 import { categoryOptions, unitOptions } from '../serviceItemOptions'
+import HistoryModal from '../../activity-log/HistoryModal'
 
 const defaultValues = {
   name: '',
@@ -82,85 +83,88 @@ const ServiceItemForm = () => {
   const selectedUnitOption = unitOptions.find(i => i.value === unit) || null
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle tag='h4'>{isEdit ? 'Edit Service Item' : 'Add New Service Item'}</CardTitle>
-      </CardHeader>
-      <CardBody>
-        <Form onSubmit={handleSubmit(onSubmit)}>
-          <Row>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='name'>
-                Name <span className='text-danger'>*</span>
-              </Label>
-              <Controller
-                name='name'
-                control={control}
-                render={({ field }) => (
-                  <Input id='name' placeholder='Web Development' invalid={errors.name && true} {...field} />
-                )}
-              />
-            </Col>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='category'>
-                Category
-              </Label>
-              <Select
-                inputId='category'
-                isClearable
-                classNamePrefix='select'
-                className='react-select'
-                theme={selectThemeColors}
-                options={categoryOptions}
-                value={selectedCategoryOption}
-                onChange={option => setValue('category', option ? option.value : '', { shouldDirty: true })}
-                placeholder='Select category...'
-              />
-            </Col>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='price'>
-                Price
-              </Label>
-              <Controller
-                name='price'
-                control={control}
-                render={({ field }) => (
-                  <AmountField id='price' placeholder='75.00' value={field.value} onChange={field.onChange} />
-                )}
-              />
-            </Col>
-            <Col md={6} className='mb-1'>
-              <Label className='form-label' for='unit'>
-                Unit
-              </Label>
-              <Select
-                inputId='unit'
-                isClearable
-                classNamePrefix='select'
-                className='react-select'
-                theme={selectThemeColors}
-                options={unitOptions}
-                value={selectedUnitOption}
-                onChange={option => setValue('unit', option ? option.value : '', { shouldDirty: true })}
-                placeholder='Select unit...'
-              />
-            </Col>
-            <Col md={12}>
-              <Label className='form-label' for='description'>
-                Description
-              </Label>
-              <Controller
-                name='description'
-                control={control}
-                render={({ field }) => (
-                  <Input type='textarea' rows='3' id='description' placeholder='Custom web development services' {...field} />
-                )}
-              />
-            </Col>
-          </Row>
-        </Form>
-      </CardBody>
-    </Card>
+    <Fragment>
+      <Card>
+        <CardHeader>
+          <CardTitle tag='h4'>{isEdit ? 'Edit Service Item' : 'Add New Service Item'}</CardTitle>
+        </CardHeader>
+        <CardBody>
+          <Form onSubmit={handleSubmit(onSubmit)}>
+            <Row>
+              <Col md={6} className='mb-1'>
+                <Label className='form-label' for='name'>
+                  Name <span className='text-danger'>*</span>
+                </Label>
+                <Controller
+                  name='name'
+                  control={control}
+                  render={({ field }) => (
+                    <Input id='name' placeholder='Web Development' invalid={errors.name && true} {...field} />
+                  )}
+                />
+              </Col>
+              <Col md={6} className='mb-1'>
+                <Label className='form-label' for='category'>
+                  Category
+                </Label>
+                <Select
+                  inputId='category'
+                  isClearable
+                  classNamePrefix='select'
+                  className='react-select'
+                  theme={selectThemeColors}
+                  options={categoryOptions}
+                  value={selectedCategoryOption}
+                  onChange={option => setValue('category', option ? option.value : '', { shouldDirty: true })}
+                  placeholder='Select category...'
+                />
+              </Col>
+              <Col md={6} className='mb-1'>
+                <Label className='form-label' for='price'>
+                  Price
+                </Label>
+                <Controller
+                  name='price'
+                  control={control}
+                  render={({ field }) => (
+                    <AmountField id='price' placeholder='75.00' value={field.value} onChange={field.onChange} />
+                  )}
+                />
+              </Col>
+              <Col md={6} className='mb-1'>
+                <Label className='form-label' for='unit'>
+                  Unit
+                </Label>
+                <Select
+                  inputId='unit'
+                  isClearable
+                  classNamePrefix='select'
+                  className='react-select'
+                  theme={selectThemeColors}
+                  options={unitOptions}
+                  value={selectedUnitOption}
+                  onChange={option => setValue('unit', option ? option.value : '', { shouldDirty: true })}
+                  placeholder='Select unit...'
+                />
+              </Col>
+              <Col md={12}>
+                <Label className='form-label' for='description'>
+                  Description
+                </Label>
+                <Controller
+                  name='description'
+                  control={control}
+                  render={({ field }) => (
+                    <Input type='textarea' rows='3' id='description' placeholder='Custom web development services' {...field} />
+                  )}
+                />
+              </Col>
+            </Row>
+          </Form>
+        </CardBody>
+      </Card>
+      {isEdit && <HistoryModal entityType='service_item' entityId={Number(id)} buttonId='service-item-history-btn' />}
+    </Fragment>
   )
 }
 

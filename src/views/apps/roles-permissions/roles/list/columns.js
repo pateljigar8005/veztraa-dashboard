@@ -35,7 +35,7 @@ export const columns = [
   },
   {
     name: 'Total Users',
-    minWidth: '160px',
+    width: '170px',
     sortable: true,
     sortField: 'user_count',
     selector: row => row.user_count,
@@ -48,7 +48,7 @@ export const columns = [
   {
     name: 'Actions',
     right: true,
-    minWidth: '90px',
+    width: '120px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
         {currentUserCan('/roles', 'edit') && (

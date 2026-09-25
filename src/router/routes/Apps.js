@@ -3,7 +3,6 @@ import { lazy } from 'react'
 const Chat = lazy(() => import('../../views/apps/chat'))
 const Todo = lazy(() => import('../../views/apps/todo'))
 const Email = lazy(() => import('../../views/apps/email'))
-const Kanban = lazy(() => import('../../views/apps/kanban'))
 const Calendar = lazy(() => import('../../views/apps/calendar'))
 
 const InvoiceList = lazy(() => import('../../views/apps/invoice/list'))
@@ -84,6 +83,7 @@ const JobApplicationView = lazy(() => import('../../views/apps/job-application/v
 
 const ApiKeyList = lazy(() => import('../../views/apps/api-key/list'))
 const ApiKeyAccessHistory = lazy(() => import('../../views/apps/api-key/view'))
+const ActivityLogList = lazy(() => import('../../views/apps/activity-log/list'))
 
 const AppRoutes = [
   {
@@ -129,14 +129,6 @@ const AppRoutes = [
   {
     element: <Calendar />,
     path: '/calendar'
-  },
-  {
-    element: <Kanban />,
-    path: '/kanban',
-    meta: {
-      appLayout: true,
-      className: 'kanban-application'
-    }
   },
   {
     element: <InvoiceList />,
@@ -488,6 +480,10 @@ const AppRoutes = [
   {
     element: <ApiKeyAccessHistory />,
     path: '/api-key/:id/logs'
+  },
+  {
+    element: <ActivityLogList />,
+    path: '/activity-log'
   }
 ]
 

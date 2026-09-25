@@ -30,7 +30,7 @@ export const columns = [
   },
   {
     name: 'Type',
-    minWidth: '130px',
+    width: '140px',
     sortable: true,
     sortField: 'type',
     selector: row => row.type,
@@ -38,7 +38,7 @@ export const columns = [
   },
   {
     name: 'Status',
-    minWidth: '110px',
+    width: '130px',
     sortable: true,
     sortField: 'is_active',
     selector: row => row.is_active,
@@ -50,7 +50,7 @@ export const columns = [
   },
   {
     name: 'Created',
-    minWidth: '160px',
+    width: '180px',
     sortable: true,
     sortField: 'created_at',
     selector: row => row.created_at,
@@ -59,7 +59,7 @@ export const columns = [
   {
     name: 'Actions',
     right: true,
-    minWidth: '130px',
+    width: '160px',
     cell: row => (
       <div className='column-action d-flex align-items-center'>
         {currentUserCan('/pdf-designer', 'edit') && (
