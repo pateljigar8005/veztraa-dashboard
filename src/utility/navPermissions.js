@@ -38,7 +38,6 @@ export const filterNavByPermissions = (navItems, userData) => {
 
 const routeToMenuId = [
   { pattern: /^\/email/, id: 'email' },
-  { pattern: /^\/chat/, id: 'chat' },
   { pattern: /^\/todo/, id: 'todo' },
   { pattern: /^\/calendar/, id: 'calendar' },
   { pattern: /^\/project/, id: 'projects' },
