@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import toast from 'react-hot-toast'
-import { Plus, Clock } from 'react-feather'
+import { Clock } from 'react-feather'
 import {
   Card,
   CardHeader,
@@ -62,14 +62,15 @@ const MyLeave = () => {
       <Card>
         <CardHeader>
           <CardTitle tag='h4'>My Leave Balance ({store.balancesYear})</CardTitle>
-          <div className='d-flex' style={{ gap: '0.5rem' }}>
-            <Button color='secondary' outline size='sm' onClick={() => setOtOpen(true)}>
-              <Clock size={14} className='me-50' /> Log Overtime
-            </Button>
-            <Button color='primary' size='sm' onClick={() => { setEditingRequest(null); setApplyOpen(true) }}>
-              <Plus size={14} className='me-50' /> Apply for Leave
-            </Button>
-          </div>
+          <Button color='primary' size='sm' onClick={() => setOtOpen(true)}>
+            <Clock size={14} className='me-50' /> Log Overtime
+          </Button>
+          {/* No visible trigger - the navbar's Add icon clicks this
+              (NavbarBookmarks.js's listToAddButtonId), since applying for
+              leave is a modal here rather than an /my-leave/add page. */}
+          <Button id='my-leave-apply-btn' className='d-none' onClick={() => { setEditingRequest(null); setApplyOpen(true) }}>
+            Apply for Leave
+          </Button>
         </CardHeader>
         <CardBody>
           <Row>

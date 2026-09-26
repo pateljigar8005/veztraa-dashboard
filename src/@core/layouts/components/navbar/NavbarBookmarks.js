@@ -47,7 +47,8 @@ const isTodoRoute = pathname => /^\/todo(\/.*)?$/.test(pathname)
 
 // Modal-based add actions use a hidden page button instead of navigation.
 const listToAddButtonId = {
-  '/api-key': 'api-key-create-btn'
+  '/api-key': 'api-key-create-btn',
+  '/my-leave': 'my-leave-apply-btn'
 }
 
 // These list routes do not render the shared advanced-search trigger.
