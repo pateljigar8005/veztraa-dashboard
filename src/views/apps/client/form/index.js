@@ -92,10 +92,13 @@ const ClientForm = () => {
       }
 
       const action = isEdit ? updateClient({ id: Number(id), ...payload }) : addClient(payload)
-      dispatch(action).then(() => {
-      toast.success(isEdit ? 'Client updated' : 'Client added')
-      navigate('/client')
-    })
+      dispatch(action)
+        .unwrap()
+        .then(() => {
+          toast.success(isEdit ? 'Client updated' : 'Client added')
+          navigate('/client')
+        })
+        .catch(err => toast.error(err?.message || 'Failed to save client'))
     } else {
       for (const key in data) {
         if (data[key].length === 0) {
