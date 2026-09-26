@@ -1,10 +1,12 @@
-import { Fragment, useState, useEffect } from 'react'
+import { Fragment, useState, useEffect, useMemo, useRef } from 'react'
 import useClampPage from '@hooks/useClampPage'
 import useDebounce from '@hooks/useDebounce'
 import AdvancedSearchModal from '../../shared/AdvancedSearchModal'
-import { columns } from './columns'
-import { getAllData, getData } from '../store'
+import useDragReorder from '../../shared/useDragReorder'
+import { getColumns } from './columns'
+import { getAllData, getData, updateJobListing } from '../store'
 import { useDispatch, useSelector } from 'react-redux'
+import toast from 'react-hot-toast'
 import ReactPaginate from 'react-paginate'
 import DataTable from 'react-data-table-component'
 import { ChevronDown } from 'react-feather'
@@ -72,16 +74,20 @@ const JobListingList = () => {
   const dispatch = useDispatch()
   const store = useSelector(state => state.jobListings)
 
-  const [sort, setSort] = useState('desc')
+  const [sort, setSort] = useState('asc')
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const [sortColumn, setSortColumn] = useState('id')
+  const [sortColumn, setSortColumn] = useState('sort_order')
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false)
   const [filters, setFilters] = useState({})
 
   const debouncedSearchTerm = useDebounce(searchTerm, 400)
+
+  const dragEnabled = sortColumn === 'sort_order' && sort === 'asc'
+  const columns = useMemo(() => getColumns(dragEnabled), [dragEnabled])
+  const tableContainerRef = useRef(null)
 
   useClampPage({ data: store.data, total: store.total, currentPage, rowsPerPage, setCurrentPage })
 
@@ -182,6 +188,30 @@ const JobListingList = () => {
     setSortColumn(column.sortField)
   }
 
+  const handleReorder = async (oldIndex, newIndex) => {
+    const rows = dataToRender()
+    const originalSortOrders = rows.map(r => r.sort_order)
+    const reordered = [...rows]
+    const [moved] = reordered.splice(oldIndex, 1)
+    reordered.splice(newIndex, 0, moved)
+
+    const changes = reordered
+      .map((row, i) => ({ id: row.id, sort_order: originalSortOrders[i] }))
+      .filter(change => rows.find(r => r.id === change.id).sort_order !== change.sort_order)
+
+    for (const change of changes) {
+      await dispatch(updateJobListing({ id: change.id, sort_order: change.sort_order }))
+    }
+    if (changes.length > 0) toast.success('Order updated')
+  }
+
+  useDragReorder({
+    containerRef: tableContainerRef,
+    enabled: dragEnabled,
+    rows: dataToRender(),
+    onReorder: handleReorder
+  })
+
   return (
     <Fragment>
       <Button id='navbar-advanced-search-trigger' className='d-none' onClick={() => setAdvancedSearchOpen(true)} />
@@ -194,7 +224,7 @@ const JobListingList = () => {
         onClear={handleClearFilters}
       />
       <Card>
-        <div className='react-dataTable'>
+        <div className='react-dataTable' ref={tableContainerRef}>
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='job listings' message='Post an opening to show it on your careers page.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
             noHeader

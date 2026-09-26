@@ -7,13 +7,27 @@ import { Edit2, Trash2 } from 'react-feather'
 import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
+import GripVerticalIcon from '../../shared/GripVerticalIcon'
 
 const statusObj = {
   active: 'light-success',
   inactive: 'light-secondary'
 }
 
-export const columns = [
+export const getColumns = dragEnabled => [
+  {
+    name: '',
+    width: '56px',
+    minWidth: '56px',
+    center: true,
+    cell: () => (
+      <GripVerticalIcon
+        size={22}
+        className='drag-handle text-muted'
+        style={{ cursor: dragEnabled ? 'grab' : 'not-allowed', opacity: dragEnabled ? 1 : 0.35 }}
+      />
+    )
+  },
   {
     name: 'Job Title',
     sortable: true,
