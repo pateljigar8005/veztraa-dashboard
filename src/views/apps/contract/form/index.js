@@ -8,7 +8,7 @@ import { Editor } from '@veztraa/editor'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
-import { selectThemeColors, uploadEditorImage, formatAmount, sortOptions } from '@utils'
+import { selectThemeColors, uploadEditorImage, formatAmount, sortOptions, clientOptionLabel } from '@utils'
 import TermsSection from '../../shared/TermsSection'
 import PaymentMethodSection from '../../shared/PaymentMethodSection'
 import LineItemsTable from '../../shared/LineItemsTable'
@@ -87,7 +87,8 @@ const ContractForm = () => {
         sortOptions(
           response.data.data.clients.map(c => ({
             value: c.id,
-            label: c.fullName,
+            label: clientOptionLabel(c),
+            contact_name: c.fullName,
             company_name: c.company_name,
             email: c.email,
             phone: c.phone,
@@ -168,7 +169,7 @@ const ContractForm = () => {
   const handleQuickFill = option => {
     setValue('client_id', option ? option.value : '', { shouldDirty: true })
     if (option) {
-      setValue('contact_name', option.label, { shouldDirty: true })
+      setValue('contact_name', option.contact_name, { shouldDirty: true })
       setValue('company_name', option.company_name || '', { shouldDirty: true })
       setValue('email', option.email || '', { shouldDirty: true })
       setValue('phone', option.phone || '', { shouldDirty: true })

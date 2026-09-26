@@ -4,7 +4,7 @@ import useDebounce from '@hooks/useDebounce'
 import axios from 'axios'
 import AdvancedSearchModal from '../../shared/AdvancedSearchModal'
 import { invoiceStatusOptions, currencyOptions } from '../../quotation/documentOptions'
-import { sortOptions } from '@utils'
+import { sortOptions, clientOptionLabel } from '@utils'
 import { columns } from './columns'
 import { getAllData, getData } from '../store'
 import { useDispatch, useSelector } from 'react-redux'
@@ -25,7 +25,7 @@ const searchFields = [
     label: 'Client',
     type: 'select',
     fetchOptions: () =>
-      axios.get('/clients', { params: { perPage: 100 } }).then(r => sortOptions(r.data.data.clients.map(c => ({ value: c.id, label: c.fullName }))))
+      axios.get('/clients', { params: { perPage: 100 } }).then(r => sortOptions(r.data.data.clients.map(c => ({ value: c.id, label: clientOptionLabel(c) }))))
   },
   { name: 'currency', label: 'Currency', type: 'select', options: currencyOptions },
   { name: 'issue_date', label: 'Issue Date', type: 'date-range' },

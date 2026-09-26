@@ -2,6 +2,7 @@ import { Fragment, useState, useEffect } from 'react'
 import useClampPage from '@hooks/useClampPage'
 import useDebounce from '@hooks/useDebounce'
 import axios from 'axios'
+import { clientOptionLabel } from '@utils'
 import AdvancedSearchModal from '../../shared/AdvancedSearchModal'
 import { frequencyOptions, contractStatusOptions } from '../contractOptions'
 import { columns } from './columns'
@@ -24,7 +25,7 @@ const searchFields = [
     label: 'Client',
     type: 'select',
     fetchOptions: () =>
-      axios.get('/clients', { params: { perPage: 100 } }).then(r => r.data.data.clients.map(c => ({ value: c.id, label: c.fullName })))
+      axios.get('/clients', { params: { perPage: 100 } }).then(r => r.data.data.clients.map(c => ({ value: c.id, label: clientOptionLabel(c) })))
   },
   { name: 'frequency', label: 'Frequency', type: 'select', options: frequencyOptions },
   { name: 'start_date', label: 'Start Date', type: 'date-range' },

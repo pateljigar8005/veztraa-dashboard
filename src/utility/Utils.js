@@ -10,6 +10,13 @@ export const isObjEmpty = obj => Object.keys(obj).length === 0
 // existing order is itself meaningful, not incidental.
 export const sortOptions = options => [...options].sort((a, b) => String(a.label).localeCompare(String(b.label)))
 
+// Label for a client in a select: "Name (Company)" so clients that share a name
+// can be told apart. Falls back to just the name when there is no company.
+export const clientOptionLabel = client => {
+  const name = client.fullName || [client.first_name, client.last_name].filter(Boolean).join(' ')
+  return client.company_name ? `${name} (${client.company_name})` : name
+}
+
 // R2-hosted images come back as an already-absolute URL (custom domain);
 // only a legacy pre-R2 relative path (e.g. "/public/avatars/xxx.jpg") needs
 // the API base URL prefixed.
