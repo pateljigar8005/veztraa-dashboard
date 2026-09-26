@@ -5,7 +5,10 @@ import { Settings } from 'react-feather'
 import { Card, CardBody, Button, Input, Label } from 'reactstrap'
 import { currentUserCan } from '@src/utility/navPermissions'
 
-const taskFilters = [{ label: 'To-Do', className: 'form-check-info' }]
+const taskFilters = [
+  { label: 'To-Do', className: 'form-check-info' },
+  { label: 'Invoices', className: 'form-check-warning' }
+]
 
 const SidebarLeft = props => {
   const { handleAddEventSidebar, toggleSidebar, updateFilter, updateAllFilters, toggleTaskFilter, store, dispatch } = props
