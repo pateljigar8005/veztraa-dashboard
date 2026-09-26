@@ -46,6 +46,10 @@ const UserForm = () => {
   const [emailUsernameMode, setEmailUsernameMode] = useState(false)
   const [samePasswordAsLogin, setSamePasswordAsLogin] = useState(true)
   const [extraDirty, setExtraDirty] = useState(false)
+  const [isEmployee, setIsEmployee] = useState(false)
+  const [salaryType, setSalaryType] = useState('monthly')
+  const [salaryAmount, setSalaryAmount] = useState('')
+  const isViewerAdmin = (getUserData()?.role || '').toLowerCase() === 'admin'
 
   const {
     control,
@@ -102,6 +106,9 @@ const UserForm = () => {
       })
       setAutoAppendSignature(user.email_signature_auto_append !== false)
       setSamePasswordAsLogin(user.email_login_password_synced !== false)
+      setIsEmployee(Boolean(user.is_employee))
+      setSalaryType(user.salary_type || 'monthly')
+      setSalaryAmount(user.salary_amount != null ? String(user.salary_amount) : '')
       if (user.role_id) setRoleId(String(user.role_id))
       setAvatarPreview(resolveAvatarUrl(user.avatar))
     }
@@ -144,6 +151,11 @@ const UserForm = () => {
         email_signature: data.email_signature,
         email_signature_auto_append: autoAppendSignature,
         email_login_password_synced: samePasswordAsLogin
+      }
+      if (!selfMode && isViewerAdmin) {
+        payload.is_employee = isEmployee
+        payload.salary_type = isEmployee ? salaryType : null
+        payload.salary_amount = isEmployee && salaryAmount !== '' ? Number(salaryAmount) : null
       }
       if (emailUsernameMode) {
         payload.email = `${data.email}@${mailDomain}`
@@ -335,6 +347,68 @@ const UserForm = () => {
                 </Col>
               )}
             </Row>
+
+            {!selfMode && isViewerAdmin && (
+              <Fragment>
+                <h5 className='mb-1 mt-2'>Employment & Salary</h5>
+                <p className='text-muted small'>Only admins can see or edit this - drives Leave/PL payout calculations.</p>
+                <Row>
+                  <Col md={12} className='mb-1'>
+                    <div className='form-switch d-flex align-items-center'>
+                      <Input
+                        type='switch'
+                        id='is_employee'
+                        checked={isEmployee}
+                        onChange={e => {
+                          setIsEmployee(e.target.checked)
+                          setExtraDirty(true)
+                        }}
+                      />
+                      <Label className='form-check-label mb-0 ms-50' for='is_employee'>
+                        This user is an employee (gets Leave/PL and salary tracking)
+                      </Label>
+                    </div>
+                  </Col>
+                  {isEmployee && (
+                    <Fragment>
+                      <Col md={6} className='mb-1'>
+                        <Label className='form-label' for='salary_type'>
+                          Salary Type
+                        </Label>
+                        <Input
+                          type='select'
+                          id='salary_type'
+                          value={salaryType}
+                          onChange={e => {
+                            setSalaryType(e.target.value)
+                            setExtraDirty(true)
+                          }}
+                        >
+                          <option value='monthly'>Monthly</option>
+                          <option value='hourly'>Hourly</option>
+                        </Input>
+                      </Col>
+                      <Col md={6} className='mb-1'>
+                        <Label className='form-label' for='salary_amount'>
+                          {salaryType === 'monthly' ? 'Monthly Salary' : 'Hourly Rate'}
+                        </Label>
+                        <Input
+                          type='number'
+                          id='salary_amount'
+                          min='0'
+                          step='0.01'
+                          value={salaryAmount}
+                          onChange={e => {
+                            setSalaryAmount(e.target.value)
+                            setExtraDirty(true)
+                          }}
+                        />
+                      </Col>
+                    </Fragment>
+                  )}
+                </Row>
+              </Fragment>
+            )}
 
             <h5 className='mb-1 mt-2'>Email Settings</h5>
             <p className='text-muted small'>

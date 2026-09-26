@@ -69,6 +69,9 @@ const Calendar = props => {
       const { url, ...rest } = event
       return rest
     })
+    // Approved leave is read-only on the calendar - no dragging, resizing,
+    // or click-to-edit, same as Todo/Invoice source events above.
+    .map(event => (event.extendedProps?.source === 'leave' ? { ...event, editable: false } : event))
 
   const calendarOptions = {
     events: [...filteredEvents, ...taskEvents],
@@ -109,7 +112,9 @@ const Calendar = props => {
       // calendar shows what's actually urgent. Every other event
       // (Meeting/Deadline/etc.) keeps its admin-managed category color.
       let colorName
-      if (source === 'todo') {
+      if (source === 'leave') {
+        colorName = 'danger'
+      } else if (source === 'todo') {
         colorName = priorityColors[priority] || 'secondary'
       } else if (source === 'invoice') {
         colorName = status === 'overdue' ? 'danger' : 'warning'
@@ -139,6 +144,12 @@ const Calendar = props => {
 
       if (clickedEvent._def.extendedProps.source === 'invoice') {
         handleInvoiceEventClick(clickedEvent._def.extendedProps.invoiceId)
+        return
+      }
+
+      // Approved leave is read-only here - it's managed from My Leave /
+      // Leave Approvals, not the calendar's own add/edit sidebar.
+      if (clickedEvent._def.extendedProps.source === 'leave') {
         return
       }
 

@@ -7,7 +7,8 @@ export const menuPermissionGroups = [
       { id: 'todo', title: 'Todo' },
       { id: 'calendar', title: 'Calendar' },
       { id: 'projects', title: 'Project' },
-      { id: 'timesheets', title: 'Timesheet' }
+      { id: 'timesheets', title: 'Timesheet' },
+      { id: 'leave', title: 'Leave' }
     ]
   },
   {

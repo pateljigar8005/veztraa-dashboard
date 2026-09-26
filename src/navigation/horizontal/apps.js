@@ -25,7 +25,8 @@ import {
   Tag,
   BarChart2,
   Key,
-  Activity
+  Activity,
+  CheckCircle
 } from 'react-feather'
 
 export default [
@@ -57,6 +58,18 @@ export default [
         title: 'Timesheet',
         icon: <Clock />,
         navLink: '/timesheet'
+      },
+      {
+        id: 'leave',
+        title: 'My Leave',
+        icon: <Briefcase />,
+        navLink: '/my-leave'
+      },
+      {
+        id: 'leave',
+        title: 'Leave Approvals',
+        icon: <CheckCircle />,
+        navLink: '/leave-approvals'
       }
     ]
   },
@@ -194,6 +207,12 @@ export default [
         title: 'Holidays',
         icon: <Sun />,
         navLink: '/holiday'
+      },
+      {
+        id: 'leave',
+        title: 'Leave Types',
+        icon: <Briefcase />,
+        navLink: '/leave-type'
       },
       {
         id: 'company',
