@@ -6,7 +6,7 @@ import AmountField from './AmountField'
 import GripVerticalIcon from './GripVerticalIcon'
 import { formatAmount } from '@utils'
 
-const LineItemsTable = ({ control, fields, lineItems, remove, move, onAddItem, onOpenCatalog }) => {
+const LineItemsTable = ({ control, fields, lineItems, remove, move, onAddItem, onOpenCatalog, currency }) => {
   const dragIndex = useRef(null)
   const [overIndex, setOverIndex] = useState(null)
 
@@ -78,7 +78,7 @@ const LineItemsTable = ({ control, fields, lineItems, remove, move, onAddItem, o
                       render={({ field }) => <AmountField value={field.value} onChange={field.onChange} />}
                     />
                   </td>
-                  <td className='fw-bolder align-middle'>${formatAmount(qty * rate)}</td>
+                  <td className='fw-bolder align-middle'>{currency || '$'}{formatAmount(qty * rate)}</td>
                   <td className='align-middle'>
                     <Button
                       color='flat-danger'

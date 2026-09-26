@@ -322,6 +322,7 @@ const QuotationForm = () => {
               move={move}
               onAddItem={() => append({ description: '', qty: 1, rate: 0 })}
               onOpenCatalog={() => setCatalogOpen(true)}
+              currency={currency}
             />
 
             <hr className='invoice-spacing' />
@@ -422,7 +423,7 @@ const QuotationForm = () => {
             <CardBody>
               <div className='d-flex justify-content-between mb-1'>
                 <span>Subtotal</span>
-                <span>${formatAmount(subtotal)}</span>
+                <span>{currency || '$'}{formatAmount(subtotal)}</span>
               </div>
               {taxEnabled && (
                 <>
@@ -436,7 +437,7 @@ const QuotationForm = () => {
                   />
                   <div className='d-flex justify-content-between mb-1'>
                     <span>Tax Amount</span>
-                    <span>${formatAmount(taxAmount)}</span>
+                    <span>{currency || '$'}{formatAmount(taxAmount)}</span>
                   </div>
                 </>
               )}
@@ -460,13 +461,13 @@ const QuotationForm = () => {
               </div>
               <div className='d-flex justify-content-between mb-2'>
                 <span>Discount</span>
-                <span className='text-success'>-${formatAmount(discountAmount)}</span>
+                <span className='text-success'>-{currency || '$'}{formatAmount(discountAmount)}</span>
               </div>
 
               <hr />
               <div className='d-flex justify-content-between mb-2'>
                 <h5 className='mb-0'>Total</h5>
-                <h5 className='mb-0'>${formatAmount(total)}</h5>
+                <h5 className='mb-0'>{currency || '$'}{formatAmount(total)}</h5>
               </div>
             </CardBody>
           </Card>
