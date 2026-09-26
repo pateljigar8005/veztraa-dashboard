@@ -39,6 +39,19 @@ export const formatAmount = value => {
 
 export const htmlToString = html => html.replace(/<\/?[^>]+(>|$)/g, '')
 
+// Service item prices are always stored in USD. `currencyRates` is
+// {icon: rate} from /currencies, where rate is that currency's value
+// relative to 1 USD (USD itself has rate 1). Converts a catalog item's
+// USD price into whatever currency a quotation/invoice/contract is using.
+export const convertFromUsd = (amountUsd, targetCurrency, currencyRates = {}) => {
+  const amount = Number(amountUsd) || 0
+  if (!targetCurrency || targetCurrency === 'USD') return amount
+  const rate = Number(currencyRates[targetCurrency])
+  if (!rate) return amount
+  const usdRate = Number(currencyRates.USD) || 1
+  return Math.round(amount * (rate / usdRate) * 100) / 100
+}
+
 export const toDateOnly = date => {
   if (!date) return null
   const y = date.getFullYear()

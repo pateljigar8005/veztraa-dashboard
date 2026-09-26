@@ -7,7 +7,7 @@ import Select from 'react-select'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
-import { selectThemeColors, formatAmount, sortOptions, clientOptionLabel } from '@utils'
+import { selectThemeColors, formatAmount, sortOptions, clientOptionLabel, convertFromUsd } from '@utils'
 import CatalogModal from '../../shared/CatalogModal'
 import TermsSection from '../../shared/TermsSection'
 import PaymentMethodSection from '../../shared/PaymentMethodSection'
@@ -44,6 +44,7 @@ const QuotationForm = () => {
 
   const [clientOptions, setClientOptions] = useState([])
   const [currencyOptions, setCurrencyOptions] = useState([])
+  const [currencyRates, setCurrencyRates] = useState({})
   const [paymentMethodOptions, setPaymentMethodOptions] = useState([])
   const [templateOptions, setTemplateOptions] = useState([])
   const [termsContent, setTermsContent] = useState('')
@@ -94,13 +95,13 @@ const QuotationForm = () => {
       )
     })
     axios.get('/currencies', { params: { perPage: 100 } }).then(response => {
+      const currencies = response.data.data.currencies
       setCurrencyOptions(
         sortOptions(
-          response.data.data.currencies
-            .filter(c => c.is_active)
-            .map(c => ({ value: c.icon, label: `${c.name} (${c.icon})` }))
+          currencies.filter(c => c.is_active).map(c => ({ value: c.icon, label: `${c.name} (${c.icon})` }))
         )
       )
+      setCurrencyRates(Object.fromEntries(currencies.map(c => [c.icon, Number(c.rate)])))
     })
     axios.get('/payment-methods', { params: { perPage: 100 } }).then(response => {
       setPaymentMethodOptions(
@@ -191,7 +192,9 @@ const QuotationForm = () => {
     if (lineItems.length === 1 && !lineItems[0].description) {
       remove(0)
     }
-    items.forEach(item => append({ description: item.name, qty: 1, rate: item.price }))
+    items.forEach(item =>
+      append({ description: item.name, qty: 1, rate: convertFromUsd(item.price, currency, currencyRates) })
+    )
   }
 
   const subtotal = (lineItems || []).reduce((sum, item) => sum + (Number(item.qty) || 0) * (Number(item.rate) || 0), 0)
