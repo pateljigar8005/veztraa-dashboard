@@ -251,6 +251,9 @@ const InvoiceForm = () => {
     const sourceId = isEdit ? Number(id) : Number(cloneId)
     if (sourceId && store.selectedInvoice && store.selectedInvoice.id === sourceId) {
       const inv = store.selectedInvoice
+      // Every field goes into reset() so the loaded values become the form's
+      // baseline - setting some afterwards with setValue() left them differing
+      // from the defaults and the untouched form counted as dirty.
       reset({
         contact_name: inv.contact_name || '',
         company_name: inv.company_name || '',
@@ -261,14 +264,14 @@ const InvoiceForm = () => {
         due_date: inv.due_date || '',
         tax_rate: inv.tax_rate || 0,
         discount_value: inv.discount_value || 0,
-        line_items: inv.line_items && inv.line_items.length ? inv.line_items : [{ description: '', qty: 1, rate: 0 }]
+        line_items: inv.line_items && inv.line_items.length ? inv.line_items : [{ description: '', qty: 1, rate: 0 }],
+        client_id: inv.client_id || '',
+        status: inv.status || 'draft',
+        currency: inv.currency || 'USD',
+        payment_method_id: inv.payment_method_id || '',
+        terms_template_id: inv.terms_template_id || '',
+        discount_type: inv.discount_type || '$'
       })
-      setValue('client_id', inv.client_id || '')
-      setValue('status', inv.status || 'draft')
-      setValue('currency', inv.currency || 'USD')
-      setValue('payment_method_id', inv.payment_method_id || '')
-      setValue('terms_template_id', inv.terms_template_id || '')
-      setValue('discount_type', inv.discount_type || '$')
       setTermsContent(inv.terms_content || '')
       setPaymentMethodContent(inv.payment_method_content || '')
       // A clone keeps the original's link too - e.g. next month's invoice

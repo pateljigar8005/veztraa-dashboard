@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Select from 'react-select'
 import { Editor } from '@veztraa/editor'
@@ -8,6 +8,16 @@ import { selectThemeColors, uploadEditorImage } from '@utils'
 
 const TermsSection = ({ templateOptions, templateId, onTemplateChange, content, onContentChange, defaultOpen }) => {
   const [isOpen, setIsOpen] = useState(false)
+  // The editor can emit an onChange while it loads / normalises the saved HTML.
+  // Only report changes once the user has actually interacted with it, so a
+  // form that has not been touched is never flagged as having unsaved changes.
+  const userEdited = useRef(false)
+  const markEdited = () => {
+    userEdited.current = true
+  }
+  const handleEditorChange = value => {
+    if (userEdited.current) onContentChange(value)
+  }
   const collapsible = !defaultOpen
 
   const handleTemplateSelect = option => {
@@ -33,7 +43,15 @@ const TermsSection = ({ templateOptions, templateId, onTemplateChange, content, 
         onChange={handleTemplateSelect}
         placeholder='— Load from template —'
       />
-      <Editor value={content} onChange={onContentChange} height={500} onImageUpload={uploadEditorImage} />
+      <div
+        onKeyDownCapture={markEdited}
+        onMouseDownCapture={markEdited}
+        onPasteCapture={markEdited}
+        onCutCapture={markEdited}
+        onDropCapture={markEdited}
+      >
+        <Editor value={content} onChange={handleEditorChange} height={500} onImageUpload={uploadEditorImage} />
+      </div>
     </>
   )
 
