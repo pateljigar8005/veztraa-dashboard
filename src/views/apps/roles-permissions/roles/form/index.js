@@ -9,7 +9,12 @@ import { addRole, updateRole, getRole } from '../store'
 import { menuPermissionGroups } from '../menuPermissions'
 import HistoryModal from '../../../activity-log/HistoryModal'
 
-const actions = ['view', 'add', 'edit', 'delete', 'export']
+// 'approve' only means something for the Leave module (approve/reject
+// leave and overtime), but this table renders one column per action for
+// every row uniformly - simplest to add it here than to special-case a
+// per-module action column. It's a harmless unused checkbox on every
+// other row.
+const actions = ['view', 'add', 'edit', 'delete', 'export', 'approve']
 const nonViewActions = actions.filter(a => a !== 'view')
 
 const applyPermissionRule = (entry, action, checked) => {
@@ -87,7 +92,7 @@ const RoleForm = () => {
   const toggleRow = (menuId, checked) => {
     setPermissions(prev => ({
       ...prev,
-      [menuId]: { view: checked, add: checked, edit: checked, delete: checked, export: checked }
+      [menuId]: Object.fromEntries(actions.map(action => [action, checked]))
     }))
     setExtraDirty(true)
   }

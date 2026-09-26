@@ -1,4 +1,4 @@
-import { DollarSign, FileText, Edit3, Users, Briefcase, Clock } from 'react-feather'
+import { DollarSign, FileText, Edit3, Users, Briefcase, Clock, CheckCircle } from 'react-feather'
 import { formatAmount } from '@utils'
 
 // Keep block ids and section names aligned with the API and permissions menu.
@@ -69,6 +69,18 @@ export const dashboardBlocks = [
     color: 'success',
     path: '/timesheet',
     stats: data => [{ label: 'Hours this week', value: formatAmount(data.hours_this_week) }]
+  },
+  {
+    id: 'leave',
+    section: 'Apps & Pages',
+    title: 'Leave',
+    icon: CheckCircle,
+    color: 'info',
+    path: '/my-leave',
+    stats: data => [
+      { label: 'My remaining PL', value: data.my_remaining_pl },
+      { label: 'Pending approvals', value: data.pending_approvals_count }
+    ]
   }
 ]
 

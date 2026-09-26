@@ -45,6 +45,10 @@ const EmailTemplateList = lazy(() => import('../../views/apps/email-template/lis
 const EmailTemplateForm = lazy(() => import('../../views/apps/email-template/form'))
 const HolidayList = lazy(() => import('../../views/apps/holiday/list'))
 const HolidayForm = lazy(() => import('../../views/apps/holiday/form'))
+const LeaveTypeList = lazy(() => import('../../views/apps/leave-type/list'))
+const LeaveTypeForm = lazy(() => import('../../views/apps/leave-type/form'))
+const MyLeave = lazy(() => import('../../views/apps/leave/MyLeave'))
+const LeaveApprovals = lazy(() => import('../../views/apps/leave/LeaveApprovals'))
 const InvoiceReport = lazy(() => import('../../views/apps/reports/invoice-report'))
 const TimesheetReport = lazy(() => import('../../views/apps/reports/timesheet-report'))
 const PdfDesignerTemplateList = lazy(() => import('../../views/apps/pdf-designer/list'))
@@ -334,6 +338,26 @@ const AppRoutes = [
   {
     element: <HolidayForm />,
     path: '/holiday/edit/:id'
+  },
+  {
+    element: <LeaveTypeList />,
+    path: '/leave-type'
+  },
+  {
+    element: <LeaveTypeForm />,
+    path: '/leave-type/add'
+  },
+  {
+    element: <LeaveTypeForm />,
+    path: '/leave-type/edit/:id'
+  },
+  {
+    element: <MyLeave />,
+    path: '/my-leave'
+  },
+  {
+    element: <LeaveApprovals />,
+    path: '/leave-approvals'
   },
   {
     element: <InvoiceReport />,

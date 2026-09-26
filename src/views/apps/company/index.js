@@ -22,7 +22,7 @@ import {
   Button,
   Spinner
 } from 'reactstrap'
-import { Settings, Mail, FileText, Send, Sun, Server, Trash2 } from 'react-feather'
+import { Settings, Mail, FileText, Send, Sun, Server, Trash2, Briefcase } from 'react-feather'
 import InputPasswordToggle from '@components/input-password-toggle'
 import AdminEmailsTab from './AdminEmailsTab'
 import HistoryModal from '../activity-log/HistoryModal'
@@ -60,7 +60,10 @@ const defaultValues = {
   cpanel_port: 2083,
   cpanel_username: '',
   cpanel_api_token: '',
-  mail_domain: ''
+  mail_domain: '',
+  leave_pl_accrual_per_month: '',
+  leave_sick_annual_quota: '',
+  leave_standard_hours_per_day: ''
 }
 
 const CompanySettings = () => {
@@ -73,6 +76,8 @@ const CompanySettings = () => {
       ? 'pdf'
       : tabParam === 'weekend'
       ? 'weekend'
+      : tabParam === 'leave'
+      ? 'leave'
       : tabParam === 'mailbox'
       ? 'mailbox'
       : tabParam === 'admin-emails'
@@ -185,7 +190,10 @@ const CompanySettings = () => {
         cpanel_port: data.cpanel_port ?? 2083,
         cpanel_username: data.cpanel_username || '',
         cpanel_api_token: data.cpanel_api_token || '',
-        mail_domain: data.mail_domain || ''
+        mail_domain: data.mail_domain || '',
+        leave_pl_accrual_per_month: data.leave_pl_accrual_per_month ?? '',
+        leave_sick_annual_quota: data.leave_sick_annual_quota ?? '',
+        leave_standard_hours_per_day: data.leave_standard_hours_per_day ?? ''
       })
       setTaxEnabled(data.tax_enabled)
       setCurrencyId(data.currency_id || '')
@@ -251,7 +259,10 @@ const CompanySettings = () => {
         cpanel_port: data.cpanel_port === '' ? null : Number(data.cpanel_port),
         cpanel_username: data.cpanel_username || null,
         cpanel_api_token: data.cpanel_api_token,
-        mail_domain: data.mail_domain || null
+        mail_domain: data.mail_domain || null,
+        leave_pl_accrual_per_month: data.leave_pl_accrual_per_month === '' ? null : Number(data.leave_pl_accrual_per_month),
+        leave_sick_annual_quota: data.leave_sick_annual_quota === '' ? null : Number(data.leave_sick_annual_quota),
+        leave_standard_hours_per_day: data.leave_standard_hours_per_day === '' ? null : Number(data.leave_standard_hours_per_day)
       })
       .then(() => {
         toast.success('Company settings updated')
@@ -296,6 +307,10 @@ const CompanySettings = () => {
                 <ListGroupItem tag={Link} to='/company?tab=weekend' action active={activeTab === 'weekend'}>
                   <Sun size={16} className='me-75' />
                   <span className='align-middle'>Weekends</span>
+                </ListGroupItem>
+                <ListGroupItem tag={Link} to='/company?tab=leave' action active={activeTab === 'leave'}>
+                  <Briefcase size={16} className='me-75' />
+                  <span className='align-middle'>Leave</span>
                 </ListGroupItem>
                 <ListGroupItem tag={Link} to='/company?tab=mailbox' action active={activeTab === 'mailbox'}>
                   <Server size={16} className='me-75' />
@@ -491,6 +506,53 @@ const CompanySettings = () => {
                       </Label>
                     </div>
                   </div>
+                </Col>
+              </Row>
+            </TabPane>
+
+            <TabPane tabId='leave'>
+              <h6 className='mb-1'>Leave / PL Settings</h6>
+              <p className='text-muted small mb-2'>
+                Company-wide accrual and quota rules for the Leave/PL module - not editable per leave type.
+              </p>
+              <Row>
+                <Col md={4} className='mb-1'>
+                  <Label className='form-label' for='leave_pl_accrual_per_month'>
+                    PL Accrual (days/month)
+                  </Label>
+                  <Controller
+                    name='leave_pl_accrual_per_month'
+                    control={control}
+                    render={({ field }) => (
+                      <Input type='number' id='leave_pl_accrual_per_month' min='0' step='0.01' {...field} />
+                    )}
+                  />
+                  <FormText color='muted'>e.g. 1.25 = 15 days/year</FormText>
+                </Col>
+                <Col md={4} className='mb-1'>
+                  <Label className='form-label' for='leave_sick_annual_quota'>
+                    Sick Leave Quota (days/year)
+                  </Label>
+                  <Controller
+                    name='leave_sick_annual_quota'
+                    control={control}
+                    render={({ field }) => (
+                      <Input type='number' id='leave_sick_annual_quota' min='0' step='0.01' {...field} />
+                    )}
+                  />
+                </Col>
+                <Col md={4} className='mb-1'>
+                  <Label className='form-label' for='leave_standard_hours_per_day'>
+                    Standard Hours/Day
+                  </Label>
+                  <Controller
+                    name='leave_standard_hours_per_day'
+                    control={control}
+                    render={({ field }) => (
+                      <Input type='number' id='leave_standard_hours_per_day' min='0' step='0.5' {...field} />
+                    )}
+                  />
+                  <FormText color='muted'>Also converts overtime hours to PL days</FormText>
                 </Col>
               </Row>
             </TabPane>
