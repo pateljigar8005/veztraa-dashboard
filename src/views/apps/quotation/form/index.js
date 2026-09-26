@@ -322,6 +322,7 @@ const QuotationForm = () => {
               move={move}
               onAddItem={() => append({ description: '', qty: 1, rate: 0 })}
               onOpenCatalog={() => setCatalogOpen(true)}
+              currency={currency}
             />
 
             <hr className='invoice-spacing' />
