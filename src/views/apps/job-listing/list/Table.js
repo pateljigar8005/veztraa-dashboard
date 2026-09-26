@@ -4,7 +4,7 @@ import useDebounce from '@hooks/useDebounce'
 import AdvancedSearchModal from '../../shared/AdvancedSearchModal'
 import useDragReorder from '../../shared/useDragReorder'
 import { getColumns } from './columns'
-import { getAllData, getData, updateJobListing } from '../store'
+import { getAllData, getData, reorderJobListings } from '../store'
 import { useDispatch, useSelector } from 'react-redux'
 import toast from 'react-hot-toast'
 import ReactPaginate from 'react-paginate'
@@ -208,10 +208,10 @@ const JobListingList = () => {
       .filter(change => !change.unchanged)
       .map(({ id, sort_order }) => ({ id, sort_order }))
 
-    for (const change of changes) {
-      await dispatch(updateJobListing({ id: change.id, sort_order: change.sort_order }))
+    if (changes.length > 0) {
+      await dispatch(reorderJobListings(changes))
+      toast.success('Order updated')
     }
-    if (changes.length > 0) toast.success('Order updated')
   }
 
   useDragReorder({
