@@ -9,7 +9,7 @@ import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Badge, 
 import DateField from '../../shared/DateField'
 import AmountField from '../../shared/AmountField'
 import { invoiceStatusOptions, currencyOptions } from '../../quotation/documentOptions'
-import { selectThemeColors, formatAmount, sortOptions } from '@utils'
+import { selectThemeColors, formatAmount, sortOptions, clientOptionLabel } from '@utils'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
 import { FileText as EmptyIcon } from 'react-feather'
@@ -167,7 +167,7 @@ const InvoiceReport = () => {
   useEffect(() => {
     axios
       .get('/clients', { params: { perPage: 100 } })
-      .then(response => setClientOptions(sortOptions(response.data.data.clients.map(c => ({ value: c.id, label: c.fullName })))))
+      .then(response => setClientOptions(sortOptions(response.data.data.clients.map(c => ({ value: c.id, label: clientOptionLabel(c) })))))
       .catch(() => {})
   }, [])
 
