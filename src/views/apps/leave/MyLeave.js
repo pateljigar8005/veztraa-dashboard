@@ -161,16 +161,25 @@ const MyLeave = () => {
           </Button>
         </CardHeader>
         <CardBody>
-          <Row>
+          <Row className='g-2'>
             {store.balances.map(b => (
-              <Col md={4} sm={6} key={b.leave_type_id} className='mb-1'>
-                <div className={`p-1 border rounded bg-light-${b.color}`}>
-                  <p className='text-muted mb-0'>{b.leave_type_name}</p>
-                  <h3 className='mb-0'>{b.remaining}</h3>
-                  <small className='text-muted'>
-                    Accrued {b.accrued} + Opening {b.opening_balance} + Adjusted {b.adjusted} - Used {b.used}
-                  </small>
-                </div>
+              <Col md={3} sm={6} key={b.leave_type_id}>
+                <Card className='mb-0 h-100 border'>
+                  <CardBody className='d-flex align-items-center'>
+                    <div className={`avatar avatar-stats p-50 m-0 me-2 bg-light-${b.color}`}>
+                      <div className='avatar-content'>
+                        <Briefcase size={22} />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className='fw-bolder mb-0'>{b.remaining}</h3>
+                      <p className='card-text text-muted mb-0'>{b.leave_type_name}</p>
+                      <small className='text-muted'>
+                        Accrued {b.accrued} + Opening {b.opening_balance} + Adjusted {b.adjusted} - Used {b.used}
+                      </small>
+                    </div>
+                  </CardBody>
+                </Card>
               </Col>
             ))}
             {store.balances.length === 0 && <Col md={12}><p className='text-muted mb-0'>No leave types configured yet.</p></Col>}
