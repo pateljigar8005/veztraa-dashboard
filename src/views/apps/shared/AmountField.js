@@ -5,13 +5,20 @@ import classnames from 'classnames'
 const AmountField = ({ id, value, onChange, invalid, className, placeholder, decimalScale = 2, ...rest }) => {
   const inputRef = useRef(null)
   const cleaveRef = useRef(null)
+  // Cleave fires onValueChanged for programmatic setRawValue() calls too. Those
+  // are just the form loading a saved value into the field, not the user
+  // editing it, so they must not reach onChange (it would mark the form dirty).
+  const syncingRef = useRef(false)
 
   useEffect(() => {
     cleaveRef.current = new Cleave(inputRef.current, {
       numeral: true,
       numeralDecimalScale: decimalScale,
       numeralThousandsGroupStyle: 'thousand',
-      onValueChanged: e => onChange(e.target.rawValue)
+      onValueChanged: e => {
+        if (syncingRef.current) return
+        onChange(e.target.rawValue)
+      }
     })
     return () => cleaveRef.current?.destroy()
   }, [])
@@ -21,7 +28,12 @@ const AmountField = ({ id, value, onChange, invalid, className, placeholder, dec
     if (!current) return
     const next = value === null || value === undefined ? '' : String(value)
     if (current.getRawValue() !== next) {
-      current.setRawValue(next)
+      syncingRef.current = true
+      try {
+        current.setRawValue(next)
+      } finally {
+        syncingRef.current = false
+      }
     }
   }, [value])
 

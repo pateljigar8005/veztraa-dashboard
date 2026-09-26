@@ -3,6 +3,7 @@ import { columns } from './columns'
 import { getAllData } from '../store'
 import CreateApiKeyModal from '../CreateApiKeyModal'
 import { useDispatch, useSelector } from 'react-redux'
+import ReactPaginate from 'react-paginate'
 import DataTable from 'react-data-table-component'
 import { ChevronDown } from 'react-feather'
 import { Row, Col, Card, Input, Button } from 'reactstrap'
@@ -11,6 +12,26 @@ import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
 import { Key as EmptyIcon } from 'react-feather'
+
+// Same pager as the other list pages. The data is all loaded client-side here,
+// so react-data-table-component hands us the page state and does the slicing.
+const CustomPagination = ({ currentPage, rowsPerPage, rowCount, onChangePage }) => (
+  <ReactPaginate
+    previousLabel={''}
+    nextLabel={''}
+    pageCount={Math.ceil(rowCount / rowsPerPage) || 1}
+    activeClassName='active'
+    forcePage={currentPage > 0 ? currentPage - 1 : 0}
+    onPageChange={page => onChangePage(page.selected + 1)}
+    pageClassName={'page-item'}
+    nextLinkClassName={'page-link'}
+    nextClassName={'page-item next'}
+    previousClassName={'page-item prev'}
+    previousLinkClassName={'page-link'}
+    pageLinkClassName={'page-link'}
+    containerClassName={'pagination react-paginate justify-content-end my-2 pe-1'}
+  />
+)
 
 const CustomHeader = ({ rowsPerPage, handlePerPage, searchTerm, handleFilter, onCreate, canCreate }) => {
   return (
@@ -69,13 +90,18 @@ const ApiKeysTable = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [modalOpen, setModalOpen] = useState(false)
+  const [resetPage, setResetPage] = useState(false)
 
   useEffect(() => {
     dispatch(getAllData())
   }, [dispatch])
 
   const handlePerPage = e => setRowsPerPage(parseInt(e.currentTarget.value))
-  const handleFilter = val => setSearchTerm(val)
+  const handleFilter = val => {
+    setSearchTerm(val)
+    // Back to page 1 when the search changes, like the other lists.
+    setResetPage(prev => !prev)
+  }
 
   const dataToRender = () => {
     if (!searchTerm) return store.allData
@@ -96,6 +122,8 @@ const ApiKeysTable = () => {
             responsive
             columns={columns}
             paginationPerPage={rowsPerPage}
+            paginationComponent={CustomPagination}
+            paginationResetDefaultPage={resetPage}
             sortIcon={<ChevronDown />}
             className='react-dataTable'
             data={dataToRender()}
