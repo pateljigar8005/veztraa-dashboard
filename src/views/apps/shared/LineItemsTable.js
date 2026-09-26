@@ -10,8 +10,13 @@ const LineItemsTable = ({ control, fields, lineItems, remove, move, onAddItem, o
   const dragIndex = useRef(null)
   const [overIndex, setOverIndex] = useState(null)
 
-  const handleDragStart = index => {
+  const handleDragStart = (e, index) => {
     dragIndex.current = index
+    const row = e.currentTarget.closest('tr')
+    if (row) {
+      const rect = row.getBoundingClientRect()
+      e.dataTransfer.setDragImage(row, e.clientX - rect.left, e.clientY - rect.top)
+    }
   }
 
   const handleDragOver = (e, index) => {
@@ -55,7 +60,7 @@ const LineItemsTable = ({ control, fields, lineItems, remove, move, onAddItem, o
                   <td
                     className='align-middle text-center'
                     draggable
-                    onDragStart={() => handleDragStart(index)}
+                    onDragStart={e => handleDragStart(e, index)}
                     style={{ cursor: 'grab', paddingRight: 0 }}
                   >
                     <GripVerticalIcon size={12} className='drag-handle text-muted' />
