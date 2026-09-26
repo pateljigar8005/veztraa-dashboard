@@ -553,7 +553,7 @@ const InvoiceForm = () => {
                 <CardBody>
                   <div className='d-flex justify-content-between mb-1'>
                     <span>Subtotal</span>
-                    <span>${formatAmount(subtotal)}</span>
+                    <span>{currency || '$'}{formatAmount(subtotal)}</span>
                   </div>
                   {taxEnabled && (
                     <>
@@ -567,7 +567,7 @@ const InvoiceForm = () => {
                       />
                       <div className='d-flex justify-content-between mb-1'>
                         <span>Tax Amount</span>
-                        <span>${formatAmount(taxAmount)}</span>
+                        <span>{currency || '$'}{formatAmount(taxAmount)}</span>
                       </div>
                     </>
                   )}
@@ -591,13 +591,13 @@ const InvoiceForm = () => {
                   </div>
                   <div className='d-flex justify-content-between mb-2'>
                     <span>Discount</span>
-                    <span className='text-success'>-${formatAmount(discountAmount)}</span>
+                    <span className='text-success'>-{currency || '$'}{formatAmount(discountAmount)}</span>
                   </div>
 
                   <hr />
                   <div className='d-flex justify-content-between mb-2'>
                     <h5 className='mb-0'>Total</h5>
-                    <h5 className='mb-0'>${formatAmount(total)}</h5>
+                    <h5 className='mb-0'>{currency || '$'}{formatAmount(total)}</h5>
                   </div>
                 </CardBody>
               </Card>
