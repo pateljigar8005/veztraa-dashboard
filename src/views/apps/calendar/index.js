@@ -13,6 +13,7 @@ import {
   fetchEvents,
   fetchEventCategories,
   fetchTodoTaskEvents,
+  fetchInvoiceDueEvents,
   selectEvent,
   updateEvent,
   updateFilter,
@@ -61,10 +62,15 @@ const CalendarComponent = () => {
     navigate(`/todo?task=${taskId}`)
   }
 
+  const handleInvoiceEventClick = invoiceId => {
+    navigate(`/invoice/view/${invoiceId}`)
+  }
+
   useEffect(() => {
     dispatch(fetchEventCategories())
     dispatch(fetchEvents())
     dispatch(fetchTodoTaskEvents())
+    dispatch(fetchInvoiceDueEvents())
   }, [])
 
   return (
@@ -100,6 +106,7 @@ const CalendarComponent = () => {
               setCalendarApi={setCalendarApi}
               handleAddEventSidebar={handleAddEventSidebar}
               handleTaskEventClick={handleTaskEventClick}
+              handleInvoiceEventClick={handleInvoiceEventClick}
               isHoliday={isHoliday}
               getHolidayName={getHolidayName}
               isWeekend={isWeekend}

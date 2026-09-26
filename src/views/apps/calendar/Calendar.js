@@ -26,6 +26,7 @@ const Calendar = props => {
     selectEvent,
     updateEvent,
     handleTaskEventClick,
+    handleInvoiceEventClick,
     isHoliday,
     getHolidayName,
     isWeekend
@@ -44,7 +45,10 @@ const Calendar = props => {
     return null
   }
 
-  const taskEvents = store.taskFilters.includes('To-Do') ? store.todoEvents : []
+  const taskEvents = [
+    ...(store.taskFilters.includes('To-Do') ? store.todoEvents : []),
+    ...(store.taskFilters.includes('Invoices') ? store.invoiceEvents : [])
+  ]
 
   // An event with no category (extendedProps.calendar null/undefined) is
   // never filterable - selectedCalendars only ever holds real category
@@ -97,14 +101,21 @@ const Calendar = props => {
     },
 
     eventClassNames({ event: calendarEvent }) {
-      const { calendar, source, priority } = calendarEvent._def.extendedProps
+      const { calendar, source, priority, status } = calendarEvent._def.extendedProps
 
       // Todo tiles color by the task's own priority (low/medium/high/urgent,
-      // see todoOptions.js) instead of one fixed color per source, so a
-      // glance at the calendar shows what's actually urgent. Every other
-      // event (Meeting/Deadline/etc.) keeps its admin-managed category
-      // color.
-      const colorName = source === 'todo' ? priorityColors[priority] || 'secondary' : calendarsColor[calendar]
+      // see todoOptions.js), invoice tiles by whether they're already
+      // overdue, instead of one fixed color per source, so a glance at the
+      // calendar shows what's actually urgent. Every other event
+      // (Meeting/Deadline/etc.) keeps its admin-managed category color.
+      let colorName
+      if (source === 'todo') {
+        colorName = priorityColors[priority] || 'secondary'
+      } else if (source === 'invoice') {
+        colorName = status === 'overdue' ? 'danger' : 'warning'
+      } else {
+        colorName = calendarsColor[calendar]
+      }
 
       return [
         `bg-light-${colorName}`
@@ -123,6 +134,11 @@ const Calendar = props => {
 
       if (clickedEvent._def.extendedProps.source === 'todo') {
         handleTaskEventClick(clickedEvent._def.extendedProps.taskId)
+        return
+      }
+
+      if (clickedEvent._def.extendedProps.source === 'invoice') {
+        handleInvoiceEventClick(clickedEvent._def.extendedProps.invoiceId)
         return
       }
 

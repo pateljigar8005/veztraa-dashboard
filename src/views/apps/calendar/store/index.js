@@ -85,6 +85,30 @@ export const fetchTodoTaskEvents = createAsyncThunk('appCalendar/fetchTodoTaskEv
   return { events, tasks }
 })
 
+export const fetchInvoiceDueEvents = createAsyncThunk('appCalendar/fetchInvoiceDueEvents', async () => {
+  const response = await axios.get('/invoices', { params: { perPage: 100 } })
+  const invoices = response.data.data.invoices
+  const events = invoices
+    // Draft invoices aren't a commitment yet, and a fully paid balance has
+    // nothing left to chase - only an outstanding, issued invoice belongs
+    // on the calendar as something due.
+    .filter(invoice => invoice.status !== 'draft' && invoice.due_date && Number(invoice.balance_due) > 0)
+    .map(invoice => ({
+      id: `invoice-${invoice.id}`,
+      title: `Invoice #${invoice.id} due - ${invoice.company_name || invoice.contact_name}`,
+      start: invoice.due_date,
+      allDay: true,
+      editable: false,
+      extendedProps: {
+        calendar: 'Invoices',
+        source: 'invoice',
+        invoiceId: invoice.id,
+        status: invoice.status
+      }
+    }))
+  return { events }
+})
+
 export const appCalendarSlice = createSlice({
   name: 'appCalendar',
   initialState: {
@@ -92,7 +116,8 @@ export const appCalendarSlice = createSlice({
     eventCategories: [],
     todoEvents: [],
     todoTasks: [],
-    taskFilters: ['To-Do'],
+    invoiceEvents: [],
+    taskFilters: ['To-Do', 'Invoices'],
     selectedEvent: {},
     // Category names currently shown - seeded to "all" once categories load
     // (see fetchEventCategories.fulfilled below). Purely a client-side
@@ -141,6 +166,9 @@ export const appCalendarSlice = createSlice({
       .addCase(fetchTodoTaskEvents.fulfilled, (state, action) => {
         state.todoEvents = action.payload.events
         state.todoTasks = action.payload.tasks
+      })
+      .addCase(fetchInvoiceDueEvents.fulfilled, (state, action) => {
+        state.invoiceEvents = action.payload.events
       })
   }
 })
