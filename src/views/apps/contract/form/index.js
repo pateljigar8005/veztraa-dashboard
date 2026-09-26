@@ -8,7 +8,15 @@ import { Editor } from '@veztraa/editor'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
-import { selectThemeColors, uploadEditorImage, formatAmount, sortOptions, clientOptionLabel, convertFromUsd } from '@utils'
+import {
+  selectThemeColors,
+  uploadEditorImage,
+  formatAmount,
+  sortOptions,
+  clientOptionLabel,
+  convertFromUsd,
+  findUsdRate
+} from '@utils'
 import TermsSection from '../../shared/TermsSection'
 import PaymentMethodSection from '../../shared/PaymentMethodSection'
 import LineItemsTable from '../../shared/LineItemsTable'
@@ -48,6 +56,7 @@ const ContractForm = () => {
   const [clientOptions, setClientOptions] = useState([])
   const [currencyOptions, setCurrencyOptions] = useState([])
   const [currencyRates, setCurrencyRates] = useState({})
+  const [usdRate, setUsdRate] = useState(null)
   const [templateOptions, setTemplateOptions] = useState([])
   const [paymentMethodOptions, setPaymentMethodOptions] = useState([])
   const [body, setBody] = useState('')
@@ -104,6 +113,7 @@ const ContractForm = () => {
         sortOptions(currencies.filter(c => c.is_active).map(c => ({ value: c.icon, label: `${c.name} (${c.icon})` })))
       )
       setCurrencyRates(Object.fromEntries(currencies.map(c => [c.icon, Number(c.rate)])))
+      setUsdRate(findUsdRate(currencies))
     })
     axios.get('/terms-templates', { params: { perPage: 100 } }).then(response => {
       setTemplateOptions(sortOptions(response.data.data.termsTemplates.map(t => ({ value: t.id, label: t.name, content: t.content }))))
@@ -185,7 +195,7 @@ const ContractForm = () => {
       remove(0)
     }
     items.forEach(item =>
-      append({ description: item.name, qty: 1, rate: convertFromUsd(item.price, currency, currencyRates) })
+      append({ description: item.name, qty: 1, rate: convertFromUsd(item.price, currency, currencyRates, usdRate) })
     )
   }
 
