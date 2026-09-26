@@ -190,14 +190,23 @@ const JobListingList = () => {
 
   const handleReorder = async (oldIndex, newIndex) => {
     const rows = dataToRender()
-    const originalSortOrders = rows.map(r => r.sort_order)
     const reordered = [...rows]
     const [moved] = reordered.splice(oldIndex, 1)
     reordered.splice(newIndex, 0, moved)
 
+    // Renumber every row on this page to its new absolute position rather than
+    // reusing the row's existing sort_order value: if the backend hasn't
+    // caught up yet (column missing, or every row still tied at the same
+    // default), diffing against the old value would never detect a change
+    // and drag-and-drop would silently save nothing. Renumbering always
+    // produces a real diff against the current value (coerced, so a missing/
+    // non-numeric value never matches) and self-heals stale/tied data on the
+    // first drag.
+    const offset = (currentPage - 1) * rowsPerPage
     const changes = reordered
-      .map((row, i) => ({ id: row.id, sort_order: originalSortOrders[i] }))
-      .filter(change => rows.find(r => r.id === change.id).sort_order !== change.sort_order)
+      .map((row, i) => ({ id: row.id, sort_order: offset + i, unchanged: Number(row.sort_order) === offset + i }))
+      .filter(change => !change.unchanged)
+      .map(({ id, sort_order }) => ({ id, sort_order }))
 
     for (const change of changes) {
       await dispatch(updateJobListing({ id: change.id, sort_order: change.sort_order }))
