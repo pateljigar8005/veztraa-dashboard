@@ -104,6 +104,8 @@ const CompanySettings = () => {
   const [careerEmailTemplateId, setCareerEmailTemplateId] = useState('')
   const [contactEmailMailboxId, setContactEmailMailboxId] = useState('')
   const [careerEmailMailboxId, setCareerEmailMailboxId] = useState('')
+  const [passwordResetEmailTemplateId, setPasswordResetEmailTemplateId] = useState('')
+  const [passwordResetEmailMailboxId, setPasswordResetEmailMailboxId] = useState('')
   const [emailTemplateOptions, setEmailTemplateOptions] = useState([])
   const [adminMailboxOptions, setAdminMailboxOptions] = useState([])
   const [smtpEncryption, setSmtpEncryption] = useState('')
@@ -210,6 +212,8 @@ const CompanySettings = () => {
       setCareerEmailTemplateId(data.career_email_template_id || '')
       setContactEmailMailboxId(data.contact_email_mailbox_id || '')
       setCareerEmailMailboxId(data.career_email_mailbox_id || '')
+      setPasswordResetEmailTemplateId(data.password_reset_email_template_id || '')
+      setPasswordResetEmailMailboxId(data.password_reset_email_mailbox_id || '')
       setSmtpEncryption(data.smtp_encryption || '')
       setImapEncryption(data.imap_encryption || '')
       setSyncIntervalMinutes(data.mailbox_sync_interval_minutes || 1)
@@ -242,6 +246,8 @@ const CompanySettings = () => {
         career_email_template_id: careerEmailTemplateId || null,
         contact_email_mailbox_id: contactEmailMailboxId || null,
         career_email_mailbox_id: careerEmailMailboxId || null,
+        password_reset_email_template_id: passwordResetEmailTemplateId || null,
+        password_reset_email_mailbox_id: passwordResetEmailMailboxId || null,
         smtp_host: data.smtp_host || null,
         smtp_port: data.smtp_port === '' ? null : Number(data.smtp_port),
         smtp_username: data.smtp_username || null,
@@ -814,6 +820,43 @@ const CompanySettings = () => {
                       />
                     </Col>
                   </Row>
+                </Col>
+                <Col md={12} className='mb-1'>
+                  <Label className='form-label' for='password_reset_email_template_id'>
+                    Forgot Password (reset link email)
+                  </Label>
+                  <Row>
+                    <Col md={6} className='mb-1 mb-md-0'>
+                      <Select
+                        inputId='password_reset_email_template_id'
+                        isClearable
+                        className='react-select'
+                        classNamePrefix='select'
+                        theme={selectThemeColors}
+                        options={emailTemplateOptions}
+                        value={emailTemplateOptions.find(i => i.value === passwordResetEmailTemplateId) || null}
+                        onChange={option => setPasswordResetEmailTemplateId(option ? option.value : '')}
+                        placeholder='Select email template...'
+                      />
+                    </Col>
+                    <Col md={6}>
+                      <Select
+                        inputId='password_reset_email_mailbox_id'
+                        isClearable
+                        className='react-select'
+                        classNamePrefix='select'
+                        theme={selectThemeColors}
+                        options={adminMailboxOptions}
+                        value={adminMailboxOptions.find(i => i.value === passwordResetEmailMailboxId) || null}
+                        onChange={option => setPasswordResetEmailMailboxId(option ? option.value : '')}
+                        placeholder='Select sending mailbox...'
+                      />
+                    </Col>
+                  </Row>
+                  <p className='text-muted small mb-0 mt-25'>
+                    Use {'{first_name}'}, {'{full_name}'} and {'{reset_link}'} placeholders in the template - the
+                    reset link expires after 1 hour.
+                  </p>
                 </Col>
               </Row>
               {!adminMailboxOptions.length && (

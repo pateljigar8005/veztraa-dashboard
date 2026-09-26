@@ -170,4 +170,12 @@ export default class JwtService {
       refreshToken: this.getRefreshToken()
     })
   }
+
+  forgotPassword(...args) {
+    return axios.post(this.jwtConfig.forgotPasswordEndpoint, ...args)
+  }
+
+  resetPassword(...args) {
+    return axios.post(this.jwtConfig.resetPasswordEndpoint, ...args)
+  }
 }
