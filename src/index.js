@@ -1,4 +1,5 @@
 import './utility/reportDesignerStyleGuard'
+import { installChunkPreloadErrorHandler, ChunkErrorBoundary } from './utility/chunkErrorHandler'
 import { Suspense, lazy } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
@@ -24,6 +25,8 @@ import './@core/scss/core.scss'
 import './assets/scss/style.scss'
 import * as serviceWorker from './serviceWorker'
 
+installChunkPreloadErrorHandler()
+
 const LazyApp = lazy(() => import('./App'))
 
 const container = document.getElementById('root')
@@ -32,14 +35,16 @@ const root = createRoot(container)
 root.render(
   <BrowserRouter>
     <Provider store={store}>
-      <Suspense fallback={<Spinner />}>
-        <AbilityContext.Provider value={ability}>
-          <ThemeContext>
-            <LazyApp />
-            <Toaster position={themeConfig.layout.toastPosition} toastOptions={{ className: 'react-hot-toast' }} />
-          </ThemeContext>
-        </AbilityContext.Provider>
-      </Suspense>
+      <ChunkErrorBoundary>
+        <Suspense fallback={<Spinner />}>
+          <AbilityContext.Provider value={ability}>
+            <ThemeContext>
+              <LazyApp />
+              <Toaster position={themeConfig.layout.toastPosition} toastOptions={{ className: 'react-hot-toast' }} />
+            </ThemeContext>
+          </AbilityContext.Provider>
+        </Suspense>
+      </ChunkErrorBoundary>
     </Provider>
   </BrowserRouter>
 )
