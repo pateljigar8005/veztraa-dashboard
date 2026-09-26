@@ -8,6 +8,11 @@ import { Button, UncontrolledTooltip, Badge } from 'reactstrap'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
 
+const statusObj = {
+  active: 'light-success',
+  inactive: 'light-secondary'
+}
+
 export const columns = [
   {
     name: 'Name',
@@ -17,30 +22,49 @@ export const columns = [
     selector: row => row.name,
     cell: row => (
       <Link to={`/leave-type/edit/${row.id}`} className='user_name text-truncate text-body'>
-        <span className='fw-bolder' style={{ borderLeft: `3px solid ${row.color}`, paddingLeft: '8px' }}>
-          {row.name}
-        </span>
+        <span className='fw-bolder'>{row.name}</span>
       </Link>
+    )
+  },
+  {
+    name: 'Color',
+    width: '130px',
+    selector: row => row.color,
+    cell: row => (
+      <Badge className='text-capitalize' color={row.color} pill>
+        {row.color}
+      </Badge>
     )
   },
   {
     name: 'Paid',
     width: '110px',
-    cell: row => <Badge color={row.is_paid ? 'light-success' : 'light-secondary'}>{row.is_paid ? 'Paid' : 'Unpaid'}</Badge>
+    cell: row => (
+      <Badge className='text-capitalize' color={row.is_paid ? 'light-success' : 'light-secondary'} pill>
+        {row.is_paid ? 'Paid' : 'Unpaid'}
+      </Badge>
+    )
   },
   {
     name: 'Affects PL Balance',
     width: '170px',
     cell: row => (
-      <Badge color={row.affects_balance ? 'light-primary' : 'light-secondary'}>
+      <Badge className='text-capitalize' color={row.affects_balance ? 'light-primary' : 'light-secondary'} pill>
         {row.affects_balance ? 'Yes' : 'No'}
       </Badge>
     )
   },
   {
     name: 'Status',
-    width: '110px',
-    cell: row => <Badge color={row.is_active ? 'light-success' : 'light-secondary'}>{row.is_active ? 'Active' : 'Inactive'}</Badge>
+    width: '130px',
+    sortable: true,
+    sortField: 'is_active',
+    selector: row => row.is_active,
+    cell: row => (
+      <Badge className='text-capitalize' color={statusObj[row.is_active ? 'active' : 'inactive']} pill>
+        {row.is_active ? 'Active' : 'Inactive'}
+      </Badge>
+    )
   },
   {
     name: 'Actions',

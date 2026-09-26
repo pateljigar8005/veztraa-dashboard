@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import toast from 'react-hot-toast'
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
-import { Card, CardHeader, CardTitle, CardBody, Table, Button } from 'reactstrap'
+import { Card, CardHeader, CardTitle, CardBody, Table, Badge, Button } from 'reactstrap'
 import { formatDate } from '@utils'
 import {
   getPendingLeaveRequests,
@@ -108,7 +108,9 @@ const LeaveApprovals = () => {
                 <tr key={r.id}>
                   <td>{r.user_name}</td>
                   <td>
-                    <span style={{ borderLeft: `3px solid ${r.leave_type_color}`, paddingLeft: '6px' }}>{r.leave_type_name}</span>
+                    <Badge className='text-capitalize' color={`light-${r.leave_type_color}`} pill>
+                      {r.leave_type_name}
+                    </Badge>
                   </td>
                   <td>
                     {displayDate(r.start_date)}{r.start_date !== r.end_date ? ` - ${displayDate(r.end_date)}` : ''}
