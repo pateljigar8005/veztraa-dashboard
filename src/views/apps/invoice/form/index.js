@@ -7,7 +7,7 @@ import Select from 'react-select'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Row, Col, Card, CardHeader, CardTitle, CardBody, Form, Label, Input } from 'reactstrap'
-import { selectThemeColors, formatAmount, sortOptions, clientOptionLabel, convertFromUsd } from '@utils'
+import { selectThemeColors, formatAmount, sortOptions, clientOptionLabel, convertFromUsd, findUsdRate } from '@utils'
 import CatalogModal from '../../shared/CatalogModal'
 import TermsSection from '../../shared/TermsSection'
 import PaymentMethodSection from '../../shared/PaymentMethodSection'
@@ -74,6 +74,7 @@ const InvoiceForm = () => {
   const [clientOptions, setClientOptions] = useState([])
   const [currencyOptions, setCurrencyOptions] = useState([])
   const [currencyRates, setCurrencyRates] = useState({})
+  const [usdRate, setUsdRate] = useState(null)
   const [paymentMethodOptions, setPaymentMethodOptions] = useState([])
   const [templateOptions, setTemplateOptions] = useState([])
   const [termsContent, setTermsContent] = useState('')
@@ -136,6 +137,7 @@ const InvoiceForm = () => {
         )
       )
       setCurrencyRates(Object.fromEntries(currencies.map(c => [c.icon, Number(c.rate)])))
+      setUsdRate(findUsdRate(currencies))
     })
     axios.get('/payment-methods', { params: { perPage: 100 } }).then(response => {
       setPaymentMethodOptions(
@@ -312,7 +314,7 @@ const InvoiceForm = () => {
       remove(0)
     }
     items.forEach(item =>
-      append({ description: item.name, qty: 1, rate: convertFromUsd(item.price, currency, currencyRates) })
+      append({ description: item.name, qty: 1, rate: convertFromUsd(item.price, currency, currencyRates, usdRate) })
     )
   }
 

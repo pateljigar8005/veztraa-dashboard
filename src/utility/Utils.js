@@ -39,17 +39,30 @@ export const formatAmount = value => {
 
 export const htmlToString = html => html.replace(/<\/?[^>]+(>|$)/g, '')
 
-// Service item prices are always stored in USD. `currencyRates` is
-// {icon: rate} from /currencies, where rate is that currency's value
-// relative to 1 USD (USD itself has rate 1). Converts a catalog item's
-// USD price into whatever currency a quotation/invoice/contract is using.
-export const convertFromUsd = (amountUsd, targetCurrency, currencyRates = {}) => {
+// Every currency's `rate` (from /currencies) is quoted against the
+// company's own base currency (e.g. a USD row with rate 87 means "1 USD
+// = 87" in whatever currency the company books in) - it is NOT quoted
+// against USD. So there is no fixed "USD rate", and the currency a
+// document uses is identified by its icon (e.g. "$"), not the literal
+// string "USD" - a currency can be named "US Dollar" with any icon.
+// findUsdRate() locates the actual USD row so its own rate can be used
+// as the reference point when converting a catalog item's USD price.
+export const findUsdRate = (currencies = []) => {
+  const usd = currencies.find(c => /^usd$/i.test(c.icon || '') || /^us(?:\s|-)?dollar$/i.test((c.name || '').trim()))
+  return usd ? Number(usd.rate) : null
+}
+
+// Converts a catalog item's USD price into whatever currency a
+// quotation/invoice/contract is using. `currencyRates` is {icon: rate}
+// from /currencies, and `usdRate` is the USD row's own rate, from
+// findUsdRate() on that same list. Converting back to the USD currency
+// itself is always a no-op, whatever its rate happens to be.
+export const convertFromUsd = (amountUsd, targetCurrency, currencyRates = {}, usdRate) => {
   const amount = Number(amountUsd) || 0
-  if (!targetCurrency || targetCurrency === 'USD') return amount
-  const rate = Number(currencyRates[targetCurrency])
-  if (!rate) return amount
-  const usdRate = Number(currencyRates.USD) || 1
-  return Math.round(amount * (rate / usdRate) * 100) / 100
+  const targetRate = Number(currencyRates[targetCurrency])
+  const usd = Number(usdRate)
+  if (!targetRate || !usd) return amount
+  return Math.round(amount * (usd / targetRate) * 100) / 100
 }
 
 export const toDateOnly = date => {
