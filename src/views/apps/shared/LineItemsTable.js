@@ -35,8 +35,8 @@ const LineItemsTable = ({ control, fields, lineItems, remove, move, onAddItem, o
             <tr>
               <th style={{ width: '26px', paddingRight: 0 }}></th>
               <th style={{ paddingLeft: '1rem' }}>Description</th>
-              <th style={{ width: '90px' }}>Qty</th>
-              <th style={{ width: '120px' }}>Rate</th>
+              <th style={{ width: '120px' }}>Qty</th>
+              <th style={{ width: '160px' }}>Rate</th>
               <th style={{ width: '110px' }}>Amount</th>
               <th style={{ width: '50px' }}></th>
             </tr>
@@ -48,13 +48,16 @@ const LineItemsTable = ({ control, fields, lineItems, remove, move, onAddItem, o
               return (
                 <tr
                   key={field.id}
-                  draggable
-                  onDragStart={() => handleDragStart(index)}
                   onDragOver={e => handleDragOver(e, index)}
                   onDrop={() => handleDrop(index)}
                   style={overIndex === index ? { borderTop: '2px solid #7367f0' } : undefined}
                 >
-                  <td className='align-middle text-center' style={{ cursor: 'grab', paddingRight: 0 }}>
+                  <td
+                    className='align-middle text-center'
+                    draggable
+                    onDragStart={() => handleDragStart(index)}
+                    style={{ cursor: 'grab', paddingRight: 0 }}
+                  >
                     <GripVerticalIcon size={12} className='drag-handle text-muted' />
                   </td>
                   <td style={{ paddingLeft: '1rem' }}>
