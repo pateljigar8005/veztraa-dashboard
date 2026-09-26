@@ -49,6 +49,16 @@ export const updateJobListing = createAsyncThunk(
   }
 )
 
+export const reorderJobListings = createAsyncThunk(
+  'appJobListings/reorderJobListings',
+  async (changes, { dispatch, getState }) => {
+    const response = await axios.post('/job-listings/reorder', { changes })
+    await dispatch(getData(getState().jobListings.params))
+    await dispatch(getAllData())
+    return response.data.data
+  }
+)
+
 export const deleteJobListing = createAsyncThunk(
   'appJobListings/deleteJobListing',
   async (id, { dispatch, getState }) => {    try {
