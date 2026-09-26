@@ -75,7 +75,7 @@ const MyLeave = () => {
           <Row>
             {store.balances.map(b => (
               <Col md={4} sm={6} key={b.leave_type_id} className='mb-1'>
-                <div className='p-1 border rounded' style={{ borderLeft: `4px solid ${b.color}` }}>
+                <div className={`p-1 border rounded bg-light-${b.color}`}>
                   <p className='text-muted mb-0'>{b.leave_type_name}</p>
                   <h3 className='mb-0'>{b.remaining}</h3>
                   <small className='text-muted'>
@@ -109,7 +109,9 @@ const MyLeave = () => {
               {store.myRequests.map(r => (
                 <tr key={r.id}>
                   <td>
-                    <span style={{ borderLeft: `3px solid ${r.leave_type_color}`, paddingLeft: '6px' }}>{r.leave_type_name}</span>
+                    <Badge className='text-capitalize' color={`light-${r.leave_type_color}`} pill>
+                      {r.leave_type_name}
+                    </Badge>
                   </td>
                   <td>
                     {displayDate(r.start_date)}{r.start_date !== r.end_date ? ` - ${displayDate(r.end_date)}` : ''}

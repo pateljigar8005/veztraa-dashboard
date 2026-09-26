@@ -2,13 +2,35 @@ import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
 import toast from 'react-hot-toast'
+import Select, { components } from 'react-select'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
+import { selectThemeColors } from '@utils'
 import HistoryModal from '../../activity-log/HistoryModal'
 import { addLeaveType, updateLeaveType, getLeaveType } from '../store'
 
-const defaultValues = { name: '', color: '#7367F0', is_paid: true, affects_balance: true, is_active: true }
+// Bootstrap contextual color names, not hex values - same convention as
+// Event Categories: the color renders via `bg-light-{color}`/`bullet-{color}`
+// utility classes elsewhere in the app, so it must be one of these to render.
+const colorOptions = [
+  { value: 'primary', label: 'Primary' },
+  { value: 'secondary', label: 'Secondary' },
+  { value: 'success', label: 'Success' },
+  { value: 'danger', label: 'Danger' },
+  { value: 'warning', label: 'Warning' },
+  { value: 'info', label: 'Info' },
+  { value: 'dark', label: 'Dark' }
+]
+
+const ColorOption = ({ data, ...props }) => (
+  <components.Option {...props}>
+    <span className={`bullet bullet-${data.value} bullet-sm me-50`}></span>
+    {data.label}
+  </components.Option>
+)
+
+const defaultValues = { name: '', color: 'success', is_paid: true, affects_balance: true, is_active: true }
 
 const LeaveTypeForm = () => {
   const { id } = useParams()
@@ -20,12 +42,16 @@ const LeaveTypeForm = () => {
   const {
     control,
     reset,
+    setValue,
+    watch,
     setError,
     handleSubmit,
     formState: { errors, isDirty }
   } = useForm({ defaultValues })
 
   useUnsavedChangesGuard(isDirty)
+
+  const color = watch('color')
 
   useEffect(() => {
     if (isEdit) dispatch(getLeaveType(id))
@@ -36,7 +62,7 @@ const LeaveTypeForm = () => {
       const leaveType = store.selectedLeaveType
       reset({
         name: leaveType.name || '',
-        color: leaveType.color || '#7367F0',
+        color: leaveType.color || 'success',
         is_paid: Boolean(leaveType.is_paid),
         affects_balance: Boolean(leaveType.affects_balance),
         is_active: Boolean(leaveType.is_active)
@@ -48,7 +74,7 @@ const LeaveTypeForm = () => {
     if (data.name.length > 0) {
       const payload = {
         name: data.name,
-        color: data.color,
+        color: data.color || 'success',
         is_paid: data.is_paid,
         affects_balance: data.affects_balance,
         is_active: data.is_active
@@ -71,6 +97,8 @@ const LeaveTypeForm = () => {
       setError('name', { type: 'manual' })
     }
   }
+
+  const selectedColorOption = colorOptions.find(i => i.value === color) || colorOptions[0]
 
   return (
     <Card>
@@ -98,10 +126,24 @@ const LeaveTypeForm = () => {
               <Label className='form-label' for='color'>
                 Color
               </Label>
-              <Controller
-                name='color'
-                control={control}
-                render={({ field }) => <Input id='color' type='color' {...field} style={{ height: '38px' }} />}
+              <Select
+                inputId='color'
+                classNamePrefix='select'
+                className='react-select'
+                theme={selectThemeColors}
+                options={colorOptions}
+                value={selectedColorOption}
+                onChange={option => setValue('color', option.value, { shouldDirty: true })}
+                isSearchable={false}
+                components={{
+                  Option: ColorOption,
+                  SingleValue: props => (
+                    <components.SingleValue {...props}>
+                      <span className={`bullet bullet-${props.data.value} bullet-sm me-50`}></span>
+                      {props.data.label}
+                    </components.SingleValue>
+                  )
+                }}
               />
             </Col>
           </Row>

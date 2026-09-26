@@ -11,6 +11,7 @@ import { getData as getServiceItemData } from '@src/views/apps/service-item/stor
 import { getData as getTermsTemplateData } from '@src/views/apps/terms-template/store'
 import { getData as getEmailTemplateData } from '@src/views/apps/email-template/store'
 import { getData as getHolidayData } from '@src/views/apps/holiday/store'
+import { getData as getLeaveTypeData } from '@src/views/apps/leave-type/store'
 import { getData as getTimesheetData } from '@src/views/apps/timesheet/store'
 import { getData as getTimesheetActivityData } from '@src/views/apps/timesheet-activity/store'
 import { getData as getTeamMemberData } from '@src/views/apps/team-member/store'
@@ -42,6 +43,7 @@ const registry = [
   { pattern: /^\/terms-template$/, refetch: (d, g) => d(getTermsTemplateData(g().termsTemplates.params)) },
   { pattern: /^\/email-template$/, refetch: (d, g) => d(getEmailTemplateData(g().emailTemplates.params)) },
   { pattern: /^\/holiday$/, refetch: (d, g) => d(getHolidayData(g().holidays.params)) },
+  { pattern: /^\/leave-type$/, refetch: (d, g) => d(getLeaveTypeData(g().leaveTypes.params)) },
   { pattern: /^\/timesheet$/, refetch: (d, g) => d(getTimesheetData(g().timesheets.params)) },
   { pattern: /^\/timesheet-activity$/, refetch: (d, g) => d(getTimesheetActivityData(g().timesheetActivities.params)) },
   { pattern: /^\/team-member$/, refetch: (d, g) => d(getTeamMemberData(g().teamMembers.params)) },

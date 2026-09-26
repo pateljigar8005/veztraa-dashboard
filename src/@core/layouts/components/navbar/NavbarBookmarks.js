@@ -27,11 +27,12 @@ const listToAddRoute = {
   '/case-study': '/case-study/add',
   '/job-listing': '/job-listing/add',
   '/timesheet': '/timesheet/add',
-  '/timesheet-activity': '/timesheet-activity/add'
+  '/timesheet-activity': '/timesheet-activity/add',
+  '/leave-type': '/leave-type/add'
 }
 
 const addOrEditRoutePattern =
-  /^\/(user|client|payment-method|event-category|service-item|project|quotation|contract|invoice|terms-template|email-template|holiday|roles|pdf-designer|currency|industry|team-member|portfolio|case-study|job-listing|timesheet-activity|timesheet)\/(add|edit\/[^/]+)$/
+  /^\/(user|client|payment-method|event-category|service-item|project|quotation|contract|invoice|terms-template|email-template|holiday|roles|pdf-designer|currency|industry|team-member|portfolio|case-study|job-listing|timesheet-activity|timesheet|leave-type)\/(add|edit\/[^/]+)$/
 
 const isPdfDesignerFormRoute = pathname => /^\/pdf-designer\/(add|edit\/[^/]+)$/.test(pathname)
 
@@ -50,7 +51,7 @@ const listToAddButtonId = {
 }
 
 // These list routes do not render the shared advanced-search trigger.
-const noSearchRoutes = ['/email-template', '/terms-template', '/roles']
+const noSearchRoutes = ['/email-template', '/terms-template', '/roles', '/leave-type']
 
 // The action label varies between document downloads and spreadsheet exports.
 const downloadButtonIdByRoute = [
@@ -96,6 +97,7 @@ const historyButtonIdByRoute = [
   { pattern: /^\/portfolio\/edit\/[^/]+$/, buttonId: 'portfolio-history-btn' },
   { pattern: /^\/case-study\/edit\/[^/]+$/, buttonId: 'case-study-history-btn' },
   { pattern: /^\/job-listing\/edit\/[^/]+$/, buttonId: 'job-listing-history-btn' },
+  { pattern: /^\/leave-type\/edit\/[^/]+$/, buttonId: 'leave-type-history-btn' },
   { pattern: /^\/contact-submission\/view\/[^/]+$/, buttonId: 'contact-submission-history-btn' },
   { pattern: /^\/job-application\/view\/[^/]+$/, buttonId: 'job-application-history-btn' }
 ]
