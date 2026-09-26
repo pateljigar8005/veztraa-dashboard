@@ -1,7 +1,8 @@
 import { Fragment, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import toast from 'react-hot-toast'
-import { Clock } from 'react-feather'
+import { Clock, Briefcase } from 'react-feather'
+import DataTable from 'react-data-table-component'
 import {
   Card,
   CardHeader,
@@ -10,11 +11,12 @@ import {
   Row,
   Col,
   Button,
-  Badge,
-  Table
+  Badge
 } from 'reactstrap'
 import { formatDate } from '@utils'
 import { confirmDelete } from '@src/utility/confirmDelete'
+import '@styles/react/libs/tables/react-dataTable-component.scss'
+import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
 import ApplyLeaveModal from './ApplyLeaveModal'
 import LogOvertimeModal from './LogOvertimeModal'
 import { getMyBalances, getMyLeaveRequests, getMyOvertimeEntries, cancelLeaveRequest } from './store'
@@ -57,6 +59,92 @@ const MyLeave = () => {
     })
   }
 
+  const leaveRequestColumns = [
+    {
+      name: 'Type',
+      minWidth: '140px',
+      cell: r => (
+        <Badge className='text-capitalize' color={`light-${r.leave_type_color}`} pill>
+          {r.leave_type_name}
+        </Badge>
+      )
+    },
+    {
+      name: 'Dates',
+      minWidth: '220px',
+      cell: r => (
+        <span>
+          {displayDate(r.start_date)}{r.start_date !== r.end_date ? ` - ${displayDate(r.end_date)}` : ''}
+          {r.half_day !== 'none' && <small className='text-muted d-block'>{r.half_day.replace('_', ' ')}</small>}
+        </span>
+      )
+    },
+    { name: 'Days', width: '90px', selector: row => row.days },
+    {
+      name: 'Status',
+      width: '130px',
+      cell: r => (
+        <Badge color={statusColor[r.status]} className='text-capitalize'>
+          {r.status}
+        </Badge>
+      )
+    },
+    {
+      name: 'Reason / Rejection',
+      minWidth: '200px',
+      cell: r =>
+        r.status === 'rejected' && r.rejection_reason ? (
+          <span className='text-danger'>{r.rejection_reason}</span>
+        ) : (
+          r.reason || <span className='text-muted'>—</span>
+        )
+    },
+    {
+      name: 'Actions',
+      right: true,
+      minWidth: '160px',
+      cell: r => (
+        <Fragment>
+          {r.status === 'pending' && (
+            <Fragment>
+              <Button
+                size='sm'
+                color='flat-primary'
+                className='me-50'
+                onClick={() => { setEditingRequest(r); setApplyOpen(true) }}
+              >
+                Edit
+              </Button>
+              <Button size='sm' color='flat-danger' onClick={() => handleCancel(r)}>
+                Cancel
+              </Button>
+            </Fragment>
+          )}
+          {r.status === 'approved' && r.start_date > new Date().toISOString().slice(0, 10) && (
+            <Button size='sm' color='flat-danger' onClick={() => handleCancel(r)}>
+              Cancel
+            </Button>
+          )}
+        </Fragment>
+      )
+    }
+  ]
+
+  const overtimeColumns = [
+    { name: 'Date', minWidth: '140px', cell: e => <span>{displayDate(e.date)}</span> },
+    { name: 'Hours', width: '110px', selector: row => row.hours },
+    {
+      name: 'Status',
+      width: '130px',
+      cell: e => (
+        <Badge color={statusColor[e.status]} className='text-capitalize'>
+          {e.status}
+        </Badge>
+      )
+    },
+    { name: 'Reason', minWidth: '200px', cell: e => e.reason || <span className='text-muted'>—</span> }
+  ]
+
   return (
     <Fragment>
       <Card>
@@ -95,75 +183,21 @@ const MyLeave = () => {
           <CardTitle tag='h4'>My Leave Requests</CardTitle>
         </CardHeader>
         <CardBody>
-          <Table responsive className='mb-0'>
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th>Dates</th>
-                <th>Days</th>
-                <th>Status</th>
-                <th>Reason / Rejection</th>
-                <th className='text-end'>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {store.myRequests.map(r => (
-                <tr key={r.id}>
-                  <td>
-                    <Badge className='text-capitalize' color={`light-${r.leave_type_color}`} pill>
-                      {r.leave_type_name}
-                    </Badge>
-                  </td>
-                  <td>
-                    {displayDate(r.start_date)}{r.start_date !== r.end_date ? ` - ${displayDate(r.end_date)}` : ''}
-                    {r.half_day !== 'none' && <small className='text-muted d-block'>{r.half_day.replace('_', ' ')}</small>}
-                  </td>
-                  <td>{r.days}</td>
-                  <td>
-                    <Badge color={statusColor[r.status]} className='text-capitalize'>
-                      {r.status}
-                    </Badge>
-                  </td>
-                  <td>
-                    {r.status === 'rejected' && r.rejection_reason ? (
-                      <span className='text-danger'>{r.rejection_reason}</span>
-                    ) : (
-                      r.reason || <span className='text-muted'>—</span>
-                    )}
-                  </td>
-                  <td className='text-end'>
-                    {r.status === 'pending' && (
-                      <Fragment>
-                        <Button
-                          size='sm'
-                          color='flat-primary'
-                          className='me-50'
-                          onClick={() => { setEditingRequest(r); setApplyOpen(true) }}
-                        >
-                          Edit
-                        </Button>
-                        <Button size='sm' color='flat-danger' onClick={() => handleCancel(r)}>
-                          Cancel
-                        </Button>
-                      </Fragment>
-                    )}
-                    {r.status === 'approved' && r.start_date > new Date().toISOString().slice(0, 10) && (
-                      <Button size='sm' color='flat-danger' onClick={() => handleCancel(r)}>
-                        Cancel
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {store.myRequests.length === 0 && (
-                <tr>
-                  <td colSpan={6} className='text-center text-muted'>
-                    No leave requests yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
+          <div className='react-dataTable'>
+            <DataTable
+              noHeader
+              responsive
+              columns={leaveRequestColumns}
+              data={store.myRequests}
+              noDataComponent={
+                <TableEmptyState
+                  icon={Briefcase}
+                  noun='leave requests'
+                  message="Apply for leave from the navbar and it'll show up here."
+                />
+              }
+            />
+          </div>
         </CardBody>
       </Card>
 
@@ -172,37 +206,17 @@ const MyLeave = () => {
           <CardTitle tag='h4'>My Overtime Entries</CardTitle>
         </CardHeader>
         <CardBody>
-          <Table responsive className='mb-0'>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Hours</th>
-                <th>Status</th>
-                <th>Reason</th>
-              </tr>
-            </thead>
-            <tbody>
-              {store.myOvertimeEntries.map(e => (
-                <tr key={e.id}>
-                  <td>{displayDate(e.date)}</td>
-                  <td>{e.hours}</td>
-                  <td>
-                    <Badge color={statusColor[e.status]} className='text-capitalize'>
-                      {e.status}
-                    </Badge>
-                  </td>
-                  <td>{e.reason || <span className='text-muted'>—</span>}</td>
-                </tr>
-              ))}
-              {store.myOvertimeEntries.length === 0 && (
-                <tr>
-                  <td colSpan={4} className='text-center text-muted'>
-                    No overtime logged yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
+          <div className='react-dataTable'>
+            <DataTable
+              noHeader
+              responsive
+              columns={overtimeColumns}
+              data={store.myOvertimeEntries}
+              noDataComponent={
+                <TableEmptyState icon={Clock} noun='overtime entries' message="Log overtime and it'll show up here." />
+              }
+            />
+          </div>
         </CardBody>
       </Card>
 

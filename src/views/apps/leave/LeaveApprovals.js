@@ -3,8 +3,12 @@ import { useDispatch, useSelector } from 'react-redux'
 import toast from 'react-hot-toast'
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
-import { Card, CardHeader, CardTitle, CardBody, Table, Badge, Button } from 'reactstrap'
+import DataTable from 'react-data-table-component'
+import { CheckSquare, Clock } from 'react-feather'
+import { Card, CardHeader, CardTitle, CardBody, Badge, Button } from 'reactstrap'
 import { formatDate } from '@utils'
+import '@styles/react/libs/tables/react-dataTable-component.scss'
+import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
 import {
   getPendingLeaveRequests,
   getPendingOvertimeEntries,
@@ -85,6 +89,73 @@ const LeaveApprovals = () => {
       .finally(() => setBusyId(null))
   }
 
+  const pendingRequestColumns = [
+    { name: 'User', minWidth: '160px', selector: row => row.user_name },
+    {
+      name: 'Type',
+      minWidth: '140px',
+      cell: r => (
+        <Badge className='text-capitalize' color={`light-${r.leave_type_color}`} pill>
+          {r.leave_type_name}
+        </Badge>
+      )
+    },
+    {
+      name: 'Dates',
+      minWidth: '200px',
+      cell: r => (
+        <span>
+          {displayDate(r.start_date)}{r.start_date !== r.end_date ? ` - ${displayDate(r.end_date)}` : ''}
+        </span>
+      )
+    },
+    { name: 'Days', width: '90px', selector: row => row.days },
+    { name: 'Reason', minWidth: '180px', cell: r => r.reason || <span className='text-muted'>—</span> },
+    {
+      name: 'Actions',
+      right: true,
+      minWidth: '190px',
+      cell: r => (
+        <Fragment>
+          <Button size='sm' color='success' className='me-50' disabled={busyId === r.id} onClick={() => handleApprove(r)}>
+            Approve
+          </Button>
+          <Button size='sm' color='danger' outline disabled={busyId === r.id} onClick={() => handleReject(r)}>
+            Reject
+          </Button>
+        </Fragment>
+      )
+    }
+  ]
+
+  const pendingOvertimeColumns = [
+    { name: 'User', minWidth: '160px', selector: row => row.user_name },
+    { name: 'Date', minWidth: '140px', cell: e => <span>{displayDate(e.date)}</span> },
+    { name: 'Hours', width: '110px', selector: row => row.hours },
+    { name: 'Reason', minWidth: '180px', cell: e => e.reason || <span className='text-muted'>—</span> },
+    {
+      name: 'Actions',
+      right: true,
+      minWidth: '190px',
+      cell: e => (
+        <Fragment>
+          <Button
+            size='sm'
+            color='success'
+            className='me-50'
+            disabled={busyId === `ot-${e.id}`}
+            onClick={() => handleApproveOt(e)}
+          >
+            Approve
+          </Button>
+          <Button size='sm' color='danger' outline disabled={busyId === `ot-${e.id}`} onClick={() => handleRejectOt(e)}>
+            Reject
+          </Button>
+        </Fragment>
+      )
+    }
+  ]
+
   return (
     <Fragment>
       <Card>
@@ -92,56 +163,21 @@ const LeaveApprovals = () => {
           <CardTitle tag='h4'>Pending Leave Requests</CardTitle>
         </CardHeader>
         <CardBody>
-          <Table responsive className='mb-0'>
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Type</th>
-                <th>Dates</th>
-                <th>Days</th>
-                <th>Reason</th>
-                <th className='text-end'>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {store.pendingRequests.map(r => (
-                <tr key={r.id}>
-                  <td>{r.user_name}</td>
-                  <td>
-                    <Badge className='text-capitalize' color={`light-${r.leave_type_color}`} pill>
-                      {r.leave_type_name}
-                    </Badge>
-                  </td>
-                  <td>
-                    {displayDate(r.start_date)}{r.start_date !== r.end_date ? ` - ${displayDate(r.end_date)}` : ''}
-                  </td>
-                  <td>{r.days}</td>
-                  <td>{r.reason || <span className='text-muted'>—</span>}</td>
-                  <td className='text-end'>
-                    <Button
-                      size='sm'
-                      color='success'
-                      className='me-50'
-                      disabled={busyId === r.id}
-                      onClick={() => handleApprove(r)}
-                    >
-                      Approve
-                    </Button>
-                    <Button size='sm' color='danger' outline disabled={busyId === r.id} onClick={() => handleReject(r)}>
-                      Reject
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-              {store.pendingRequests.length === 0 && (
-                <tr>
-                  <td colSpan={6} className='text-center text-muted'>
-                    No pending leave requests.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
+          <div className='react-dataTable'>
+            <DataTable
+              noHeader
+              responsive
+              columns={pendingRequestColumns}
+              data={store.pendingRequests}
+              noDataComponent={
+                <TableEmptyState
+                  icon={CheckSquare}
+                  noun='pending leave requests'
+                  message='Leave requests awaiting your approval will show up here.'
+                />
+              }
+            />
+          </div>
         </CardBody>
       </Card>
 
@@ -150,48 +186,21 @@ const LeaveApprovals = () => {
           <CardTitle tag='h4'>Pending Overtime</CardTitle>
         </CardHeader>
         <CardBody>
-          <Table responsive className='mb-0'>
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Date</th>
-                <th>Hours</th>
-                <th>Reason</th>
-                <th className='text-end'>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {store.pendingOvertimeEntries.map(e => (
-                <tr key={e.id}>
-                  <td>{e.user_name}</td>
-                  <td>{displayDate(e.date)}</td>
-                  <td>{e.hours}</td>
-                  <td>{e.reason || <span className='text-muted'>—</span>}</td>
-                  <td className='text-end'>
-                    <Button
-                      size='sm'
-                      color='success'
-                      className='me-50'
-                      disabled={busyId === `ot-${e.id}`}
-                      onClick={() => handleApproveOt(e)}
-                    >
-                      Approve
-                    </Button>
-                    <Button size='sm' color='danger' outline disabled={busyId === `ot-${e.id}`} onClick={() => handleRejectOt(e)}>
-                      Reject
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-              {store.pendingOvertimeEntries.length === 0 && (
-                <tr>
-                  <td colSpan={5} className='text-center text-muted'>
-                    No pending overtime entries.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
+          <div className='react-dataTable'>
+            <DataTable
+              noHeader
+              responsive
+              columns={pendingOvertimeColumns}
+              data={store.pendingOvertimeEntries}
+              noDataComponent={
+                <TableEmptyState
+                  icon={Clock}
+                  noun='pending overtime entries'
+                  message='Overtime entries awaiting your approval will show up here.'
+                />
+              }
+            />
+          </div>
         </CardBody>
       </Card>
     </Fragment>
