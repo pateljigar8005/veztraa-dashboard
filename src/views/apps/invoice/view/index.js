@@ -13,6 +13,7 @@ import RecordPaymentModal from '../RecordPaymentModal'
 import SourceReference from '../SourceReference'
 import ComposePopup from '../../email/ComposePopup'
 import HistoryModal from '../../activity-log/HistoryModal'
+import TableEmptyState from '../../shared/TableEmptyState'
 import { selectThemeColors, formatAmount } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
@@ -473,7 +474,7 @@ const InvoiceView = () => {
             </Button>
           </div>
           {payments.length === 0 ? (
-            <p className='text-muted mb-0'>No payments recorded yet.</p>
+            <TableEmptyState icon={CreditCard} noun='payments recorded' message='Record a payment against this invoice to see it here.' />
           ) : (
             <Table responsive className='mb-0'>
               <thead>
