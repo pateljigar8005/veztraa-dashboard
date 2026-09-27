@@ -405,7 +405,7 @@ const InvoiceView = () => {
                 onChange={handleStatusChange}
                 isDisabled={!currentUserCan('/invoice', 'edit')}
               />
-              <Button color='primary' block onClick={() => setPaymentsListOpen(true)}>
+              <Button color='primary' block className='mt-1' onClick={() => setPaymentsListOpen(true)}>
                 <CreditCard size={14} className='me-50' />
                 Payments
               </Button>
