@@ -41,77 +41,91 @@ export const buildThemeColorCSS = hex => {
   const borderSubtle = tint(hex, 0.6)
   const focusBorder = tint(hex, 0.4)
 
+  // Every rule below uses !important. This override is deliberately not
+  // relying on cascade order (being "last in <head>") because Vite's dev
+  // server can re-inject/reorder the app's own CSS via HMR after this tag
+  // exists, which would otherwise silently lose the override mid-session.
   return `:root {
-  --bs-primary: ${hex};
-  --bs-primary-rgb: ${rgb};
-  --bs-link-color: ${hex};
-  --bs-link-color-rgb: ${rgb};
-  --bs-link-hover-color: ${hoverBg};
+  --bs-primary: ${hex} !important;
+  --bs-primary-rgb: ${rgb} !important;
+  --bs-link-color: ${hex} !important;
+  --bs-link-color-rgb: ${rgb} !important;
+  --bs-link-hover-color: ${hoverBg} !important;
 }
 
-a { color: ${hex}; }
-a:hover { color: ${hoverBg}; }
+a { color: ${hex} !important; }
+a:hover { color: ${hoverBg} !important; }
 
 .text-primary { color: ${hex} !important; }
 .bg-primary { background-color: ${hex} !important; }
 .border-primary { border-color: ${hex} !important; }
 
 .btn-primary {
-  --bs-btn-bg: ${hex};
-  --bs-btn-border-color: ${hex};
-  --bs-btn-hover-bg: ${hoverBg};
-  --bs-btn-hover-border-color: ${hoverBg};
-  --bs-btn-active-bg: ${activeBg};
-  --bs-btn-active-border-color: ${activeBg};
-  --bs-btn-disabled-bg: ${hex};
-  --bs-btn-disabled-border-color: ${hex};
-  --bs-btn-focus-shadow-rgb: ${rgb};
-  box-shadow: 0 2px 4px 0 rgba(${rgb}, 0.4);
+  --bs-btn-bg: ${hex} !important;
+  --bs-btn-border-color: ${hex} !important;
+  --bs-btn-hover-bg: ${hoverBg} !important;
+  --bs-btn-hover-border-color: ${hoverBg} !important;
+  --bs-btn-active-bg: ${activeBg} !important;
+  --bs-btn-active-border-color: ${activeBg} !important;
+  --bs-btn-disabled-bg: ${hex} !important;
+  --bs-btn-disabled-border-color: ${hex} !important;
+  --bs-btn-focus-shadow-rgb: ${rgb} !important;
+  background-color: ${hex} !important;
+  border-color: ${hex} !important;
+  box-shadow: 0 2px 4px 0 rgba(${rgb}, 0.4) !important;
 }
 .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
-  box-shadow: 0 4px 18px 0 rgba(${rgb}, 0.44);
+  background-color: ${hoverBg} !important;
+  border-color: ${hoverBg} !important;
+  box-shadow: 0 4px 18px 0 rgba(${rgb}, 0.44) !important;
 }
 
 .btn-outline-primary {
-  --bs-btn-color: ${hex};
-  --bs-btn-border-color: ${hex};
-  --bs-btn-hover-bg: ${hex};
-  --bs-btn-hover-border-color: ${hex};
-  --bs-btn-active-bg: ${hex};
-  --bs-btn-active-border-color: ${hex};
-  --bs-btn-focus-shadow-rgb: ${rgb};
+  --bs-btn-color: ${hex} !important;
+  --bs-btn-border-color: ${hex} !important;
+  --bs-btn-hover-bg: ${hex} !important;
+  --bs-btn-hover-border-color: ${hex} !important;
+  --bs-btn-active-bg: ${hex} !important;
+  --bs-btn-active-border-color: ${hex} !important;
+  --bs-btn-focus-shadow-rgb: ${rgb} !important;
+  color: ${hex} !important;
+  border-color: ${hex} !important;
+}
+.btn-outline-primary:hover, .btn-outline-primary:active {
+  background-color: ${hex} !important;
+  border-color: ${hex} !important;
 }
 
-.btn-flat-primary { color: ${hex}; }
-.btn-flat-primary:hover { background-color: rgba(${rgb}, 0.12); }
+.btn-flat-primary { color: ${hex} !important; }
+.btn-flat-primary:hover { background-color: rgba(${rgb}, 0.12) !important; }
 
 .badge.bg-primary, .badge-primary { background-color: ${hex} !important; }
 .badge.bg-light-primary { background-color: ${lightBg} !important; color: ${hex} !important; }
 
-.alert-primary { color: ${hex}; background-color: ${lightBg}; border-color: ${borderSubtle}; }
-.alert-primary .alert-link { color: ${shade(hex, 0.1)}; }
+.alert-primary { color: ${hex} !important; background-color: ${lightBg} !important; border-color: ${borderSubtle} !important; }
+.alert-primary .alert-link { color: ${shade(hex, 0.1)} !important; }
 
-.progress-bar { background-color: ${hex}; }
+.progress-bar { background-color: ${hex} !important; }
 
 .form-check-input:checked, .form-switch .form-check-input:checked {
-  background-color: ${hex};
-  border-color: ${hex};
+  background-color: ${hex} !important;
+  border-color: ${hex} !important;
 }
-.form-check-input:focus { box-shadow: 0 0 0 0.25rem rgba(${rgb}, 0.25); }
+.form-check-input:focus { box-shadow: 0 0 0 0.25rem rgba(${rgb}, 0.25) !important; }
 
-.nav-pills .nav-link.active, .nav-pills .show > .nav-link { background-color: ${hex}; }
-.page-item.active .page-link { background-color: ${hex}; border-color: ${hex}; }
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link { background-color: ${hex} !important; }
+.page-item.active .page-link { background-color: ${hex} !important; border-color: ${hex} !important; }
 
 .main-menu .navigation li.active > a {
   background: linear-gradient(118deg, rgba(${rgb}, 1), rgba(${rgb}, 0.7)) !important;
-  box-shadow: 0 0 10px 1px rgba(${rgb}, 0.7);
+  box-shadow: 0 0 10px 1px rgba(${rgb}, 0.7) !important;
   color: #fff !important;
 }
 .main-menu .navigation li.active > a * { color: #fff !important; }
-.main-menu .navigation li .active > a { color: ${hex}; }
-.horizontal-menu .nav-link.active { color: ${hex}; }
+.main-menu .navigation li .active > a { color: ${hex} !important; }
+.horizontal-menu .nav-link.active { color: ${hex} !important; }
 
-.form-control:focus, .form-select:focus { border-color: ${focusBorder}; box-shadow: 0 0 0 0.2rem rgba(${rgb}, 0.25); }
+.form-control:focus, .form-select:focus { border-color: ${focusBorder} !important; box-shadow: 0 0 0 0.2rem rgba(${rgb}, 0.25) !important; }
 
 ::selection { background: ${tint(hex, 0.5)}; }
 `
@@ -122,8 +136,10 @@ const getStyleTag = () => {
   if (!tag) {
     tag = document.createElement('style')
     tag.id = STYLE_TAG_ID
-    document.head.appendChild(tag)
   }
+  // Re-appending (even if already in <head>) moves it to the end, so it
+  // stays last after any other stylesheet the app injects later.
+  document.head.appendChild(tag)
   return tag
 }
 
