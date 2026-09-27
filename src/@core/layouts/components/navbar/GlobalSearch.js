@@ -7,6 +7,10 @@ import {
   Calendar,
   CheckSquare,
   Mail,
+  Send,
+  Image,
+  BookOpen,
+  Package,
   Users,
   FileText,
   Briefcase,
@@ -27,15 +31,51 @@ import { canAccessRoute } from '@src/utility/navPermissions'
 const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform || navigator.userAgent || '')
 
 // Grouped result order the API can return, kept stable regardless of which
-// groups happen to have matches for a given query.
-const GROUP_ORDER = ['clients', 'quotations', 'contracts', 'invoiceApp', 'projects', 'users']
+// groups happen to have matches for a given query - mirrors
+// SearchController::index()'s group order (veztraa-api).
+const GROUP_ORDER = [
+  'clients',
+  'quotations',
+  'contracts',
+  'invoiceApp',
+  'projects',
+  'users',
+  'teamMembers',
+  'contactSubmissions',
+  'jobApplications',
+  'jobListings',
+  'portfolioItems',
+  'caseStudies',
+  'serviceItems',
+  'paymentMethods',
+  'currencies',
+  'industries',
+  'holidays',
+  'leaveTypes',
+  'timesheetActivities',
+  'roles'
+]
 const GROUP_ICON = {
   clients: Users,
   quotations: FileText,
   contracts: Briefcase,
   invoiceApp: DollarSign,
   projects: Folder,
-  users: User
+  users: User,
+  teamMembers: Users,
+  contactSubmissions: Mail,
+  jobApplications: Send,
+  jobListings: Briefcase,
+  portfolioItems: Image,
+  caseStudies: BookOpen,
+  serviceItems: Package,
+  paymentMethods: CreditCard,
+  currencies: DollarSign,
+  industries: Globe,
+  holidays: Calendar,
+  leaveTypes: Clock,
+  timesheetActivities: Clock,
+  roles: Lock
 }
 
 // Shown when the query is empty, laid out as two columns of two labeled
@@ -104,6 +144,10 @@ const GlobalSearch = () => {
   const isSearching = query.trim().length >= 2
 
   const userData = getUserData()
+  // Whole-system search is admin-only (the API enforces this too - see
+  // SearchController::index()) - non-admins get no Ctrl+K binding and no modal.
+  const isAdmin = (userData?.role || '').toLowerCase() === 'admin'
+
   const visibleColumns = QUICK_LINK_COLUMNS.map(column =>
     column
       .map(group => ({ ...group, items: group.items.filter(item => canAccessRoute(item.path, userData)) }))
@@ -122,6 +166,8 @@ const GlobalSearch = () => {
   }
 
   useEffect(() => {
+    if (!isAdmin) return undefined
+
     const handleKeyDown = e => {
       const modifierPressed = isMac ? e.metaKey : e.ctrlKey
       if (modifierPressed && e.key.toLowerCase() === 'k') {
@@ -131,7 +177,7 @@ const GlobalSearch = () => {
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [])
+  }, [isAdmin])
 
   useEffect(() => {
     if (isOpen) {
@@ -196,6 +242,8 @@ const GlobalSearch = () => {
     return runningIndex
   }
 
+  if (!isAdmin) return null
+
   return (
     <Modal isOpen={isOpen} toggle={close} className='modal-dialog-centered modal-lg global-search-modal' contentClassName='p-0'>
       <div className='d-flex align-items-center px-3 py-1' style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
@@ -204,7 +252,7 @@ const GlobalSearch = () => {
             ref={inputRef}
             className='border-0 flex-grow-1'
             style={{ outline: 'none', background: 'transparent', fontSize: '1.15rem' }}
-            placeholder='Search clients, invoices, contracts, quotations, projects, users...'
+            placeholder='Search anything in the system...'
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={handleKeyNav}
