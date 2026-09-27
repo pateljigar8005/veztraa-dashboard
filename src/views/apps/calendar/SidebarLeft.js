@@ -98,7 +98,7 @@ const SidebarLeft = props => {
             {taskFilters.map(filter => (
               <div
                 key={`${filter.label}-key`}
-                className={classnames('form-check', {
+                className={classnames('form-check mb-1', {
                   [filter.className]: filter.className
                 })}
               >
