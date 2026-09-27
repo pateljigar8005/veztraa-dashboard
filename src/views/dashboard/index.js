@@ -7,6 +7,8 @@ import BlockCard from './BlockCard'
 import CombinedChartCard from './CombinedChartCard'
 import UpcomingCard from './UpcomingCard'
 import KpiStrip from './KpiStrip'
+import EarningReportCard from './EarningReportCard'
+import SupportTrackerCard from './SupportTrackerCard'
 
 // One block's config + its already-fetched data in -> a BlockCard. Donut-
 // flagged blocks (Invoice/Quotation/Project) are handled separately in the
@@ -52,6 +54,21 @@ const Dashboard = () => {
       ) : (
         <Fragment>
           <KpiStrip blocks={store.blocks} />
+
+          {(store.blocks.earningsReport || store.blocks.supportTracker) && (
+            <Row className='g-2 mb-1'>
+              {store.blocks.earningsReport && (
+                <Col md={store.blocks.supportTracker ? 7 : 12}>
+                  <EarningReportCard data={store.blocks.earningsReport} />
+                </Col>
+              )}
+              {store.blocks.supportTracker && (
+                <Col md={store.blocks.earningsReport ? 5 : 12}>
+                  <SupportTrackerCard data={store.blocks.supportTracker} />
+                </Col>
+              )}
+            </Row>
+          )}
 
           <Row className='g-2'>
             <Col lg={4} md={12} className='order-lg-2'>
