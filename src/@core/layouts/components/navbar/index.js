@@ -1,6 +1,7 @@
 import { Fragment } from 'react'
 import NavbarUser from './NavbarUser'
 import NavbarBookmarks from './NavbarBookmarks'
+import GlobalSearch from './GlobalSearch'
 
 const ThemeNavbar = props => {
   const { skin, setSkin, setMenuVisibility } = props
@@ -9,6 +10,9 @@ const ThemeNavbar = props => {
     <Fragment>
       <div className='bookmark-wrapper d-flex align-items-center'>
         <NavbarBookmarks setMenuVisibility={setMenuVisibility} />
+        <ul className='nav navbar-nav align-items-center'>
+          <GlobalSearch />
+        </ul>
       </div>
       <NavbarUser skin={skin} setSkin={setSkin} />
     </Fragment>
