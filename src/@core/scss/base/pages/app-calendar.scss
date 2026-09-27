@@ -177,8 +177,9 @@ $fc-day-toggle-btn-padding: 0.55rem 1.5rem;
   .fc-day-holiday-label {
     display: block;
     margin-left: auto;
-    padding: 0.1rem 0.4rem;
+    padding: 0.25rem 0.4rem;
     font-size: 0.7rem;
+    line-height: 1;
     font-weight: 500;
     color: $danger;
     background-color: rgba($danger, 0.12);
