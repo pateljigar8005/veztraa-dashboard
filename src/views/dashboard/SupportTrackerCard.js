@@ -1,74 +1,112 @@
 import { useContext } from 'react'
-import { CheckSquare, UserCheck, AlertCircle, MoreVertical } from 'react-feather'
 import Chart from 'react-apexcharts'
-import { Card, CardBody, CardTitle, CardSubtitle } from 'reactstrap'
+import {
+  Row,
+  Col,
+  Card,
+  CardBody,
+  CardText,
+  CardTitle,
+  CardHeader,
+  DropdownMenu,
+  DropdownItem,
+  DropdownToggle,
+  UncontrolledDropdown
+} from 'reactstrap'
 import { ThemeColors } from '@src/utility/context/ThemeColors'
 
-// Stat list is whatever DashboardController::supportTracker() sends
-// (Open Todos / Pending Approvals / Overdue Invoices today) - icons/colors
-// here just cycle by position so a 4th stat added server-side still
-// renders instead of being dropped. Same list + radial-gauge layout as
-// Vuexy's own "Support Tracker" demo card.
-const ICONS = [CheckSquare, UserCheck, AlertCircle]
-const COLORS = ['info', 'warning', 'danger']
+// Exact visual port of Vuexy's reactstrap+apexcharts "Support Tracker" card
+// (react-version/vite-bootstrap5/full-version/.../SupportTracker.js) - same
+// dashed dual-tone radial gauge, layout and static demo numbers as the
+// template's own fake-db data. Wiring this to real ticket/task data is a
+// follow-up.
+const DATA = {
+  title: 'Support Tracker',
+  lastDays: ['Last 28 Days', 'Last Month', 'Last Year'],
+  totalTicket: 163,
+  newTicket: 29,
+  openTicket: 63,
+  responseTime: 1
+}
 
-const SupportTrackerCard = ({ data }) => {
+const SupportTrackerCard = () => {
   const { colors } = useContext(ThemeColors)
-  const pct = data.completion_pct || 0
+  const primary = colors?.primary?.main || '#7367f0'
+  const danger = colors?.danger?.main || '#ea5455'
 
   const options = {
-    chart: { type: 'radialBar', sparkline: { enabled: true } },
     plotOptions: {
       radialBar: {
-        hollow: { size: '60%' },
-        track: { background: colors?.secondary?.light || '#ebe9f1' },
+        size: 150,
+        offsetY: 20,
+        startAngle: -150,
+        endAngle: 150,
+        hollow: { size: '65%' },
+        track: { background: '#fff', strokeWidth: '100%' },
         dataLabels: {
-          name: { show: true, offsetY: 20, color: '#a0a0a0', fontSize: '13px' },
-          value: { show: true, offsetY: -10, fontSize: '26px', fontWeight: 600, formatter: val => `${val}%` }
+          name: { offsetY: -5, fontFamily: 'Montserrat', fontSize: '1rem' },
+          value: { offsetY: 15, fontFamily: 'Montserrat', fontSize: '1.714rem' }
         }
       }
     },
-    colors: [colors?.primary?.main || '#7367f0'],
-    labels: ['Completed Task'],
-    stroke: { lineCap: 'round' }
+    colors: [danger],
+    fill: {
+      type: 'gradient',
+      gradient: {
+        shade: 'dark',
+        type: 'horizontal',
+        shadeIntensity: 0.5,
+        gradientToColors: [primary],
+        inverseColors: true,
+        opacityFrom: 1,
+        opacityTo: 1,
+        stops: [0, 100]
+      }
+    },
+    stroke: { dashArray: 8 },
+    labels: ['Completed Tickets']
   }
 
   return (
     <Card className='h-100'>
-      <CardBody className='d-flex flex-column'>
-        <div className='d-flex align-items-start justify-content-between'>
-          <div>
-            <CardTitle tag='h4' className='mb-25'>
-              Support Tracker
-            </CardTitle>
-            <CardSubtitle tag='p' className='text-muted mb-0'>
-              Open Items Overview
-            </CardSubtitle>
+      <CardHeader className='pb-0'>
+        <CardTitle tag='h4'>{DATA.title}</CardTitle>
+        <UncontrolledDropdown className='chart-dropdown'>
+          <DropdownToggle color='' className='bg-transparent btn-sm border-0 p-50'>
+            Last 7 days
+          </DropdownToggle>
+          <DropdownMenu end>
+            {DATA.lastDays.map(item => (
+              <DropdownItem className='w-100' key={item}>
+                {item}
+              </DropdownItem>
+            ))}
+          </DropdownMenu>
+        </UncontrolledDropdown>
+      </CardHeader>
+      <CardBody>
+        <Row>
+          <Col sm='2' className='d-flex flex-column flex-wrap text-center'>
+            <h1 className='font-large-2 fw-bolder mt-2 mb-0'>{DATA.totalTicket}</h1>
+            <CardText>Tickets</CardText>
+          </Col>
+          <Col sm='10' className='d-flex justify-content-center'>
+            <Chart options={options} series={[83]} type='radialBar' height={270} id='support-tracker-card' />
+          </Col>
+        </Row>
+        <div className='d-flex justify-content-between mt-1'>
+          <div className='text-center'>
+            <CardText className='mb-50'>New Tickets</CardText>
+            <span className='font-large-1 fw-bold'>{DATA.newTicket}</span>
           </div>
-          <MoreVertical size={18} className='text-muted cursor-pointer' />
-        </div>
-
-        <div className='d-flex align-items-center justify-content-between flex-grow-1 mt-2'>
-          <div>
-            {data.stats.map((stat, index) => {
-              const Icon = ICONS[index % ICONS.length]
-              const color = COLORS[index % COLORS.length]
-              return (
-                <div key={stat.label} className='d-flex align-items-center mb-2'>
-                  <div className={`avatar avatar-sm p-50 m-0 me-1 bg-light-${color}`}>
-                    <div className='avatar-content'>
-                      <Icon size={15} />
-                    </div>
-                  </div>
-                  <div>
-                    <h5 className='fw-bolder mb-0'>{stat.value}</h5>
-                    <small className='text-muted'>{stat.label}</small>
-                  </div>
-                </div>
-              )
-            })}
+          <div className='text-center'>
+            <CardText className='mb-50'>Open Tickets</CardText>
+            <span className='font-large-1 fw-bold'>{DATA.openTicket}</span>
           </div>
-          <Chart options={options} series={[pct]} type='radialBar' height={190} width={190} />
+          <div className='text-center'>
+            <CardText className='mb-50'>Response Time</CardText>
+            <span className='font-large-1 fw-bold'>{DATA.responseTime}d</span>
+          </div>
         </div>
       </CardBody>
     </Card>

@@ -7,8 +7,11 @@ import BlockCard from './BlockCard'
 import CombinedChartCard from './CombinedChartCard'
 import UpcomingCard from './UpcomingCard'
 import KpiStrip from './KpiStrip'
-import EarningReportCard from './EarningReportCard'
 import SupportTrackerCard from './SupportTrackerCard'
+import RevenueReportCard from './RevenueReportCard'
+import UserTimelineCard from './UserTimelineCard'
+import SalesRadarCard from './SalesRadarCard'
+import AppDesignCard from './AppDesignCard'
 
 // One block's config + its already-fetched data in -> a BlockCard. Donut-
 // flagged blocks (Invoice/Quotation/Project) are handled separately in the
@@ -55,20 +58,28 @@ const Dashboard = () => {
         <Fragment>
           <KpiStrip blocks={store.blocks} />
 
-          {(store.blocks.earningsReport || store.blocks.supportTracker) && (
-            <Row className='g-2 mb-1'>
-              {store.blocks.earningsReport && (
-                <Col md={store.blocks.supportTracker ? 7 : 12}>
-                  <EarningReportCard data={store.blocks.earningsReport} />
-                </Col>
-              )}
-              {store.blocks.supportTracker && (
-                <Col md={store.blocks.earningsReport ? 5 : 12}>
-                  <SupportTrackerCard data={store.blocks.supportTracker} />
-                </Col>
-              )}
-            </Row>
-          )}
+          <Row className='g-2 mb-1'>
+            <Col md={store.blocks.supportTracker ? 6 : 12}>
+              <RevenueReportCard />
+            </Col>
+            {store.blocks.supportTracker && (
+              <Col md={6}>
+                <SupportTrackerCard />
+              </Col>
+            )}
+          </Row>
+
+          <Row className='g-2 mb-1'>
+            <Col lg={4} md={6} xs={12}>
+              <UserTimelineCard />
+            </Col>
+            <Col lg={4} md={6} xs={12}>
+              <SalesRadarCard />
+            </Col>
+            <Col lg={4} md={12} xs={12}>
+              <AppDesignCard />
+            </Col>
+          </Row>
 
           <Row className='g-2'>
             <Col lg={4} md={12} className='order-lg-2'>
