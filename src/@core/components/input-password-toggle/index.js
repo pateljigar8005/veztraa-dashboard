@@ -16,6 +16,7 @@ const InputPasswordToggle = forwardRef((props, ref) => {
     iconSize,
     inputClassName,
     invalid,
+    actions,
     ...rest
   } = props
 
@@ -62,6 +63,17 @@ const InputPasswordToggle = forwardRef((props, ref) => {
         <InputGroupText className='cursor-pointer' onClick={() => setInputVisibility(!inputVisibility)}>
           {renderIcon()}
         </InputGroupText>
+        {actions?.map((action, index) => (
+          <InputGroupText
+            key={index}
+            id={action.id}
+            className='cursor-pointer'
+            title={action.title}
+            onClick={action.onClick}
+          >
+            {action.icon}
+          </InputGroupText>
+        ))}
       </InputGroup>
     </Fragment>
   )
@@ -71,6 +83,14 @@ export default InputPasswordToggle
 
 InputPasswordToggle.propTypes = {
   invalid: PropTypes.bool,
+  actions: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string,
+      title: PropTypes.string,
+      icon: PropTypes.node,
+      onClick: PropTypes.func
+    })
+  ),
   hideIcon: PropTypes.node,
   showIcon: PropTypes.node,
   visible: PropTypes.bool,

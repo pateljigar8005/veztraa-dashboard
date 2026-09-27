@@ -6,12 +6,14 @@ import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormText, InputGroup, InputGroupText } from 'reactstrap'
+import { RefreshCw, Copy } from 'react-feather'
 import { addUser, updateUser, getUser, uploadAvatar } from '../store'
 import InputPasswordToggle from '@components/input-password-toggle'
 import ImageUploadField from '../../shared/ImageUploadField'
 import PhoneInput from '../../shared/PhoneInput'
 import { Editor } from '@veztraa/editor'
 import { getUserData, resolveAvatarUrl, uploadEditorImage } from '@utils'
+import { generatePassword } from '@src/utility/generatePassword'
 import HistoryModal from '../../activity-log/HistoryModal'
 
 const PASSWORD_PLACEHOLDER = '••••••••'
@@ -56,12 +58,31 @@ const UserForm = () => {
     control,
     reset,
     setError,
+    setValue,
     handleSubmit,
     watch,
     formState: { errors, isDirty }
   } = useForm({ defaultValues })
 
   const watchedPassword = watch('password')
+
+  const handleGeneratePassword = () => {
+    const generated = generatePassword()
+    setValue('password', generated, { shouldDirty: true })
+  }
+
+  const handleCopyPassword = async value => {
+    if (!value || value === PASSWORD_PLACEHOLDER) {
+      toast.error('Generate or type a password first')
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(value)
+      toast.success('Password copied to clipboard')
+    } catch (e) {
+      toast.error('Could not copy password')
+    }
+  }
 
   useUnsavedChangesGuard(isDirty || extraDirty)
 
@@ -299,10 +320,10 @@ const UserForm = () => {
                   )}
                 />
               </Col>
-              {!selfMode && (
+              {!selfMode && (!isEdit || isViewerAdmin) && (
                 <Col md={6} className='mb-1'>
                   <Label className='form-label' for='password'>
-                    Password {!isEdit && <span className='text-danger'>*</span>}
+                    {isEdit ? 'Reset Password' : 'Password'} {!isEdit && <span className='text-danger'>*</span>}
                   </Label>
                   <Controller
                     name='password'
@@ -315,13 +336,27 @@ const UserForm = () => {
                         onFocus={e => {
                           if (isEdit) e.target.select()
                         }}
+                        actions={[
+                          {
+                            id: 'generate-password',
+                            title: 'Generate a strong password',
+                            icon: <RefreshCw size={14} />,
+                            onClick: handleGeneratePassword
+                          },
+                          {
+                            id: 'copy-password',
+                            title: 'Copy password',
+                            icon: <Copy size={14} />,
+                            onClick: () => handleCopyPassword(field.value)
+                          }
+                        ]}
                       />
                     )}
                   />
                   <FormText color='muted'>
                     {isEdit
-                      ? 'Leave as-is to keep the current password - the eye icon reveals what you type, not the existing one'
-                      : 'Minimum 6 characters'}
+                      ? "As an admin, you can reset this user's password here - leave as-is to keep their current password. The eye icon reveals what you type, not the existing one."
+                      : 'Minimum 6 characters - use the refresh icon to generate a strong one, then copy it'}
                   </FormText>
                 </Col>
               )}
