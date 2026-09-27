@@ -2,11 +2,12 @@ import { Fragment, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
 import axios from 'axios'
+import QRCode from 'qrcode'
 import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import Select from 'react-select'
-import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormText, InputGroup, InputGroupText } from 'reactstrap'
+import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormText, InputGroup, InputGroupText, Modal, ModalHeader, ModalBody, Button } from 'reactstrap'
 import { RefreshCw, Copy } from 'react-feather'
 import { addUser, updateUser, getUser, uploadAvatar } from '../store'
 import InputPasswordToggle from '@components/input-password-toggle'
@@ -16,6 +17,7 @@ import AmountField from '../../shared/AmountField'
 import { Editor } from '@veztraa/editor'
 import { getUserData, resolveAvatarUrl, uploadEditorImage, selectThemeColors, sortOptions } from '@utils'
 import { generatePassword } from '@src/utility/generatePassword'
+import { confirmDelete } from '@src/utility/confirmDelete'
 import HistoryModal from '../../activity-log/HistoryModal'
 
 const PASSWORD_PLACEHOLDER = '••••••••'
@@ -56,7 +58,21 @@ const UserForm = () => {
   const [salaryAmount, setSalaryAmount] = useState('')
   const [salaryCurrency, setSalaryCurrency] = useState('USD')
   const [currencyOptions, setCurrencyOptions] = useState([])
+  const [isActive, setIsActive] = useState(true)
   const isViewerAdmin = (getUserData()?.role || '').toLowerCase() === 'admin'
+  const isSelf = Boolean(id) && Number(id) === Number(getUserData()?.id)
+
+  // Two-factor authentication (account-settings self mode only)
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
+  const [twoFactorBusy, setTwoFactorBusy] = useState(false)
+  const [setupModalOpen, setSetupModalOpen] = useState(false)
+  const [qrDataUrl, setQrDataUrl] = useState('')
+  const [manualSecret, setManualSecret] = useState('')
+  const [setupCode, setSetupCode] = useState('')
+  const [setupError, setSetupError] = useState('')
+  const [disableModalOpen, setDisableModalOpen] = useState(false)
+  const [disablePassword, setDisablePassword] = useState('')
+  const [disableError, setDisableError] = useState('')
 
   const {
     control,
@@ -150,8 +166,67 @@ const UserForm = () => {
       setSalaryCurrency(user.salary_currency || 'USD')
       if (user.role_id) setRoleId(String(user.role_id))
       setAvatarPreview(resolveAvatarUrl(user.avatar))
+      setIsActive(user.is_active !== false)
+      setTwoFactorEnabled(Boolean(user.two_factor_enabled))
     }
   }, [store.selectedUser, mailDomainLoaded, mailDomain])
+
+  const startTwoFactorSetup = () => {
+    setSetupError('')
+    setSetupCode('')
+    setTwoFactorBusy(true)
+    axios
+      .post('/account/2fa/setup')
+      .then(async response => {
+        const { secret, otpauth_url: otpauthUrl } = response.data.data
+        setManualSecret(secret)
+        setQrDataUrl(await QRCode.toDataURL(otpauthUrl))
+        setSetupModalOpen(true)
+      })
+      .catch(err => toast.error(err?.response?.data?.message || 'Could not start two-factor setup'))
+      .finally(() => setTwoFactorBusy(false))
+  }
+
+  const confirmTwoFactorEnable = e => {
+    e.preventDefault()
+    setTwoFactorBusy(true)
+    setSetupError('')
+    axios
+      .post('/account/2fa/enable', { code: setupCode })
+      .then(() => {
+        setTwoFactorEnabled(true)
+        setSetupModalOpen(false)
+        toast.success('Two-factor authentication is now enabled')
+      })
+      .catch(err => setSetupError(err?.response?.data?.message || 'Invalid code'))
+      .finally(() => setTwoFactorBusy(false))
+  }
+
+  const confirmTwoFactorDisable = e => {
+    e.preventDefault()
+    setTwoFactorBusy(true)
+    setDisableError('')
+    axios
+      .post('/account/2fa/disable', { password: disablePassword })
+      .then(() => {
+        setTwoFactorEnabled(false)
+        setDisableModalOpen(false)
+        setDisablePassword('')
+        toast.success('Two-factor authentication is now disabled')
+      })
+      .catch(err => setDisableError(err?.response?.data?.message || 'Incorrect password'))
+      .finally(() => setTwoFactorBusy(false))
+  }
+
+  const handleAdminResetTwoFactor = () => {
+    axios
+      .post(`/users/${id}/reset-2fa`)
+      .then(() => {
+        setTwoFactorEnabled(false)
+        toast.success("This user's two-factor authentication has been reset")
+      })
+      .catch(err => toast.error(err?.response?.data?.message || 'Failed to reset two-factor authentication'))
+  }
 
   const handleAvatarChange = file => {
     setAvatarPreview(URL.createObjectURL(file))
@@ -192,6 +267,7 @@ const UserForm = () => {
         email_login_password_synced: samePasswordAsLogin
       }
       if (!selfMode && isViewerAdmin) {
+        payload.is_active = isActive
         payload.is_employee = isEmployee
         payload.salary_type = isEmployee ? salaryType : null
         payload.salary_amount = isEmployee && salaryAmount !== '' ? Number(salaryAmount) : null
@@ -400,6 +476,31 @@ const UserForm = () => {
                   </Input>
                 </Col>
               )}
+              {!selfMode && isViewerAdmin && (
+                <Col md={6} className='mb-1'>
+                  <Label className='form-label d-block'>Status</Label>
+                  <div className='form-switch d-flex align-items-center mt-50'>
+                    <Input
+                      type='switch'
+                      id='is_active'
+                      checked={isActive}
+                      disabled={isSelf}
+                      onChange={e => {
+                        setIsActive(e.target.checked)
+                        setExtraDirty(true)
+                      }}
+                    />
+                    <Label className='form-check-label mb-0 ms-50' for='is_active'>
+                      {isActive ? 'Active' : 'Inactive'}
+                    </Label>
+                  </div>
+                  {isSelf ? (
+                    <FormText color='muted'>You cannot deactivate your own account.</FormText>
+                  ) : (
+                    <FormText color='muted'>An inactive user cannot sign in and is signed out everywhere.</FormText>
+                  )}
+                </Col>
+              )}
             </Row>
 
             {!selfMode && isViewerAdmin && (
@@ -477,6 +578,69 @@ const UserForm = () => {
                     </Fragment>
                   )}
                 </Row>
+              </Fragment>
+            )}
+
+            {(selfMode || (isEdit && isViewerAdmin && !isSelf)) && (
+              <Fragment>
+                <h5 className='mb-1 mt-2'>Two-Factor Authentication</h5>
+                {selfMode ? (
+                  <Row>
+                    <Col md={12} className='mb-1'>
+                      <div className='d-flex align-items-center' style={{ gap: '1rem' }}>
+                        <div className='form-switch'>
+                          <Input
+                            type='switch'
+                            id='two_factor_enabled'
+                            checked={twoFactorEnabled}
+                            disabled={twoFactorBusy}
+                            onChange={e => {
+                              if (e.target.checked) {
+                                startTwoFactorSetup()
+                              } else {
+                                setDisableError('')
+                                setDisablePassword('')
+                                setDisableModalOpen(true)
+                              }
+                            }}
+                          />
+                        </div>
+                        <Label className='form-check-label mb-0' for='two_factor_enabled'>
+                          {twoFactorEnabled
+                            ? 'Enabled - your account requires a code from your authenticator app at login.'
+                            : 'Require a code from an authenticator app (Google Authenticator, Authy, etc.) at login.'}
+                        </Label>
+                      </div>
+                    </Col>
+                  </Row>
+                ) : (
+                  <Row>
+                    <Col md={12} className='mb-1'>
+                      <p className='text-muted small mb-1'>
+                        {twoFactorEnabled
+                          ? 'This user has two-factor authentication enabled.'
+                          : 'This user has not set up two-factor authentication.'}
+                      </p>
+                      {twoFactorEnabled && (
+                        <Button
+                          type='button'
+                          color='outline-danger'
+                          size='sm'
+                          onClick={() =>
+                            confirmDelete({
+                              title: 'Reset two-factor authentication?',
+                              text: "This user's authenticator app will stop working and they'll need to set 2FA up again.",
+                              confirmButtonText: 'Yes, reset it',
+                              onConfirm: handleAdminResetTwoFactor
+                            })
+                          }
+                        >
+                          Reset two-factor authentication
+                        </Button>
+                      )}
+                    </Col>
+                  </Row>
+                )}
               </Fragment>
             )}
 
@@ -590,6 +754,61 @@ const UserForm = () => {
         </CardBody>
       </Card>
       {isEdit && <HistoryModal entityType='user' entityId={Number(id)} buttonId='user-history-btn' />}
+
+      <Modal isOpen={setupModalOpen} toggle={() => setSetupModalOpen(false)} centered>
+        <ModalHeader toggle={() => setSetupModalOpen(false)}>Set up two-factor authentication</ModalHeader>
+        <ModalBody>
+          <p>Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.):</p>
+          {qrDataUrl && (
+            <div className='text-center mb-1'>
+              <img src={qrDataUrl} alt='Two-factor authentication QR code' width={200} height={200} />
+            </div>
+          )}
+          <p className='text-muted small'>Can't scan it? Enter this key manually instead:</p>
+          <p className='text-center mb-2'>
+            <code>{manualSecret}</code>
+          </p>
+          <Form onSubmit={confirmTwoFactorEnable}>
+            <Label className='form-label' for='setup-code'>
+              Enter the 6-digit code from your app to confirm
+            </Label>
+            <Input
+              id='setup-code'
+              inputMode='numeric'
+              maxLength={6}
+              placeholder='123456'
+              invalid={Boolean(setupError)}
+              value={setupCode}
+              onChange={e => setSetupCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            />
+            {setupError && <FormText color='danger'>{setupError}</FormText>}
+            <Button type='submit' color='primary' className='mt-1' block disabled={twoFactorBusy}>
+              Verify & Enable
+            </Button>
+          </Form>
+        </ModalBody>
+      </Modal>
+
+      <Modal isOpen={disableModalOpen} toggle={() => setDisableModalOpen(false)} centered>
+        <ModalHeader toggle={() => setDisableModalOpen(false)}>Disable two-factor authentication</ModalHeader>
+        <ModalBody>
+          <Form onSubmit={confirmTwoFactorDisable}>
+            <Label className='form-label' for='disable-password'>
+              Confirm your password to disable two-factor authentication
+            </Label>
+            <InputPasswordToggle
+              id='disable-password'
+              value={disablePassword}
+              onChange={e => setDisablePassword(e.target.value)}
+              invalid={Boolean(disableError)}
+            />
+            {disableError && <FormText color='danger'>{disableError}</FormText>}
+            <Button type='submit' color='danger' className='mt-1' block disabled={twoFactorBusy}>
+              Disable
+            </Button>
+          </Form>
+        </ModalBody>
+      </Modal>
     </Fragment>
   )
 }

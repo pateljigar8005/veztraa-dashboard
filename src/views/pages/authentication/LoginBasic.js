@@ -1,6 +1,7 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import useJwt from '@src/auth/jwt/useJwt'
+import axios from 'axios'
 import { useDispatch } from 'react-redux'
 import { useForm, Controller } from 'react-hook-form'
 import { handleLogin } from '@store/authentication'
@@ -20,6 +21,10 @@ const LoginBasic = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const ability = useContext(AbilityContext)
+  const [mfaToken, setMfaToken] = useState(null)
+  const [otp, setOtp] = useState('')
+  const [otpError, setOtpError] = useState('')
+  const [verifying, setVerifying] = useState(false)
   const {
     control,
     setError,
@@ -27,20 +32,28 @@ const LoginBasic = () => {
     formState: { errors }
   } = useForm({ defaultValues })
 
+  const completeLogin = res => {
+    const data = { ...res.data.userData, accessToken: res.data.accessToken, refreshToken: res.data.refreshToken }
+    dispatch(handleLogin(data))
+    ability.update(res.data.userData.ability)
+    navigate(getHomeRouteForLoggedInUser(data.role))
+  }
+
   const onSubmit = data => {
     if (Object.values(data).every(field => field.length > 0)) {
       useJwt
         .login({ email: data.loginEmail, password: data.password })
         .then(res => {
-          const data = { ...res.data.userData, accessToken: res.data.accessToken, refreshToken: res.data.refreshToken }
-          dispatch(handleLogin(data))
-          ability.update(res.data.userData.ability)
-          navigate(getHomeRouteForLoggedInUser(data.role))
+          if (res.data.mfaRequired) {
+            setMfaToken(res.data.mfaToken)
+            return
+          }
+          completeLogin(res)
         })
         .catch(err =>
           setError('loginEmail', {
             type: 'manual',
-            message: err.response?.data?.error || 'Invalid email or password'
+            message: err.response?.data?.message || err.response?.data?.error || 'Invalid email or password'
           })
         )
     } else {
@@ -52,6 +65,77 @@ const LoginBasic = () => {
         }
       }
     }
+  }
+
+  const onVerifyOtp = e => {
+    e.preventDefault()
+    if (otp.length !== 6) {
+      setOtpError('Enter the 6-digit code from your authenticator app')
+      return
+    }
+    setVerifying(true)
+    setOtpError('')
+    axios
+      .post('/auth/verify-otp', { mfaToken, code: otp })
+      .then(res => completeLogin(res))
+      .catch(err => {
+        setOtpError(err.response?.data?.message || 'Invalid or expired code')
+      })
+      .finally(() => setVerifying(false))
+  }
+
+  if (mfaToken) {
+    return (
+      <div className='auth-wrapper auth-basic px-2'>
+        <div className='auth-inner my-2'>
+          <Card className='mb-0'>
+            <CardBody>
+              <Link className='brand-logo' to='/' onClick={e => e.preventDefault()}>
+                <img src={logo} alt='Veztraa' height='42' />
+              </Link>
+              <CardTitle tag='h4' className='mb-1'>
+                Two-factor authentication
+              </CardTitle>
+              <CardText className='mb-2'>Enter the 6-digit code from your authenticator app</CardText>
+              <Form className='auth-login-form mt-2' onSubmit={onVerifyOtp}>
+                <div className='mb-1'>
+                  <Label className='form-label' for='otp-code'>
+                    Authentication code
+                  </Label>
+                  <Input
+                    autoFocus
+                    id='otp-code'
+                    inputMode='numeric'
+                    maxLength={6}
+                    placeholder='123456'
+                    invalid={Boolean(otpError)}
+                    value={otp}
+                    onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  />
+                  {otpError && <FormFeedback>{otpError}</FormFeedback>}
+                </div>
+                <Button type='submit' color='primary' block disabled={verifying}>
+                  Verify
+                </Button>
+                <Button
+                  type='button'
+                  color='flat-secondary'
+                  block
+                  className='mt-1'
+                  onClick={() => {
+                    setMfaToken(null)
+                    setOtp('')
+                    setOtpError('')
+                  }}
+                >
+                  Back to sign in
+                </Button>
+              </Form>
+            </CardBody>
+          </Card>
+        </div>
+      </div>
+    )
   }
 
   return (
