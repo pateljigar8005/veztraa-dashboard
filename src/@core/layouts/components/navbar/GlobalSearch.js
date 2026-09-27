@@ -19,7 +19,7 @@ import {
   CreditCard,
   Globe
 } from 'react-feather'
-import { NavItem, NavLink, Modal, ModalBody, Spinner, UncontrolledTooltip } from 'reactstrap'
+import { Modal, ModalBody, Spinner } from 'reactstrap'
 import axios from 'axios'
 import useDebounce from '@hooks/useDebounce'
 import { canAccessRoute } from '@src/utility/navPermissions'
@@ -121,8 +121,6 @@ const GlobalSearch = () => {
     setActiveIndex(0)
   }
 
-  const open = () => setIsOpen(true)
-
   useEffect(() => {
     const handleKeyDown = e => {
       const modifierPressed = isMac ? e.metaKey : e.ctrlKey
@@ -199,18 +197,8 @@ const GlobalSearch = () => {
   }
 
   return (
-    <>
-      <NavItem className='d-none d-lg-block'>
-        <NavLink className='nav-link-style' id='navbar-global-search-btn' onClick={open}>
-          <SearchIcon className='ficon' />
-        </NavLink>
-        <UncontrolledTooltip placement='bottom' target='navbar-global-search-btn'>
-          Search everything ({isMac ? '⌘' : 'Ctrl'}+K)
-        </UncontrolledTooltip>
-      </NavItem>
-
-      <Modal isOpen={isOpen} toggle={close} className='modal-dialog-centered modal-lg global-search-modal' contentClassName='p-0'>
-        <div className='d-flex align-items-center px-1_5 px-3 py-1' style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+    <Modal isOpen={isOpen} toggle={close} className='modal-dialog-centered modal-lg global-search-modal' contentClassName='p-0'>
+      <div className='d-flex align-items-center px-3 py-1' style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
           <SearchIcon size={20} className='text-muted me-1' />
           <input
             ref={inputRef}
@@ -299,7 +287,6 @@ const GlobalSearch = () => {
             })}
         </ModalBody>
       </Modal>
-    </>
   )
 }
 

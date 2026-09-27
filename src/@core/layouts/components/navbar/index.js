@@ -10,10 +10,8 @@ const ThemeNavbar = props => {
     <Fragment>
       <div className='bookmark-wrapper d-flex align-items-center'>
         <NavbarBookmarks setMenuVisibility={setMenuVisibility} />
-        <ul className='nav navbar-nav align-items-center'>
-          <GlobalSearch />
-        </ul>
       </div>
+      <GlobalSearch />
       <NavbarUser skin={skin} setSkin={setSkin} />
     </Fragment>
   )
