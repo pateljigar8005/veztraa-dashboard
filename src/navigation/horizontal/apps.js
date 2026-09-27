@@ -26,7 +26,9 @@ import {
   BarChart2,
   Key,
   Activity,
-  CheckCircle
+  CheckCircle,
+  Truck,
+  PieChart
 } from 'react-feather'
 
 export default [
@@ -185,6 +187,31 @@ export default [
     ]
   },
   {
+    id: 'finance',
+    title: 'Finance',
+    icon: <DollarSign />,
+    children: [
+      {
+        id: 'vendors',
+        title: 'Vendor',
+        icon: <Truck />,
+        navLink: '/vendor'
+      },
+      {
+        id: 'expenses',
+        title: 'Expense',
+        icon: <DollarSign />,
+        navLink: '/expense'
+      },
+      {
+        id: 'vendorBills',
+        title: 'Vendor Bill',
+        icon: <FileText />,
+        navLink: '/vendor-bill'
+      }
+    ]
+  },
+  {
     id: 'reports',
     title: 'Reports',
     icon: <BarChart2 />,
@@ -200,6 +227,12 @@ export default [
         title: 'Timesheet Report',
         icon: <Clock />,
         navLink: '/reports/timesheet'
+      },
+      {
+        id: 'profitReports',
+        title: 'Profit Report',
+        icon: <PieChart />,
+        navLink: '/reports/profit'
       }
     ]
   },

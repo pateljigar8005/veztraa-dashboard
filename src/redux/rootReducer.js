@@ -35,6 +35,9 @@ import contactSubmissions from '@src/views/apps/contact-submission/store'
 import jobApplications from '@src/views/apps/job-application/store'
 import apiKeys from '@src/views/apps/api-key/store'
 import activityLogs from '@src/views/apps/activity-log/store'
+import vendors from '@src/views/apps/vendor/store'
+import expenses from '@src/views/apps/expense/store'
+import vendorBills from '@src/views/apps/vendor-bill/store'
 import notifications from './notifications'
 
 const rootReducer = {
@@ -75,6 +78,9 @@ const rootReducer = {
   jobApplications,
   apiKeys,
   activityLogs,
+  vendors,
+  expenses,
+  vendorBills,
   notifications
 }
 

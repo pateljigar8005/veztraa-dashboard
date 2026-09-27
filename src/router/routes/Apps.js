@@ -53,6 +53,16 @@ const PayrollList = lazy(() => import('../../views/apps/payroll/list'))
 const PayrollRunView = lazy(() => import('../../views/apps/payroll/view'))
 const InvoiceReport = lazy(() => import('../../views/apps/reports/invoice-report'))
 const TimesheetReport = lazy(() => import('../../views/apps/reports/timesheet-report'))
+const ProfitReport = lazy(() => import('../../views/apps/reports/profit-report'))
+
+const VendorList = lazy(() => import('../../views/apps/vendor/list'))
+const VendorForm = lazy(() => import('../../views/apps/vendor/form'))
+
+const ExpenseList = lazy(() => import('../../views/apps/expense/list'))
+const ExpenseForm = lazy(() => import('../../views/apps/expense/form'))
+
+const VendorBillList = lazy(() => import('../../views/apps/vendor-bill/list'))
+const VendorBillForm = lazy(() => import('../../views/apps/vendor-bill/form'))
 const PdfDesignerTemplateList = lazy(() => import('../../views/apps/pdf-designer/list'))
 const PdfDesignerTemplateForm = lazy(() => import('../../views/apps/pdf-designer/form'))
 
@@ -376,6 +386,46 @@ const AppRoutes = [
   {
     element: <TimesheetReport />,
     path: '/reports/timesheet'
+  },
+  {
+    element: <ProfitReport />,
+    path: '/reports/profit'
+  },
+  {
+    element: <VendorList />,
+    path: '/vendor'
+  },
+  {
+    element: <VendorForm />,
+    path: '/vendor/add'
+  },
+  {
+    element: <VendorForm />,
+    path: '/vendor/edit/:id'
+  },
+  {
+    element: <ExpenseList />,
+    path: '/expense'
+  },
+  {
+    element: <ExpenseForm />,
+    path: '/expense/add'
+  },
+  {
+    element: <ExpenseForm />,
+    path: '/expense/edit/:id'
+  },
+  {
+    element: <VendorBillList />,
+    path: '/vendor-bill'
+  },
+  {
+    element: <VendorBillForm />,
+    path: '/vendor-bill/add'
+  },
+  {
+    element: <VendorBillForm />,
+    path: '/vendor-bill/edit/:id'
   },
   {
     element: <PdfDesignerTemplateList />,

@@ -28,11 +28,14 @@ const listToAddRoute = {
   '/job-listing': '/job-listing/add',
   '/timesheet': '/timesheet/add',
   '/timesheet-activity': '/timesheet-activity/add',
-  '/leave-type': '/leave-type/add'
+  '/leave-type': '/leave-type/add',
+  '/vendor': '/vendor/add',
+  '/expense': '/expense/add',
+  '/vendor-bill': '/vendor-bill/add'
 }
 
 const addOrEditRoutePattern =
-  /^\/(user|client|payment-method|event-category|service-item|project|quotation|contract|invoice|terms-template|email-template|holiday|roles|pdf-designer|currency|industry|team-member|portfolio|case-study|job-listing|timesheet-activity|timesheet|leave-type)\/(add|edit\/[^/]+)$/
+  /^\/(user|client|payment-method|event-category|service-item|project|quotation|contract|invoice|terms-template|email-template|holiday|roles|pdf-designer|currency|industry|team-member|portfolio|case-study|job-listing|timesheet-activity|timesheet|leave-type|vendor-bill|vendor|expense)\/(add|edit\/[^/]+)$/
 
 const isPdfDesignerFormRoute = pathname => /^\/pdf-designer\/(add|edit\/[^/]+)$/.test(pathname)
 
@@ -100,6 +103,9 @@ const historyButtonIdByRoute = [
   { pattern: /^\/case-study\/edit\/[^/]+$/, buttonId: 'case-study-history-btn' },
   { pattern: /^\/job-listing\/edit\/[^/]+$/, buttonId: 'job-listing-history-btn' },
   { pattern: /^\/leave-type\/edit\/[^/]+$/, buttonId: 'leave-type-history-btn' },
+  { pattern: /^\/vendor\/edit\/[^/]+$/, buttonId: 'vendor-history-btn' },
+  { pattern: /^\/expense\/edit\/[^/]+$/, buttonId: 'expense-history-btn' },
+  { pattern: /^\/vendor-bill\/edit\/[^/]+$/, buttonId: 'vendor-bill-history-btn' },
   { pattern: /^\/contact-submission\/view\/[^/]+$/, buttonId: 'contact-submission-history-btn' },
   { pattern: /^\/job-application\/view\/[^/]+$/, buttonId: 'job-application-history-btn' }
 ]
