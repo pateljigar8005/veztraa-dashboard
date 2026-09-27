@@ -105,6 +105,33 @@ const Calendar = props => {
       return isHoliday(toDateOnly(date)) || isWeekend(date) ? ['fc-day-holiday'] : []
     },
 
+    // dayCellContent's returned content replaces whatever FullCalendar wraps
+    // inside its own day-number link, so appending the holiday name there
+    // would nest it inside that <a> - appending our own label element to the
+    // cell frame after mount keeps the day-number link untouched.
+    dayCellDidMount(arg) {
+      const holidayName = getHolidayName(toDateOnly(arg.date))
+      const frame = arg.el.querySelector('.fc-daygrid-day-top')
+      const existingLabel = frame?.querySelector('.fc-day-holiday-label')
+
+      if (!holidayName) {
+        existingLabel?.remove()
+        return
+      }
+
+      if (existingLabel) {
+        existingLabel.textContent = holidayName
+        existingLabel.title = holidayName
+        return
+      }
+
+      const label = document.createElement('span')
+      label.className = 'fc-day-holiday-label'
+      label.title = holidayName
+      label.textContent = holidayName
+      frame?.appendChild(label)
+    },
+
     eventClassNames({ event: calendarEvent }) {
       const { calendar, source, priority, status } = calendarEvent._def.extendedProps
 
