@@ -87,6 +87,7 @@ const CompanySettings = () => {
       : 'general'
   const [taxEnabled, setTaxEnabled] = useState(false)
   const [currencyId, setCurrencyId] = useState('')
+  const [reportCurrencyId, setReportCurrencyId] = useState('')
   const [invoicePdfTemplateId, setInvoicePdfTemplateId] = useState('')
   const [contractPdfTemplateId, setContractPdfTemplateId] = useState('')
   const [quotationPdfTemplateId, setQuotationPdfTemplateId] = useState('')
@@ -199,6 +200,7 @@ const CompanySettings = () => {
       })
       setTaxEnabled(data.tax_enabled)
       setCurrencyId(data.currency_id || '')
+      setReportCurrencyId(data.report_currency_id || '')
       setInvoicePdfTemplateId(data.invoice_pdf_template_id || '')
       setContractPdfTemplateId(data.contract_pdf_template_id || '')
       setQuotationPdfTemplateId(data.quotation_pdf_template_id || '')
@@ -229,6 +231,7 @@ const CompanySettings = () => {
       .put('/company', {
         legal_name: data.legal_name,
         currency_id: currencyId || null,
+        report_currency_id: reportCurrencyId || null,
         address: data.address,
         tax_enabled: taxEnabled,
         default_tax_rate: Number(data.default_tax_rate) || 0,
@@ -363,6 +366,26 @@ const CompanySettings = () => {
                     onChange={option => setCurrencyId(option ? option.value : '')}
                     placeholder='Select currency...'
                   />
+                </Col>
+                <Col md={6} className='mb-1'>
+                  <Label className='form-label' for='report_currency_id'>
+                    Report Currency
+                  </Label>
+                  <Select
+                    inputId='report_currency_id'
+                    isClearable
+                    className='react-select'
+                    classNamePrefix='select'
+                    theme={selectThemeColors}
+                    options={currencyOptions}
+                    value={currencyOptions.find(i => i.value === reportCurrencyId) || null}
+                    onChange={option => setReportCurrencyId(option ? option.value : '')}
+                    placeholder='Same as Default Currency'
+                  />
+                  <small className='text-muted'>
+                    Income/expense reports (like Profit Report) convert every figure into this currency using each
+                    currency's rate. Leave blank to use the Default Currency above.
+                  </small>
                 </Col>
                 <Col md={12} className='mb-1'>
                   <Label className='form-label' for='address'>

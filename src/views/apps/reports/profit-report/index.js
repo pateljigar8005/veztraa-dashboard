@@ -60,6 +60,7 @@ const ProfitReport = () => {
   const [monthRows, setMonthRows] = useState([])
   const [clientRows, setClientRows] = useState([])
   const [totals, setTotals] = useState({ revenue: 0, expenses: 0, vendorBills: 0, payroll: 0, profit: 0 })
+  const [reportIcon, setReportIcon] = useState('')
 
   const handleReset = () => {
     setDateFrom('')
@@ -77,12 +78,33 @@ const ProfitReport = () => {
       const expenseParams = { expense_date_from: dateFrom || undefined, expense_date_to: dateTo || undefined }
       const billParams = { bill_date_from: dateFrom || undefined, bill_date_to: dateTo || undefined }
 
-      const [invoices, expenses, vendorBills, payrollResponse] = await Promise.all([
+      const [invoices, expenses, vendorBills, payrollResponse, currenciesResponse, companyResponse] = await Promise.all([
         fetchAllPages('/invoices', invoiceParams),
         fetchAllPages('/expenses', expenseParams),
         fetchAllPages('/vendor-bills', billParams),
-        axios.get('/payroll-runs', { params: { perPage: 100 } })
+        axios.get('/payroll-runs', { params: { perPage: 100 } }),
+        axios.get('/currencies', { params: { perPage: 100 } }),
+        axios.get('/company')
       ])
+
+      // Every currency's rate is quoted against the company's base currency
+      // (see src/utility/Utils.js findUsdRate() comment), so converting X -> Y
+      // goes through that base: amount * rate(X) gets to base, / rate(Y) gets
+      // to Y. Payroll's total_net carries no currency of its own (payroll
+      // never converts per-employee salary_currency - see PayrollController),
+      // so it's treated as already being in the base currency.
+      const rateByIcon = {}
+      currenciesResponse.data.data.currencies.forEach(c => {
+        rateByIcon[c.icon] = Number(c.rate) || 1
+      })
+      const company = companyResponse.data.data
+      const icon = company.report_currency_icon || company.currency_icon || 'USD'
+      const reportRate = rateByIcon[icon] || 1
+      const toReport = (amount, currencyIcon) => {
+        const rate = currencyIcon ? rateByIcon[currencyIcon] || 1 : 1
+        return (amount * rate) / reportRate
+      }
+      setReportIcon(icon)
 
       const payrollRuns = payrollResponse.data.data.payroll_runs.filter(run => {
         const ym = `${run.year}-${String(run.month).padStart(2, '0')}`
@@ -97,18 +119,18 @@ const ProfitReport = () => {
         return byMonth[ym]
       }
       invoices.forEach(inv => {
-        ensureMonth(inv.issue_date.slice(0, 7)).revenue += Number(inv.total) || 0
+        ensureMonth(inv.issue_date.slice(0, 7)).revenue += toReport(Number(inv.total) || 0, inv.currency)
       })
       expenses.forEach(exp => {
-        ensureMonth(exp.expense_date.slice(0, 7)).expenses += Number(exp.amount) || 0
+        ensureMonth(exp.expense_date.slice(0, 7)).expenses += toReport(Number(exp.amount) || 0, exp.currency)
       })
       vendorBills.forEach(bill => {
-        ensureMonth(bill.bill_date.slice(0, 7)).vendorBills += Number(bill.amount) || 0
+        ensureMonth(bill.bill_date.slice(0, 7)).vendorBills += toReport(Number(bill.amount) || 0, bill.currency)
       })
       if (includePayroll) {
         payrollRuns.forEach(run => {
           const ym = `${run.year}-${String(run.month).padStart(2, '0')}`
-          ensureMonth(ym).payroll += Number(run.total_net) || 0
+          ensureMonth(ym).payroll += toReport(Number(run.total_net) || 0, null)
         })
       }
 
@@ -124,11 +146,11 @@ const ProfitReport = () => {
       invoices.forEach(inv => {
         const key = inv.client_id || `unlinked-${inv.contact_name}`
         const label = inv.company_name || inv.contact_name || 'Unlinked'
-        ensureClient(key, label).revenue += Number(inv.total) || 0
+        ensureClient(key, label).revenue += toReport(Number(inv.total) || 0, inv.currency)
       })
       expenses.forEach(exp => {
         if (!exp.client_id) return
-        ensureClient(exp.client_id, exp.client_full_name || 'Unlinked').expenses += Number(exp.amount) || 0
+        ensureClient(exp.client_id, exp.client_full_name || 'Unlinked').expenses += toReport(Number(exp.amount) || 0, exp.currency)
       })
 
       const clientTable = Object.values(byClient)
@@ -172,6 +194,7 @@ const ProfitReport = () => {
         ['Date From', dateFrom || 'Any'],
         ['Date To', dateTo || 'Any'],
         ['Includes Payroll Cost', includePayroll ? 'Yes' : 'No'],
+        ['Reporting Currency', reportIcon],
         [],
         ['Total Revenue', totals.revenue.toFixed(2)],
         ['Total Expenses', totals.expenses.toFixed(2)],
@@ -214,31 +237,33 @@ const ProfitReport = () => {
     }
   }
 
+  const money = value => `${reportIcon} ${formatAmount(value)}`
+
   const monthColumns = [
     { name: 'Month', minWidth: '120px', selector: row => row.month, cell: row => <span className='fw-bolder'>{monthLabel(row.month)}</span> },
-    { name: 'Revenue', minWidth: '130px', right: true, selector: row => row.revenue, cell: row => <span className='text-success'>{formatAmount(row.revenue)}</span> },
-    { name: 'Expenses', minWidth: '130px', right: true, selector: row => row.expenses, cell: row => <span className='text-danger'>{formatAmount(row.expenses)}</span> },
-    { name: 'Vendor Bills', minWidth: '130px', right: true, selector: row => row.vendorBills, cell: row => <span className='text-danger'>{formatAmount(row.vendorBills)}</span> },
-    { name: 'Payroll', minWidth: '130px', right: true, selector: row => row.payroll, cell: row => <span className='text-danger'>{formatAmount(row.payroll)}</span> },
+    { name: 'Revenue', minWidth: '150px', right: true, selector: row => row.revenue, cell: row => <span className='text-success'>{money(row.revenue)}</span> },
+    { name: 'Expenses', minWidth: '150px', right: true, selector: row => row.expenses, cell: row => <span className='text-danger'>{money(row.expenses)}</span> },
+    { name: 'Vendor Bills', minWidth: '150px', right: true, selector: row => row.vendorBills, cell: row => <span className='text-danger'>{money(row.vendorBills)}</span> },
+    { name: 'Payroll', minWidth: '150px', right: true, selector: row => row.payroll, cell: row => <span className='text-danger'>{money(row.payroll)}</span> },
     {
       name: 'Profit',
-      minWidth: '140px',
+      minWidth: '160px',
       right: true,
       selector: row => row.profit,
-      cell: row => <span className={row.profit >= 0 ? 'fw-bolder text-success' : 'fw-bolder text-danger'}>{formatAmount(row.profit)}</span>
+      cell: row => <span className={row.profit >= 0 ? 'fw-bolder text-success' : 'fw-bolder text-danger'}>{money(row.profit)}</span>
     }
   ]
 
   const clientColumns = [
     { name: 'Client', minWidth: '200px', selector: row => row.client, cell: row => <span className='fw-bolder'>{row.client}</span> },
-    { name: 'Revenue', minWidth: '140px', right: true, selector: row => row.revenue, cell: row => <span className='text-success'>{formatAmount(row.revenue)}</span> },
-    { name: 'Direct Expenses', minWidth: '150px', right: true, selector: row => row.expenses, cell: row => <span className='text-danger'>{formatAmount(row.expenses)}</span> },
+    { name: 'Revenue', minWidth: '160px', right: true, selector: row => row.revenue, cell: row => <span className='text-success'>{money(row.revenue)}</span> },
+    { name: 'Direct Expenses', minWidth: '170px', right: true, selector: row => row.expenses, cell: row => <span className='text-danger'>{money(row.expenses)}</span> },
     {
       name: 'Profit',
-      minWidth: '140px',
+      minWidth: '160px',
       right: true,
       selector: row => row.profit,
-      cell: row => <span className={row.profit >= 0 ? 'fw-bolder text-success' : 'fw-bolder text-danger'}>{formatAmount(row.profit)}</span>
+      cell: row => <span className={row.profit >= 0 ? 'fw-bolder text-success' : 'fw-bolder text-danger'}>{money(row.profit)}</span>
     }
   ]
 
@@ -291,9 +316,10 @@ const ProfitReport = () => {
             </Col>
           </Row>
           <p className='text-muted small mb-0'>
-            Revenue counts each invoice's full total against its issue date. Client profit compares revenue to only the
-            expenses directly linked to that client - vendor bills and payroll aren't attributed to a client and only
-            appear in the monthly totals.
+            Every figure below is converted into the company's Report Currency (Company Settings → General){reportIcon ? ` — currently ${reportIcon}` : ''},
+            using each currency's exchange rate. Revenue counts each invoice's full total against its issue date. Client
+            profit compares revenue to only the expenses directly linked to that client - vendor bills and payroll
+            aren't attributed to a client and only appear in the monthly totals.
           </p>
         </CardBody>
       </Card>
@@ -301,9 +327,9 @@ const ProfitReport = () => {
       {hasRun && (
         <>
           <Row className='mt-1'>
-            <StatCard icon={TrendingUp} color='success' label='Total Revenue' value={formatAmount(totals.revenue)} />
-            <StatCard icon={TrendingDown} color='danger' label='Total Costs' value={formatAmount(totals.expenses + totals.vendorBills + totals.payroll)} />
-            <StatCard icon={DollarSign} color={totals.profit >= 0 ? 'success' : 'danger'} label='Net Profit' value={formatAmount(totals.profit)} />
+            <StatCard icon={TrendingUp} color='success' label='Total Revenue' value={money(totals.revenue)} />
+            <StatCard icon={TrendingDown} color='danger' label='Total Costs' value={money(totals.expenses + totals.vendorBills + totals.payroll)} />
+            <StatCard icon={DollarSign} color={totals.profit >= 0 ? 'success' : 'danger'} label='Net Profit' value={money(totals.profit)} />
             <StatCard icon={PieChart} color='info' label='Months Covered' value={monthRows.length} />
           </Row>
 
