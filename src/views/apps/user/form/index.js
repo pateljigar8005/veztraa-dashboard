@@ -9,6 +9,7 @@ import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, Fo
 import { addUser, updateUser, getUser, uploadAvatar } from '../store'
 import InputPasswordToggle from '@components/input-password-toggle'
 import ImageUploadField from '../../shared/ImageUploadField'
+import PhoneInput from '../../shared/PhoneInput'
 import { Editor } from '@veztraa/editor'
 import { getUserData, resolveAvatarUrl, uploadEditorImage } from '@utils'
 import HistoryModal from '../../activity-log/HistoryModal'
@@ -294,7 +295,7 @@ const UserForm = () => {
                   name='phone'
                   control={control}
                   render={({ field }) => (
-                    <Input id='phone' placeholder='(397) 294-5153' invalid={errors.phone && true} {...field} />
+                    <PhoneInput id='phone' invalid={errors.phone && true} value={field.value} onChange={field.onChange} />
                   )}
                 />
               </Col>

@@ -14,6 +14,7 @@ import PaymentMethodSection from '../../shared/PaymentMethodSection'
 import LineItemsTable from '../../shared/LineItemsTable'
 import DateField from '../../shared/DateField'
 import AmountField from '../../shared/AmountField'
+import PhoneInput from '../../shared/PhoneInput'
 import { addQuotation, updateQuotation, getQuotation } from '../store'
 import { discountTypeOptions } from '../documentOptions'
 
@@ -300,7 +301,11 @@ const QuotationForm = () => {
                   <Label className='form-label' for='phone'>
                     Phone
                   </Label>
-                  <Controller name='phone' control={control} render={({ field }) => <Input id='phone' {...field} />} />
+                  <Controller
+                    name='phone'
+                    control={control}
+                    render={({ field }) => <PhoneInput id='phone' value={field.value} onChange={field.onChange} />}
+                  />
                 </Col>
                 <Col md={12} className='mb-1'>
                   <Label className='form-label' for='billing_address'>

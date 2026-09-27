@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
 import { selectThemeColors, sortOptions } from '@utils'
 import { addClient, updateClient, getClient } from '../store'
+import PhoneInput from '../../shared/PhoneInput'
 import HistoryModal from '../../activity-log/HistoryModal'
 
 const defaultValues = {
@@ -195,7 +196,7 @@ const ClientForm = () => {
                 <Controller
                   name='phone'
                   control={control}
-                  render={({ field }) => <Input id='phone' placeholder='(397) 294-5153' {...field} />}
+                  render={({ field }) => <PhoneInput id='phone' value={field.value} onChange={field.onChange} />}
                 />
               </Col>
               <Col md={6} className='mb-1'>
