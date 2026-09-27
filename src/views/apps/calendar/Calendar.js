@@ -27,6 +27,7 @@ const Calendar = props => {
     updateEvent,
     handleTaskEventClick,
     handleInvoiceEventClick,
+    handleContractEventClick,
     isHoliday,
     getHolidayName,
     isWeekend
@@ -47,7 +48,8 @@ const Calendar = props => {
 
   const taskEvents = [
     ...(store.taskFilters.includes('To-Do') ? store.todoEvents : []),
-    ...(store.taskFilters.includes('Invoices') ? store.invoiceEvents : [])
+    ...(store.taskFilters.includes('Invoices') ? store.invoiceEvents : []),
+    ...(store.taskFilters.includes('Upcoming Invoices') ? store.contractInvoiceEvents : [])
   ]
 
   // An event with no category (extendedProps.calendar null/undefined) is
@@ -118,6 +120,10 @@ const Calendar = props => {
         colorName = priorityColors[priority] || 'secondary'
       } else if (source === 'invoice') {
         colorName = status === 'overdue' ? 'danger' : 'warning'
+      } else if (source === 'contract-invoice') {
+        colorName = 'info'
+      } else if (source === 'contract-invoice-due') {
+        colorName = 'secondary'
       } else {
         colorName = calendarsColor[calendar]
       }
@@ -144,6 +150,11 @@ const Calendar = props => {
 
       if (clickedEvent._def.extendedProps.source === 'invoice') {
         handleInvoiceEventClick(clickedEvent._def.extendedProps.invoiceId)
+        return
+      }
+
+      if (['contract-invoice', 'contract-invoice-due'].includes(clickedEvent._def.extendedProps.source)) {
+        handleContractEventClick(clickedEvent._def.extendedProps.contractId)
         return
       }
 

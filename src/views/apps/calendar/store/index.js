@@ -109,6 +109,46 @@ export const fetchInvoiceDueEvents = createAsyncThunk('appCalendar/fetchInvoiceD
   return { events }
 })
 
+// Two events per projected occurrence - when the contract's next invoice
+// will be generated (by the recurring-invoice cron) and the projected due
+// date that invoice will get - so collections can be planned before either
+// actually exists yet. Once the cron creates the real invoice, its actual
+// due date takes over via fetchInvoiceDueEvents above.
+export const fetchContractInvoiceEvents = createAsyncThunk('appCalendar/fetchContractInvoiceEvents', async () => {
+  const response = await axios.get('/contracts/upcoming-invoices')
+  const occurrences = response.data.data.occurrences
+  const events = occurrences.flatMap(occ => {
+    const label = occ.company_name || occ.contact_name || occ.client_full_name || `Contract ${occ.contract_number}`
+    return [
+      {
+        id: `contract-invoice-${occ.contract_id}-${occ.invoice_date}`,
+        title: `Invoice to generate - ${label}`,
+        start: occ.invoice_date,
+        allDay: true,
+        editable: false,
+        extendedProps: {
+          calendar: 'Upcoming Invoices',
+          source: 'contract-invoice',
+          contractId: occ.contract_id
+        }
+      },
+      {
+        id: `contract-invoice-due-${occ.contract_id}-${occ.due_date}`,
+        title: `Invoice due (projected) - ${label}`,
+        start: occ.due_date,
+        allDay: true,
+        editable: false,
+        extendedProps: {
+          calendar: 'Upcoming Invoices',
+          source: 'contract-invoice-due',
+          contractId: occ.contract_id
+        }
+      }
+    ]
+  })
+  return { events }
+})
+
 export const appCalendarSlice = createSlice({
   name: 'appCalendar',
   initialState: {
@@ -117,7 +157,8 @@ export const appCalendarSlice = createSlice({
     todoEvents: [],
     todoTasks: [],
     invoiceEvents: [],
-    taskFilters: ['To-Do', 'Invoices'],
+    contractInvoiceEvents: [],
+    taskFilters: ['To-Do', 'Invoices', 'Upcoming Invoices'],
     selectedEvent: {},
     // Category names currently shown - seeded to "all" once categories load
     // (see fetchEventCategories.fulfilled below). Purely a client-side
@@ -169,6 +210,9 @@ export const appCalendarSlice = createSlice({
       })
       .addCase(fetchInvoiceDueEvents.fulfilled, (state, action) => {
         state.invoiceEvents = action.payload.events
+      })
+      .addCase(fetchContractInvoiceEvents.fulfilled, (state, action) => {
+        state.contractInvoiceEvents = action.payload.events
       })
   }
 })

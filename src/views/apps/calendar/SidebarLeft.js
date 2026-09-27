@@ -5,10 +5,15 @@ import { Settings } from 'react-feather'
 import { Card, CardBody, Button, Input, Label } from 'reactstrap'
 import { currentUserCan } from '@src/utility/navPermissions'
 
-const taskFilters = [
+const baseTaskFilters = [
   { label: 'To-Do', className: 'form-check-info' },
   { label: 'Invoices', className: 'form-check-warning' }
 ]
+
+// Contract-projected invoice dates aren't something every user should see
+// on their calendar - same view permission that gates the Contracts list
+// itself.
+const contractInvoiceFilter = { label: 'Upcoming Invoices', className: 'form-check-secondary' }
 
 const SidebarLeft = props => {
   const { handleAddEventSidebar, toggleSidebar, updateFilter, updateAllFilters, toggleTaskFilter, store, dispatch } = props
@@ -17,6 +22,8 @@ const SidebarLeft = props => {
     toggleSidebar(false)
     handleAddEventSidebar()
   }
+
+  const taskFilters = currentUserCan('/contract', 'view') ? [...baseTaskFilters, contractInvoiceFilter] : baseTaskFilters
 
   return (
     <Fragment>

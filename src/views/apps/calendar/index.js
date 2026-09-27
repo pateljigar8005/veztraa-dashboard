@@ -14,6 +14,7 @@ import {
   fetchEventCategories,
   fetchTodoTaskEvents,
   fetchInvoiceDueEvents,
+  fetchContractInvoiceEvents,
   selectEvent,
   updateEvent,
   updateFilter,
@@ -22,6 +23,7 @@ import {
   addEvent,
   removeEvent
 } from './store'
+import { currentUserCan } from '@src/utility/navPermissions'
 import '@styles/react/apps/app-calendar.scss'
 
 const CalendarComponent = () => {
@@ -66,11 +68,20 @@ const CalendarComponent = () => {
     navigate(`/invoice/view/${invoiceId}`)
   }
 
+  const handleContractEventClick = contractId => {
+    navigate(`/contract/view/${contractId}`)
+  }
+
   useEffect(() => {
     dispatch(fetchEventCategories())
     dispatch(fetchEvents())
     dispatch(fetchTodoTaskEvents())
     dispatch(fetchInvoiceDueEvents())
+    // Same permission that gates the Contracts list itself - not every
+    // user should see projected contract invoice dates on their calendar.
+    if (currentUserCan('/contract', 'view')) {
+      dispatch(fetchContractInvoiceEvents())
+    }
   }, [])
 
   return (
@@ -107,6 +118,7 @@ const CalendarComponent = () => {
               handleAddEventSidebar={handleAddEventSidebar}
               handleTaskEventClick={handleTaskEventClick}
               handleInvoiceEventClick={handleInvoiceEventClick}
+              handleContractEventClick={handleContractEventClick}
               isHoliday={isHoliday}
               getHolidayName={getHolidayName}
               isWeekend={isWeekend}
