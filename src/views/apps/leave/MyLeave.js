@@ -11,7 +11,8 @@ import {
   Row,
   Col,
   Button,
-  Badge
+  Badge,
+  UncontrolledTooltip
 } from 'reactstrap'
 import { formatDate } from '@utils'
 import { confirmDelete } from '@src/utility/confirmDelete'
@@ -163,8 +164,8 @@ const MyLeave = () => {
         <CardBody>
           <Row className='g-2'>
             {store.balances.map(b => (
-              <Col md={3} sm={6} key={b.leave_type_id}>
-                <Card className='mb-0 h-100 border'>
+              <Col md={12 / store.balances.length} sm={6} key={b.leave_type_id}>
+                <Card className='mb-0 h-100' id={`leave-balance-${b.leave_type_id}`}>
                   <CardBody className='d-flex align-items-center'>
                     <div className={`avatar avatar-stats p-50 m-0 me-2 bg-light-${b.color}`}>
                       <div className='avatar-content'>
@@ -174,12 +175,12 @@ const MyLeave = () => {
                     <div>
                       <h3 className='fw-bolder mb-0'>{b.remaining}</h3>
                       <p className='card-text text-muted mb-0'>{b.leave_type_name}</p>
-                      <small className='text-muted'>
-                        Accrued {b.accrued} + Opening {b.opening_balance} + Adjusted {b.adjusted} - Used {b.used}
-                      </small>
                     </div>
                   </CardBody>
                 </Card>
+                <UncontrolledTooltip placement='bottom' target={`leave-balance-${b.leave_type_id}`}>
+                  Accrued {b.accrued} + Opening {b.opening_balance} + Adjusted {b.adjusted} - Used {b.used}
+                </UncontrolledTooltip>
               </Col>
             ))}
             {store.balances.length === 0 && <Col md={12}><p className='text-muted mb-0'>No leave types configured yet.</p></Col>}
