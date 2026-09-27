@@ -105,8 +105,9 @@ a:hover { color: ${hoverBg}; }
 .main-menu .navigation li.active > a {
   background: linear-gradient(118deg, rgba(${rgb}, 1), rgba(${rgb}, 0.7)) !important;
   box-shadow: 0 0 10px 1px rgba(${rgb}, 0.7);
+  color: #fff !important;
 }
-.main-menu .navigation li:not(.active) > a.active,
+.main-menu .navigation li.active > a * { color: #fff !important; }
 .main-menu .navigation li .active > a { color: ${hex}; }
 .horizontal-menu .nav-link.active { color: ${hex}; }
 
