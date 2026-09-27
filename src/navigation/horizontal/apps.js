@@ -70,6 +70,12 @@ export default [
         title: 'Leave Approvals',
         icon: <CheckCircle />,
         navLink: '/leave-approvals'
+      },
+      {
+        id: 'payroll',
+        title: 'Payroll',
+        icon: <DollarSign />,
+        navLink: '/payroll'
       }
     ]
   },

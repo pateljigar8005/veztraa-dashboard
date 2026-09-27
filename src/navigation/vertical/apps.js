@@ -68,6 +68,12 @@ export default [
     navLink: '/leave-approvals'
   },
   {
+    id: 'payroll',
+    title: 'Payroll',
+    icon: <DollarSign size={20} />,
+    navLink: '/payroll'
+  },
+  {
     header: 'Billing'
   },
   {

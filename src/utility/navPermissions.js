@@ -68,6 +68,7 @@ const routeToMenuId = [
   { pattern: /^\/leave-type/, id: 'leave' },
   { pattern: /^\/leave-approvals/, id: 'leave' },
   { pattern: /^\/my-leave/, id: 'leave' },
+  { pattern: /^\/payroll/, id: 'payroll' },
   { pattern: /^\/contact-submission/, id: 'contactSubmissions' },
   { pattern: /^\/job-application/, id: 'jobApplications' },
   { pattern: /^\/api-key/, id: 'apiKeys' },

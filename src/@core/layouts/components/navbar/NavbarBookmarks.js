@@ -48,11 +48,12 @@ const isTodoRoute = pathname => /^\/todo(\/.*)?$/.test(pathname)
 // Modal-based add actions use a hidden page button instead of navigation.
 const listToAddButtonId = {
   '/api-key': 'api-key-create-btn',
-  '/my-leave': 'my-leave-apply-btn'
+  '/my-leave': 'my-leave-apply-btn',
+  '/payroll': 'payroll-generate-btn'
 }
 
 // These list routes do not render the shared advanced-search trigger.
-const noSearchRoutes = ['/email-template', '/terms-template', '/roles', '/leave-type']
+const noSearchRoutes = ['/email-template', '/terms-template', '/roles', '/leave-type', '/payroll']
 
 // The action label varies between document downloads and spreadsheet exports.
 const downloadButtonIdByRoute = [

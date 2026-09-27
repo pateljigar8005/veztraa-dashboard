@@ -49,6 +49,8 @@ const LeaveTypeList = lazy(() => import('../../views/apps/leave-type/list'))
 const LeaveTypeForm = lazy(() => import('../../views/apps/leave-type/form'))
 const MyLeave = lazy(() => import('../../views/apps/leave/MyLeave'))
 const LeaveApprovals = lazy(() => import('../../views/apps/leave/LeaveApprovals'))
+const PayrollList = lazy(() => import('../../views/apps/payroll/list'))
+const PayrollRunView = lazy(() => import('../../views/apps/payroll/view'))
 const InvoiceReport = lazy(() => import('../../views/apps/reports/invoice-report'))
 const TimesheetReport = lazy(() => import('../../views/apps/reports/timesheet-report'))
 const PdfDesignerTemplateList = lazy(() => import('../../views/apps/pdf-designer/list'))
@@ -358,6 +360,14 @@ const AppRoutes = [
   {
     element: <LeaveApprovals />,
     path: '/leave-approvals'
+  },
+  {
+    element: <PayrollList />,
+    path: '/payroll'
+  },
+  {
+    element: <PayrollRunView />,
+    path: '/payroll/view/:id'
   },
   {
     element: <InvoiceReport />,
