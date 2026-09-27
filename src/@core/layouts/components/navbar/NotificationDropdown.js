@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import Avatar from '@components/avatar'
 import PerfectScrollbar from 'react-perfect-scrollbar'
-import { Bell, Mail, Send, CheckSquare, AtSign, X, Briefcase } from 'react-feather'
+import { Bell, Mail, Send, CheckSquare, AtSign, X, Briefcase, FileText } from 'react-feather'
 import { Badge, Button, DropdownMenu, DropdownItem, DropdownToggle, UncontrolledDropdown, Spinner } from 'reactstrap'
 import { dismissNotification, dismissAllNotifications, markAllNotificationsRead, markNotificationRead } from '@store/notifications'
 
@@ -13,9 +13,11 @@ const TYPE_META = {
   contact: { icon: <Mail size={14} />, color: 'primary' },
   job_application: { icon: <Send size={14} />, color: 'info' },
   todo_overdue: { icon: <CheckSquare size={14} />, color: 'danger' },
+  todo_assigned: { icon: <CheckSquare size={14} />, color: 'info' },
   mention: { icon: <AtSign size={14} />, color: 'warning' },
   leave_pending: { icon: <Briefcase size={14} />, color: 'warning' },
-  leave_decided: { icon: <Briefcase size={14} />, color: 'success' }
+  leave_decided: { icon: <Briefcase size={14} />, color: 'success' },
+  invoice_overdue: { icon: <FileText size={14} />, color: 'danger' }
 }
 
 // Add local midnight when the API returns a date without a time.

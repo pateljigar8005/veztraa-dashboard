@@ -65,7 +65,7 @@ export const notificationsSlice = createSlice({
   name: 'notifications',
   initialState: {
     count: 0,
-    byType: { contact: 0, job_application: 0, mention: 0 },
+    byType: { contact: 0, job_application: 0, mention: 0, invoice_overdue: 0, todo_assigned: 0 },
     items: []
   },
   reducers: {},
