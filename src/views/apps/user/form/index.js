@@ -5,14 +5,16 @@ import axios from 'axios'
 import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
+import Select from 'react-select'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormText, InputGroup, InputGroupText } from 'reactstrap'
 import { RefreshCw, Copy } from 'react-feather'
 import { addUser, updateUser, getUser, uploadAvatar } from '../store'
 import InputPasswordToggle from '@components/input-password-toggle'
 import ImageUploadField from '../../shared/ImageUploadField'
 import PhoneInput from '../../shared/PhoneInput'
+import AmountField from '../../shared/AmountField'
 import { Editor } from '@veztraa/editor'
-import { getUserData, resolveAvatarUrl, uploadEditorImage } from '@utils'
+import { getUserData, resolveAvatarUrl, uploadEditorImage, selectThemeColors, sortOptions } from '@utils'
 import { generatePassword } from '@src/utility/generatePassword'
 import HistoryModal from '../../activity-log/HistoryModal'
 
@@ -52,6 +54,8 @@ const UserForm = () => {
   const [isEmployee, setIsEmployee] = useState(false)
   const [salaryType, setSalaryType] = useState('monthly')
   const [salaryAmount, setSalaryAmount] = useState('')
+  const [salaryCurrency, setSalaryCurrency] = useState('USD')
+  const [currencyOptions, setCurrencyOptions] = useState([])
   const isViewerAdmin = (getUserData()?.role || '').toLowerCase() === 'admin'
 
   const {
@@ -98,6 +102,18 @@ const UserForm = () => {
     axios.get('/company').then(response => {
       setMailDomain(response.data.data.mail_domain || '')
       setMailDomainLoaded(true)
+      // A brand new user defaults to the company's configured currency - edit
+      // loads the saved salary_currency instead (see the store.selectedUser
+      // effect below), so this must not clobber that.
+      if (!isEdit && response.data.data.currency_icon) {
+        setSalaryCurrency(response.data.data.currency_icon)
+      }
+    })
+    axios.get('/currencies', { params: { perPage: 100 } }).then(response => {
+      const currencies = response.data.data.currencies
+      setCurrencyOptions(
+        sortOptions(currencies.filter(c => c.is_active).map(c => ({ value: c.icon, label: `${c.name} (${c.icon})` })))
+      )
     })
   }, [])
 
@@ -131,6 +147,7 @@ const UserForm = () => {
       setIsEmployee(Boolean(user.is_employee))
       setSalaryType(user.salary_type || 'monthly')
       setSalaryAmount(user.salary_amount != null ? String(user.salary_amount) : '')
+      setSalaryCurrency(user.salary_currency || 'USD')
       if (user.role_id) setRoleId(String(user.role_id))
       setAvatarPreview(resolveAvatarUrl(user.avatar))
     }
@@ -178,6 +195,7 @@ const UserForm = () => {
         payload.is_employee = isEmployee
         payload.salary_type = isEmployee ? salaryType : null
         payload.salary_amount = isEmployee && salaryAmount !== '' ? Number(salaryAmount) : null
+        payload.salary_currency = isEmployee ? salaryCurrency : null
       }
       if (emailUsernameMode) {
         payload.email = `${data.email}@${mailDomain}`
@@ -424,18 +442,34 @@ const UserForm = () => {
                           <option value='hourly'>Hourly</option>
                         </Input>
                       </Col>
-                      <Col md={6} className='mb-1'>
+                      <Col md={3} className='mb-1'>
+                        <Label className='form-label' for='salary_currency'>
+                          Currency
+                        </Label>
+                        <Select
+                          inputId='salary_currency'
+                          classNamePrefix='select'
+                          className='react-select'
+                          theme={selectThemeColors}
+                          options={currencyOptions}
+                          value={currencyOptions.find(i => i.value === salaryCurrency) || null}
+                          onChange={option => {
+                            setSalaryCurrency(option ? option.value : 'USD')
+                            setExtraDirty(true)
+                          }}
+                          placeholder='Select currency...'
+                        />
+                      </Col>
+                      <Col md={3} className='mb-1'>
                         <Label className='form-label' for='salary_amount'>
                           {salaryType === 'monthly' ? 'Monthly Salary' : 'Hourly Rate'}
                         </Label>
-                        <Input
-                          type='number'
+                        <AmountField
                           id='salary_amount'
-                          min='0'
-                          step='0.01'
+                          placeholder='0.00'
                           value={salaryAmount}
-                          onChange={e => {
-                            setSalaryAmount(e.target.value)
+                          onChange={value => {
+                            setSalaryAmount(value)
                             setExtraDirty(true)
                           }}
                         />

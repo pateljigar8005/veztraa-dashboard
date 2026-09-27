@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Badge } from 'reactstrap'
+import { formatAmount } from '@utils'
 
 const monthNames = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -30,12 +31,12 @@ export const columns = [
   {
     name: 'Total Gross',
     width: '150px',
-    cell: row => row.total_gross.toFixed(2)
+    cell: row => formatAmount(row.total_gross)
   },
   {
     name: 'Total Net',
     width: '150px',
-    cell: row => row.total_net.toFixed(2)
+    cell: row => formatAmount(row.total_net)
   },
   {
     name: 'Status',

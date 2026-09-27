@@ -8,6 +8,7 @@ import { getPayrollRun, finalizePayrollRun, markPayslipPaid } from '../store'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
 import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
+import { formatAmount } from '@utils'
 
 const monthNames = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -43,7 +44,7 @@ const PayrollRunView = () => {
   const handleMarkPaid = payslip => {
     confirmDelete({
       title: `Mark ${payslip.user_name}'s payslip as paid?`,
-      text: `Net salary: ${payslip.net_salary.toFixed(2)}`,
+      text: `Net salary: ${payslip.salary_currency || ''} ${formatAmount(payslip.net_salary)}`.trim(),
       confirmButtonText: 'Yes, mark as paid',
       onConfirm: () =>
         dispatch(markPayslipPaid(payslip.id))
@@ -81,8 +82,8 @@ const PayrollRunView = () => {
         <CardBody>
           <Row>
             <Col md='4'><strong>Employees:</strong> {run.employee_count}</Col>
-            <Col md='4'><strong>Total Gross:</strong> {run.total_gross.toFixed(2)}</Col>
-            <Col md='4'><strong>Total Net:</strong> {run.total_net.toFixed(2)}</Col>
+            <Col md='4'><strong>Total Gross:</strong> {formatAmount(run.total_gross)}</Col>
+            <Col md='4'><strong>Total Net:</strong> {formatAmount(run.total_net)}</Col>
           </Row>
           {run.finalized_by_name && (
             <p className='text-muted small mt-1 mb-0'>Finalized by {run.finalized_by_name} on {run.finalized_at}</p>
@@ -123,10 +124,10 @@ const PayrollRunView = () => {
               {payslips.map(p => (
                 <tr key={p.id}>
                   <td>{p.user_name}</td>
-                  <td>{p.gross_salary.toFixed(2)}</td>
+                  <td>{p.salary_currency || ''} {formatAmount(p.gross_salary)}</td>
                   <td>{p.unpaid_leave_days} day(s)</td>
-                  <td>{p.unpaid_leave_deduction.toFixed(2)}</td>
-                  <td><strong>{p.net_salary.toFixed(2)}</strong></td>
+                  <td>{p.salary_currency || ''} {formatAmount(p.unpaid_leave_deduction)}</td>
+                  <td><strong>{p.salary_currency || ''} {formatAmount(p.net_salary)}</strong></td>
                   <td>
                     <Badge className='text-capitalize' color={p.status === 'paid' ? 'light-success' : 'light-warning'} pill>
                       {p.status}
