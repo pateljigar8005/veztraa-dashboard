@@ -22,12 +22,19 @@ import {
   Button,
   Spinner
 } from 'reactstrap'
-import { Settings, Mail, FileText, Send, Sun, Server, Trash2, Briefcase } from 'react-feather'
+import { Settings, Mail, FileText, Send, Sun, Server, Trash2, Briefcase, Droplet } from 'react-feather'
 import InputPasswordToggle from '@components/input-password-toggle'
 import AdminEmailsTab from './AdminEmailsTab'
 import HistoryModal from '../activity-log/HistoryModal'
 import { selectThemeColors, getUserData, sortOptions } from '@utils'
 import { confirmDelete } from '@src/utility/confirmDelete'
+import {
+  applyThemeColor,
+  getCachedThemeColor,
+  setCachedThemeColor,
+  isValidHexColor,
+  DEFAULT_THEME_COLOR
+} from '@src/utility/themeColor'
 
 const encryptionOptions = [
   { value: '', label: 'None' },
@@ -84,8 +91,12 @@ const CompanySettings = () => {
       ? 'admin-emails'
       : tabParam === 'email-templates'
       ? 'email-templates'
+      : tabParam === 'theme'
+      ? 'theme'
       : 'general'
   const [taxEnabled, setTaxEnabled] = useState(false)
+  const [themePrimaryColor, setThemePrimaryColor] = useState(DEFAULT_THEME_COLOR)
+  const [themeColorInput, setThemeColorInput] = useState(DEFAULT_THEME_COLOR)
   const [currencyId, setCurrencyId] = useState('')
   const [reportCurrencyId, setReportCurrencyId] = useState('')
   const [invoicePdfTemplateId, setInvoicePdfTemplateId] = useState('')
@@ -139,6 +150,20 @@ const CompanySettings = () => {
   }
 
   const { control, reset, handleSubmit } = useForm({ defaultValues })
+
+  // Live preview across the whole app as the admin picks a color - not
+  // cached/persisted until Save is pressed, so navigating away without
+  // saving just reverts to the real color on next load.
+  useEffect(() => {
+    if (!loading && isValidHexColor(themePrimaryColor)) applyThemeColor(themePrimaryColor)
+  }, [themePrimaryColor, loading])
+
+  // Leaving the page without saving reverts the live preview back to the
+  // real, cached color.
+  useEffect(() => {
+    return () => applyThemeColor(getCachedThemeColor())
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     axios.get('/currencies', { params: { perPage: 100 } }).then(response => {
@@ -199,6 +224,9 @@ const CompanySettings = () => {
         leave_standard_hours_per_day: data.leave_standard_hours_per_day ?? ''
       })
       setTaxEnabled(data.tax_enabled)
+      const savedColor = isValidHexColor(data.theme_primary_color) ? data.theme_primary_color : DEFAULT_THEME_COLOR
+      setThemePrimaryColor(savedColor)
+      setThemeColorInput(savedColor)
       setCurrencyId(data.currency_id || '')
       setReportCurrencyId(data.report_currency_id || '')
       setInvoicePdfTemplateId(data.invoice_pdf_template_id || '')
@@ -230,6 +258,7 @@ const CompanySettings = () => {
     axios
       .put('/company', {
         legal_name: data.legal_name,
+        theme_primary_color: themePrimaryColor,
         currency_id: currencyId || null,
         report_currency_id: reportCurrencyId || null,
         address: data.address,
@@ -274,6 +303,11 @@ const CompanySettings = () => {
         leave_standard_hours_per_day: data.leave_standard_hours_per_day === '' ? null : Number(data.leave_standard_hours_per_day)
       })
       .then(() => {
+        // Apply and cache immediately - every other tab/device picks it up
+        // in the background next time it loads (see src/index.js), no
+        // redeploy needed.
+        applyThemeColor(themePrimaryColor)
+        setCachedThemeColor(themePrimaryColor)
         toast.success('Company settings updated')
       })
       .catch(() => toast.error('Failed to update company settings'))
@@ -320,6 +354,10 @@ const CompanySettings = () => {
                 <ListGroupItem tag={Link} to='/company?tab=leave' action active={activeTab === 'leave'}>
                   <Briefcase size={16} className='me-75' />
                   <span className='align-middle'>Leave</span>
+                </ListGroupItem>
+                <ListGroupItem tag={Link} to='/company?tab=theme' action active={activeTab === 'theme'}>
+                  <Droplet size={16} className='me-75' />
+                  <span className='align-middle'>Theme Color</span>
                 </ListGroupItem>
                 <ListGroupItem tag={Link} to='/company?tab=mailbox' action active={activeTab === 'mailbox'}>
                   <Server size={16} className='me-75' />
@@ -582,6 +620,74 @@ const CompanySettings = () => {
                     )}
                   />
                   <FormText color='muted'>Also converts overtime hours to PL days</FormText>
+                </Col>
+              </Row>
+            </TabPane>
+
+            <TabPane tabId='theme'>
+              <h6 className='mb-1'>Theme Color</h6>
+              <p className='text-muted small mb-2'>
+                One color for the whole company - every user sees it, and it applies instantly with no page-load
+                delay (it's cached in the browser and applied before the page renders, not fetched from the
+                database on every load). Covers buttons, links, the active menu item, badges and form controls;
+                a handful of deep hover shades baked into the theme's compiled CSS stay their original tint.
+              </p>
+              <Row>
+                <Col md={4} className='mb-1'>
+                  <Label className='form-label d-block' for='theme_primary_color'>
+                    Primary Color
+                  </Label>
+                  <div className='d-flex align-items-center' style={{ gap: '0.75rem' }}>
+                    <Input
+                      type='color'
+                      id='theme_primary_color'
+                      value={isValidHexColor(themeColorInput) ? themeColorInput : themePrimaryColor}
+                      style={{ width: '3rem', height: '2.5rem', padding: '0.25rem' }}
+                      onChange={e => {
+                        setThemeColorInput(e.target.value)
+                        setThemePrimaryColor(e.target.value)
+                      }}
+                    />
+                    <Input
+                      id='theme_primary_color_hex'
+                      value={themeColorInput}
+                      placeholder={DEFAULT_THEME_COLOR}
+                      maxLength={7}
+                      onChange={e => {
+                        const value = e.target.value
+                        setThemeColorInput(value)
+                        if (isValidHexColor(value)) setThemePrimaryColor(value)
+                      }}
+                      onBlur={() => {
+                        if (!isValidHexColor(themeColorInput)) setThemeColorInput(themePrimaryColor)
+                      }}
+                    />
+                  </div>
+                  {!isValidHexColor(themeColorInput) && (
+                    <FormText color='danger'>Enter a 6-digit hex color, e.g. #7367f0</FormText>
+                  )}
+                </Col>
+                <Col md={4} className='mb-1'>
+                  <Label className='form-label d-block'>Preview</Label>
+                  <Button type='button' color='primary' className='me-1'>
+                    Primary Button
+                  </Button>
+                  <Button type='button' outline color='primary'>
+                    Outline
+                  </Button>
+                </Col>
+                <Col md={4} className='mb-1'>
+                  <Button
+                    type='button'
+                    color='outline-secondary'
+                    size='sm'
+                    onClick={() => {
+                      setThemePrimaryColor(DEFAULT_THEME_COLOR)
+                      setThemeColorInput(DEFAULT_THEME_COLOR)
+                    }}
+                  >
+                    Reset to Default
+                  </Button>
                 </Col>
               </Row>
             </TabPane>

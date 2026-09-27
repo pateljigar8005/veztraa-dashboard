@@ -24,8 +24,15 @@ import './@core/assets/fonts/feather/iconfont.css'
 import './@core/scss/core.scss'
 import './assets/scss/style.scss'
 import * as serviceWorker from './serviceWorker'
+import axios from 'axios'
+import { applyThemeColor, getCachedThemeColor, setCachedThemeColor } from './utility/themeColor'
 
 installChunkPreloadErrorHandler()
+
+// Apply the cached company theme color before anything renders - no flash,
+// no waiting on the API. The API is only checked afterwards, in the
+// background, in case the color changed from another device/browser.
+applyThemeColor(getCachedThemeColor())
 
 const LazyApp = lazy(() => import('./App'))
 
@@ -50,3 +57,17 @@ root.render(
 )
 
 serviceWorker.unregister()
+
+// Background refresh only - never blocks or delays the first paint above.
+// Runs after login too since axios only carries a token once one exists;
+// a 401 on a public/login screen is expected and harmless here.
+axios
+  .get('/company')
+  .then(response => {
+    const hex = response.data?.data?.theme_primary_color
+    if (hex && hex !== getCachedThemeColor()) {
+      setCachedThemeColor(hex)
+      applyThemeColor(hex)
+    }
+  })
+  .catch(() => {})
