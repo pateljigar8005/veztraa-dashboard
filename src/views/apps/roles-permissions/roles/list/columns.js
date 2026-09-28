@@ -7,6 +7,7 @@ import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
 import toast from 'react-hot-toast'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
+import { getCachedThemeColor } from '@src/utility/themeColor'
 
 const handleDelete = (id, name) => {
   confirmDelete({
@@ -60,7 +61,7 @@ export const columns = [
               className='btn-icon me-1'
               color='flat-primary'
               size='sm'
-              style={{ borderRadius: '4px', backgroundColor: '#7367f01f' }}
+              style={{ borderRadius: '4px', backgroundColor: getCachedThemeColor() + '1f' }}
             >
               <Edit2 size={16} className='text-primary' />
             </Button>

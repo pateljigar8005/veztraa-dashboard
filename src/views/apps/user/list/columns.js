@@ -9,6 +9,7 @@ import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
 import { resolveAvatarUrl } from '@utils'
+import { getCachedThemeColor } from '@src/utility/themeColor'
 
 const renderClient = row => {
   if (row.avatar && row.avatar.length) {
@@ -104,7 +105,7 @@ export const columns = [
               className='btn-icon me-1'
               color='flat-primary'
               size='sm'
-              style={{ borderRadius: '4px', backgroundColor: '#7367f01f' }}
+              style={{ borderRadius: '4px', backgroundColor: getCachedThemeColor() + '1f' }}
             >
               <Edit2 size={16} className='text-primary' />
             </Button>

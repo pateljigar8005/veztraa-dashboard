@@ -1,6 +1,7 @@
 import { DefaultRoute } from '../router/routes'
 import axios from 'axios'
 import { resizeToFit, uploadToR2 } from './imageUpload'
+import { getCachedThemeColor } from './themeColor'
 
 export const isObjEmpty = obj => Object.keys(obj).length === 0
 
@@ -153,14 +154,23 @@ export const getHomeRouteForLoggedInUser = userRole => {
   return userRole ? DefaultRoute : '/login'
 }
 
-export const selectThemeColors = theme => ({
-  ...theme,
-  colors: {
-    ...theme.colors,
-    primary25: '#7367f01a',
-    primary: '#7367f0',
-    neutral10: '#7367f0',
-    neutral20: '#ededed',
-    neutral30: '#ededed'
+// react-select renders its own hover/selected option colors from this
+// `theme` prop (inline, via emotion) rather than from the app's CSS, so the
+// CSS-level theme-color override (src/utility/themeColor.js) can't reach
+// it - these were still hardcoded to Vuexy's default purple regardless of
+// the company's chosen color. Read the same cached color everything else
+// uses instead.
+export const selectThemeColors = theme => {
+  const primary = getCachedThemeColor()
+  return {
+    ...theme,
+    colors: {
+      ...theme.colors,
+      primary25: `${primary}1a`,
+      primary,
+      neutral10: primary,
+      neutral20: '#ededed',
+      neutral30: '#ededed'
+    }
   }
-})
+}
