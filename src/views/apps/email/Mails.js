@@ -6,7 +6,8 @@ import MailCardContextMenu from './MailCardContextMenu'
 import toast from 'react-hot-toast'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 import ReactPaginate from 'react-paginate'
-import { Menu, Search } from 'react-feather'
+import { Menu, Search, Mail } from 'react-feather'
+import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
 import { Input, InputGroup, InputGroupText, Button } from 'reactstrap'
 import MailListSkeleton from './MailListSkeleton'
 import { confirmDelete } from '@src/utility/confirmDelete'
@@ -264,9 +265,12 @@ const Mails = props => {
               ))}
             </ul>
           ) : (
-            <div className='no-results d-block'>
-              <h5>No Items Found</h5>
-            </div>
+            <TableEmptyState
+              icon={Mail}
+              noun='emails'
+              message={`No emails in ${store.params.folder || 'this folder'}.`}
+              filtered={Boolean(query)}
+            />
           )}
         </PerfectScrollbar>
 
