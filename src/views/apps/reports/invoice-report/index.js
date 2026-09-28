@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import * as XLSX from 'xlsx'
 import Select from 'react-select'
 import DataTable from 'react-data-table-component'
+import ReactPaginate from 'react-paginate'
 import { Search, RotateCcw, Download, FileText, DollarSign, CheckCircle, AlertCircle } from 'react-feather'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Badge, Spinner } from 'reactstrap'
 import DateField from '../../shared/DateField'
@@ -154,6 +155,24 @@ const StatCard = ({ icon: Icon, color, label, value }) => (
       </CardBody>
     </Card>
   </Col>
+)
+
+const CustomPagination = ({ rowsPerPage, rowCount, currentPage, onChangePage }) => (
+  <ReactPaginate
+    previousLabel={''}
+    nextLabel={''}
+    pageCount={Math.ceil(rowCount / rowsPerPage) || 1}
+    activeClassName='active'
+    forcePage={currentPage - 1}
+    onPageChange={page => onChangePage(page.selected + 1)}
+    pageClassName={'page-item'}
+    nextLinkClassName={'page-link'}
+    nextClassName={'page-item next'}
+    previousClassName={'page-item prev'}
+    previousLinkClassName={'page-link'}
+    pageLinkClassName={'page-link'}
+    containerClassName={'pagination react-paginate justify-content-end my-2 pe-1'}
+  />
 )
 
 const InvoiceReport = () => {
@@ -441,6 +460,7 @@ const InvoiceReport = () => {
                 className='react-dataTable'
                 data={rows}
                 paginationRowsPerPageOptions={[10, 25, 50, 100]}
+                paginationComponent={CustomPagination}
                 noDataComponent={<TableEmptyState icon={EmptyIcon} noun='invoices' filtered filteredMessage='No invoices match these report filters. Try widening the date range or clearing some filters.' />}
               />
             </div>
