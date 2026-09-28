@@ -111,16 +111,20 @@ export const buildThemeColorCSS = hex => {
 [dir=rtl] .fallback-spinner .loading .effect-2,
 [dir=rtl] .fallback-spinner .loading .effect-3 { border-right: 3px solid ${hex} !important; }
 
-/* :not(.active):not(.btn) so this never fights a component's own
-   styling on an <a> that isn't a plain text link - list-group items,
-   nav links and menu items set their own active-state background +
-   contrast text, and a <Button tag={Link}> (an <a class="btn
-   btn-primary">, used all over for "Edit"/"Create Invoice"-style
-   actions) already gets its text color from .btn-primary. Since this
-   rule is !important it would otherwise always win regardless of
-   specificity, even against a same-color background (invisible text). */
-[dir] a:not(.active):not(.btn) { color: ${hex} !important; }
-[dir] a:not(.active):not(.btn):hover { color: ${hoverBg} !important; }
+/* :not(.active):not(.btn):not(.dropdown-item) so this never fights a
+   component's own styling on an <a> that isn't a plain text link -
+   list-group items, nav links and menu items set their own active-state
+   background + contrast text, a <Button tag={Link}> (an <a class="btn
+   btn-primary">) already gets its text color from .btn-primary, and a
+   <DropdownItem tag={Link}> (an <a class="dropdown-item">) has its own
+   hover rule below setting a contrast-aware color. Without the
+   exclusion this rule (having an extra type selector, "a") is actually
+   MORE specific than ".dropdown-item:hover" below despite reading like
+   a generic catch-all, so it would silently win and paint hover text a
+   merely-darkened shade of the theme color instead of full contrast -
+   invisible whenever the theme color itself is already dark. */
+[dir] a:not(.active):not(.btn):not(.dropdown-item) { color: ${hex} !important; }
+[dir] a:not(.active):not(.btn):not(.dropdown-item):hover { color: ${hoverBg} !important; }
 
 [dir] .text-primary { color: ${hex} !important; }
 [dir] .bg-primary { background-color: ${hex} !important; }
