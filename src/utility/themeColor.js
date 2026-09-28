@@ -92,6 +92,25 @@ export const buildThemeColorCSS = hex => {
   --rte-quote-border: ${hex} !important;
 }
 
+/* @veztraa/report-designer (PDF Designer) has its own color system too,
+   defined on :root with its own default purple - same story as the
+   editor package above. */
+:root {
+  --accent: ${hex} !important;
+  --accent-h: ${hoverBg} !important;
+}
+
+/* The boot-time app loader (shown before any route/company data has
+   loaded) hardcodes a slightly different purple shade
+   (rgb(121, 97, 249)) than Vuexy's usual #7367f0, so the stylesheet
+   sweep's exact-color match never touches it. */
+[dir=ltr] .fallback-spinner .loading .effect-1,
+[dir=ltr] .fallback-spinner .loading .effect-2,
+[dir=ltr] .fallback-spinner .loading .effect-3 { border-left: 3px solid ${hex} !important; }
+[dir=rtl] .fallback-spinner .loading .effect-1,
+[dir=rtl] .fallback-spinner .loading .effect-2,
+[dir=rtl] .fallback-spinner .loading .effect-3 { border-right: 3px solid ${hex} !important; }
+
 [dir] a { color: ${hex} !important; }
 [dir] a:hover { color: ${hoverBg} !important; }
 
@@ -183,6 +202,10 @@ export const buildThemeColorCSS = hex => {
 [dir] .form-control:focus, [dir] .form-select:focus { border-color: ${focusBorder} !important; box-shadow: 0 0 0 0.2rem rgba(${rgb}, 0.25) !important; }
 
 [dir] .dropdown-menu { --bs-dropdown-link-active-color: ${contrastText} !important; }
+[dir][dir] .dropdown-item:hover, [dir][dir] .dropdown-item:focus {
+  background-color: ${hex} !important;
+  color: ${contrastText} !important;
+}
 [dir] .list-group { --bs-list-group-active-color: ${contrastText} !important; }
 
 ::selection { background: ${tint(hex, 0.5)}; }
