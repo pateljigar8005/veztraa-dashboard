@@ -41,10 +41,17 @@ export const buildThemeColorCSS = hex => {
   const borderSubtle = tint(hex, 0.6)
   const focusBorder = tint(hex, 0.4)
 
-  // Every rule below uses !important. This override is deliberately not
-  // relying on cascade order (being "last in <head>") because Vite's dev
-  // server can re-inject/reorder the app's own CSS via HMR after this tag
-  // exists, which would otherwise silently lose the override mid-session.
+  // Every rule below uses !important AND is prefixed with the `[dir]`
+  // attribute selector. That's not decorative: Vuexy's own compiled CSS
+  // hardcodes rules like `[dir] .btn-primary{background-color:...!important}`
+  // for every "primary" component, and `[dir]` (always present - the app's
+  // <html> always has a dir attribute) adds one extra unit of specificity.
+  // Two `!important` declarations don't tie-break on source order - the
+  // more specific one always wins regardless of which one loads later - so
+  // without matching that `[dir]` prefix ourselves, Vuexy's built-in rule
+  // silently beat ours on the default (non-hover) state even though this
+  // stylesheet loads last in <head>. Their compiled CSS doesn't special-case
+  // :hover the same way, which is why hover alone looked correct.
   return `:root {
   --bs-primary: ${hex} !important;
   --bs-primary-rgb: ${rgb} !important;
@@ -53,14 +60,14 @@ export const buildThemeColorCSS = hex => {
   --bs-link-hover-color: ${hoverBg} !important;
 }
 
-a { color: ${hex} !important; }
-a:hover { color: ${hoverBg} !important; }
+[dir] a { color: ${hex} !important; }
+[dir] a:hover { color: ${hoverBg} !important; }
 
-.text-primary { color: ${hex} !important; }
-.bg-primary { background-color: ${hex} !important; }
-.border-primary { border-color: ${hex} !important; }
+[dir] .text-primary { color: ${hex} !important; }
+[dir] .bg-primary { background-color: ${hex} !important; }
+[dir] .border-primary { border-color: ${hex} !important; }
 
-.btn-primary {
+[dir] .btn-primary {
   --bs-btn-bg: ${hex} !important;
   --bs-btn-border-color: ${hex} !important;
   --bs-btn-hover-bg: ${hoverBg} !important;
@@ -74,13 +81,13 @@ a:hover { color: ${hoverBg} !important; }
   border-color: ${hex} !important;
   box-shadow: 0 2px 4px 0 rgba(${rgb}, 0.4) !important;
 }
-.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+[dir] .btn-primary:hover, [dir] .btn-primary:focus, [dir] .btn-primary:active {
   background-color: ${hoverBg} !important;
   border-color: ${hoverBg} !important;
   box-shadow: 0 4px 18px 0 rgba(${rgb}, 0.44) !important;
 }
 
-.btn-outline-primary {
+[dir] .btn-outline-primary {
   --bs-btn-color: ${hex} !important;
   --bs-btn-border-color: ${hex} !important;
   --bs-btn-hover-bg: ${hex} !important;
@@ -91,41 +98,42 @@ a:hover { color: ${hoverBg} !important; }
   color: ${hex} !important;
   border-color: ${hex} !important;
 }
-.btn-outline-primary:hover, .btn-outline-primary:active {
+[dir] .btn-outline-primary:hover, [dir] .btn-outline-primary:active {
   background-color: ${hex} !important;
   border-color: ${hex} !important;
 }
 
-.btn-flat-primary { color: ${hex} !important; }
-.btn-flat-primary:hover { background-color: rgba(${rgb}, 0.12) !important; }
+[dir] .btn-flat-primary { color: ${hex} !important; }
+[dir] .btn-flat-primary:hover { background-color: rgba(${rgb}, 0.12) !important; }
 
-.badge.bg-primary, .badge-primary { background-color: ${hex} !important; }
-.badge.bg-light-primary { background-color: ${lightBg} !important; color: ${hex} !important; }
+[dir] .badge.bg-primary, [dir] .badge-primary { background-color: ${hex} !important; }
+[dir] .badge.bg-light-primary { background-color: ${lightBg} !important; color: ${hex} !important; }
 
-.alert-primary { color: ${hex} !important; background-color: ${lightBg} !important; border-color: ${borderSubtle} !important; }
-.alert-primary .alert-link { color: ${shade(hex, 0.1)} !important; }
+[dir] .alert-primary { color: ${hex} !important; background-color: ${lightBg} !important; border-color: ${borderSubtle} !important; }
+[dir] .alert-primary .alert-link { color: ${shade(hex, 0.1)} !important; }
 
-.progress-bar { background-color: ${hex} !important; }
+[dir] .progress-bar { background-color: ${hex} !important; }
 
-.form-check-input:checked, .form-switch .form-check-input:checked {
+[dir] .form-check-input:checked, [dir] .form-switch .form-check-input:checked {
   background-color: ${hex} !important;
   border-color: ${hex} !important;
 }
-.form-check-input:focus { box-shadow: 0 0 0 0.25rem rgba(${rgb}, 0.25) !important; }
+[dir] .form-check-input:focus { box-shadow: 0 0 0 0.25rem rgba(${rgb}, 0.25) !important; }
 
-.nav-pills .nav-link.active, .nav-pills .show > .nav-link { background-color: ${hex} !important; }
-.page-item.active .page-link { background-color: ${hex} !important; border-color: ${hex} !important; }
+[dir] .nav-pills .nav-link.active, [dir] .nav-pills .show > .nav-link { background-color: ${hex} !important; }
+[dir] .page-item.active .page-link,
+[dir] .pagination-primary .page-item.active .page-link { background-color: ${hex} !important; border-color: ${hex} !important; }
 
-.main-menu .navigation li.active > a {
+[dir] .main-menu .navigation li.active > a {
   background: linear-gradient(118deg, rgba(${rgb}, 1), rgba(${rgb}, 0.7)) !important;
   box-shadow: 0 0 10px 1px rgba(${rgb}, 0.7) !important;
   color: #fff !important;
 }
-.main-menu .navigation li.active > a * { color: #fff !important; }
-.main-menu .navigation li .active > a { color: ${hex} !important; }
-.horizontal-menu .nav-link.active { color: ${hex} !important; }
+[dir] .main-menu .navigation li.active > a * { color: #fff !important; }
+[dir] .main-menu .navigation li .active > a { color: ${hex} !important; }
+[dir] .horizontal-menu .nav-link.active { color: ${hex} !important; }
 
-.form-control:focus, .form-select:focus { border-color: ${focusBorder} !important; box-shadow: 0 0 0 0.2rem rgba(${rgb}, 0.25) !important; }
+[dir] .form-control:focus, [dir] .form-select:focus { border-color: ${focusBorder} !important; box-shadow: 0 0 0 0.2rem rgba(${rgb}, 0.25) !important; }
 
 ::selection { background: ${tint(hex, 0.5)}; }
 `
