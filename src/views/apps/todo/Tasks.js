@@ -209,7 +209,12 @@ const Tasks = props => {
             })}
           </ReactSortable>
         ) : (
-          <TableEmptyState icon={CheckSquare} noun='tasks' message='No tasks yet.' filtered={Boolean(query)} />
+          <TableEmptyState
+            icon={CheckSquare}
+            noun='tasks'
+            message='Tasks you create or get assigned show up here.'
+            filtered={Boolean(query)}
+          />
         )}
       </PerfectScrollbar>
     )
