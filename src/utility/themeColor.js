@@ -111,13 +111,16 @@ export const buildThemeColorCSS = hex => {
 [dir=rtl] .fallback-spinner .loading .effect-2,
 [dir=rtl] .fallback-spinner .loading .effect-3 { border-right: 3px solid ${hex} !important; }
 
-/* :not(.active) so this never fights a component's own active-state
-   styling on an <a> (list-group items, nav links, menu items...) - those
-   set their own background + contrast text, and since this rule is
-   !important it would otherwise always win regardless of specificity,
-   even against a same-color background (invisible text). */
-[dir] a:not(.active) { color: ${hex} !important; }
-[dir] a:not(.active):hover { color: ${hoverBg} !important; }
+/* :not(.active):not(.btn) so this never fights a component's own
+   styling on an <a> that isn't a plain text link - list-group items,
+   nav links and menu items set their own active-state background +
+   contrast text, and a <Button tag={Link}> (an <a class="btn
+   btn-primary">, used all over for "Edit"/"Create Invoice"-style
+   actions) already gets its text color from .btn-primary. Since this
+   rule is !important it would otherwise always win regardless of
+   specificity, even against a same-color background (invisible text). */
+[dir] a:not(.active):not(.btn) { color: ${hex} !important; }
+[dir] a:not(.active):not(.btn):hover { color: ${hoverBg} !important; }
 
 [dir] .text-primary { color: ${hex} !important; }
 [dir] .bg-primary { background-color: ${hex} !important; }
