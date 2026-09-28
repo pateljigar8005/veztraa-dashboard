@@ -10,7 +10,8 @@ import classnames from 'classnames'
 import { useState } from 'react'
 import { ReactSortable } from 'react-sortablejs'
 import PerfectScrollbar from 'react-perfect-scrollbar'
-import { Menu, Search, Filter, MoreVertical } from 'react-feather'
+import { Menu, Search, Filter, MoreVertical, CheckSquare } from 'react-feather'
+import TableEmptyState from '../shared/TableEmptyState'
 import {
   Input,
   Badge,
@@ -208,9 +209,7 @@ const Tasks = props => {
             })}
           </ReactSortable>
         ) : (
-          <div className='no-results show'>
-            <h5>No Items Found</h5>
-          </div>
+          <TableEmptyState icon={CheckSquare} noun='tasks' message='No tasks yet.' filtered={Boolean(query)} />
         )}
       </PerfectScrollbar>
     )
