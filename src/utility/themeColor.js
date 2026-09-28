@@ -72,6 +72,26 @@ export const buildThemeColorCSS = hex => {
   --bs-link-hover-color: ${hoverBg} !important;
 }
 
+/* The @veztraa/editor package (email signature / rich-text fields) has its
+   own separate color system, unrelated to Bootstrap/Vuexy's - it defines
+   these on ":root, [data-rte=light]" (and a [data-rte=dark] variant), so
+   overriding only :root wouldn't reach an editor instance that sets these
+   directly on its own wrapper element via [data-rte=light]. */
+:root, [data-rte=light], [data-rte=dark] {
+  --rte-active: ${hex} !important;
+  --rte-active-text: ${contrastText} !important;
+  --rte-accent: ${hex} !important;
+  --rte-accent-h: ${hoverBg} !important;
+  --rte-accent-dim: rgba(${rgb}, 0.1) !important;
+  --rte-accent-ring: rgba(${rgb}, 0.3) !important;
+  --rte-accent-light: ${tint(hex, 0.7)} !important;
+  --rte-accent-r: ${hexToRgb(hex)[0]} !important;
+  --rte-accent-g: ${hexToRgb(hex)[1]} !important;
+  --rte-accent-b: ${hexToRgb(hex)[2]} !important;
+  --rte-link: ${hex} !important;
+  --rte-quote-border: ${hex} !important;
+}
+
 [dir] a { color: ${hex} !important; }
 [dir] a:hover { color: ${hoverBg} !important; }
 
@@ -142,14 +162,22 @@ export const buildThemeColorCSS = hex => {
 [dir] .page-item.active .page-link,
 [dir] .pagination-primary .page-item.active .page-link { background-color: ${hex} !important; border-color: ${hex} !important; color: ${contrastText} !important; }
 
-[dir] .main-menu .navigation li.active > a,
-[dir] .main-menu .navigation li .active > a {
+/* This exact spot (active menu item text) has twice lost to a
+   same-specificity !important Vuexy rule that loads earlier - specificity
+   ties among !important declarations go to source order, not to us just
+   because we load last, so a plain tie isn't safe here. Inflating our own
+   specificity with a repeated [dir] (a harmless no-op for matching -
+   <html> either has a dir attribute or it doesn't, so [dir][dir] matches
+   exactly what [dir] matches) guarantees we outrank anything Vuexy ships
+   without needing to find and out-guess the exact competing selector. */
+[dir][dir][dir] .main-menu .navigation li.active > a,
+[dir][dir][dir] .main-menu .navigation li .active > a {
   background: linear-gradient(118deg, rgba(${rgb}, 1), rgba(${rgb}, 0.7)) !important;
   box-shadow: 0 0 10px 1px rgba(${rgb}, 0.7) !important;
   color: ${contrastText} !important;
 }
-[dir] .main-menu .navigation li.active > a *,
-[dir] .main-menu .navigation li .active > a * { color: ${contrastText} !important; }
+[dir][dir][dir] .main-menu .navigation li.active > a *,
+[dir][dir][dir] .main-menu .navigation li .active > a * { color: ${contrastText} !important; }
 [dir] .horizontal-menu .nav-link.active { color: ${hex} !important; }
 
 [dir] .form-control:focus, [dir] .form-select:focus { border-color: ${focusBorder} !important; box-shadow: 0 0 0 0.2rem rgba(${rgb}, 0.25) !important; }
