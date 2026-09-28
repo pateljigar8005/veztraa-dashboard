@@ -111,20 +111,22 @@ export const buildThemeColorCSS = hex => {
 [dir=rtl] .fallback-spinner .loading .effect-2,
 [dir=rtl] .fallback-spinner .loading .effect-3 { border-right: 3px solid ${hex} !important; }
 
-/* :not(.active):not(.btn):not(.dropdown-item) so this never fights a
-   component's own styling on an <a> that isn't a plain text link -
-   list-group items, nav links and menu items set their own active-state
-   background + contrast text, a <Button tag={Link}> (an <a class="btn
-   btn-primary">) already gets its text color from .btn-primary, and a
-   <DropdownItem tag={Link}> (an <a class="dropdown-item">) has its own
-   hover rule below setting a contrast-aware color. Without the
-   exclusion this rule (having an extra type selector, "a") is actually
-   MORE specific than ".dropdown-item:hover" below despite reading like
-   a generic catch-all, so it would silently win and paint hover text a
-   merely-darkened shade of the theme color instead of full contrast -
-   invisible whenever the theme color itself is already dark. */
-[dir] a:not(.active):not(.btn):not(.dropdown-item) { color: ${hex} !important; }
-[dir] a:not(.active):not(.btn):not(.dropdown-item):hover { color: ${hoverBg} !important; }
+/* This is meant to be the LOWEST-priority color rule for an <a> - any
+   component with its own active/hover color logic (list-group items,
+   menu items, .btn buttons, .dropdown-item, .page-link pagination...)
+   should always win over it. A plain :not(.foo) doesn't achieve that:
+   it still carries the specificity of .foo, so "a:not(.dropdown-item)"
+   (with its extra "a" type selector) actually ends up MORE specific
+   than a same-class dedicated rule like ".dropdown-item:hover" once
+   their class counts tie - silently winning and painting text a
+   merely-darkened shade of the theme color instead of full contrast,
+   invisible whenever the theme color itself is dark. :where(...)
+   applies the same exclusions with ZERO added specificity, so this
+   rule stays at plain "[dir] a" specificity and any component-specific
+   rule (which always has at least one class of its own) naturally
+   wins - no need to keep adding classes here as new components turn up. */
+[dir] a:where(:not(.active, .btn, .dropdown-item, .page-link)) { color: ${hex} !important; }
+[dir] a:where(:not(.active, .btn, .dropdown-item, .page-link)):hover { color: ${hoverBg} !important; }
 
 [dir] .text-primary { color: ${hex} !important; }
 [dir] .bg-primary { background-color: ${hex} !important; }
