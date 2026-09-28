@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { ReportDesigner } from '@veztraa/report-designer'
 import { Card, CardBody, Row, Col, Label, Input } from 'reactstrap'
 import { selectThemeColors } from '@utils'
+import { getCachedThemeColor } from '@src/utility/themeColor'
 import { addPdfDesignerTemplate, updatePdfDesignerTemplate, getPdfDesignerTemplate } from '../store'
 import { PDF_DESIGNER_SCOPE_ID } from '@src/utility/reportDesignerStyleGuard'
 
@@ -230,7 +231,7 @@ const PdfDesignerTemplateForm = () => {
               }
             }}
             theme='light'
-            accentColor='#7367f0'
+            accentColor={getCachedThemeColor()}
             toolbar={{ onSave: handleDesignerSave }}
           />
         </div>
