@@ -215,6 +215,19 @@ export const buildThemeColorCSS = hex => {
 }
 [dir] .list-group { --bs-list-group-active-color: ${contrastText} !important; }
 
+/* react-select: hovering the currently-selected option gets BOTH
+   --is-focused and --is-selected at once. Its default style function
+   colors the text for "focused" (the theme color) independently of
+   "selected" (which sets the background to the same theme color) - so
+   the two combine into theme-color text on a theme-color background,
+   invisible, unlike either state alone. The emotion-generated class
+   carrying the actual colors is unpredictable per-render, but these two
+   classNamePrefix classes are stable, so force the readable pairing here. */
+[dir][dir] .select__option--is-focused.select__option--is-selected {
+  background-color: ${hex} !important;
+  color: ${contrastText} !important;
+}
+
 ::selection { background: ${tint(hex, 0.5)}; }
 `
 }
