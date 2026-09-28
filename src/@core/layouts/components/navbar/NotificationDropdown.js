@@ -7,6 +7,7 @@ import PerfectScrollbar from 'react-perfect-scrollbar'
 import { Bell, Mail, Send, CheckSquare, AtSign, X, Briefcase, FileText } from 'react-feather'
 import { Badge, Button, DropdownMenu, DropdownItem, DropdownToggle, UncontrolledDropdown, Spinner } from 'reactstrap'
 import { dismissNotification, dismissAllNotifications, markAllNotificationsRead, markNotificationRead } from '@store/notifications'
+import CardEmptyState from '@src/views/apps/shared/CardEmptyState'
 
 // The API handles permission filtering; this component renders the returned items.
 const TYPE_META = {
@@ -89,7 +90,9 @@ const NotificationDropdown = () => {
           </DropdownItem>
         </li>
         {items.length === 0 ? (
-          <li className='p-2 text-center text-muted'>You're all caught up.</li>
+          <li className='p-1'>
+            <CardEmptyState icon={Bell} message="You're all caught up." />
+          </li>
         ) : (
           <PerfectScrollbar
             component='li'
