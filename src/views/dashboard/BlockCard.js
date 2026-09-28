@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Card, CardBody } from 'reactstrap'
+import CardEmptyState from '@src/views/apps/shared/CardEmptyState'
 
 // Same avatar-stats + bg-light-{color} shape as the Invoice Report page's
 // own StatCard (src/views/apps/reports/invoice-report/index.js). h-100 so
@@ -26,7 +27,7 @@ const BlockCard = ({ icon: Icon, color, title, path, stats, items = [] }) => (
         </Link>
       </div>
       {stats.length === 0 ? (
-        <p className='text-muted mb-0'>No data yet</p>
+        <CardEmptyState icon={Icon} />
       ) : stats.length === 1 ? (
         <h2 className='fw-bolder mb-0'>{stats[0].value}</h2>
       ) : (

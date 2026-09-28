@@ -1,7 +1,9 @@
 import { Fragment, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Row, Col } from 'reactstrap'
+import { Grid } from 'react-feather'
 import { getSummary } from './store'
+import CardEmptyState from '@src/views/apps/shared/CardEmptyState'
 import { dashboardBlocks, dashboardSections } from './blockConfig'
 import DashboardSkeleton from './DashboardSkeleton'
 import BlockCard from './BlockCard'
@@ -52,7 +54,7 @@ const Dashboard = () => {
       {store.loading ? (
         <DashboardSkeleton />
       ) : visibleBlocks.length === 0 && store.upcoming.length === 0 ? (
-        <p className='text-muted'>Nothing to show here yet.</p>
+        <CardEmptyState icon={Grid} message='Nothing to show here yet' />
       ) : (
         <Fragment>
           <KpiStrip blocks={store.blocks} />

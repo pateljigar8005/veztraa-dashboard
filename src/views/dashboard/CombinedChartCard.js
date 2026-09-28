@@ -1,8 +1,10 @@
 import { useContext } from 'react'
 import { Link } from 'react-router-dom'
 import Chart from 'react-apexcharts'
+import { PieChart } from 'react-feather'
 import { Card, CardBody } from 'reactstrap'
 import { ThemeColors } from '@src/utility/context/ThemeColors'
+import CardEmptyState from '@src/views/apps/shared/CardEmptyState'
 
 // One actual chart for every status-breakdown block in a section (Invoice/
 // Quotation/Project), not one chart each - a single horizontal stacked bar,
@@ -64,7 +66,9 @@ const CombinedChartCard = ({ items }) => {
         {hasData ? (
           <Chart options={options} series={series} type='bar' height={items.length * 70 + 60} />
         ) : (
-          <p className='text-muted mb-0 mt-1'>No data yet</p>
+          <div className='mt-1'>
+            <CardEmptyState icon={PieChart} />
+          </div>
         )}
       </CardBody>
     </Card>
