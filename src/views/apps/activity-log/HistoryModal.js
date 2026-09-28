@@ -3,7 +3,8 @@ import axios from 'axios'
 import ReactPaginate from 'react-paginate'
 import DataTable from 'react-data-table-component'
 import { Clock, Search, ChevronDown } from 'react-feather'
-import { Badge, Button, Input, InputGroup, InputGroupText, Modal, ModalHeader, ModalBody, Spinner } from 'reactstrap'
+import { Badge, Button, Input, InputGroup, InputGroupText, Modal, ModalHeader, ModalBody } from 'reactstrap'
+import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { describeActivityRow, ActivityLines, ActivityDateTime } from '@src/utility/activityLogFormat'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
@@ -177,9 +178,7 @@ const HistoryModal = ({ entityType, entityId, entityLabel, buttonId }) => {
           </div>
 
           {loading ? (
-            <div className='d-flex justify-content-center p-3'>
-              <Spinner size='sm' color='primary' />
-            </div>
+            <TableRowsSkeleton rows={5} columns={[45, 15, 20, 10]} />
           ) : visibleRows.length === 0 ? (
             <div className='d-flex flex-column align-items-center text-center py-3'>
               <div className='avatar avatar-xl bg-light-secondary mb-1'>

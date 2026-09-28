@@ -9,6 +9,7 @@ import { Paperclip, ChevronLeft, CornerUpLeft, CornerUpRight, Star, Download, XC
 import PerfectScrollbar from 'react-perfect-scrollbar'
 import { Card, CardBody, CardFooter, CardHeader, Spinner } from 'reactstrap'
 import { toggleFlag, updateMessageFlag, deleteMessage, removeMessageFromList } from './store'
+import MailDetailsSkeleton from './MailDetailsSkeleton'
 
 const MailDetails = props => {
   const { mail, loading, folder, openMail, dispatch, setOpenMail, toggleCompose, setReplyTo, viewingMailboxId } = props
@@ -81,9 +82,7 @@ const MailDetails = props => {
       })}
     >
       {loading ? (
-        <div className='d-flex justify-content-center align-items-center h-100'>
-          <Spinner color='primary' />
-        </div>
+        <MailDetailsSkeleton />
       ) : mail !== null && mail !== undefined ? (
         <Fragment>
           <div className='email-detail-header'>
