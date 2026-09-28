@@ -190,13 +190,15 @@ export const buildThemeColorCSS = hex => {
    exactly what [dir] matches) guarantees we outrank anything Vuexy ships
    without needing to find and out-guess the exact competing selector. */
 [dir][dir][dir] .main-menu .navigation li.active > a,
-[dir][dir][dir] .main-menu .navigation li .active > a {
+[dir][dir][dir] .main-menu .navigation li .active > a,
+[dir][dir][dir] .main-menu .navigation li a.active {
   background: linear-gradient(118deg, rgba(${rgb}, 1), rgba(${rgb}, 0.7)) !important;
   box-shadow: 0 0 10px 1px rgba(${rgb}, 0.7) !important;
   color: ${contrastText} !important;
 }
 [dir][dir][dir] .main-menu .navigation li.active > a *,
-[dir][dir][dir] .main-menu .navigation li .active > a * { color: ${contrastText} !important; }
+[dir][dir][dir] .main-menu .navigation li .active > a *,
+[dir][dir][dir] .main-menu .navigation li a.active * { color: ${contrastText} !important; }
 [dir] .horizontal-menu .nav-link.active { color: ${hex} !important; }
 
 [dir] .form-control:focus, [dir] .form-select:focus { border-color: ${focusBorder} !important; box-shadow: 0 0 0 0.2rem rgba(${rgb}, 0.25) !important; }
