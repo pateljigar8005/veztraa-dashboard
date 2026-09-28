@@ -166,6 +166,7 @@ export const buildThemeColorCSS = hex => {
 [dir] .btn-outline-primary:hover, [dir] .btn-outline-primary:active {
   background-color: ${hex} !important;
   border-color: ${hex} !important;
+  color: ${contrastText} !important;
 }
 
 [dir] .btn-flat-primary { color: ${hex} !important; }
