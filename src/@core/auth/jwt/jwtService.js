@@ -42,6 +42,15 @@ export default class JwtService {
             return Promise.reject(error)
           }
 
+          // No refresh token means there was never a session to refresh (e.g.
+          // a background request firing on the public login page before the
+          // user has signed in). Attempting a refresh here would itself 401
+          // against refreshEndpoint above and redirect to /login, which -
+          // since we're already there - just reloads the page and repeats.
+          if (!this.getRefreshToken()) {
+            return Promise.reject(error)
+          }
+
           if (!this.isAlreadyFetchingAccessToken) {
             this.isAlreadyFetchingAccessToken = true
             this.refreshToken()
@@ -127,7 +136,10 @@ export default class JwtService {
     }
     localStorage.removeItem(this.jwtConfig.storageTokenKeyName)
     localStorage.removeItem(this.jwtConfig.storageRefreshTokenKeyName)
-    window.location.href = '/login'
+    // Avoid a reload loop if this fires while already on a public auth page.
+    if (!/^\/(login|register|forgot-password|reset-password)/.test(window.location.pathname)) {
+      window.location.href = '/login'
+    }
   }
 
   addSubscriber(subscriber) {
