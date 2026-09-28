@@ -30,9 +30,9 @@ import { selectThemeColors, getUserData, sortOptions } from '@utils'
 import { confirmDelete } from '@src/utility/confirmDelete'
 import {
   applyThemeColor,
-  getCachedThemeColor,
   setCachedThemeColor,
   isValidHexColor,
+  getContrastText,
   DEFAULT_THEME_COLOR
 } from '@src/utility/themeColor'
 
@@ -150,20 +150,6 @@ const CompanySettings = () => {
   }
 
   const { control, reset, handleSubmit } = useForm({ defaultValues })
-
-  // Live preview across the whole app as the admin picks a color - not
-  // cached/persisted until Save is pressed, so navigating away without
-  // saving just reverts to the real color on next load.
-  useEffect(() => {
-    if (!loading && isValidHexColor(themePrimaryColor)) applyThemeColor(themePrimaryColor)
-  }, [themePrimaryColor, loading])
-
-  // Leaving the page without saving reverts the live preview back to the
-  // real, cached color.
-  useEffect(() => {
-    return () => applyThemeColor(getCachedThemeColor())
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   useEffect(() => {
     axios.get('/currencies', { params: { perPage: 100 } }).then(response => {
@@ -669,10 +655,26 @@ const CompanySettings = () => {
                 </Col>
                 <Col md={4} className='mb-1'>
                   <Label className='form-label d-block'>Preview</Label>
-                  <Button type='button' color='primary' className='me-1'>
+                  <Button
+                    type='button'
+                    className='me-1'
+                    style={
+                      isValidHexColor(themeColorInput)
+                        ? {
+                            backgroundColor: themeColorInput,
+                            borderColor: themeColorInput,
+                            color: getContrastText(themeColorInput)
+                          }
+                        : undefined
+                    }
+                  >
                     Primary Button
                   </Button>
-                  <Button type='button' outline color='primary'>
+                  <Button
+                    type='button'
+                    outline
+                    style={isValidHexColor(themeColorInput) ? { color: themeColorInput, borderColor: themeColorInput } : undefined}
+                  >
                     Outline
                   </Button>
                 </Col>
