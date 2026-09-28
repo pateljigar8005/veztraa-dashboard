@@ -61,8 +61,16 @@ serviceWorker.unregister()
 // Background refresh only - never blocks or delays the first paint above.
 // Runs after login too since axios only carries a token once one exists;
 // a 401 on a public/login screen is expected and harmless here.
+//
+// This request is issued before the router has settled on its real route
+// (e.g. a "/" -> "/dashboard" redirect right after boot), and axiosConfig's
+// route-change interceptor aborts every GET tagged with a path the app has
+// since navigated away from. Supplying our own signal here opts this
+// request out of that auto-cancel (the interceptor only wraps requests
+// where no signal is already set) so it isn't silently killed by the very
+// first navigation.
 axios
-  .get('/company')
+  .get('/company', { signal: new AbortController().signal })
   .then(response => {
     const hex = response.data?.data?.theme_primary_color
     if (hex && hex !== getCachedThemeColor()) {
