@@ -128,6 +128,13 @@ export const buildThemeColorCSS = hex => {
 [dir] a:where(:not(.active, .btn, .dropdown-item, .page-link)) { color: ${hex} !important; }
 [dir] a:where(:not(.active, .btn, .dropdown-item, .page-link)):hover { color: ${hoverBg} !important; }
 
+/* Vuexy hardcodes a DIFFERENT literal purple (#6d62e4, not the usual
+   #7367f0) just for this one utility hover state - e.g. the Payroll
+   list's "<Link className="text-body">" month cell. The stylesheet
+   sweep only searches for the app's own default color, so a different
+   literal shade like this slips through untouched. */
+[dir] .text-body[href]:hover { color: ${hex} !important; }
+
 [dir] .text-primary { color: ${hex} !important; }
 [dir] .bg-primary { background-color: ${hex} !important; }
 [dir] .border-primary { border-color: ${hex} !important; }
