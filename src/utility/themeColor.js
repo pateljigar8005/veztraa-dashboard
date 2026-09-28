@@ -176,10 +176,14 @@ export const buildThemeColorCSS = hex => {
 
 [dir] .progress-bar { background-color: ${hex} !important; }
 
-[dir] .form-check-input:checked, [dir] .form-switch .form-check-input:checked {
-  background-color: ${hex} !important;
-  border-color: ${hex} !important;
-}
+/* No explicit "checked" override here on purpose - Vuexy gives checkboxes
+   distinct color variants (.form-check-info, .form-check-warning,
+   .form-check-secondary...) each with their own default color, and an
+   !important blanket rule here would force ALL of them to the theme
+   color, erasing that color-coding (e.g. calendar's per-category task
+   filters). The plain/no-variant checkbox IS meant to follow the theme
+   color and already does, via the stylesheet sweep below (its default
+   is the same literal purple this sweep already catches and swaps). */
 [dir] .form-check-input:focus { box-shadow: 0 0 0 0.25rem rgba(${rgb}, 0.25) !important; }
 
 [dir] .nav-pills .nav-link.active, [dir] .nav-pills .show > .nav-link { background-color: ${hex} !important; color: ${contrastText} !important; }
