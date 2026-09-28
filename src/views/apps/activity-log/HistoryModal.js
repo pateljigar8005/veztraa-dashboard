@@ -7,6 +7,7 @@ import { Badge, Button, Input, InputGroup, InputGroupText, Modal, ModalHeader, M
 import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { describeActivityRow, ActivityLines, ActivityDateTime } from '@src/utility/activityLogFormat'
+import DateField from '@src/views/apps/shared/DateField'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 
 // Record history uses the shared activity formatter and a hidden trigger
@@ -147,8 +148,8 @@ const HistoryModal = ({ entityType, entityId, entityLabel, buttonId }) => {
         </ModalHeader>
         <ModalBody>
           <div className='d-flex flex-wrap align-items-center gap-1 mb-1'>
-            <Input type='date' value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ maxWidth: 170 }} />
-            <Input type='date' value={dateTo} onChange={e => setDateTo(e.target.value)} style={{ maxWidth: 170 }} />
+            <DateField value={dateFrom} onChange={setDateFrom} style={{ maxWidth: 170 }} />
+            <DateField value={dateTo} onChange={setDateTo} style={{ maxWidth: 170 }} />
             {/* Bootstrap's .input-group defaults to width: 100%, which was
                 forcing this onto its own line inside the flex-wrap row
                 above instead of sitting alongside the two date fields -
