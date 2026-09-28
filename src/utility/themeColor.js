@@ -124,13 +124,14 @@ export const buildThemeColorCSS = hex => {
 [dir] .page-item.active .page-link,
 [dir] .pagination-primary .page-item.active .page-link { background-color: ${hex} !important; border-color: ${hex} !important; }
 
-[dir] .main-menu .navigation li.active > a {
+[dir] .main-menu .navigation li.active > a,
+[dir] .main-menu .navigation li .active > a {
   background: linear-gradient(118deg, rgba(${rgb}, 1), rgba(${rgb}, 0.7)) !important;
   box-shadow: 0 0 10px 1px rgba(${rgb}, 0.7) !important;
   color: #fff !important;
 }
-[dir] .main-menu .navigation li.active > a * { color: #fff !important; }
-[dir] .main-menu .navigation li .active > a { color: ${hex} !important; }
+[dir] .main-menu .navigation li.active > a *,
+[dir] .main-menu .navigation li .active > a * { color: #fff !important; }
 [dir] .horizontal-menu .nav-link.active { color: ${hex} !important; }
 
 [dir] .form-control:focus, [dir] .form-select:focus { border-color: ${focusBorder} !important; box-shadow: 0 0 0 0.2rem rgba(${rgb}, 0.25) !important; }
@@ -151,9 +152,93 @@ const getStyleTag = () => {
   return tag
 }
 
+// Vuexy's own compiled CSS hardcodes the default primary color (#7367f0 /
+// rgb(115, 103, 240), plus the same values URL-encoded inside inline SVG
+// data-URIs) directly into hundreds of unrelated selectors - badges,
+// avatars, dropdowns, pagination, the date picker, dropzones, editor
+// toolbars, and more. Rather than hand-maintain a selector list that will
+// always be one screenshot behind, this scans every stylesheet actually
+// loaded by the app, finds any rule that hardcodes that default color, and
+// clones it verbatim into our override with the color swapped - so it
+// automatically matches the original's exact selector (same or higher
+// specificity is guaranteed since it's a literal clone) and, appended last,
+// wins any remaining tie.
+const DEFAULT_HEX_RE = /#7367f0/gi
+const DEFAULT_RGB_RE = /115\s*,\s*103\s*,\s*240/gi
+const DEFAULT_ENCODED_HEX_RE = /%237367f0/gi
+
+const buildStylesheetSweepCSS = hex => {
+  const rgbTuple = hexToRgb(hex).join(', ')
+  const encodedHex = '%23' + hex.slice(1)
+  let out = ''
+
+  for (const sheet of Array.from(document.styleSheets)) {
+    if (sheet.ownerNode && sheet.ownerNode.id === STYLE_TAG_ID) continue
+    let rules
+    try {
+      rules = sheet.cssRules
+    } catch (e) {
+      continue // cross-origin sheet we can't read, or not parsed yet
+    }
+    if (!rules) continue
+    for (const rule of Array.from(rules)) {
+      const text = rule.cssText
+      if (!text) continue
+      DEFAULT_HEX_RE.lastIndex = 0
+      DEFAULT_RGB_RE.lastIndex = 0
+      DEFAULT_ENCODED_HEX_RE.lastIndex = 0
+      if (!DEFAULT_HEX_RE.test(text) && !DEFAULT_RGB_RE.test(text) && !DEFAULT_ENCODED_HEX_RE.test(text)) continue
+      out += text
+        .replace(DEFAULT_HEX_RE, hex)
+        .replace(DEFAULT_RGB_RE, rgbTuple)
+        .replace(DEFAULT_ENCODED_HEX_RE, encodedHex)
+      out += '\n'
+    }
+  }
+  return out
+}
+
+let lastAppliedHex = null
+let sweepObserverStarted = false
+
+// Route chunks (e.g. the file-upload dropzone) and their CSS load lazily,
+// well after the initial sweep runs. Watch for any new <link>/<style> the
+// app adds to <head> and re-sweep once it's actually loaded, so a page
+// visited later in the session still gets themed correctly.
+const startThemeColorAutoSweep = () => {
+  if (sweepObserverStarted || typeof MutationObserver === 'undefined') return
+  sweepObserverStarted = true
+  const rerun = () => {
+    if (lastAppliedHex) applyThemeColor(lastAppliedHex)
+  }
+  new MutationObserver(mutations => {
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (node.nodeName === 'LINK' && node.rel === 'stylesheet') {
+          node.addEventListener('load', rerun, { once: true })
+        } else if (node.nodeName === 'STYLE' && node.id !== STYLE_TAG_ID) {
+          rerun()
+        }
+      }
+    }
+  }).observe(document.head, { childList: true })
+}
+
 export const applyThemeColor = hex => {
   if (!isValidHexColor(hex)) return
-  getStyleTag().textContent = buildThemeColorCSS(hex)
+  lastAppliedHex = hex
+  getStyleTag().textContent = buildThemeColorCSS(hex) + '\n' + buildStylesheetSweepCSS(hex)
+  startThemeColorAutoSweep()
+  // A stylesheet already in <head> but still mid-download won't have
+  // parsed cssRules yet on the first pass above - catch it once the page
+  // finishes loading.
+  if (document.readyState !== 'complete') {
+    window.addEventListener('load', rerunSweepOnLoad, { once: true })
+  }
+}
+
+function rerunSweepOnLoad() {
+  if (lastAppliedHex) applyThemeColor(lastAppliedHex)
 }
 
 export const getCachedThemeColor = () => {
