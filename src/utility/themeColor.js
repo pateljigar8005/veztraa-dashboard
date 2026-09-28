@@ -27,6 +27,17 @@ const tint = (hex, weight) => rgbToHex(mix(hexToRgb(hex), [255, 255, 255], weigh
 
 export const isValidHexColor = hex => /^#[0-9a-fA-F]{6}$/.test(hex || '')
 
+// Picks readable text for a solid background of this color (YIQ perceived-
+// brightness formula - a standard, cheap approximation of what's legible).
+// Lets the theme color itself be light or dark without any element that
+// paints text on top of it (buttons, active menu items, badges...) going
+// unreadable.
+export const getContrastText = hex => {
+  const [r, g, b] = hexToRgb(hex)
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000
+  return yiq >= 150 ? '#1e1e1e' : '#ffffff'
+}
+
 // Overrides the CSS custom properties and utility/component classes that
 // Vuexy's compiled Bootstrap CSS uses for "primary" (buttons, links, badges,
 // active nav/menu items, form checks/switches, focus rings). A handful of
@@ -40,6 +51,7 @@ export const buildThemeColorCSS = hex => {
   const lightBg = tint(hex, 0.84)
   const borderSubtle = tint(hex, 0.6)
   const focusBorder = tint(hex, 0.4)
+  const contrastText = getContrastText(hex)
 
   // Every rule below uses !important AND is prefixed with the `[dir]`
   // attribute selector. That's not decorative: Vuexy's own compiled CSS
@@ -77,13 +89,19 @@ export const buildThemeColorCSS = hex => {
   --bs-btn-disabled-bg: ${hex} !important;
   --bs-btn-disabled-border-color: ${hex} !important;
   --bs-btn-focus-shadow-rgb: ${rgb} !important;
+  --bs-btn-color: ${contrastText} !important;
+  --bs-btn-hover-color: ${contrastText} !important;
+  --bs-btn-active-color: ${contrastText} !important;
+  --bs-btn-disabled-color: ${contrastText} !important;
   background-color: ${hex} !important;
   border-color: ${hex} !important;
+  color: ${contrastText} !important;
   box-shadow: 0 2px 4px 0 rgba(${rgb}, 0.4) !important;
 }
 [dir] .btn-primary:hover, [dir] .btn-primary:focus, [dir] .btn-primary:active {
   background-color: ${hoverBg} !important;
   border-color: ${hoverBg} !important;
+  color: ${contrastText} !important;
   box-shadow: 0 4px 18px 0 rgba(${rgb}, 0.44) !important;
 }
 
@@ -106,7 +124,7 @@ export const buildThemeColorCSS = hex => {
 [dir] .btn-flat-primary { color: ${hex} !important; }
 [dir] .btn-flat-primary:hover { background-color: rgba(${rgb}, 0.12) !important; }
 
-[dir] .badge.bg-primary, [dir] .badge-primary { background-color: ${hex} !important; }
+[dir] .badge.bg-primary, [dir] .badge-primary { background-color: ${hex} !important; color: ${contrastText} !important; }
 [dir] .badge.bg-light-primary { background-color: ${lightBg} !important; color: ${hex} !important; }
 
 [dir] .alert-primary { color: ${hex} !important; background-color: ${lightBg} !important; border-color: ${borderSubtle} !important; }
@@ -120,21 +138,24 @@ export const buildThemeColorCSS = hex => {
 }
 [dir] .form-check-input:focus { box-shadow: 0 0 0 0.25rem rgba(${rgb}, 0.25) !important; }
 
-[dir] .nav-pills .nav-link.active, [dir] .nav-pills .show > .nav-link { background-color: ${hex} !important; }
+[dir] .nav-pills .nav-link.active, [dir] .nav-pills .show > .nav-link { background-color: ${hex} !important; color: ${contrastText} !important; }
 [dir] .page-item.active .page-link,
-[dir] .pagination-primary .page-item.active .page-link { background-color: ${hex} !important; border-color: ${hex} !important; }
+[dir] .pagination-primary .page-item.active .page-link { background-color: ${hex} !important; border-color: ${hex} !important; color: ${contrastText} !important; }
 
 [dir] .main-menu .navigation li.active > a,
 [dir] .main-menu .navigation li .active > a {
   background: linear-gradient(118deg, rgba(${rgb}, 1), rgba(${rgb}, 0.7)) !important;
   box-shadow: 0 0 10px 1px rgba(${rgb}, 0.7) !important;
-  color: #fff !important;
+  color: ${contrastText} !important;
 }
 [dir] .main-menu .navigation li.active > a *,
-[dir] .main-menu .navigation li .active > a * { color: #fff !important; }
+[dir] .main-menu .navigation li .active > a * { color: ${contrastText} !important; }
 [dir] .horizontal-menu .nav-link.active { color: ${hex} !important; }
 
 [dir] .form-control:focus, [dir] .form-select:focus { border-color: ${focusBorder} !important; box-shadow: 0 0 0 0.2rem rgba(${rgb}, 0.25) !important; }
+
+[dir] .dropdown-menu { --bs-dropdown-link-active-color: ${contrastText} !important; }
+[dir] .list-group { --bs-list-group-active-color: ${contrastText} !important; }
 
 ::selection { background: ${tint(hex, 0.5)}; }
 `
