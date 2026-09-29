@@ -1,18 +1,16 @@
 @import '../../base/pages/app-calendar.scss';
 
 // A fixed `height` on the FullCalendar instance (see Calendar.js) fixes the
-// *overall* grid height, but FullCalendar's own row-balancing still sets
-// each week row's height (as an inline style) proportional to that row's
-// content - a week with a "+more" link still ends up taller than a quieter
-// week even so. Forcing every day cell to the same explicit height (with
-// !important to beat that inline style) is the only way to make every row
-// in view actually match - dayMaxEvents (2, see Calendar.js) already caps
-// what a cell can show, so this comfortably fits the day number + 2 events
-// + a "+more" link without clipping, same content every cell ever needs to
-// fit regardless of which row it's in.
+// *overall* grid height, but FullCalendar's own row-balancing sizes each
+// week row (as an inline style) to that row's own content, so a quiet week
+// (no events, maybe just a holiday label) stays short instead of matching a
+// busy week's height - previously this was overridden with a uniform fixed
+// height, which kept every row the same but left a large empty block under
+// any day that didn't use the full 2-events-plus-more-link allowance (e.g. a
+// holiday-only day). A min-height keeps a bare day number from looking
+// cramped while letting rows with more content grow naturally.
 .fc-daygrid-day-frame {
-  height: 130px !important;
-  overflow: hidden;
+  min-height: 60px;
 }
 
 // Below 700px the view-switcher (Month/Week/Day/List) wraps onto its own
