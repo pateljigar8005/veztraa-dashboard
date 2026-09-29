@@ -11,6 +11,7 @@ import { getQuotation, updateQuotation } from '../store'
 import { quotationStatusOptions } from '../documentOptions'
 import ComposePopup from '../../email/ComposePopup'
 import HistoryModal from '../../activity-log/HistoryModal'
+import DocumentViewSkeleton from '../../shared/DocumentViewSkeleton'
 import LinkedInvoicesCard from '../../invoice/LinkedInvoicesCard'
 import { selectThemeColors, formatAmount } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
@@ -124,7 +125,7 @@ const QuotationView = () => {
   }
 
   if (!quotation || quotation.id !== Number(id)) {
-    return null
+    return <DocumentViewSkeleton />
   }
 
   const selectedStatusOption = quotationStatusOptions.find(i => i.value === quotation.status) || null

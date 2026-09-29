@@ -11,6 +11,7 @@ import { getContract, updateContract } from '../store'
 import { frequencyOptions, contractStatusOptions, invoiceableContractStatuses } from '../contractOptions'
 import ComposePopup from '../../email/ComposePopup'
 import HistoryModal from '../../activity-log/HistoryModal'
+import DocumentViewSkeleton from '../../shared/DocumentViewSkeleton'
 import LinkedInvoicesCard from '../../invoice/LinkedInvoicesCard'
 import { selectThemeColors } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
@@ -121,7 +122,7 @@ const ContractView = () => {
   }
 
   if (!contract || contract.id !== Number(id)) {
-    return null
+    return <DocumentViewSkeleton />
   }
 
   const selectedStatusOption = contractStatusOptions.find(i => i.value === contract.status) || null

@@ -14,6 +14,7 @@ import SourceReference from '../SourceReference'
 import ComposePopup from '../../email/ComposePopup'
 import HistoryModal from '../../activity-log/HistoryModal'
 import TableEmptyState from '../../shared/TableEmptyState'
+import DocumentViewSkeleton from '../../shared/DocumentViewSkeleton'
 import { selectThemeColors, formatAmount } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
@@ -143,7 +144,7 @@ const InvoiceView = () => {
   }
 
   if (!invoice || invoice.id !== Number(id)) {
-    return null
+    return <DocumentViewSkeleton />
   }
 
   const selectedStatusOption = invoiceStatusOptions.find(i => i.value === invoice.status) || null
