@@ -117,10 +117,11 @@ const ApiKeysTable = () => {
       <CreateApiKeyModal isOpen={modalOpen} toggle={() => setModalOpen(!modalOpen)} />
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='API keys' message='Create an API key to let your website read and submit data.' filtered={Boolean(searchTerm)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             pagination
@@ -143,6 +144,7 @@ const ApiKeysTable = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

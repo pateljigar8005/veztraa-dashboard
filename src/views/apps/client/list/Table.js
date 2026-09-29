@@ -218,10 +218,11 @@ const ClientsList = () => {
       />
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='clients' message='Add your first client to start sending quotations, contracts and invoices.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -243,6 +244,7 @@ const ClientsList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

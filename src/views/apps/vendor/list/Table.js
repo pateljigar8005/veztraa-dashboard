@@ -198,10 +198,11 @@ const VendorsList = () => {
       />
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='vendors' message='Add a vendor to start tracking expenses and bills.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -223,6 +224,7 @@ const VendorsList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

@@ -206,10 +206,11 @@ const UsersList = () => {
       />
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='users' message='Invite your team so they can sign in to the dashboard.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -231,6 +232,7 @@ const UsersList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

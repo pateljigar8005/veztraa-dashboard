@@ -104,10 +104,11 @@ const RolesTable = () => {
     <Fragment>
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='roles' message='Create a role to control what each group of users can access.' filtered={Boolean(searchTerm)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             pagination
@@ -128,6 +129,7 @@ const RolesTable = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

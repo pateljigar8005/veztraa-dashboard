@@ -160,10 +160,11 @@ const JobApplicationsList = () => {
     <Fragment>
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='job applications' message="Applications from your website's careers page will appear here." filtered={Boolean(searchTerm)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -187,6 +188,7 @@ const JobApplicationsList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

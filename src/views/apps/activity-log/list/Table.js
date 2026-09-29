@@ -300,10 +300,11 @@ const ActivityLogList = () => {
     <Fragment>
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='activity' message='Changes made across the dashboard will be recorded here.' filtered={Boolean(searchTerm || entityType || action)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -339,6 +340,7 @@ const ActivityLogList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

@@ -200,10 +200,11 @@ const IndustriesList = () => {
       />
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='industries' message='Add industries to categorise your clients.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -225,6 +226,7 @@ const IndustriesList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

@@ -160,10 +160,11 @@ const ContactSubmissionsList = () => {
     <Fragment>
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='contact submissions' message="Messages from your website's contact form will appear here." filtered={Boolean(searchTerm)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -187,6 +188,7 @@ const ContactSubmissionsList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

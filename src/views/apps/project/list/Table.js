@@ -196,10 +196,11 @@ const ProjectsList = () => {
       />
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='projects' message='Add a project to track its budget, timeline and logged hours.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -221,6 +222,7 @@ const ProjectsList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

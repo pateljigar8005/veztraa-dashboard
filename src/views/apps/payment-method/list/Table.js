@@ -200,10 +200,11 @@ const PaymentMethodsList = () => {
       />
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='payment methods' message='Add the payment details that appear on your invoices.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -225,6 +226,7 @@ const PaymentMethodsList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

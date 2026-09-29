@@ -205,10 +205,11 @@ const InvoiceList = () => {
       />
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='invoices' message='Create an invoice, or convert an accepted quotation into one.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -230,6 +231,7 @@ const InvoiceList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

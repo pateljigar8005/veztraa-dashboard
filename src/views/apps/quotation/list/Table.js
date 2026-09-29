@@ -205,10 +205,11 @@ const QuotationsList = () => {
       />
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='quotations' message='Create a quotation to send a priced proposal to a client.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -230,6 +231,7 @@ const QuotationsList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

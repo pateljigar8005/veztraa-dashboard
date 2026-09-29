@@ -160,6 +160,9 @@ const LeaveTypesTable = () => {
     <Fragment>
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={
               <TableEmptyState
@@ -169,8 +172,6 @@ const LeaveTypesTable = () => {
                 filtered={Boolean(searchTerm)}
               />
             }
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -192,6 +193,7 @@ const LeaveTypesTable = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

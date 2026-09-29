@@ -130,6 +130,9 @@ const ApiKeyAccessHistory = () => {
         </div>
       </CardHeader>
       <div className='react-dataTable'>
+        {loading ? (
+          <TableRowsSkeleton rows={8} />
+        ) : (
         <DataTable
           noHeader
           pagination
@@ -139,10 +142,9 @@ const ApiKeyAccessHistory = () => {
           className='react-dataTable'
           paginationComponent={CustomPagination}
           data={logs}
-          progressPending={loading}
-          progressComponent={<TableRowsSkeleton rows={8} />}
           noDataComponent={<TableEmptyState icon={EmptyIcon} noun='requests' message='Requests made with this key will be logged here.' />}
         />
+        )}
       </div>
     </Card>
   )

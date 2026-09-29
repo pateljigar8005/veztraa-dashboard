@@ -196,13 +196,14 @@ const MyLeave = () => {
         </CardHeader>
         <CardBody>
           <div className='react-dataTable'>
+            {loading ? (
+              <TableRowsSkeleton rows={4} />
+            ) : (
             <DataTable
               noHeader
               responsive
               columns={leaveRequestColumns}
               data={store.myRequests}
-              progressPending={loading}
-              progressComponent={<TableRowsSkeleton rows={4} />}
               noDataComponent={
                 <TableEmptyState
                   icon={Briefcase}
@@ -211,6 +212,7 @@ const MyLeave = () => {
                 />
               }
             />
+            )}
           </div>
         </CardBody>
       </Card>
@@ -221,17 +223,19 @@ const MyLeave = () => {
         </CardHeader>
         <CardBody>
           <div className='react-dataTable'>
+            {loading ? (
+              <TableRowsSkeleton rows={4} />
+            ) : (
             <DataTable
               noHeader
               responsive
               columns={overtimeColumns}
               data={store.myOvertimeEntries}
-              progressPending={loading}
-              progressComponent={<TableRowsSkeleton rows={4} />}
               noDataComponent={
                 <TableEmptyState icon={Clock} noun='overtime entries' message="Log overtime and it'll show up here." />
               }
             />
+            )}
           </div>
         </CardBody>
       </Card>

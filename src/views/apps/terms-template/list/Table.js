@@ -160,10 +160,11 @@ const TermsTemplatesList = () => {
     <Fragment>
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='terms templates' message='Save terms & conditions once and reuse them on every document.' filtered={Boolean(searchTerm)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -185,6 +186,7 @@ const TermsTemplatesList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

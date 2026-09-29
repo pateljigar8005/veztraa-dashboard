@@ -201,10 +201,11 @@ const ServiceItemsList = () => {
       />
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='service items' message='Add the services you sell to reuse them on quotations and invoices.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -226,6 +227,7 @@ const ServiceItemsList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

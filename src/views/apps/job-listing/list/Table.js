@@ -237,10 +237,11 @@ const JobListingList = () => {
       />
       <Card>
         <div className='react-dataTable' ref={tableContainerRef}>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='job listings' message='Post an opening to show it on your careers page.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -262,6 +263,7 @@ const JobListingList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

@@ -242,10 +242,11 @@ const CaseStudyList = () => {
       />
       <Card>
         <div className='react-dataTable' ref={tableContainerRef}>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='case studies' message='Write a case study to publish on your website.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -267,6 +268,7 @@ const CaseStudyList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

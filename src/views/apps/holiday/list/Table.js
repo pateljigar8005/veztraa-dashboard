@@ -194,10 +194,11 @@ const HolidaysList = () => {
       />
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='holidays' message='Add public holidays so they show on the calendar and dashboard.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -219,6 +220,7 @@ const HolidaysList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

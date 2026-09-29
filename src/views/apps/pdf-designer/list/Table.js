@@ -210,10 +210,11 @@ const PdfDesignerTemplatesList = () => {
       />
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='PDF templates' message='Design a PDF layout for your invoices, quotations or contracts.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -235,6 +236,7 @@ const PdfDesignerTemplatesList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

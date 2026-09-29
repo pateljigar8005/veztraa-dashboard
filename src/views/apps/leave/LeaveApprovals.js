@@ -168,13 +168,14 @@ const LeaveApprovals = () => {
         </CardHeader>
         <CardBody>
           <div className='react-dataTable'>
+            {loading ? (
+              <TableRowsSkeleton rows={4} />
+            ) : (
             <DataTable
               noHeader
               responsive
               columns={pendingRequestColumns}
               data={store.pendingRequests}
-              progressPending={loading}
-              progressComponent={<TableRowsSkeleton rows={4} />}
               noDataComponent={
                 <TableEmptyState
                   icon={CheckSquare}
@@ -183,6 +184,7 @@ const LeaveApprovals = () => {
                 />
               }
             />
+            )}
           </div>
         </CardBody>
       </Card>
@@ -193,13 +195,14 @@ const LeaveApprovals = () => {
         </CardHeader>
         <CardBody>
           <div className='react-dataTable'>
+            {loading ? (
+              <TableRowsSkeleton rows={4} />
+            ) : (
             <DataTable
               noHeader
               responsive
               columns={pendingOvertimeColumns}
               data={store.pendingOvertimeEntries}
-              progressPending={loading}
-              progressComponent={<TableRowsSkeleton rows={4} />}
               noDataComponent={
                 <TableEmptyState
                   icon={Clock}
@@ -208,6 +211,7 @@ const LeaveApprovals = () => {
                 />
               }
             />
+            )}
           </div>
         </CardBody>
       </Card>

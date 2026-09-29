@@ -101,6 +101,9 @@ const PayrollTable = () => {
           </Button>
         </CardHeader>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={
               <TableEmptyState
@@ -109,8 +112,6 @@ const PayrollTable = () => {
                 message='Generate a month to create payslips for every active employee.'
               />
             }
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             pagination
@@ -123,6 +124,7 @@ const PayrollTable = () => {
             data={store.data}
             subHeaderComponent={<CustomHeader rowsPerPage={rowsPerPage} handlePerPage={handlePerPage} />}
           />
+          )}
         </div>
       </Card>
       <GeneratePayrollModal open={generateOpen} setOpen={setGenerateOpen} />

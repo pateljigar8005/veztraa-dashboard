@@ -204,10 +204,11 @@ const ContractsList = () => {
       />
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='contracts' message='Create a contract to set the terms of an ongoing engagement.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -229,6 +230,7 @@ const ContractsList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

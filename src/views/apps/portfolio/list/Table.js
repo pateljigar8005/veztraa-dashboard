@@ -242,10 +242,11 @@ const PortfolioList = () => {
       />
       <Card>
         <div className='react-dataTable' ref={tableContainerRef}>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='portfolio items' message='Add projects to showcase in your website portfolio.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -267,6 +268,7 @@ const PortfolioList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

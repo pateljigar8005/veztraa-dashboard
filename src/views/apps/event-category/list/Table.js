@@ -200,10 +200,11 @@ const EventCategoriesList = () => {
       />
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='event categories' message='Add categories to organise calendar events.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -225,6 +226,7 @@ const EventCategoriesList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

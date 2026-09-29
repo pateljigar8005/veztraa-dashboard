@@ -228,10 +228,11 @@ const TeamMembersList = () => {
       />
       <Card>
         <div className='react-dataTable' ref={tableContainerRef}>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='team members' message='Add the team members shown on your website.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -253,6 +254,7 @@ const TeamMembersList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

@@ -160,10 +160,11 @@ const EmailTemplatesList = () => {
     <Fragment>
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='email templates' message='Create reusable email templates for sending documents to clients.' filtered={Boolean(searchTerm)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -185,6 +186,7 @@ const EmailTemplatesList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

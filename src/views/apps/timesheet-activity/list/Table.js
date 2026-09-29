@@ -198,10 +198,11 @@ const TimesheetActivitiesList = () => {
       />
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='timesheet activities' message='Add the activity types people log their hours against.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -223,6 +224,7 @@ const TimesheetActivitiesList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>

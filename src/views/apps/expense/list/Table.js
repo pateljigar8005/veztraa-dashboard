@@ -193,10 +193,11 @@ const ExpensesList = () => {
       />
       <Card>
         <div className='react-dataTable'>
+          {loading ? (
+            <TableRowsSkeleton rows={8} />
+          ) : (
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='expenses' message='Log a cost to track it against revenue.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            progressPending={loading}
-            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer
@@ -218,6 +219,7 @@ const ExpensesList = () => {
               />
             }
           />
+          )}
         </div>
       </Card>
     </Fragment>
