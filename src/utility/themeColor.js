@@ -112,21 +112,24 @@ export const buildThemeColorCSS = hex => {
 [dir=rtl] .fallback-spinner .loading .effect-3 { border-right: 3px solid ${hex} !important; }
 
 /* This is meant to be the LOWEST-priority color rule for an <a> - any
-   component with its own active/hover color logic (list-group items,
-   menu items, .btn buttons, .dropdown-item, .page-link pagination...)
-   should always win over it. A plain :not(.foo) doesn't achieve that:
-   it still carries the specificity of .foo, so "a:not(.dropdown-item)"
-   (with its extra "a" type selector) actually ends up MORE specific
-   than a same-class dedicated rule like ".dropdown-item:hover" once
-   their class counts tie - silently winning and painting text a
-   merely-darkened shade of the theme color instead of full contrast,
-   invisible whenever the theme color itself is dark. :where(...)
-   applies the same exclusions with ZERO added specificity, so this
-   rule stays at plain "[dir] a" specificity and any component-specific
-   rule (which always has at least one class of its own) naturally
-   wins - no need to keep adding classes here as new components turn up. */
-[dir] a:where(:not(.active, .btn, .dropdown-item, .page-link)) { color: ${hex} !important; }
-[dir] a:where(:not(.active, .btn, .dropdown-item, .page-link)):hover { color: ${hoverBg} !important; }
+   component with its own active/hover/pressed color logic (list-group
+   items, menu items, .btn buttons, .dropdown-item, .page-link
+   pagination...) should always win over it. A plain :not(.foo) doesn't
+   achieve that on its own: it still carries the specificity of .foo, so
+   "a:not(.dropdown-item)" (with its extra "a" type selector) actually
+   ends up MORE specific than a same-class dedicated rule like
+   ".dropdown-item:hover" once their class counts tie - silently winning
+   and painting text a merely-darkened shade of the theme color instead
+   of full contrast. :where(...) applies the exclusions with ZERO added
+   specificity, fixing that. But this rule is ALSO !important, which
+   beats ANY non-!important rule regardless of specificity - :where()
+   alone doesn't help there, so a component that colors itself without
+   !important (e.g. Bootstrap's plain ".list-group-item-action:active"
+   using a CSS var, no !important) still needs to be named here, or its
+   color gets overridden while its background (from the sweep, separately)
+   still becomes the theme color too - invisible text either way. */
+[dir] a:where(:not(.active, .btn, .dropdown-item, .page-link, .list-group-item)) { color: ${hex} !important; }
+[dir] a:where(:not(.active, .btn, .dropdown-item, .page-link, .list-group-item)):hover { color: ${hoverBg} !important; }
 
 /* Vuexy hardcodes a DIFFERENT literal purple (#6d62e4, not the usual
    #7367f0) just for this one utility hover state - e.g. the Payroll
