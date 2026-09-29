@@ -64,7 +64,7 @@ const PhoneInput = ({ id, value, onChange, invalid, placeholder = 'Phone number'
   }
 
   const handleNumberChange = e => {
-    onChange(buildPhoneValue(country, e.target.value))
+    onChange(buildPhoneValue(country, e.target.value.replace(/\D/g, '')))
   }
 
   return (
