@@ -18,6 +18,7 @@ import { Row, Col, Card, Input, Button } from 'reactstrap'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
+import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import { Activity as EmptyIcon } from 'react-feather'
 
 // One exported row per log entry. The Description column's lines are
@@ -153,6 +154,7 @@ const ActivityLogList = () => {
   // Flipping this is react-data-table-component's only way to clear its
   // own internal checkbox state from outside.
   const [clearSelectionToggle, setClearSelectionToggle] = useState(false)
+  const [loading, setLoading] = useState(true)
   const canDelete = currentUserCan('/activity-log', 'delete')
 
   const debouncedSearchTerm = useDebounce(searchTerm, 400)
@@ -160,6 +162,7 @@ const ActivityLogList = () => {
   useClampPage({ data: store.data, total: store.total, currentPage, rowsPerPage, setCurrentPage })
 
   useEffect(() => {
+    setLoading(true)
     dispatch(
       getData({
         sort,
@@ -170,7 +173,7 @@ const ActivityLogList = () => {
         entityType,
         action
       })
-    )
+    ).finally(() => setLoading(false))
   }, [dispatch, sort, sortColumn, currentPage, rowsPerPage, debouncedSearchTerm, entityType, action])
 
   const handlePagination = page => setCurrentPage(page.selected + 1)
@@ -299,6 +302,8 @@ const ActivityLogList = () => {
         <div className='react-dataTable'>
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='activity' message='Changes made across the dashboard will be recorded here.' filtered={Boolean(searchTerm || entityType || action)} />}
+            progressPending={loading}
+            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer

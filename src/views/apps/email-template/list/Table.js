@@ -11,6 +11,7 @@ import { Row, Col, Card, Input } from 'reactstrap'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
+import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import { Mail as EmptyIcon } from 'react-feather'
 
 const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) => {
@@ -64,12 +65,14 @@ const EmailTemplatesList = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [sortColumn, setSortColumn] = useState('id')
   const [rowsPerPage, setRowsPerPage] = useState(10)
+  const [loading, setLoading] = useState(true)
 
   const debouncedSearchTerm = useDebounce(searchTerm, 400)
 
   useClampPage({ data: store.data, total: store.total, currentPage, rowsPerPage, setCurrentPage })
 
   useEffect(() => {
+    setLoading(true)
     dispatch(getAllData())
     dispatch(
       getData({
@@ -79,7 +82,7 @@ const EmailTemplatesList = () => {
         page: currentPage,
         perPage: rowsPerPage
       })
-    )
+    ).finally(() => setLoading(false))
   }, [dispatch, sort, sortColumn, currentPage, debouncedSearchTerm])
 
   const handlePagination = page => {
@@ -159,6 +162,8 @@ const EmailTemplatesList = () => {
         <div className='react-dataTable'>
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='email templates' message='Create reusable email templates for sending documents to clients.' filtered={Boolean(searchTerm)} />}
+            progressPending={loading}
+            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer

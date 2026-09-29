@@ -9,6 +9,7 @@ import { Card, CardHeader, CardTitle, CardBody, Badge, Button } from 'reactstrap
 import { formatDate } from '@utils'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
+import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import {
   getPendingLeaveRequests,
   getPendingOvertimeEntries,
@@ -43,10 +44,13 @@ const LeaveApprovals = () => {
   const store = useSelector(state => state.leave)
 
   const [busyId, setBusyId] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    dispatch(getPendingLeaveRequests())
-    dispatch(getPendingOvertimeEntries())
+    setLoading(true)
+    Promise.all([dispatch(getPendingLeaveRequests()), dispatch(getPendingOvertimeEntries())]).finally(() =>
+      setLoading(false)
+    )
   }, [dispatch])
 
   const handleApprove = request => {
@@ -169,6 +173,8 @@ const LeaveApprovals = () => {
               responsive
               columns={pendingRequestColumns}
               data={store.pendingRequests}
+              progressPending={loading}
+              progressComponent={<TableRowsSkeleton rows={4} />}
               noDataComponent={
                 <TableEmptyState
                   icon={CheckSquare}
@@ -192,6 +198,8 @@ const LeaveApprovals = () => {
               responsive
               columns={pendingOvertimeColumns}
               data={store.pendingOvertimeEntries}
+              progressPending={loading}
+              progressComponent={<TableRowsSkeleton rows={4} />}
               noDataComponent={
                 <TableEmptyState
                   icon={Clock}

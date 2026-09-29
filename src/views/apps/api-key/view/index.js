@@ -12,6 +12,7 @@ import { confirmDelete } from '@src/utility/confirmDelete'
 import { currentUserCan } from '@src/utility/navPermissions'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
+import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import { Activity as EmptyIcon } from 'react-feather'
 
 const statusColor = code => {
@@ -63,10 +64,12 @@ const ApiKeyAccessHistory = () => {
   const store = useSelector(state => state.apiKeys)
 
   const [currentPage, setCurrentPage] = useState(1)
+  const [loading, setLoading] = useState(true)
   const rowsPerPage = 20
 
   useEffect(() => {
-    dispatch(getApiKeyLogs({ id: Number(id), page: currentPage, perPage: rowsPerPage }))
+    setLoading(true)
+    dispatch(getApiKeyLogs({ id: Number(id), page: currentPage, perPage: rowsPerPage })).finally(() => setLoading(false))
   }, [dispatch, id, currentPage])
 
   const handlePagination = page => setCurrentPage(page.selected + 1)
@@ -136,6 +139,8 @@ const ApiKeyAccessHistory = () => {
           className='react-dataTable'
           paginationComponent={CustomPagination}
           data={logs}
+          progressPending={loading}
+          progressComponent={<TableRowsSkeleton rows={8} />}
           noDataComponent={<TableEmptyState icon={EmptyIcon} noun='requests' message='Requests made with this key will be logged here.' />}
         />
       </div>

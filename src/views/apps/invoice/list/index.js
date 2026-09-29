@@ -15,6 +15,7 @@ import { Row, Col, Card, Input, Button } from 'reactstrap'
 import '@styles/react/apps/app-invoice.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState, { hasActiveFilters } from '@src/views/apps/shared/TableEmptyState'
+import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import { FileText as EmptyIcon } from 'react-feather'
 
 
@@ -86,12 +87,14 @@ const InvoiceList = () => {
 
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false)
   const [filters, setFilters] = useState({})
+  const [loading, setLoading] = useState(true)
 
   const debouncedSearchTerm = useDebounce(searchTerm, 400)
 
   useClampPage({ data: store.data, total: store.total, currentPage, rowsPerPage, setCurrentPage })
 
   useEffect(() => {
+    setLoading(true)
     dispatch(getAllData())
     dispatch(
       getData({
@@ -102,7 +105,7 @@ const InvoiceList = () => {
         perPage: rowsPerPage,
         filters
       })
-    )
+    ).finally(() => setLoading(false))
   }, [dispatch, sort, sortColumn, currentPage, debouncedSearchTerm, filters])
 
   const handlePagination = page => {
@@ -204,6 +207,8 @@ const InvoiceList = () => {
         <div className='react-dataTable'>
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='invoices' message='Create an invoice, or convert an accepted quotation into one.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
+            progressPending={loading}
+            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer

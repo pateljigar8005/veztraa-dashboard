@@ -18,6 +18,7 @@ import { formatDate } from '@utils'
 import { confirmDelete } from '@src/utility/confirmDelete'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
+import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import ApplyLeaveModal from './ApplyLeaveModal'
 import LogOvertimeModal from './LogOvertimeModal'
 import { getMyBalances, getMyLeaveRequests, getMyOvertimeEntries, cancelLeaveRequest } from './store'
@@ -36,14 +37,15 @@ const MyLeave = () => {
   const [applyOpen, setApplyOpen] = useState(false)
   const [otOpen, setOtOpen] = useState(false)
   const [editingRequest, setEditingRequest] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   const refresh = () => {
     dispatch(getMyBalances())
-    dispatch(getMyLeaveRequests())
-    dispatch(getMyOvertimeEntries())
+    Promise.all([dispatch(getMyLeaveRequests()), dispatch(getMyOvertimeEntries())]).finally(() => setLoading(false))
   }
 
   useEffect(() => {
+    setLoading(true)
     refresh()
   }, [dispatch])
 
@@ -199,6 +201,8 @@ const MyLeave = () => {
               responsive
               columns={leaveRequestColumns}
               data={store.myRequests}
+              progressPending={loading}
+              progressComponent={<TableRowsSkeleton rows={4} />}
               noDataComponent={
                 <TableEmptyState
                   icon={Briefcase}
@@ -222,6 +226,8 @@ const MyLeave = () => {
               responsive
               columns={overtimeColumns}
               data={store.myOvertimeEntries}
+              progressPending={loading}
+              progressComponent={<TableRowsSkeleton rows={4} />}
               noDataComponent={
                 <TableEmptyState icon={Clock} noun='overtime entries' message="Log overtime and it'll show up here." />
               }

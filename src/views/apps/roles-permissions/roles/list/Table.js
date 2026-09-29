@@ -9,6 +9,7 @@ import { Row, Col, Card, Input } from 'reactstrap'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
+import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import { Shield as EmptyIcon } from 'react-feather'
 
 // Same pager as the other list pages. The data is all loaded client-side here,
@@ -80,9 +81,11 @@ const RolesTable = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [resetPage, setResetPage] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    dispatch(getAllData())
+    setLoading(true)
+    dispatch(getAllData()).finally(() => setLoading(false))
   }, [dispatch])
 
   const handlePerPage = e => setRowsPerPage(parseInt(e.currentTarget.value))
@@ -103,6 +106,8 @@ const RolesTable = () => {
         <div className='react-dataTable'>
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='roles' message='Create a role to control what each group of users can access.' filtered={Boolean(searchTerm)} />}
+            progressPending={loading}
+            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             pagination

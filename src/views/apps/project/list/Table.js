@@ -14,6 +14,7 @@ import { Row, Col, Card, Input, Button } from 'reactstrap'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState, { hasActiveFilters } from '@src/views/apps/shared/TableEmptyState'
+import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import { Folder as EmptyIcon } from 'react-feather'
 
 
@@ -77,12 +78,14 @@ const ProjectsList = () => {
 
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false)
   const [filters, setFilters] = useState({})
+  const [loading, setLoading] = useState(true)
 
   const debouncedSearchTerm = useDebounce(searchTerm, 400)
 
   useClampPage({ data: store.data, total: store.total, currentPage, rowsPerPage, setCurrentPage })
 
   useEffect(() => {
+    setLoading(true)
     dispatch(getAllData())
     dispatch(
       getData({
@@ -93,7 +96,7 @@ const ProjectsList = () => {
         perPage: rowsPerPage,
         filters
       })
-    )
+    ).finally(() => setLoading(false))
   }, [dispatch, sort, sortColumn, currentPage, debouncedSearchTerm, filters])
 
   const handlePagination = page => {
@@ -195,6 +198,8 @@ const ProjectsList = () => {
         <div className='react-dataTable'>
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='projects' message='Add a project to track its budget, timeline and logged hours.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
+            progressPending={loading}
+            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer

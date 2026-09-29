@@ -13,6 +13,7 @@ import { toDateOnly } from '@utils'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState, { hasActiveFilters } from '@src/views/apps/shared/TableEmptyState'
+import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import { Gift as EmptyIcon } from 'react-feather'
 
 const searchFields = [{ name: 'date', label: 'Date', type: 'date-range' }]
@@ -76,12 +77,14 @@ const HolidaysList = () => {
 
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false)
   const [filters, setFilters] = useState(defaultFilters)
+  const [loading, setLoading] = useState(true)
 
   const debouncedSearchTerm = useDebounce(searchTerm, 400)
 
   useClampPage({ data: store.data, total: store.total, currentPage, rowsPerPage, setCurrentPage })
 
   useEffect(() => {
+    setLoading(true)
     dispatch(getAllData())
     dispatch(
       getData({
@@ -92,7 +95,7 @@ const HolidaysList = () => {
         perPage: rowsPerPage,
         filters
       })
-    )
+    ).finally(() => setLoading(false))
   }, [dispatch, sort, sortColumn, currentPage, debouncedSearchTerm, filters])
 
   const handlePagination = page => {
@@ -193,6 +196,8 @@ const HolidaysList = () => {
         <div className='react-dataTable'>
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='holidays' message='Add public holidays so they show on the calendar and dashboard.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
+            progressPending={loading}
+            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer

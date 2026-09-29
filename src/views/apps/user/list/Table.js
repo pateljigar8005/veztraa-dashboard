@@ -13,6 +13,7 @@ import { Row, Col, Card, Input, Button } from 'reactstrap'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState, { hasActiveFilters } from '@src/views/apps/shared/TableEmptyState'
+import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import { User as EmptyIcon } from 'react-feather'
 
 
@@ -87,12 +88,14 @@ const UsersList = () => {
 
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false)
   const [filters, setFilters] = useState({})
+  const [loading, setLoading] = useState(true)
 
   const debouncedSearchTerm = useDebounce(searchTerm, 400)
 
   useClampPage({ data: store.data, total: store.total, currentPage, rowsPerPage, setCurrentPage })
 
   useEffect(() => {
+    setLoading(true)
     dispatch(getAllData())
     dispatch(
       getData({
@@ -103,7 +106,7 @@ const UsersList = () => {
         perPage: rowsPerPage,
         filters
       })
-    )
+    ).finally(() => setLoading(false))
   }, [dispatch, sort, sortColumn, currentPage, debouncedSearchTerm, filters])
 
   const handlePagination = page => {
@@ -205,6 +208,8 @@ const UsersList = () => {
         <div className='react-dataTable'>
           <DataTable
             noDataComponent={<TableEmptyState icon={EmptyIcon} noun='users' message='Invite your team so they can sign in to the dashboard.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
+            progressPending={loading}
+            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             sortServer

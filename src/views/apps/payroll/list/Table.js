@@ -9,6 +9,7 @@ import { ChevronDown, DollarSign } from 'react-feather'
 import { Row, Col, Card, Input, Button, CardHeader, CardTitle } from 'reactstrap'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
+import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import GeneratePayrollModal from './GeneratePayrollModal'
 
 const CustomHeader = ({ handlePerPage, rowsPerPage }) => {
@@ -45,11 +46,13 @@ const PayrollTable = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [generateOpen, setGenerateOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useClampPage({ data: store.data, total: store.total, currentPage, rowsPerPage, setCurrentPage })
 
   useEffect(() => {
-    dispatch(getData({ page: currentPage, perPage: rowsPerPage }))
+    setLoading(true)
+    dispatch(getData({ page: currentPage, perPage: rowsPerPage })).finally(() => setLoading(false))
   }, [dispatch, currentPage, rowsPerPage])
 
   const handlePagination = page => {
@@ -106,6 +109,8 @@ const PayrollTable = () => {
                 message='Generate a month to create payslips for every active employee.'
               />
             }
+            progressPending={loading}
+            progressComponent={<TableRowsSkeleton rows={8} />}
             noHeader
             subHeader
             pagination
