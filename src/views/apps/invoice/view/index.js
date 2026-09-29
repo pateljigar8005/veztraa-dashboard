@@ -458,7 +458,7 @@ const InvoiceView = () => {
         </div>
       </Col>
 
-      <Modal isOpen={paymentsListOpen} toggle={() => setPaymentsListOpen(!paymentsListOpen)} size='lg'>
+      <Modal isOpen={paymentsListOpen} toggle={() => setPaymentsListOpen(!paymentsListOpen)} size='xl'>
         <ModalHeader toggle={() => setPaymentsListOpen(!paymentsListOpen)}>Payments</ModalHeader>
         <ModalBody>
           <div className='d-flex justify-content-end mb-1'>
