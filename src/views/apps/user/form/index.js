@@ -7,13 +7,14 @@ import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import Select from 'react-select'
-import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormText, InputGroup, InputGroupText, Modal, ModalHeader, ModalBody, Button } from 'reactstrap'
+import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormText, FormFeedback, InputGroup, InputGroupText, Modal, ModalHeader, ModalBody, Button } from 'reactstrap'
 import { RefreshCw, Copy } from 'react-feather'
 import { addUser, updateUser, getUser, uploadAvatar } from '../store'
 import InputPasswordToggle from '@components/input-password-toggle'
 import ImageUploadField from '../../shared/ImageUploadField'
 import PhoneInput from '../../shared/PhoneInput'
 import AmountField from '../../shared/AmountField'
+import isValidEmail from '../../shared/isValidEmail'
 import { Editor } from '@veztraa/editor'
 import { getUserData, resolveAvatarUrl, uploadEditorImage, selectThemeColors, sortOptions } from '@utils'
 import { generatePassword } from '@src/utility/generatePassword'
@@ -251,8 +252,9 @@ const UserForm = () => {
 
   const checkIsValid = data => {
     const requiredOk = ['first_name', 'last_name', 'email', 'phone'].every(key => data[key].length > 0)
+    const emailOk = emailUsernameMode || isValidEmail(data.email)
     const passwordOk = isEdit || (data.password.length > 0 && data.password !== PASSWORD_PLACEHOLDER)
-    return requiredOk && passwordOk
+    return requiredOk && emailOk && passwordOk
   }
 
   const onSubmit = data => {
@@ -320,6 +322,9 @@ const UserForm = () => {
         if (data[key].length === 0) {
           setError(key, { type: 'manual' })
         }
+      }
+      if (!emailUsernameMode && data.email.length > 0 && !isValidEmail(data.email)) {
+        setError('email', { type: 'manual', message: 'Enter a valid email address' })
       }
     }
   }
@@ -397,6 +402,7 @@ const UserForm = () => {
                     )}
                   />
                 )}
+                {!emailUsernameMode && errors.email?.message && <FormFeedback>{errors.email.message}</FormFeedback>}
                 {selfMode && <FormText color='muted'>Contact an admin to change your login email.</FormText>}
                 {!selfMode && emailUsernameMode && (
                   <FormText color='muted'>Also this user's company mailbox - creates it on save if it doesn't exist yet.</FormText>

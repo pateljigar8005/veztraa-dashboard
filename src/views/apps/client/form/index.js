@@ -6,10 +6,11 @@ import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
+import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormFeedback } from 'reactstrap'
 import { selectThemeColors, sortOptions } from '@utils'
 import { addClient, updateClient, getClient } from '../store'
 import PhoneInput from '../../shared/PhoneInput'
+import isValidEmail from '../../shared/isValidEmail'
 import HistoryModal from '../../activity-log/HistoryModal'
 
 const defaultValues = {
@@ -77,7 +78,8 @@ const ClientForm = () => {
     }
   }, [store.selectedClient])
 
-  const checkIsValid = data => ['first_name', 'last_name', 'email'].every(key => data[key].length > 0)
+  const checkIsValid = data =>
+    ['first_name', 'last_name', 'email'].every(key => data[key].length > 0) && isValidEmail(data.email)
 
   const onSubmit = data => {
     if (checkIsValid(data)) {
@@ -105,6 +107,9 @@ const ClientForm = () => {
         if (data[key].length === 0) {
           setError(key, { type: 'manual' })
         }
+      }
+      if (data.email.length > 0 && !isValidEmail(data.email)) {
+        setError('email', { type: 'manual', message: 'Enter a valid email address' })
       }
     }
   }
@@ -188,6 +193,7 @@ const ClientForm = () => {
                     />
                   )}
                 />
+                {errors.email?.message && <FormFeedback>{errors.email.message}</FormFeedback>}
               </Col>
               <Col md={6} className='mb-1'>
                 <Label className='form-label' for='phone'>

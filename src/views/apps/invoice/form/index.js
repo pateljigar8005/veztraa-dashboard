@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-import { Row, Col, Card, CardHeader, CardTitle, CardBody, Form, Label, Input } from 'reactstrap'
+import { Row, Col, Card, CardHeader, CardTitle, CardBody, Form, Label, Input, FormFeedback } from 'reactstrap'
 import { selectThemeColors, formatAmount, sortOptions, clientOptionLabel, convertFromUsd, findUsdRate } from '@utils'
 import CatalogModal from '../../shared/CatalogModal'
 import TermsSection from '../../shared/TermsSection'
@@ -15,6 +15,7 @@ import LineItemsTable from '../../shared/LineItemsTable'
 import DateField from '../../shared/DateField'
 import AmountField from '../../shared/AmountField'
 import PhoneInput from '../../shared/PhoneInput'
+import isValidEmail from '../../shared/isValidEmail'
 import { addInvoice, updateInvoice, getInvoice } from '../store'
 import SourceReference from '../SourceReference'
 import { discountTypeOptions } from '../../quotation/documentOptions'
@@ -325,7 +326,9 @@ const InvoiceForm = () => {
     discountType === '%' ? subtotal * ((Number(discountValue) || 0) / 100) : Number(discountValue) || 0
   const total = subtotal + taxAmount - discountAmount
 
-  const checkIsValid = data => ['contact_name', 'issue_date', 'due_date'].every(key => data[key].length > 0)
+  const checkIsValid = data =>
+    ['contact_name', 'issue_date', 'due_date'].every(key => data[key].length > 0) &&
+    (data.email.length === 0 || isValidEmail(data.email))
 
   const onSubmit = data => {
     if (checkIsValid(data)) {
@@ -370,6 +373,9 @@ const InvoiceForm = () => {
         if (!data[key] || data[key].length === 0) {
           setError(key, { type: 'manual' })
         }
+      }
+      if (data.email.length > 0 && !isValidEmail(data.email)) {
+        setError('email', { type: 'manual', message: 'Enter a valid email address' })
       }
     }
   }
@@ -425,7 +431,14 @@ const InvoiceForm = () => {
                         <Label className='form-label' for='email'>
                           Email
                         </Label>
-                        <Controller name='email' control={control} render={({ field }) => <Input type='email' id='email' {...field} />} />
+                        <Controller
+                          name='email'
+                          control={control}
+                          render={({ field }) => (
+                            <Input type='email' id='email' invalid={errors.email && true} {...field} />
+                          )}
+                        />
+                        {errors.email?.message && <FormFeedback>{errors.email.message}</FormFeedback>}
                       </Col>
                       <Col md={6} className='mb-1'>
                         <Label className='form-label' for='phone'>

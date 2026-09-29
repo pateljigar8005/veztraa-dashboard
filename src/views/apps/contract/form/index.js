@@ -7,7 +7,7 @@ import Select from 'react-select'
 import { Editor } from '@veztraa/editor'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input } from 'reactstrap'
+import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormFeedback } from 'reactstrap'
 import {
   selectThemeColors,
   uploadEditorImage,
@@ -24,6 +24,7 @@ import CatalogModal from '../../shared/CatalogModal'
 import AmountField from '../../shared/AmountField'
 import PhoneInput from '../../shared/PhoneInput'
 import DateField from '../../shared/DateField'
+import isValidEmail from '../../shared/isValidEmail'
 import { addContract, updateContract, getContract } from '../store'
 import { frequencyOptions } from '../contractOptions'
 import { discountTypeOptions } from '../../quotation/documentOptions'
@@ -212,6 +213,11 @@ const ContractForm = () => {
       return
     }
 
+    if (data.email && data.email.length > 0 && !isValidEmail(data.email)) {
+      setError('email', { type: 'manual', message: 'Enter a valid email address' })
+      return
+    }
+
     const payload = {
       body,
       status: status || 'draft',
@@ -292,7 +298,14 @@ const ContractForm = () => {
                   <Label className='form-label' for='email'>
                     Email
                   </Label>
-                  <Controller name='email' control={control} render={({ field }) => <Input type='email' id='email' {...field} />} />
+                  <Controller
+                    name='email'
+                    control={control}
+                    render={({ field }) => (
+                      <Input type='email' id='email' invalid={errors.email && true} {...field} />
+                    )}
+                  />
+                  {errors.email?.message && <FormFeedback>{errors.email.message}</FormFeedback>}
                 </Col>
                 <Col md={6} className='mb-1'>
                   <Label className='form-label' for='phone'>
