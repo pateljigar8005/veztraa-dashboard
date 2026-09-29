@@ -353,7 +353,7 @@ const ContractForm = () => {
                   setBody(value)
                   setExtraDirty(true)
                 }}
-                height={300}
+                height={500}
                 onImageUpload={uploadEditorImage}
               />
               <p className='text-muted small mt-1 mb-0'>
