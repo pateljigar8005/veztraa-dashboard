@@ -51,6 +51,19 @@ export default class JwtService {
             return Promise.reject(error)
           }
 
+          // A request that still 401s after already being retried once with
+          // a freshly refreshed token means the new token isn't valid for it
+          // either - refreshing again would just repeat the same 401
+          // forever. With several polling hooks (notifications, unread
+          // count, synced user data) all hitting this at once, that unbounded
+          // loop is what flooded the browser with requests until it ran out
+          // of resources. Give up and force a re-login instead of looping.
+          if (originalRequest._retriedAfterRefresh) {
+            this.onAccessTokenFetchFailed()
+            return Promise.reject(error)
+          }
+          originalRequest._retriedAfterRefresh = true
+
           if (!this.isAlreadyFetchingAccessToken) {
             this.isAlreadyFetchingAccessToken = true
             this.refreshToken()
