@@ -5,11 +5,10 @@ import Timeline from '@components/timeline'
 import { priorityColors } from '../apps/todo/todoOptions'
 import { TYPE_META, relativeLabel, invoiceCustomContent } from './upcomingTimelineItems'
 
-// User Timeline card - same underlying merged todo/calendar/holiday feed as
-// the sidebar Upcoming block, but its own plain glowing-dot rendering (no
-// icon inside the circle) to match this card's original look - kept
-// deliberately different from the sidebar's icon-in-circle style, per
-// request.
+// User Timeline card - merged todo/calendar/holiday/invoice feed, with its
+// own plain glowing-dot rendering (no icon inside the circle, except for
+// holidays below) to match this card's original look. The sidebar Upcoming
+// block was removed as a duplicate of this exact same feed.
 const toTimelineItem = item => {
   const meta = TYPE_META[item.type]
   return {

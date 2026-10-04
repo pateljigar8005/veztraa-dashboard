@@ -8,7 +8,6 @@ import { dashboardBlocks, dashboardSections } from './blockConfig'
 import DashboardSkeleton from './DashboardSkeleton'
 import BlockCard from './BlockCard'
 import CombinedChartCard from './CombinedChartCard'
-import UpcomingCard from './UpcomingCard'
 import KpiStrip from './KpiStrip'
 import SupportTrackerCard from './SupportTrackerCard'
 import RevenueReportCard from './RevenueReportCard'
@@ -85,11 +84,7 @@ const Dashboard = () => {
           </Row>
 
           <Row className='g-2'>
-            <Col lg={4} md={12} className='order-lg-2'>
-              <h6 className='text-muted text-uppercase mb-1'>Upcoming</h6>
-              <UpcomingCard items={store.upcoming} />
-            </Col>
-            <Col lg={8} md={12} className='order-lg-1'>
+            <Col md={12}>
               {dashboardSections.map(section => {
                 const sectionBlocks = visibleBlocks.filter(block => block.section === section)
                 if (sectionBlocks.length === 0) return null

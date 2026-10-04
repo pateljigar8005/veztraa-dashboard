@@ -3,10 +3,10 @@ import { Row, Col, Card, CardBody } from 'reactstrap'
 import Skeleton from '@components/skeleton'
 
 // Mirrors the real dashboard's grid (KpiStrip -> Revenue/SupportTracker row
-// -> 3-card row -> section cards + Upcoming sidebar) so there's no layout
-// jump when the fetched data swaps in. Card counts are fixed guesses (4 KPIs,
-// 3 block cards) rather than driven by data we don't have yet - close enough
-// for a loading placeholder, and it disappears as soon as getSummary resolves.
+// -> 3-card row -> section cards) so there's no layout jump when the fetched
+// data swaps in. Card counts are fixed guesses (4 KPIs, 3 block cards)
+// rather than driven by data we don't have yet - close enough for a loading
+// placeholder, and it disappears as soon as getSummary resolves.
 const StatCardSkeleton = () => (
   <Card className='mb-0 h-100'>
     <CardBody className='d-flex align-items-center'>
@@ -44,22 +44,6 @@ const ChartCardSkeleton = ({ height = 220 }) => (
   </Card>
 )
 
-const UpcomingCardSkeleton = () => (
-  <Card className='mb-1'>
-    <CardBody>
-      {[0, 1, 2, 3].map(i => (
-        <div key={i} className='d-flex align-items-start mb-1'>
-          <Skeleton circle width={24} height={24} className='me-1 mt-25' />
-          <div className='flex-grow-1'>
-            <Skeleton width='75%' height={12} className='mb-50' />
-            <Skeleton width='40%' height={10} />
-          </div>
-        </div>
-      ))}
-    </CardBody>
-  </Card>
-)
-
 const DashboardSkeleton = () => (
   <Fragment>
     <Row className='g-2 mb-1'>
@@ -88,11 +72,7 @@ const DashboardSkeleton = () => (
     </Row>
 
     <Row className='g-2'>
-      <Col lg={4} md={12} className='order-lg-2'>
-        <Skeleton width={90} height={14} className='mb-1' />
-        <UpcomingCardSkeleton />
-      </Col>
-      <Col lg={8} md={12} className='order-lg-1'>
+      <Col md={12}>
         <Skeleton width={120} height={14} className='mb-1' />
         <Row className='g-2'>
           {[0, 1, 2].map(i => (
