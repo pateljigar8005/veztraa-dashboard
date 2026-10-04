@@ -1,84 +1,47 @@
-// ** Custom Components
-import Avatar from '@components/avatar'
-import Timeline from '@components/timeline'
-import AvatarGroup from '@components/avatar-group'
-
-// ** Icons Imports
+import { Link } from 'react-router-dom'
 import { List, MoreVertical } from 'react-feather'
+import { Card, CardHeader, CardTitle, CardBody, Badge } from 'reactstrap'
+import Timeline from '@components/timeline'
+import { priorityColors } from '../apps/todo/todoOptions'
+import { TYPE_META, relativeLabel, invoiceCustomContent } from './upcomingTimelineItems'
 
-// ** Reactstrap Imports
-import { Card, CardHeader, CardTitle, CardBody } from 'reactstrap'
-
-// ** Images
-import jsonImg from '@src/assets/images/icons/json.png'
-
-// ** Avatar Imports
-import avatar6 from '@src/assets/images/portrait/small/avatar-s-6.jpg'
-import avatar7 from '@src/assets/images/portrait/small/avatar-s-7.jpg'
-import avatar8 from '@src/assets/images/portrait/small/avatar-s-8.jpg'
-import avatar9 from '@src/assets/images/portrait/small/avatar-s-9.jpg'
-import avatar20 from '@src/assets/images/portrait/small/avatar-s-20.jpg'
-
-// Exact port of Vuexy's "User Timeline" advanced card
-// (react-version/vite-bootstrap5/full-version/.../CardUserTimeline.js) -
-// same Timeline/Avatar/AvatarGroup components this app already ships with,
-// same static demo content. Wiring this to a real activity feed is a
-// follow-up.
-const avatarGroupArr = [
-  { title: 'Billy Hopkins', img: avatar9, placement: 'bottom', imgHeight: 33, imgWidth: 33 },
-  { title: 'Amy Carson', img: avatar6, placement: 'bottom', imgHeight: 33, imgWidth: 33 },
-  { title: 'Brandon Miles', img: avatar8, placement: 'bottom', imgHeight: 33, imgWidth: 33 },
-  { title: 'Daisy Weber', img: avatar7, placement: 'bottom', imgHeight: 33, imgWidth: 33 },
-  { title: 'Jenny Looper', img: avatar20, placement: 'bottom', imgHeight: 33, imgWidth: 33 }
-]
-
-const data = [
-  {
-    title: '12 Invoices have been paid',
-    content: 'Invoices have been paid to the company.',
-    meta: '12 min ago',
-    metaClassName: 'me-1',
-    customContent: (
-      <div className='d-flex align-items-center'>
-        <img className='me-1' src={jsonImg} alt='data.json' height='23' />
-        <div className='mb-0'>data.json</div>
-      </div>
-    )
-  },
-  {
-    title: 'Client Meeting',
-    content: 'Project meeting with john @10:15am.',
-    meta: '45 min ago',
-    metaClassName: 'me-1',
-    color: 'warning',
-    customContent: (
-      <div className='d-flex align-items-center'>
-        <Avatar img={avatar9} />
-        <div className='ms-50'>
-          <h6 className='mb-0'>John Doe (Client)</h6>
-          <span>CEO of Infibeam</span>
-        </div>
-      </div>
-    )
-  },
-  {
-    title: 'Create a new project for client',
-    content: 'Add files to new design folder',
-    color: 'info',
-    meta: '2 days ago',
-    metaClassName: 'me-1',
-    customContent: <AvatarGroup data={avatarGroupArr} />
-  },
-  {
-    title: 'Create a new project for client',
-    content: 'Add files to new design folder',
-    color: 'danger',
-    meta: '5 days ago',
-    metaClassName: 'me-1'
+// User Timeline card - same underlying merged todo/calendar/holiday feed as
+// the sidebar Upcoming block, but its own plain glowing-dot rendering (no
+// icon inside the circle) to match this card's original look - kept
+// deliberately different from the sidebar's icon-in-circle style, per
+// request.
+const toTimelineItem = item => {
+  const meta = TYPE_META[item.type]
+  return {
+    title: (
+      <Link to={meta.path(item.id)} className='text-body'>
+        {item.title}
+      </Link>
+    ),
+    meta: item.overdue ? 'Overdue' : relativeLabel(item.date),
+    metaClassName: item.overdue ? 'text-danger fw-bolder' : '',
+    color: item.overdue ? 'danger' : item.color || meta.color,
+    // Holidays repeat the same plain "Holiday" content line item after
+    // item - the icon gives them a bit more visual identity than a plain
+    // gray dot, without changing the plain-dot look for the other types.
+    icon: item.type === 'holiday' ? meta.icon : undefined,
+    content: (
+      <span className='text-muted'>
+        {meta.label}
+        {item.meta && (
+          <Badge color={priorityColors[item.meta] || 'secondary'} pill className='text-capitalize ms-50'>
+            {item.meta}
+          </Badge>
+        )}
+      </span>
+    ),
+    customContent: item.type === 'invoice' ? invoiceCustomContent(item) : undefined
   }
-]
+}
 
-const UserTimelineCard = () => {
+const UserTimelineCard = ({ data = [] }) => {
+  const items = data.filter(item => TYPE_META[item.type]).map(toTimelineItem)
+
   return (
     <Card className='card-user-timeline h-100'>
       <CardHeader>
@@ -89,7 +52,11 @@ const UserTimelineCard = () => {
         <MoreVertical size={18} className='cursor-pointer' />
       </CardHeader>
       <CardBody>
-        <Timeline className='ms-50 mb-0' data={data} />
+        {items.length > 0 ? (
+          <Timeline className='ms-50 mb-0' data={items} />
+        ) : (
+          <p className='text-muted mb-0'>Nothing coming up this week.</p>
+        )}
       </CardBody>
     </Card>
   )

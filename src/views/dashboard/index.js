@@ -71,9 +71,11 @@ const Dashboard = () => {
           </Row>
 
           <Row className='g-2 mb-1'>
-            <Col lg={4} md={6} xs={12}>
-              <UserTimelineCard />
-            </Col>
+            {store.blocks.upcomingEvents && (
+              <Col lg={4} md={6} xs={12}>
+                <UserTimelineCard data={store.blocks.upcomingEvents.items} />
+              </Col>
+            )}
             <Col lg={4} md={6} xs={12}>
               <SalesRadarCard />
             </Col>

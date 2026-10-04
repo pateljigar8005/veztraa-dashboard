@@ -35,6 +35,12 @@ export const installChunkPreloadErrorHandler = () => {
 export class ChunkErrorBoundary extends Component {
   state = { hasError: false, isChunkError: false, reloaded: false }
 
+  // A non-chunk error used to fall through with hasError: false, so this
+  // boundary rendered the same crashing children again immediately - an
+  // infinite render-crash-remount loop (which itself re-triggers every
+  // mount-time request in the app, e.g. the navbar's polling hooks) instead
+  // of a plain error screen. Any caught error now stops re-rendering
+  // children; only a genuine chunk-load error attempts the reload.
   static getDerivedStateFromError(error) {
     return { hasError: true, isChunkError: isChunkLoadError(error) }
   }

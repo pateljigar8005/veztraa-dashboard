@@ -62,13 +62,13 @@ export default [
         navLink: '/timesheet'
       },
       {
-        id: 'leave',
+        id: 'myLeave',
         title: 'My Leave',
         icon: <Briefcase />,
         navLink: '/my-leave'
       },
       {
-        id: 'leave',
+        id: 'leaveApprovals',
         title: 'Leave Approvals',
         icon: <CheckCircle />,
         navLink: '/leave-approvals'
@@ -248,7 +248,7 @@ export default [
         navLink: '/holiday'
       },
       {
-        id: 'leave',
+        id: 'leaveTypes',
         title: 'Leave Types',
         icon: <Briefcase />,
         navLink: '/leave-type'
