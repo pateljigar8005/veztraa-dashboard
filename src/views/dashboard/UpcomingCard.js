@@ -38,7 +38,11 @@ const UpcomingCard = ({ items }) => (
         </div>
       ) : (
         <Timeline
-          data={items.map(item => {
+          // Guard against a type the API sends that this card doesn't know
+          // about yet - an unmapped item used to crash this render (reading
+          // .path off an undefined meta), which took the whole app down with
+          // it every time it remounted.
+          data={items.filter(item => TYPE_META[item.type]).map(item => {
             const meta = TYPE_META[item.type]
             return {
               title: (

@@ -33,26 +33,45 @@ export const installChunkPreloadErrorHandler = () => {
 }
 
 export class ChunkErrorBoundary extends Component {
-  state = { hasError: false, reloaded: false }
+  state = { hasError: false, isChunkError: false, reloaded: false }
 
   static getDerivedStateFromError(error) {
-    return { hasError: isChunkLoadError(error) }
+    return { hasError: true, isChunkError: isChunkLoadError(error) }
   }
 
   componentDidCatch(error) {
     if (isChunkLoadError(error)) {
       this.setState({ reloaded: reloadOnce() })
+    } else {
+      console.error(error)
     }
   }
 
   render() {
     if (this.state.hasError) {
-      if (!this.state.reloaded) {
-        // Already reloaded once this session and it's still failing (e.g. offline)
-        console.error('Failed to load app after reload; skipping further reloads')
+      if (this.state.isChunkError) {
+        if (!this.state.reloaded) {
+          // Already reloaded once this session and it's still failing (e.g. offline)
+          console.error('Failed to load app after reload; skipping further reloads')
+        }
+        return null
       }
 
-      return null
+      // A non-chunk render error used to be swallowed here by clearing
+      // hasError and re-rendering props.children, which actually remounts
+      // the whole app fresh (React already tore the old tree down to reach
+      // this boundary). If the error came from stale data that's still
+      // there after remount (e.g. a bad dashboard API response), that
+      // remount crashes again immediately - looping forever and, since the
+      // remounted app re-fires its own startup requests every time,
+      // flooding the browser with network calls. Show a static fallback
+      // instead of ever retrying automatically.
+      return (
+        <div className='d-flex flex-column align-items-center justify-content-center text-center p-2' style={{ minHeight: '100vh' }}>
+          <h4>Something went wrong</h4>
+          <p className='text-muted'>Please refresh the page. If this keeps happening, let support know.</p>
+        </div>
+      )
     }
 
     return this.props.children
