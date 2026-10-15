@@ -235,7 +235,7 @@ const NavbarBookmarks = props => {
         </NavItem>
       </ul>
       <ul className='nav navbar-nav align-items-center'>
-        <NavItem className='d-none d-lg-block'>
+        <NavItem className='d-block'>
           <NavLink
             className='nav-link-style'
             id='navbar-add-btn'
@@ -252,7 +252,7 @@ const NavbarBookmarks = props => {
                 : 'Add (open a list page first)'}
           </UncontrolledTooltip>
         </NavItem>
-        <NavItem className='d-none d-lg-block'>
+        <NavItem className='d-block'>
           <NavLink className='nav-link-style' id='navbar-refresh-btn' onClick={handleRefresh}>
             <RefreshCw className='ficon' />
           </NavLink>
@@ -260,7 +260,7 @@ const NavbarBookmarks = props => {
             Refresh
           </UncontrolledTooltip>
         </NavItem>
-        <NavItem className='d-none d-lg-block'>
+        <NavItem className='d-block'>
           <NavLink
             className='nav-link-style'
             id='navbar-search-btn'
@@ -277,7 +277,7 @@ const NavbarBookmarks = props => {
                 : 'Search (open a list page first)'}
           </UncontrolledTooltip>
         </NavItem>
-        <NavItem className='d-none d-lg-block'>
+        <NavItem className='d-block'>
           <NavLink className='nav-link-style' id='navbar-back-btn' onClick={() => navigate(-1)}>
             <CornerDownLeft className='ficon' />
           </NavLink>
@@ -285,7 +285,7 @@ const NavbarBookmarks = props => {
             Back
           </UncontrolledTooltip>
         </NavItem>
-        <NavItem className='d-none d-lg-block'>
+        <NavItem className='d-block'>
           <NavLink
             className='nav-link-style'
             id='navbar-save-btn'
@@ -302,7 +302,7 @@ const NavbarBookmarks = props => {
                 : 'Save (open an add/edit page first)'}
           </UncontrolledTooltip>
         </NavItem>
-        <NavItem className='d-none d-lg-block'>
+        <NavItem className='d-block'>
           <NavLink
             className='nav-link-style'
             id='navbar-download-btn'
@@ -316,7 +316,7 @@ const NavbarBookmarks = props => {
           </UncontrolledTooltip>
         </NavItem>
         {sendEmailRouteMatches && (
-          <NavItem className='d-none d-lg-block'>
+          <NavItem className='d-block'>
             <NavLink
               className='nav-link-style'
               id='navbar-send-email-btn'
@@ -331,7 +331,7 @@ const NavbarBookmarks = props => {
           </NavItem>
         )}
         {bulkDeleteVisible && (
-          <NavItem className='d-none d-lg-block'>
+          <NavItem className='d-block'>
             <NavLink
               className='nav-link-style position-relative'
               id='navbar-bulk-delete-btn'
@@ -351,7 +351,7 @@ const NavbarBookmarks = props => {
           </NavItem>
         )}
         {historyRouteMatches && (
-          <NavItem className='d-none d-lg-block'>
+          <NavItem className='d-block'>
             <NavLink
               className='nav-link-style'
               id='navbar-history-btn'
