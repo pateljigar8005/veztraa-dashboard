@@ -6,6 +6,19 @@ $email_read: $body-bg;
 $email_selected_border: #e4e1e8;
 $email_details_header_height: 5rem;
 
+// Bootstrap's own `[dir] .form-control:focus { border-color: ...; box-shadow:
+// ...; }` rule (compiled with !important, specificity of 3 class-level
+// selectors) beats this file's own `.app-fixed-search input { border: 0 }`
+// override below (whose ancestor selectors - .email-application
+// .content-area-wrapper - don't actually exist in this app's markup, so it
+// never matched to begin with) and Bootstrap's .border-0/.shadow-none
+// utilities (1 class each) applied directly on the element. An id selector
+// is the only way to out-specificity it.
+#email-search:focus {
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
 .email-application {
   .content-area-wrapper {
     border: 1px solid $border-color;

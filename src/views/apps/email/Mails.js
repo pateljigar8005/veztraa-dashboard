@@ -219,8 +219,8 @@ const Mails = props => {
           {
                                       }
           <div className='d-flex align-items-center justify-content-between w-100'>
-            <InputGroup className='input-group-merge flex-grow-1'>
-              <InputGroupText>
+            <InputGroup className='input-group-merge flex-grow-1 border-0 shadow-none'>
+              <InputGroupText className='border-0 bg-transparent'>
                 <Search className='text-muted' size={14} />
               </InputGroupText>
               <Input
@@ -228,6 +228,7 @@ const Mails = props => {
                 placeholder='Search email'
                 value={query}
                 onChange={e => setQuery(e.target.value)}
+                className='border-0 bg-transparent'
               />
             </InputGroup>
             {/* Same hidden-trigger pattern as Activity Log's own bulk-delete
