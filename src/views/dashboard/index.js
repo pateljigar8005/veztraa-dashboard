@@ -6,7 +6,6 @@ import { getSummary } from './store'
 import CardEmptyState from '@src/views/apps/shared/CardEmptyState'
 import { dashboardBlocks, dashboardSections } from './blockConfig'
 import DashboardSkeleton from './DashboardSkeleton'
-import BlockCard from './BlockCard'
 import CombinedChartCard from './CombinedChartCard'
 import KpiStrip from './KpiStrip'
 import SupportTrackerCard from './SupportTrackerCard'
@@ -15,29 +14,13 @@ import UserTimelineCard from './UserTimelineCard'
 import SalesRadarCard from './SalesRadarCard'
 import AppDesignCard from './AppDesignCard'
 
-// One block's config + its already-fetched data in -> a BlockCard. Donut-
-// flagged blocks (Invoice/Quotation/Project) are handled separately in the
-// section loop below - they combine into one CombinedChartCard instead of
-// a card each, so they never reach here.
-const renderBlockCard = (block, data) => (
-  <BlockCard
-    icon={block.icon}
-    color={block.color}
-    title={block.title}
-    path={block.path}
-    stats={block.stats(data)}
-    items={block.items ? block.items(data) : []}
-  />
-)
-
 // Personalized per role: DashboardController::summary() on the API side
 // already omits any block the current role can't view (admin gets all of
-// them) and scopes Todo/Timesheet/Calendar to the caller's own
-// records for a non-admin - this just renders whatever came back, grouped
-// under the same Billing/Apps & Pages/Website sections the Roles &
-// Permissions matrix already uses (dashboardSections). A section with no
-// visible blocks in it is skipped entirely, so a role with only e.g. Todo
-// access sees one lean "Apps & Pages" section, not two empty headers.
+// them) - this just renders whatever came back. Every remaining
+// dashboardBlocks entry is a donut block (Contracts/Clients/Timesheet/Leave
+// were removed as redundant, no longer rendered anywhere), grouped under the
+// Billing section the Roles & Permissions matrix also uses. A section with
+// no visible blocks in it is skipped entirely.
 const Dashboard = () => {
   const dispatch = useDispatch()
   const store = useSelector(state => state.dashboard)
@@ -58,26 +41,32 @@ const Dashboard = () => {
         <Fragment>
           <KpiStrip blocks={store.blocks} />
 
-          <Row className='g-2 mb-1'>
-            <Col md={store.blocks.supportTracker ? 6 : 12}>
-              <RevenueReportCard />
-            </Col>
-            {store.blocks.supportTracker && (
-              <Col md={6}>
-                <SupportTrackerCard />
-              </Col>
-            )}
-          </Row>
+          {(store.blocks.revenueReport || store.blocks.supportTracker) && (
+            <Row className='g-2 mb-2'>
+              {store.blocks.revenueReport && (
+                <Col md={store.blocks.supportTracker ? 6 : 12}>
+                  <RevenueReportCard data={store.blocks.revenueReport} />
+                </Col>
+              )}
+              {store.blocks.supportTracker && (
+                <Col md={store.blocks.revenueReport ? 6 : 12}>
+                  <SupportTrackerCard data={store.blocks.supportTracker} />
+                </Col>
+              )}
+            </Row>
+          )}
 
-          <Row className='g-2 mb-1'>
+          <Row className='g-2 mb-2'>
             {store.blocks.upcomingEvents && (
               <Col lg={4} md={6} xs={12}>
                 <UserTimelineCard data={store.blocks.upcomingEvents.items} />
               </Col>
             )}
-            <Col lg={4} md={6} xs={12}>
-              <SalesRadarCard />
-            </Col>
+            {store.blocks.salesRadar && (
+              <Col lg={4} md={6} xs={12}>
+                <SalesRadarCard data={store.blocks.salesRadar} />
+              </Col>
+            )}
             <Col lg={4} md={12} xs={12}>
               <AppDesignCard />
             </Col>
@@ -85,44 +74,36 @@ const Dashboard = () => {
 
           <Row className='g-2'>
             <Col md={12}>
+              {/* Donut blocks (Invoices/Quotations/Projects) still render
+                  per-section, since a CombinedChartCard groups them by
+                  section on purpose (e.g. all of Billing's own donuts
+                  together) and merging across sections wouldn't make sense
+                  for a single chart. */}
               {dashboardSections.map(section => {
-                const sectionBlocks = visibleBlocks.filter(block => block.section === section)
-                if (sectionBlocks.length === 0) return null
-
-                const donutBlocks = sectionBlocks.filter(block => block.chart === 'donut')
-                const otherBlocks = sectionBlocks.filter(block => block.chart !== 'donut')
+                const donutBlocks = visibleBlocks.filter(
+                  block => block.section === section && block.chart === 'donut'
+                )
+                if (donutBlocks.length === 0) return null
 
                 return (
                   <div key={section} className='mb-2'>
                     <h6 className='text-muted text-uppercase mb-1'>{section}</h6>
                     <Row className='g-2'>
-                      {donutBlocks.length > 0 && (
-                        <Col md={12}>
-                          <CombinedChartCard
-                            items={donutBlocks.map(block => {
-                              const data = store.blocks[block.id]
-                              return {
-                                icon: block.icon,
-                                color: block.color,
-                                title: block.title,
-                                path: block.path,
-                                byStatus: data[block.byStatusKey],
-                                extraStats: block.extraStats(data)
-                              }
-                            })}
-                          />
-                        </Col>
-                      )}
-                      {/* Fills the row whatever the count is, same reasoning as
-                          KpiStrip's own colWidth - a lone leftover card (e.g.
-                          just Timesheet in Apps & Pages now that Todo/Calendar
-                          moved into Upcoming) takes the full row
-                          instead of leaving a dangling empty half. */}
-                      {otherBlocks.map(block => (
-                        <Col md={12 / otherBlocks.length} key={block.id}>
-                          {renderBlockCard(block, store.blocks[block.id])}
-                        </Col>
-                      ))}
+                      <Col md={12}>
+                        <CombinedChartCard
+                          items={donutBlocks.map(block => {
+                            const data = store.blocks[block.id]
+                            return {
+                              icon: block.icon,
+                              color: block.color,
+                              title: block.title,
+                              path: block.path,
+                              byStatus: data[block.byStatusKey],
+                              extraStats: block.extraStats(data)
+                            }
+                          })}
+                        />
+                      </Col>
                     </Row>
                   </div>
                 )

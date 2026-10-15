@@ -2,31 +2,28 @@ import { useContext } from 'react'
 
 // ** Third Party Components
 import Chart from 'react-apexcharts'
-import { MoreVertical, Circle } from 'react-feather'
+import { Circle } from 'react-feather'
 
 // ** Reactstrap Imports
-import {
-  Card,
-  CardBody,
-  CardText,
-  CardTitle,
-  CardHeader,
-  DropdownMenu,
-  DropdownItem,
-  DropdownToggle,
-  UncontrolledDropdown
-} from 'reactstrap'
+import { Card, CardBody, CardText, CardTitle, CardHeader } from 'reactstrap'
 
 import { ThemeColors } from '@src/utility/context/ThemeColors'
 
-// Exact port of Vuexy's "Sales" radar-chart analytics card
-// (react-version/vite-bootstrap5/full-version/.../Sales.js). Numbers are
-// the template's own static demo data - wiring this to real sales/visit
-// figures is a follow-up.
-const SalesRadarCard = () => {
+// Port of Vuexy's "Sales" radar-chart analytics card
+// (react-version/vite-bootstrap5/full-version/.../Sales.js), now backed by
+// real data (DashboardController::salesRadar(), admin-only) - quotations
+// vs invoices issued per month, i.e. the sales funnel, instead of the
+// template's "Sales"/"Visits" numbers which have no real equivalent in a
+// B2B invoicing app (no web-traffic tracking exists here). Dropped the
+// decorative "Last 28 Days" dropdown - it never filtered anything.
+const SalesRadarCard = ({ data }) => {
   const { colors } = useContext(ThemeColors)
   const primary = colors?.primary?.main || '#7367f0'
   const info = colors?.info?.main || '#00cfe8'
+
+  const months = data?.months || []
+  const quotations = data?.quotations || []
+  const invoices = data?.invoices || []
 
   const options = {
       chart: {
@@ -60,49 +57,38 @@ const SalesRadarCard = () => {
           stops: [0, 100, 100, 100]
         }
       },
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      labels: months,
       markers: { size: 0 },
       yaxis: { show: false },
       grid: { show: false, padding: { bottom: -27 } }
     },
     series = [
-      { name: 'Sales', data: [90, 50, 86, 40, 100, 20] },
-      { name: 'Visit', data: [70, 75, 70, 76, 20, 85] }
+      { name: 'Quotations', data: quotations },
+      { name: 'Invoices', data: invoices }
     ]
 
   return (
     <Card className='h-100'>
-      <CardHeader className='d-flex justify-content-between align-items-start pb-1'>
+      <CardHeader className='pb-1'>
         <div>
           <CardTitle className='mb-25' tag='h4'>
             Sales
           </CardTitle>
           <CardText>Last 6 months</CardText>
         </div>
-
-        <UncontrolledDropdown className='chart-dropdown'>
-          <DropdownToggle color='' className='bg-transparent btn-sm border-0 p-50'>
-            <MoreVertical size={18} className='cursor-pointer' />
-          </DropdownToggle>
-          <DropdownMenu end>
-            <DropdownItem className='w-100'>Last 28 Days</DropdownItem>
-            <DropdownItem className='w-100'>Last Month</DropdownItem>
-            <DropdownItem className='w-100'>Last Year</DropdownItem>
-          </DropdownMenu>
-        </UncontrolledDropdown>
       </CardHeader>
 
       <CardBody>
         <div className='d-inline-block me-1'>
           <div className='d-flex align-items-center'>
             <Circle size={13} className='text-primary me-50' />
-            <h6 className='mb-0'>Sales</h6>
+            <h6 className='mb-0'>Quotations</h6>
           </div>
         </div>
         <div className='d-inline-block'>
           <div className='d-flex align-items-center'>
             <Circle size={13} className='text-info me-50' />
-            <h6 className='mb-0'>Visits</h6>
+            <h6 className='mb-0'>Invoices</h6>
           </div>
         </div>
         <Chart options={options} series={series} type='radar' height={300} />

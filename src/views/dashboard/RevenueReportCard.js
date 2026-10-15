@@ -7,20 +7,35 @@ import Chart from 'react-apexcharts'
 import { Row, Col, Card, CardTitle } from 'reactstrap'
 
 import { ThemeColors } from '@src/utility/context/ThemeColors'
+import { formatAmount } from '@utils'
 
 // Port of Vuexy's "Revenue Report" analytics card
 // (react-version/vite-bootstrap5/full-version/.../RevenueReport.js), minus
-// the budget side panel (removed per request). Numbers are the template's
-// own static demo data - wiring this to real revenue/expense figures is a
-// follow-up.
-const RevenueReportCard = () => {
+// the budget side panel (removed per request). Shows invoiced vs collected
+// amounts per month (DashboardController::revenueReport(), admin-only) as
+// GROUPED bars, not the template's stacked Earning/Expense layout - stacking
+// Invoiced+Collected sums them into a height with no real meaning (and
+// Collected can come from invoices issued in earlier months, so a stacked
+// bar can end up taller than that month's invoiced amount, which reads as a
+// bug). Grouped bars let the two be compared per month, which is the actual
+// point of this chart.
+// No currency conversion (same as the Earning Reports card) since invoices
+// can be in different currencies and there's no server-side conversion
+// helper yet - only the Profit Report page converts, client-side.
+const RevenueReportCard = ({ data }) => {
   const { colors } = useContext(ThemeColors)
   const primary = colors?.primary?.main || '#7367f0'
-  const warning = colors?.warning?.main || '#ff9f43'
+  // Hardcoded, not pulled from the theme's "warning" token - that one
+  // resolves to an orange (#ff9f43), not the golden yellow asked for here.
+  const collectedColor = '#FFC107'
+
+  const months = data?.months || []
+  const invoiced = data?.invoiced || []
+  const collected = data?.collected || []
 
   const revenueOptions = {
       chart: {
-        stacked: true,
+        stacked: false,
         type: 'bar',
         toolbar: { show: false }
       },
@@ -29,30 +44,30 @@ const RevenueReportCard = () => {
         yaxis: { lines: { show: false } }
       },
       xaxis: {
-        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+        categories: months,
         labels: { style: { colors: '#b9b9c3', fontSize: '0.86rem' } },
         axisTicks: { show: false },
         axisBorder: { show: false }
       },
       legend: { show: false },
       dataLabels: { enabled: false },
-      colors: [primary, warning],
+      colors: [primary, collectedColor],
       plotOptions: {
         bar: {
-          columnWidth: '17%',
-          borderRadius: [4],
-          borderRadiusWhenStacked: 'all',
-          borderRadiusApplication: 'start'
-        },
-        distributed: true
+          columnWidth: '50%',
+          borderRadius: 4
+        }
       },
       yaxis: {
-        labels: { style: { colors: '#b9b9c3', fontSize: '0.86rem' } }
+        labels: { style: { colors: '#b9b9c3', fontSize: '0.86rem' }, formatter: val => formatAmount(val) }
+      },
+      tooltip: {
+        y: { formatter: val => formatAmount(val) }
       }
     },
     revenueSeries = [
-      { name: 'Earning', data: [95, 177, 284, 256, 105, 63, 168, 218, 72] },
-      { name: 'Expense', data: [-145, -80, -60, -180, -100, -60, -85, -75, -100] }
+      { name: 'Invoiced', data: invoiced },
+      { name: 'Collected', data: collected }
     ]
 
   return (
@@ -64,11 +79,11 @@ const RevenueReportCard = () => {
             <div className='d-flex align-items-center'>
               <div className='d-flex align-items-center me-2'>
                 <span className='bullet bullet-primary me-50 cursor-pointer'></span>
-                <span>Earning</span>
+                <span>Invoiced</span>
               </div>
               <div className='d-flex align-items-center'>
-                <span className='bullet bullet-warning me-50 cursor-pointer'></span>
-                <span>Expense</span>
+                <span className='bullet me-50 cursor-pointer' style={{ backgroundColor: collectedColor }}></span>
+                <span>Collected</span>
               </div>
             </div>
           </div>

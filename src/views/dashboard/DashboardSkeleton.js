@@ -3,10 +3,10 @@ import { Row, Col, Card, CardBody } from 'reactstrap'
 import Skeleton from '@components/skeleton'
 
 // Mirrors the real dashboard's grid (KpiStrip -> Revenue/SupportTracker row
-// -> 3-card row -> section cards) so there's no layout jump when the fetched
-// data swaps in. Card counts are fixed guesses (4 KPIs, 3 block cards)
-// rather than driven by data we don't have yet - close enough for a loading
-// placeholder, and it disappears as soon as getSummary resolves.
+// -> 3-card row -> donut chart section) so there's no layout jump when the
+// fetched data swaps in. Card counts are fixed guesses (4 KPIs) rather than
+// driven by data we don't have yet - close enough for a loading placeholder,
+// and it disappears as soon as getSummary resolves.
 const StatCardSkeleton = () => (
   <Card className='mb-0 h-100'>
     <CardBody className='d-flex align-items-center'>
@@ -15,22 +15,6 @@ const StatCardSkeleton = () => (
         <Skeleton width='60%' height={20} className='mb-50' />
         <Skeleton width='80%' height={12} />
       </div>
-    </CardBody>
-  </Card>
-)
-
-const BlockCardSkeleton = () => (
-  <Card className='h-100'>
-    <CardBody>
-      <div className='d-flex align-items-center justify-content-between mb-1'>
-        <div className='d-flex align-items-center'>
-          <Skeleton circle width={38} height={38} className='me-2' />
-          <Skeleton width={90} height={16} />
-        </div>
-        <Skeleton width={50} height={12} />
-      </div>
-      <Skeleton width='40%' height={26} className='mb-50' />
-      <Skeleton width='70%' height={12} />
     </CardBody>
   </Card>
 )
@@ -46,7 +30,7 @@ const ChartCardSkeleton = ({ height = 220 }) => (
 
 const DashboardSkeleton = () => (
   <Fragment>
-    <Row className='g-2 mb-1'>
+    <Row className='g-2 mb-2'>
       {[0, 1, 2, 3].map(i => (
         <Col md={3} sm={6} key={i}>
           <StatCardSkeleton />
@@ -54,7 +38,7 @@ const DashboardSkeleton = () => (
       ))}
     </Row>
 
-    <Row className='g-2 mb-1'>
+    <Row className='g-2 mb-2'>
       <Col md={6}>
         <ChartCardSkeleton height={260} />
       </Col>
@@ -63,7 +47,7 @@ const DashboardSkeleton = () => (
       </Col>
     </Row>
 
-    <Row className='g-2 mb-1'>
+    <Row className='g-2 mb-2'>
       {[0, 1, 2].map(i => (
         <Col lg={4} md={6} xs={12} key={i}>
           <ChartCardSkeleton height={180} />
@@ -75,11 +59,9 @@ const DashboardSkeleton = () => (
       <Col md={12}>
         <Skeleton width={120} height={14} className='mb-1' />
         <Row className='g-2'>
-          {[0, 1, 2].map(i => (
-            <Col md={4} key={i}>
-              <BlockCardSkeleton />
-            </Col>
-          ))}
+          <Col md={12}>
+            <ChartCardSkeleton height={120} />
+          </Col>
         </Row>
       </Col>
     </Row>

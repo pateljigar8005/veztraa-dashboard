@@ -1,38 +1,23 @@
 import { useContext } from 'react'
 import Chart from 'react-apexcharts'
-import {
-  Row,
-  Col,
-  Card,
-  CardBody,
-  CardText,
-  CardTitle,
-  CardHeader,
-  DropdownMenu,
-  DropdownItem,
-  DropdownToggle,
-  UncontrolledDropdown
-} from 'reactstrap'
+import { Row, Col, Card, CardBody, CardText, CardTitle, CardHeader } from 'reactstrap'
 import { ThemeColors } from '@src/utility/context/ThemeColors'
 
-// Exact visual port of Vuexy's reactstrap+apexcharts "Support Tracker" card
-// (react-version/vite-bootstrap5/full-version/.../SupportTracker.js) - same
-// dashed dual-tone radial gauge, layout and static demo numbers as the
-// template's own fake-db data. Wiring this to real ticket/task data is a
-// follow-up.
-const DATA = {
-  title: 'Support Tracker',
-  lastDays: ['Last 28 Days', 'Last Month', 'Last Year'],
-  totalTicket: 163,
-  newTicket: 29,
-  openTicket: 63,
-  responseTime: 1
-}
-
-const SupportTrackerCard = () => {
+// Same dashed dual-tone radial gauge/layout as Vuexy's reactstrap
+// "Support Tracker" card, now backed by real data
+// (DashboardController::supportTracker(): Open Todos / Pending Approvals /
+// Overdue Invoices + Todo::completionRate()) instead of the template's
+// static ticket numbers. Dropped the decorative "Last 7 days" dropdown -
+// it never actually filtered anything, and that's misleading once the
+// numbers themselves are real.
+const SupportTrackerCard = ({ data }) => {
   const { colors } = useContext(ThemeColors)
   const primary = colors?.primary?.main || '#7367f0'
   const danger = colors?.danger?.main || '#ea5455'
+
+  const stats = data?.stats || []
+  const completionPct = data?.completion_pct || 0
+  const totalOpenItems = stats.reduce((sum, stat) => sum + (stat.value || 0), 0)
 
   const options = {
     plotOptions: {
@@ -64,49 +49,37 @@ const SupportTrackerCard = () => {
       }
     },
     stroke: { dashArray: 8 },
-    labels: ['Completed Tickets']
+    labels: ['Completed Todos']
   }
 
   return (
     <Card className='h-100'>
       <CardHeader className='pb-0'>
-        <CardTitle tag='h4'>{DATA.title}</CardTitle>
-        <UncontrolledDropdown className='chart-dropdown'>
-          <DropdownToggle color='' className='bg-transparent btn-sm border-0 p-50'>
-            Last 7 days
-          </DropdownToggle>
-          <DropdownMenu end>
-            {DATA.lastDays.map(item => (
-              <DropdownItem className='w-100' key={item}>
-                {item}
-              </DropdownItem>
-            ))}
-          </DropdownMenu>
-        </UncontrolledDropdown>
+        <CardTitle tag='h4'>Support Tracker</CardTitle>
       </CardHeader>
       <CardBody>
         <Row>
           <Col sm='2' className='d-flex flex-column flex-wrap text-center'>
-            <h1 className='font-large-2 fw-bolder mt-2 mb-0'>{DATA.totalTicket}</h1>
-            <CardText>Tickets</CardText>
+            <h1 className='font-large-2 fw-bolder mt-2 mb-0'>{totalOpenItems}</h1>
+            <CardText>Needs Attention</CardText>
           </Col>
           <Col sm='10' className='d-flex justify-content-center'>
-            <Chart options={options} series={[83]} type='radialBar' height={270} id='support-tracker-card' />
+            <Chart
+              options={options}
+              series={[completionPct]}
+              type='radialBar'
+              height={270}
+              id='support-tracker-card'
+            />
           </Col>
         </Row>
         <div className='d-flex justify-content-between mt-1'>
-          <div className='text-center'>
-            <CardText className='mb-50'>New Tickets</CardText>
-            <span className='font-large-1 fw-bold'>{DATA.newTicket}</span>
-          </div>
-          <div className='text-center'>
-            <CardText className='mb-50'>Open Tickets</CardText>
-            <span className='font-large-1 fw-bold'>{DATA.openTicket}</span>
-          </div>
-          <div className='text-center'>
-            <CardText className='mb-50'>Response Time</CardText>
-            <span className='font-large-1 fw-bold'>{DATA.responseTime}d</span>
-          </div>
+          {stats.map(stat => (
+            <div key={stat.label} className='text-center'>
+              <CardText className='mb-50'>{stat.label}</CardText>
+              <span className='font-large-1 fw-bold'>{stat.value}</span>
+            </div>
+          ))}
         </div>
       </CardBody>
     </Card>

@@ -50,7 +50,7 @@ const KpiStrip = ({ blocks }) => {
   const colWidth = 12 / kpis.length
 
   return (
-    <Row className='g-2 mb-1'>
+    <Row className='g-2 mb-2'>
       {kpis.map((kpi, index) => (
         <Col md={colWidth} sm={6} key={index}>
           <Card className='mb-0 h-100'>
