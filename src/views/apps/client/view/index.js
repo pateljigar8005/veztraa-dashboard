@@ -94,7 +94,7 @@ const ClientView = () => {
                   <th>Valid Until</th>
                   <th>Total</th>
                   <th>Status</th>
-                  <th></th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -109,8 +109,8 @@ const ClientView = () => {
                       </Badge>
                     </td>
                     <td>
-                      <Button tag={Link} to={`/quotation/edit/${q.id}`} size='sm' color='flat-primary'>
-                        <Edit2 size={14} />
+                      <Button tag={Link} to={`/quotation/view/${q.id}`} size='sm' color='flat-primary'>
+                        <FileText size={14} />
                       </Button>
                     </td>
                   </tr>
@@ -140,7 +140,7 @@ const ClientView = () => {
                   <th>Frequency</th>
                   <th>Start Date</th>
                   <th>Status</th>
-                  <th></th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -154,8 +154,8 @@ const ClientView = () => {
                       </Badge>
                     </td>
                     <td>
-                      <Button tag={Link} to={`/contract/edit/${c.id}`} size='sm' color='flat-primary'>
-                        <Edit2 size={14} />
+                      <Button tag={Link} to={`/contract/view/${c.id}`} size='sm' color='flat-primary'>
+                        <FileText size={14} />
                       </Button>
                     </td>
                   </tr>
@@ -186,7 +186,7 @@ const ClientView = () => {
                   <th>Due Date</th>
                   <th>Total</th>
                   <th>Status</th>
-                  <th></th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -201,8 +201,8 @@ const ClientView = () => {
                       </Badge>
                     </td>
                     <td>
-                      <Button tag={Link} to={`/invoice/edit/${i.id}`} size='sm' color='flat-primary'>
-                        <Edit2 size={14} />
+                      <Button tag={Link} to={`/invoice/view/${i.id}`} size='sm' color='flat-primary'>
+                        <FileText size={14} />
                       </Button>
                     </td>
                   </tr>
