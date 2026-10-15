@@ -35,7 +35,7 @@ export const columns = [
   {
     name: 'Project',
     sortable: true,
-    width: '190px',
+    width: '260px',
     sortField: 'project_name',
     selector: row => row.project_name,
     cell: row => <span className='text-truncate'>{row.project_name}</span>
@@ -58,7 +58,7 @@ export const columns = [
   },
   {
     name: 'Hours',
-    width: '110px',
+    width: '150px',
     sortable: true,
     sortField: 'hours',
     selector: row => row.hours,

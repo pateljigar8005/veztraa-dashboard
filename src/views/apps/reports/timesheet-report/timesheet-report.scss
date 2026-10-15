@@ -1,0 +1,16 @@
+// The table has more columns than fit most screens, so
+// react-data-table-component's `responsive` prop keeps it horizontally
+// scrollable - DataTable forwards its own `className` straight onto the
+// scrollable ResponsiveWrapper div, so this class (passed as an extra
+// className alongside the shared 'react-dataTable' one) lands directly on
+// the element that actually scrolls. Just hides the visible scrollbar
+// track/thumb (scrolling via trackpad/shift-wheel/drag still works) -
+// scoped to this page only, not every list page's table.
+.timesheet-report-table {
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; // old Edge/IE
+
+  &::-webkit-scrollbar {
+    display: none; // Chrome/Safari
+  }
+}

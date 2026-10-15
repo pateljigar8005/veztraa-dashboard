@@ -7,9 +7,11 @@ import DataTable from 'react-data-table-component'
 import ReactPaginate from 'react-paginate'
 import { Search, RotateCcw, Clock, FileText, Folder, TrendingUp } from 'react-feather'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Spinner } from 'reactstrap'
+import Avatar from '@components/avatar'
 import DateField from '../../shared/DateField'
-import { selectThemeColors, getUserData, sortOptions } from '@utils'
+import { selectThemeColors, getUserData, sortOptions, resolveAvatarUrl, htmlToString } from '@utils'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
+import './timesheet-report.scss'
 import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
 import { Clock as EmptyIcon } from 'react-feather'
 
@@ -23,29 +25,52 @@ const defaultFilters = {
   activities: []
 }
 
+// Same columns, order, and User-avatar rendering as the Timesheet listing
+// page (src/views/apps/timesheet/list/columns.js) - minus the Actions
+// column, since this report is read-only - so the data reads the same way
+// in both places.
+const renderUser = row => {
+  if (row.user_avatar && row.user_avatar.length) {
+    return <Avatar className='me-1' img={resolveAvatarUrl(row.user_avatar)} width='32' height='32' />
+  }
+  return <Avatar initials className='me-1' color='light-primary' content={row.user_name || 'User'} />
+}
+
 const columns = [
-  { name: 'Date', minWidth: '120px', sortable: true, selector: row => row.date },
   {
     name: 'User',
-    minWidth: '160px',
+    sortable: true,
+    minWidth: '220px',
     selector: row => row.user_name,
-    cell: row => <span className='fw-bolder'>{row.user_name}</span>
+    cell: row => (
+      <div className='d-flex align-items-center'>
+        {renderUser(row)}
+        <span className='fw-bolder text-truncate'>{row.user_name}</span>
+      </div>
+    )
   },
-  { name: 'Project', minWidth: '180px', selector: row => row.project_name },
-  { name: 'Activity', minWidth: '160px', selector: row => row.activity_name },
+  { name: 'Project', width: '260px', selector: row => row.project_name, cell: row => <span className='text-truncate'>{row.project_name}</span> },
+  { name: 'Date', width: '140px', sortable: true, selector: row => row.date, cell: row => <span>{row.date}</span> },
+  { name: 'Activity', width: '160px', selector: row => row.activity_name, cell: row => <span>{row.activity_name}</span> },
   {
     name: 'Hours',
-    minWidth: '100px',
-    right: true,
+    width: '150px',
     sortable: true,
     selector: row => Number(row.hours),
     cell: row => <span className='fw-bolder'>{Number(row.hours).toFixed(2)}</span>
   },
   {
     name: 'Description',
-    minWidth: '220px',
+    width: '220px',
     selector: row => row.description,
-    cell: row => <span className='text-truncate'>{row.description || '-'}</span>
+    cell: row => {
+      const plain = row.description ? htmlToString(row.description) : ''
+      return (
+        <span className='text-truncate' title={plain}>
+          {plain || '-'}
+        </span>
+      )
+    }
   }
 ]
 
@@ -368,7 +393,7 @@ const TimesheetReport = () => {
                 pagination
                 responsive
                 columns={columns}
-                className='react-dataTable'
+                className='react-dataTable timesheet-report-table'
                 data={rows}
                 paginationRowsPerPageOptions={[10, 25, 50, 100]}
                 paginationComponent={CustomPagination}
