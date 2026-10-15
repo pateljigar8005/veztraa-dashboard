@@ -217,6 +217,14 @@ const PdfDesignerTemplateForm = () => {
             />
           </Col>
         </Row>
+        {/* The inner "Save" action button must stay in the DOM and clickable -
+            NavbarBookmarks.js finds it by exact button text and calls .click()
+            on it to forward the navbar's Save icon here (see handleSave there).
+            CSS visibility doesn't affect that, so it's safe to just hide it -
+            the navbar icon is the only Save control the user should see.
+            !important is required: IconBtn sets display:flex as an inline
+            style, which otherwise beats a plain external rule. */}
+        <style>{`#${PDF_DESIGNER_SCOPE_ID} button[title="Save"] { display: none !important; }`}</style>
         <div
           id={PDF_DESIGNER_SCOPE_ID}
           style={{ height: '75vh', border: '1px solid #d8d6de', borderRadius: '0.357rem', overflow: 'hidden' }}
