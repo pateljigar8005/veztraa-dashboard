@@ -12,6 +12,7 @@ import { frequencyOptions, contractStatusOptions, invoiceableContractStatuses } 
 import ComposePopup from '../../email/ComposePopup'
 import HistoryModal from '../../activity-log/HistoryModal'
 import DocumentViewSkeleton from '../../shared/DocumentViewSkeleton'
+import PdfPreviewSkeleton from '../../shared/PdfPreviewSkeleton'
 import LinkedInvoicesCard from '../../invoice/LinkedInvoicesCard'
 import { selectThemeColors } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
@@ -364,7 +365,7 @@ const ContractView = () => {
                 Download PDF
               </Button>
               <HistoryModal entityType='contract' entityId={contract.id} entityLabel={contract.contract_number} buttonId='contract-history-btn' />
-              {!pdfTemplate && (
+              {companySettings && !companySettings.contract_pdf_template_id && (
                 <p className='text-muted small mb-0 mt-50'>
                   No Contract PDF template selected in <Link to='/company'>Company Settings</Link>.
                 </p>
@@ -382,7 +383,11 @@ const ContractView = () => {
             <LinkedInvoicesCard filterKey='contract_id' id={contract.id} emptyText='No invoices under this contract yet.' />
           )}
 
-          {pdfTemplate && (
+          {/* Until /company has answered, we don't yet know whether there's a
+              contract_pdf_template_id to even fetch - skip the skeleton only
+              once that's confirmed negative, otherwise show it right away
+              instead of this card just not existing for a beat. */}
+          {(pdfTemplate || !companySettings || companySettings.contract_pdf_template_id) && (
             <Card>
               <CardBody className='p-0'>
                 {previewUrl ? (
@@ -391,8 +396,10 @@ const ContractView = () => {
                     src={previewUrl}
                     style={{ width: '100%', height: '600px', border: 'none' }}
                   />
+                ) : pdfTemplate && !previewLoading ? (
+                  <p className='text-muted mb-0 p-2'>Preview unavailable.</p>
                 ) : (
-                  <p className='text-muted mb-0 p-2'>{previewLoading ? 'Generating preview…' : 'Preview unavailable.'}</p>
+                  <PdfPreviewSkeleton />
                 )}
               </CardBody>
             </Card>
