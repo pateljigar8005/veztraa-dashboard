@@ -9,7 +9,6 @@ import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
 import { getCachedThemeColor } from '@src/utility/themeColor'
-import { formatAmount } from '@utils'
 
 const renderClient = row => (
   <Avatar
@@ -77,11 +76,7 @@ export const columns = [
     sortable: true,
     sortField: 'total_collected',
     selector: row => row.total_collected,
-    cell: row => (
-      <span className='fw-bolder'>
-        {row.currency_icon} {formatAmount(row.total_collected)}
-      </span>
-    )
+    cell: row => <span className='fw-bolder'>{row.total_collected}</span>
   },
   {
     name: 'Status',

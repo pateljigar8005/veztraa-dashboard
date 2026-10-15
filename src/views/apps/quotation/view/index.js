@@ -13,7 +13,7 @@ import ComposePopup from '../../email/ComposePopup'
 import HistoryModal from '../../activity-log/HistoryModal'
 import DocumentViewSkeleton from '../../shared/DocumentViewSkeleton'
 import LinkedInvoicesCard from '../../invoice/LinkedInvoicesCard'
-import { selectThemeColors, formatAmount } from '@utils'
+import { selectThemeColors, formatAmount, parseAmount } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { renderEmailTemplate } from '@src/utility/renderEmailTemplate'
 
@@ -32,18 +32,21 @@ const buildPdfData = quotation => ({
   },
   currency: quotation.currency,
   tax_rate: quotation.tax_rate,
+  // The API now returns subtotal/tax_amount/discount_amount/total
+  // pre-formatted with the currency icon baked in - pass them straight
+  // through rather than re-wrapping them.
   tax_amount: quotation.tax_amount,
   discount_amount: quotation.discount_amount,
-  subtotal: formatAmount(quotation.subtotal),
-  total: formatAmount(quotation.total),
+  subtotal: quotation.subtotal,
+  total: quotation.total,
   terms_conditions: quotation.terms_content || '',
   payment_method: quotation.payment_method_content || '',
   notes: quotation.notes || '',
   service_items: (quotation.line_items || []).map(item => ({
     name: item.description || '',
     qty: item.qty,
-    rate: formatAmount(item.rate),
-    amount: formatAmount(Number(item.qty) * Number(item.rate))
+    rate: `${quotation.currency}${formatAmount(item.rate)}`,
+    amount: `${quotation.currency}${formatAmount(Number(item.qty) * Number(item.rate))}`
   }))
 })
 
@@ -192,10 +195,11 @@ const QuotationView = () => {
         issue_date: quotation.issue_date || '',
         valid_until: quotation.valid_until || '',
         currency: quotation.currency || '',
-        total: formatAmount(quotation.total),
-        subtotal: formatAmount(quotation.subtotal),
-        tax_amount: formatAmount(quotation.tax_amount),
-        discount_amount: formatAmount(quotation.discount_amount),
+        // Already formatted with currency by the API - see buildPdfData above.
+        total: quotation.total,
+        subtotal: quotation.subtotal,
+        tax_amount: quotation.tax_amount,
+        discount_amount: quotation.discount_amount,
         notes: quotation.notes || '',
         sender_company_name: companySettings.legal_name || ''
       })
@@ -297,32 +301,24 @@ const QuotationView = () => {
               <Col md={{ size: 5, offset: 7 }}>
                 <div className='d-flex justify-content-between mb-50'>
                   <span>Subtotal</span>
-                  <span>
-                    {quotation.currency} {formatAmount(quotation.subtotal)}
-                  </span>
+                  <span>{quotation.subtotal}</span>
                 </div>
-                {quotation.tax_amount > 0 && (
+                {parseAmount(quotation.tax_amount) > 0 && (
                   <div className='d-flex justify-content-between mb-50'>
                     <span>Tax ({quotation.tax_rate}%)</span>
-                    <span>
-                      {quotation.currency} {formatAmount(quotation.tax_amount)}
-                    </span>
+                    <span>{quotation.tax_amount}</span>
                   </div>
                 )}
-                {quotation.discount_amount > 0 && (
+                {parseAmount(quotation.discount_amount) > 0 && (
                   <div className='d-flex justify-content-between mb-50'>
                     <span>Discount</span>
-                    <span className='text-success'>
-                      -{quotation.currency} {formatAmount(quotation.discount_amount)}
-                    </span>
+                    <span className='text-success'>-{quotation.discount_amount}</span>
                   </div>
                 )}
                 <hr />
                 <div className='d-flex justify-content-between'>
                   <h5 className='mb-0'>Total</h5>
-                  <h5 className='mb-0'>
-                    {quotation.currency} {formatAmount(quotation.total)}
-                  </h5>
+                  <h5 className='mb-0'>{quotation.total}</h5>
                 </div>
               </Col>
             </Row>

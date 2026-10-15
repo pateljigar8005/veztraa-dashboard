@@ -10,7 +10,7 @@ import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Badge, 
 import DateField from '../../shared/DateField'
 import AmountField from '../../shared/AmountField'
 import { invoiceStatusOptions, currencyOptions } from '../../quotation/documentOptions'
-import { selectThemeColors, formatAmount, sortOptions, clientOptionLabel } from '@utils'
+import { selectThemeColors, formatAmount, parseAmount, sortOptions, clientOptionLabel } from '@utils'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
 import { FileText as EmptyIcon } from 'react-feather'
@@ -70,34 +70,22 @@ const columns = [
     minWidth: '130px',
     right: true,
     sortable: true,
-    selector: row => Number(row.total),
-    cell: row => (
-      <span>
-        {row.currency} {formatAmount(row.total)}
-      </span>
-    )
+    selector: row => parseAmount(row.total),
+    cell: row => <span>{row.total}</span>
   },
   {
     name: 'Paid',
     minWidth: '130px',
     right: true,
-    selector: row => Number(row.paid_amount),
-    cell: row => (
-      <span className='text-success'>
-        {row.currency} {formatAmount(row.paid_amount)}
-      </span>
-    )
+    selector: row => parseAmount(row.paid_amount),
+    cell: row => <span className='text-success'>{row.paid_amount}</span>
   },
   {
     name: 'Balance Due',
     minWidth: '140px',
     right: true,
-    selector: row => Number(row.balance_due),
-    cell: row => (
-      <span className={row.balance_due > 0 ? 'fw-bolder text-danger' : 'text-muted'}>
-        {row.currency} {formatAmount(row.balance_due)}
-      </span>
-    )
+    selector: row => parseAmount(row.balance_due),
+    cell: row => <span className={parseAmount(row.balance_due) > 0 ? 'fw-bolder text-danger' : 'text-muted'}>{row.balance_due}</span>
   }
 ]
 
@@ -112,12 +100,12 @@ const buildInvoiceSheet = invoiceRows => {
       Currency: r.currency,
       'Issue Date': r.issue_date,
       'Due Date': r.due_date,
-      Subtotal: Number(r.subtotal),
-      Tax: Number(r.tax_amount),
-      Discount: Number(r.discount_amount),
-      Total: Number(r.total),
-      Paid: Number(r.paid_amount),
-      'Balance Due': Number(r.balance_due)
+      Subtotal: parseAmount(r.subtotal),
+      Tax: parseAmount(r.tax_amount),
+      Discount: parseAmount(r.discount_amount),
+      Total: parseAmount(r.total),
+      Paid: parseAmount(r.paid_amount),
+      'Balance Due': parseAmount(r.balance_due)
     }))
   )
   sheet['!cols'] = [
@@ -256,9 +244,9 @@ const InvoiceReport = () => {
 
   const totals = rows.reduce(
     (acc, r) => {
-      acc.total += Number(r.total) || 0
-      acc.paid += Number(r.paid_amount) || 0
-      acc.due += Number(r.balance_due) || 0
+      acc.total += parseAmount(r.total)
+      acc.paid += parseAmount(r.paid_amount)
+      acc.due += parseAmount(r.balance_due)
       return acc
     },
     { total: 0, paid: 0, due: 0 }

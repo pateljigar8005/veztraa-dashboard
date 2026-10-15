@@ -15,7 +15,7 @@ import ComposePopup from '../../email/ComposePopup'
 import HistoryModal from '../../activity-log/HistoryModal'
 import TableEmptyState from '../../shared/TableEmptyState'
 import DocumentViewSkeleton from '../../shared/DocumentViewSkeleton'
-import { selectThemeColors, formatAmount } from '@utils'
+import { selectThemeColors, formatAmount, parseAmount } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
 import { renderEmailTemplate } from '@src/utility/renderEmailTemplate'
@@ -35,19 +35,24 @@ const buildPdfData = invoice => ({
   },
   currency: invoice.currency,
   tax_rate: invoice.tax_rate,
+  // The API now returns subtotal/tax_amount/discount_amount/total/
+  // paid_amount/balance_due pre-formatted with the currency icon baked in
+  // (e.g. "$122,360.00") - pass them straight through rather than
+  // re-wrapping them, which would double up or (via formatAmount on an
+  // already-formatted string) collapse to "0.00".
   tax_amount: invoice.tax_amount,
   discount_amount: invoice.discount_amount,
-  subtotal: formatAmount(invoice.subtotal),
-  total: formatAmount(invoice.total),
-  paid_amount: formatAmount(invoice.paid_amount),
-  balance_due: formatAmount(invoice.balance_due),
+  subtotal: invoice.subtotal,
+  total: invoice.total,
+  paid_amount: invoice.paid_amount,
+  balance_due: invoice.balance_due,
   terms_conditions: invoice.terms_content || '',
   payment_method: invoice.payment_method_content || '',
   service_items: (invoice.line_items || []).map(item => ({
     name: item.description || '',
     qty: item.qty,
-    rate: formatAmount(item.rate),
-    amount: formatAmount(Number(item.qty) * Number(item.rate))
+    rate: `${invoice.currency}${formatAmount(item.rate)}`,
+    amount: `${invoice.currency}${formatAmount(Number(item.qty) * Number(item.rate))}`
   }))
 })
 
@@ -211,12 +216,13 @@ const InvoiceView = () => {
         issue_date: invoice.issue_date || '',
         due_date: invoice.due_date || '',
         currency: invoice.currency || '',
-        total: formatAmount(invoice.total),
-        subtotal: formatAmount(invoice.subtotal),
-        tax_amount: formatAmount(invoice.tax_amount),
-        discount_amount: formatAmount(invoice.discount_amount),
-        paid_amount: formatAmount(invoice.paid_amount),
-        balance_due: formatAmount(invoice.balance_due),
+        // Already formatted with currency by the API - see buildPdfData above.
+        total: invoice.total,
+        subtotal: invoice.subtotal,
+        tax_amount: invoice.tax_amount,
+        discount_amount: invoice.discount_amount,
+        paid_amount: invoice.paid_amount,
+        balance_due: invoice.balance_due,
         sender_company_name: companySettings.legal_name || ''
       })
 
@@ -313,44 +319,32 @@ const InvoiceView = () => {
               <Col md={{ size: 5, offset: 7 }}>
                 <div className='d-flex justify-content-between mb-50'>
                   <span>Subtotal</span>
-                  <span>
-                    {invoice.currency} {formatAmount(invoice.subtotal)}
-                  </span>
+                  <span>{invoice.subtotal}</span>
                 </div>
-                {invoice.tax_amount > 0 && (
+                {parseAmount(invoice.tax_amount) > 0 && (
                   <div className='d-flex justify-content-between mb-50'>
                     <span>Tax ({invoice.tax_rate}%)</span>
-                    <span>
-                      {invoice.currency} {formatAmount(invoice.tax_amount)}
-                    </span>
+                    <span>{invoice.tax_amount}</span>
                   </div>
                 )}
-                {invoice.discount_amount > 0 && (
+                {parseAmount(invoice.discount_amount) > 0 && (
                   <div className='d-flex justify-content-between mb-50'>
                     <span>Discount</span>
-                    <span className='text-success'>
-                      -{invoice.currency} {formatAmount(invoice.discount_amount)}
-                    </span>
+                    <span className='text-success'>-{invoice.discount_amount}</span>
                   </div>
                 )}
                 <hr />
                 <div className='d-flex justify-content-between mb-50'>
                   <h5 className='mb-0'>Total</h5>
-                  <h5 className='mb-0'>
-                    {invoice.currency} {formatAmount(invoice.total)}
-                  </h5>
+                  <h5 className='mb-0'>{invoice.total}</h5>
                 </div>
                 <div className='d-flex justify-content-between mb-50'>
                   <span>Paid</span>
-                  <span className='text-success'>
-                    {invoice.currency} {formatAmount(invoice.paid_amount)}
-                  </span>
+                  <span className='text-success'>{invoice.paid_amount}</span>
                 </div>
                 <div className='d-flex justify-content-between'>
                   <span className='fw-bolder'>Balance Due</span>
-                  <span className='fw-bolder'>
-                    {invoice.currency} {formatAmount(invoice.balance_due)}
-                  </span>
+                  <span className='fw-bolder'>{invoice.balance_due}</span>
                 </div>
               </Col>
             </Row>
@@ -542,7 +536,9 @@ const InvoiceView = () => {
         toggle={() => setRecordPaymentOpen(!recordPaymentOpen)}
         invoiceId={id}
         currency={invoice.currency}
-        balanceDue={editingPayment ? invoice.balance_due + Number(editingPayment.amount) : invoice.balance_due}
+        balanceDue={
+          editingPayment ? parseAmount(invoice.balance_due) + Number(editingPayment.amount) : parseAmount(invoice.balance_due)
+        }
         payment={editingPayment}
         onSaved={() => {
           loadPayments()

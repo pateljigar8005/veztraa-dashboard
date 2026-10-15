@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 import { Badge, Card, CardHeader, CardTitle, CardBody, Spinner } from 'reactstrap'
-import { formatAmount } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { statusColorObj } from './list/columns'
 
@@ -48,7 +47,7 @@ const LinkedInvoicesCard = ({ filterKey, id, emptyText }) => {
                 </Link>
                 <div>
                   <small className='text-muted'>
-                    {invoice.currency} {formatAmount(invoice.total)} • {invoice.issue_date}
+                    {invoice.total} • {invoice.issue_date}
                   </small>
                 </div>
               </div>

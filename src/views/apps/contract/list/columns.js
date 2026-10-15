@@ -7,7 +7,6 @@ import { Copy, FileText, Trash2 } from 'react-feather'
 import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
-import { formatAmount } from '@utils'
 import { frequencyOptions } from '../contractOptions'
 
 const statusColorObj = {
@@ -68,11 +67,15 @@ export const columns = [
     sortable: true,
     sortField: 'total',
     selector: row => row.total,
-    cell: row => (
-      <span className='fw-bolder'>
-        {row.currency} {formatAmount(row.total)}
-      </span>
-    )
+    cell: row => <span className='fw-bolder'>{row.total}</span>
+  },
+  {
+    name: 'Collected',
+    width: '150px',
+    sortable: true,
+    sortField: 'total_collected',
+    selector: row => row.total_collected,
+    cell: row => <span className='fw-bolder'>{row.total_collected}</span>
   },
   {
     name: 'Start Date',

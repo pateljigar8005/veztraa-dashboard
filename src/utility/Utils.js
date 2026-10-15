@@ -38,6 +38,17 @@ export const formatAmount = value => {
   return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
+// Invoice/Quotation/Contract/Client money fields (subtotal, total,
+// paid_amount, balance_due, total_collected, ...) come back from the API
+// already formatted with their currency icon (e.g. "$122,360.00"), not as
+// plain numbers - this strips that back down for the handful of places that
+// still need to do math, sorting, or a >0 check against them.
+export const parseAmount = value => {
+  if (typeof value === 'number') return value
+  const num = Number(String(value ?? '').replace(/[^0-9.-]/g, ''))
+  return isNaN(num) ? 0 : num
+}
+
 export const htmlToString = html => html.replace(/<\/?[^>]+(>|$)/g, '')
 
 // Every currency's `rate` (from /currencies) is quoted against the

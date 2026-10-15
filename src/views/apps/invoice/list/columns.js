@@ -7,7 +7,7 @@ import { Copy, FileText, Trash2 } from 'react-feather'
 import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
-import { formatAmount } from '@utils'
+import { formatAmount, parseAmount } from '@utils'
 import SourceReference from '../SourceReference'
 
 export const statusColorObj = {
@@ -84,8 +84,8 @@ export const columns = [
     width: '150px',
     selector: row => row.balance_due,
     cell: row => (
-      <span className={Number(row.balance_due) > 0 ? 'text-danger' : 'text-success'}>
-        {row.currency} {formatAmount(row.balance_due ?? computeTotal(row))}
+      <span className={parseAmount(row.balance_due) > 0 ? 'text-danger' : 'text-success'}>
+        {row.balance_due ?? `${row.currency}${formatAmount(computeTotal(row))}`}
       </span>
     )
   },

@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
+import { parseAmount } from '@utils'
 
 // MySQL DATETIME wants local wall-clock parts, not a UTC-shifted ISO string
 // (same reasoning as the date-only fields elsewhere in this app, see
@@ -92,7 +93,7 @@ export const fetchInvoiceDueEvents = createAsyncThunk('appCalendar/fetchInvoiceD
     // Draft invoices aren't a commitment yet, and a fully paid balance has
     // nothing left to chase - only an outstanding, issued invoice belongs
     // on the calendar as something due.
-    .filter(invoice => invoice.status !== 'draft' && invoice.due_date && Number(invoice.balance_due) > 0)
+    .filter(invoice => invoice.status !== 'draft' && invoice.due_date && parseAmount(invoice.balance_due) > 0)
     .map(invoice => ({
       id: `invoice-${invoice.id}`,
       title: `Invoice #${invoice.id} due - ${invoice.company_name || invoice.contact_name}`,

@@ -7,7 +7,7 @@ import ReactPaginate from 'react-paginate'
 import { Search, RotateCcw, Download, TrendingUp, TrendingDown, DollarSign, PieChart } from 'react-feather'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Label, Button, Spinner, Input } from 'reactstrap'
 import DateField from '../../shared/DateField'
-import { formatAmount } from '@utils'
+import { formatAmount, parseAmount } from '@utils'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
 
@@ -138,7 +138,7 @@ const ProfitReport = () => {
         return byMonth[ym]
       }
       invoices.forEach(inv => {
-        ensureMonth(inv.issue_date.slice(0, 7)).revenue += toReport(Number(inv.total) || 0, inv.currency)
+        ensureMonth(inv.issue_date.slice(0, 7)).revenue += toReport(parseAmount(inv.total), inv.currency)
       })
       expenses.forEach(exp => {
         ensureMonth(exp.expense_date.slice(0, 7)).expenses += toReport(Number(exp.amount) || 0, exp.currency)
@@ -165,7 +165,7 @@ const ProfitReport = () => {
       invoices.forEach(inv => {
         const key = inv.client_id || `unlinked-${inv.contact_name}`
         const label = inv.company_name || inv.contact_name || 'Unlinked'
-        ensureClient(key, label).revenue += toReport(Number(inv.total) || 0, inv.currency)
+        ensureClient(key, label).revenue += toReport(parseAmount(inv.total), inv.currency)
       })
       expenses.forEach(exp => {
         if (!exp.client_id) return
