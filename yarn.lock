@@ -924,19 +924,19 @@
   dependencies:
     zod "^3.23.8"
 
-"@veztraa/report-designer@^0.5.2":
-  version "0.5.2"
-  resolved "https://registry.npmjs.org/@veztraa/report-designer/-/report-designer-0.5.2.tgz"
-  integrity sha512-srcH7x4iDRtIVZplWOCpvEXzj0l4h30SBfjtmRS4vPVCwZXD3jufj0Bgx3SsxIIuSS/kB4u5QSpL7SauIkM0Lg==
+"@veztraa/report-designer@^0.5.3":
+  version "0.5.3"
+  resolved "https://registry.npmjs.org/@veztraa/report-designer/-/report-designer-0.5.3.tgz"
+  integrity sha512-bCedLLIoz8oROXcAM4TCfSKSfjCVxym54xf0k1oA7wfYMnmp+fISZUQIBS33iKzqK/iHyy4NSOQCNpRCCctfUg==
   dependencies:
     "@veztraa/report-core" "0.5.0"
-    "@veztraa/report-renderer" "^0.5.2"
+    "@veztraa/report-renderer" "^0.5.3"
     zustand "^5.0.2"
 
-"@veztraa/report-renderer@^0.5.2":
-  version "0.5.2"
-  resolved "https://registry.npmjs.org/@veztraa/report-renderer/-/report-renderer-0.5.2.tgz"
-  integrity sha512-H8oRbrbI4I2qqErB5lgVI2+IkP2u3VWWBNtMzy8obcyVcAULKefXnQl9SINf0WnMgNfDb8+uy2eGr7EHkuILbw==
+"@veztraa/report-renderer@^0.5.3":
+  version "0.5.3"
+  resolved "https://registry.npmjs.org/@veztraa/report-renderer/-/report-renderer-0.5.3.tgz"
+  integrity sha512-tebY9afkHQJbh5+2SxuZN8KuIe3z7qHvzT4EBHROT20Nb/WUH/PH1dHFtIeVACwB3ltGPLuotB0siTZ3QdwLaw==
   dependencies:
     "@react-pdf/renderer" "^4.1.6"
     "@veztraa/report-core" "0.5.0"
