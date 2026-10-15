@@ -232,7 +232,17 @@ const PdfDesignerTemplateForm = () => {
             }}
             theme='light'
             accentColor={getCachedThemeColor()}
-            toolbar={{ onSave: handleDesignerSave }}
+            // The built-in Load/Save buttons are hidden - Load has no
+            // equivalent here (templates aren't loaded from a local file),
+            // and Save is replaced by this custom action so it keeps the
+            // same "Save" label NavbarBookmarks.js looks for when it
+            // forwards the navbar's Save icon into this widget (see
+            // isPdfDesignerFormRoute there - this page has no real <form>).
+            toolbar={{
+              load: false,
+              save: false,
+              actions: [{ id: 'save', label: 'Save', onClick: handleDesignerSave }]
+            }}
           />
         </div>
       </CardBody>
