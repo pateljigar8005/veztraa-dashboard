@@ -248,5 +248,8 @@ export const parsePhoneValue = value => {
 export const buildPhoneValue = (country, number) => {
   const trimmed = (number || '').trim()
   if (!country) return trimmed
-  return trimmed ? `+${country.dialCode} ${trimmed}` : ''
+  // Keep the dial code even with no digits yet, so picking a country before
+  // typing the number doesn't collapse the value back to '' - which
+  // parsePhoneValue() would then re-parse as the default country (India).
+  return trimmed ? `+${country.dialCode} ${trimmed}` : `+${country.dialCode}`
 }

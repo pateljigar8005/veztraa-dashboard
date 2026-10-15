@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import classNames from 'classnames'
 import Select, { components } from 'react-select'
 import { Input } from 'reactstrap'
@@ -17,6 +17,21 @@ const Option = props => {
       <span>{country.name}</span>
       <span className='text-muted ms-50'>+{country.dialCode}</span>
     </components.Option>
+  )
+}
+
+// React-select's default filter only matches option.label (the country
+// name), so typing a dial code like "44" or "+44" - the thing already shown
+// next to the selected country - turned up "No options". Match name, dial
+// code, and ISO code instead.
+const filterCountryOption = ({ data }, rawInput) => {
+  const input = rawInput.trim().toLowerCase().replace(/^\+/, '')
+  if (!input) return true
+  const { country } = data
+  return (
+    country.name.toLowerCase().includes(input) ||
+    country.dialCode.includes(input) ||
+    country.iso2.toLowerCase().includes(input)
   )
 }
 
@@ -58,6 +73,7 @@ const selectStyles = {
 const PhoneInput = ({ id, value, onChange, invalid, placeholder = 'Phone number', disabled }) => {
   const { country, number } = useMemo(() => parsePhoneValue(value), [value])
   const selectedOption = countryOptions.find(option => option.value === country.iso2)
+  const [countrySelectFocused, setCountrySelectFocused] = useState(false)
 
   const handleCountryChange = option => {
     onChange(buildPhoneValue(option.country, number))
@@ -84,6 +100,10 @@ const PhoneInput = ({ id, value, onChange, invalid, placeholder = 'Phone number'
         onChange={handleCountryChange}
         components={{ Option, SingleValue }}
         styles={selectStyles}
+        filterOption={filterCountryOption}
+        controlShouldRenderValue={!countrySelectFocused}
+        onMenuOpen={() => setCountrySelectFocused(true)}
+        onMenuClose={() => setCountrySelectFocused(false)}
         isSearchable
         isDisabled={disabled}
         placeholder='Search'
