@@ -13,7 +13,7 @@ import ComposePopup from '../../email/ComposePopup'
 import HistoryModal from '../../activity-log/HistoryModal'
 import DocumentViewSkeleton from '../../shared/DocumentViewSkeleton'
 import LinkedInvoicesCard from '../../invoice/LinkedInvoicesCard'
-import { selectThemeColors, formatAmount, parseAmount } from '@utils'
+import { selectThemeColors, parseAmount } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { renderEmailTemplate } from '@src/utility/renderEmailTemplate'
 
@@ -42,11 +42,12 @@ const buildPdfData = quotation => ({
   terms_conditions: quotation.terms_content || '',
   payment_method: quotation.payment_method_content || '',
   notes: quotation.notes || '',
+  // rate/amount already come pre-formatted with currency from the API.
   service_items: (quotation.line_items || []).map(item => ({
     name: item.description || '',
     qty: item.qty,
-    rate: `${quotation.currency}${formatAmount(item.rate)}`,
-    amount: `${quotation.currency}${formatAmount(Number(item.qty) * Number(item.rate))}`
+    rate: item.rate,
+    amount: item.amount
   }))
 })
 
@@ -286,12 +287,8 @@ const QuotationView = () => {
                 <tr key={index}>
                   <td>{item.description || '-'}</td>
                   <td>{item.qty}</td>
-                  <td>
-                    {quotation.currency} {formatAmount(item.rate)}
-                  </td>
-                  <td className='text-end'>
-                    {quotation.currency} {formatAmount(Number(item.qty) * Number(item.rate))}
-                  </td>
+                  <td>{item.rate}</td>
+                  <td className='text-end'>{item.amount}</td>
                 </tr>
               ))}
             </tbody>

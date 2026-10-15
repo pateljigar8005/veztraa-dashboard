@@ -7,7 +7,7 @@ import { Copy, FileText, Trash2 } from 'react-feather'
 import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
-import { formatAmount, parseAmount } from '@utils'
+import { parseAmount } from '@utils'
 import SourceReference from '../SourceReference'
 
 export const statusColorObj = {
@@ -16,13 +16,6 @@ export const statusColorObj = {
   paid: 'light-success',
   partial: 'light-warning',
   overdue: 'light-danger'
-}
-
-const computeTotal = i => {
-  const subtotal = (i.line_items || []).reduce((sum, item) => sum + (Number(item.qty) || 0) * (Number(item.rate) || 0), 0)
-  const taxAmount = subtotal * ((Number(i.tax_rate) || 0) / 100)
-  const discountAmount = i.discount_type === '%' ? subtotal * ((Number(i.discount_value) || 0) / 100) : Number(i.discount_value) || 0
-  return subtotal + taxAmount - discountAmount
 }
 
 export const columns = [
@@ -73,21 +66,13 @@ export const columns = [
     name: 'Total',
     width: '140px',
     selector: row => row.total,
-    cell: row => (
-      <span>
-        {row.currency} {formatAmount(computeTotal(row))}
-      </span>
-    )
+    cell: row => <span>{row.total}</span>
   },
   {
     name: 'Balance Due',
     width: '150px',
     selector: row => row.balance_due,
-    cell: row => (
-      <span className={parseAmount(row.balance_due) > 0 ? 'text-danger' : 'text-success'}>
-        {row.balance_due ?? `${row.currency}${formatAmount(computeTotal(row))}`}
-      </span>
-    )
+    cell: row => <span className={parseAmount(row.balance_due) > 0 ? 'text-danger' : 'text-success'}>{row.balance_due}</span>
   },
   {
     name: 'Status',

@@ -7,7 +7,6 @@ import { Copy, FileText, Trash2 } from 'react-feather'
 import { Badge, Button, UncontrolledTooltip } from 'reactstrap'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
-import { formatAmount } from '@utils'
 
 const statusColorObj = {
   draft: 'light-secondary',
@@ -15,13 +14,6 @@ const statusColorObj = {
   accepted: 'light-success',
   rejected: 'light-danger',
   expired: 'light-warning'
-}
-
-const computeTotal = q => {
-  const subtotal = (q.line_items || []).reduce((sum, item) => sum + (Number(item.qty) || 0) * (Number(item.rate) || 0), 0)
-  const taxAmount = subtotal * ((Number(q.tax_rate) || 0) / 100)
-  const discountAmount = q.discount_type === '%' ? subtotal * ((Number(q.discount_value) || 0) / 100) : Number(q.discount_value) || 0
-  return subtotal + taxAmount - discountAmount
 }
 
 export const columns = [
@@ -66,11 +58,7 @@ export const columns = [
     name: 'Total',
     width: '140px',
     selector: row => row.total,
-    cell: row => (
-      <span>
-        {row.currency} {formatAmount(computeTotal(row))}
-      </span>
-    )
+    cell: row => <span>{row.total}</span>
   },
   {
     name: 'Status',

@@ -7,7 +7,7 @@ import Select from 'react-select'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormFeedback } from 'reactstrap'
-import { selectThemeColors, formatAmount, sortOptions, clientOptionLabel, convertFromUsd, findUsdRate } from '@utils'
+import { selectThemeColors, formatAmount, parseAmount, sortOptions, clientOptionLabel, convertFromUsd, findUsdRate } from '@utils'
 import CatalogModal from '../../shared/CatalogModal'
 import TermsSection from '../../shared/TermsSection'
 import PaymentMethodSection from '../../shared/PaymentMethodSection'
@@ -150,7 +150,12 @@ const QuotationForm = () => {
         notes: q.notes || '',
         tax_rate: q.tax_rate || 0,
         discount_value: q.discount_value || 0,
-        line_items: q.line_items && q.line_items.length ? q.line_items : [{ description: '', qty: 1, rate: 0 }]
+        // The API returns line_items.rate as a currency-formatted string
+        // for display - parse it back to a plain number here, since the
+        // Rate input is live/editable and recomputes qty*rate as you type.
+        line_items: q.line_items && q.line_items.length
+          ? q.line_items.map(item => ({ ...item, rate: parseAmount(item.rate) }))
+          : [{ description: '', qty: 1, rate: 0 }]
       })
       setValue('client_id', q.client_id || '')
       setValue('status', q.status || 'draft')

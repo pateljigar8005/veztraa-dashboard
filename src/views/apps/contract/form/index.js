@@ -12,6 +12,7 @@ import {
   selectThemeColors,
   uploadEditorImage,
   formatAmount,
+  parseAmount,
   sortOptions,
   clientOptionLabel,
   convertFromUsd,
@@ -166,7 +167,12 @@ const ContractForm = () => {
         internal_notes: ct.internal_notes || '',
         tax_rate: ct.tax_rate || 0,
         discount_value: ct.discount_value || 0,
-        line_items: ct.line_items && ct.line_items.length ? ct.line_items : defaultValues.line_items
+        // The API returns line_items.rate as a currency-formatted string
+        // for display - parse it back to a plain number here, since the
+        // Rate input is live/editable and recomputes qty*rate as you type.
+        line_items: ct.line_items && ct.line_items.length
+          ? ct.line_items.map(item => ({ ...item, rate: parseAmount(item.rate) }))
+          : defaultValues.line_items
       })
       setValue('client_id', ct.client_id || '')
       setValue('frequency', ct.frequency || 'monthly')

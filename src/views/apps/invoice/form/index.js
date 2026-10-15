@@ -7,7 +7,7 @@ import Select from 'react-select'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { Row, Col, Card, CardHeader, CardTitle, CardBody, Form, Label, Input, FormFeedback } from 'reactstrap'
-import { selectThemeColors, formatAmount, sortOptions, clientOptionLabel, convertFromUsd, findUsdRate } from '@utils'
+import { selectThemeColors, formatAmount, parseAmount, sortOptions, clientOptionLabel, convertFromUsd, findUsdRate } from '@utils'
 import CatalogModal from '../../shared/CatalogModal'
 import TermsSection from '../../shared/TermsSection'
 import PaymentMethodSection from '../../shared/PaymentMethodSection'
@@ -42,6 +42,14 @@ const localToday = () => {
   const pad = n => String(n).padStart(2, '0')
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
 }
+
+// The API now returns line_items.rate as a currency-formatted string
+// (e.g. "$120,000.00") for display - but the Rate input here is a live,
+// editable number (AmountField/Cleave) that recomputes qty*rate as the
+// user types, so it needs rate back as a plain number whenever a fetched
+// record (edit, clone, convert-from-quotation, create-from-contract) is
+// loaded into the form.
+const toEditableLineItems = items => (items || []).map(item => ({ ...item, rate: parseAmount(item.rate) }))
 
 const defaultValues = {
   contact_name: '',
@@ -188,7 +196,7 @@ const InvoiceForm = () => {
           billing_address: q.billing_address || '',
           tax_rate: q.tax_rate || 0,
           discount_value: q.discount_value || 0,
-          line_items: q.line_items && q.line_items.length ? q.line_items : defaultValues.line_items
+          line_items: q.line_items && q.line_items.length ? toEditableLineItems(q.line_items) : defaultValues.line_items
         })
         setValue('client_id', q.client_id || '')
         setValue('status', 'draft')
@@ -228,7 +236,7 @@ const InvoiceForm = () => {
           billing_address: ct.billing_address || '',
           tax_rate: ct.tax_rate || 0,
           discount_value: ct.discount_value || 0,
-          line_items: ct.line_items && ct.line_items.length ? ct.line_items : defaultValues.line_items
+          line_items: ct.line_items && ct.line_items.length ? toEditableLineItems(ct.line_items) : defaultValues.line_items
         })
         setValue('client_id', ct.client_id || '')
         setValue('status', 'draft')
@@ -270,7 +278,7 @@ const InvoiceForm = () => {
         due_date: inv.due_date || '',
         tax_rate: inv.tax_rate || 0,
         discount_value: inv.discount_value || 0,
-        line_items: inv.line_items && inv.line_items.length ? inv.line_items : [{ description: '', qty: 1, rate: 0 }],
+        line_items: inv.line_items && inv.line_items.length ? toEditableLineItems(inv.line_items) : [{ description: '', qty: 1, rate: 0 }],
         client_id: inv.client_id || '',
         status: inv.status || 'draft',
         currency: inv.currency || 'USD',

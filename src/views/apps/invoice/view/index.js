@@ -48,11 +48,12 @@ const buildPdfData = invoice => ({
   balance_due: invoice.balance_due,
   terms_conditions: invoice.terms_content || '',
   payment_method: invoice.payment_method_content || '',
+  // rate/amount already come pre-formatted with currency from the API.
   service_items: (invoice.line_items || []).map(item => ({
     name: item.description || '',
     qty: item.qty,
-    rate: `${invoice.currency}${formatAmount(item.rate)}`,
-    amount: `${invoice.currency}${formatAmount(Number(item.qty) * Number(item.rate))}`
+    rate: item.rate,
+    amount: item.amount
   }))
 })
 
@@ -304,12 +305,8 @@ const InvoiceView = () => {
                 <tr key={index}>
                   <td>{item.description || '-'}</td>
                   <td>{item.qty}</td>
-                  <td>
-                    {invoice.currency} {formatAmount(item.rate)}
-                  </td>
-                  <td className='text-end'>
-                    {invoice.currency} {formatAmount(Number(item.qty) * Number(item.rate))}
-                  </td>
+                  <td>{item.rate}</td>
+                  <td className='text-end'>{item.amount}</td>
                 </tr>
               ))}
             </tbody>

@@ -5,7 +5,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Edit2, FileText, PenTool, DollarSign } from 'react-feather'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Badge, Button, Table } from 'reactstrap'
 import { getClient } from '../store'
-import { formatAmount } from '@utils'
 import HistoryModal from '../../activity-log/HistoryModal'
 
 const statusColorObj = {
@@ -20,13 +19,6 @@ const statusColorObj = {
   active: 'light-info',
   signed: 'light-success',
   terminated: 'light-danger'
-}
-
-const computeTotal = doc => {
-  const subtotal = (doc.line_items || []).reduce((sum, item) => sum + (Number(item.qty) || 0) * (Number(item.rate) || 0), 0)
-  const taxAmount = subtotal * ((Number(doc.tax_rate) || 0) / 100)
-  const discountAmount = doc.discount_type === '%' ? subtotal * ((Number(doc.discount_value) || 0) / 100) : Number(doc.discount_value) || 0
-  return subtotal + taxAmount - discountAmount
 }
 
 const ClientView = () => {
@@ -110,9 +102,7 @@ const ClientView = () => {
                   <tr key={q.id}>
                     <td>{q.issue_date}</td>
                     <td>{q.valid_until}</td>
-                    <td>
-                      {q.currency} {formatAmount(computeTotal(q))}
-                    </td>
+                    <td>{q.total}</td>
                     <td>
                       <Badge className='text-capitalize' color={statusColorObj[q.status] || 'light-secondary'} pill>
                         {q.status}
@@ -204,9 +194,7 @@ const ClientView = () => {
                   <tr key={i.id}>
                     <td>{i.issue_date}</td>
                     <td>{i.due_date}</td>
-                    <td>
-                      {i.currency} {formatAmount(computeTotal(i))}
-                    </td>
+                    <td>{i.total}</td>
                     <td>
                       <Badge className='text-capitalize' color={statusColorObj[i.status] || 'light-secondary'} pill>
                         {i.status}
