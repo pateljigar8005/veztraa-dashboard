@@ -66,14 +66,10 @@ export default class JwtService {
 
           if (!this.isAlreadyFetchingAccessToken) {
             this.isAlreadyFetchingAccessToken = true
-            this.refreshToken()
-              .then(r => {
+            this.performRefresh()
+              .then(({ accessToken }) => {
                 this.isAlreadyFetchingAccessToken = false
-
-                this.setToken(r.data.accessToken)
-                this.setRefreshToken(r.data.refreshToken)
-
-                this.onAccessTokenFetched(r.data.accessToken)
+                this.onAccessTokenFetched(accessToken)
               })
               .catch(() => {
                 this.isAlreadyFetchingAccessToken = false
@@ -128,16 +124,45 @@ export default class JwtService {
     if (this.isAlreadyFetchingAccessToken || !this.getRefreshToken()) return
 
     this.isAlreadyFetchingAccessToken = true
-    this.refreshToken()
-      .then(r => {
+    this.performRefresh()
+      .then(({ accessToken }) => {
         this.isAlreadyFetchingAccessToken = false
-        this.setToken(r.data.accessToken)
-        this.setRefreshToken(r.data.refreshToken)
-        this.onAccessTokenFetched(r.data.accessToken)
+        this.onAccessTokenFetched(accessToken)
       })
       .catch(() => {
         this.isAlreadyFetchingAccessToken = false
       })
+  }
+
+  // Refresh tokens are single-use and rotated server-side, but localStorage
+  // is shared by every tab on the same origin. With more than one dashboard
+  // tab open, their proactive-refresh timers (both scheduled off the same
+  // access token's expiry) fire moments apart, both read the same
+  // refreshToken, and the server only honors whichever request lands first.
+  // The loser's now-already-deleted token genuinely 401s, which used to wipe
+  // the (shared) localStorage tokens out from under the tab that just won -
+  // that tab kept rendering as logged in while every subsequent API call
+  // 401'd with no token at all. Web Locks serializes refreshes across tabs;
+  // once a tab gets the lock it re-checks localStorage first, since a
+  // sibling tab may have already refreshed while it was waiting, and just
+  // reuses those tokens instead of racing a second refresh against them.
+  performRefresh() {
+    const tokenBeingRefreshed = this.getRefreshToken()
+    const run = async () => {
+      const currentRefreshToken = this.getRefreshToken()
+      if (currentRefreshToken && currentRefreshToken !== tokenBeingRefreshed) {
+        return { accessToken: this.getToken(), refreshToken: currentRefreshToken }
+      }
+      const r = await this.refreshToken()
+      this.setToken(r.data.accessToken)
+      this.setRefreshToken(r.data.refreshToken)
+      return { accessToken: r.data.accessToken, refreshToken: r.data.refreshToken }
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.locks && navigator.locks.request) {
+      return navigator.locks.request('veztraa-jwt-refresh', run)
+    }
+    return run()
   }
 
   onAccessTokenFetchFailed() {
