@@ -1,10 +1,25 @@
 import { Link } from 'react-router-dom'
 import classnames from 'classnames'
-import Select from 'react-select'
+import Select, { components } from 'react-select'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 import { Mail, Send, Edit2, Trash, AlertTriangle, Archive, Clock } from 'react-feather'
 import { Button, ListGroup, ListGroupItem, Badge, Label } from 'reactstrap'
 import { selectThemeColors } from '@utils'
+
+// Shows the unread count (if any) to the right of each mailbox's label, same
+// pill-badge treatment as the folder list above it.
+const MailboxOption = props => (
+  <components.Option {...props}>
+    <span className='d-flex justify-content-between align-items-center'>
+      <span>{props.label}</span>
+      {props.data.unreadCount > 0 && (
+        <Badge className='ms-1' color='danger' pill>
+          {props.data.unreadCount}
+        </Badge>
+      )}
+    </span>
+  </components.Option>
+)
 
 const FOLDERS = [
   { key: 'INBOX', label: 'Inbox', icon: Mail },
@@ -26,6 +41,8 @@ const Sidebar = props => {
     setSidebarOpen,
     isAdmin,
     mailboxOptions,
+    mailboxUnreadCounts,
+    onRefreshMailboxUnreadCounts,
     viewingMailboxId,
     onSelectMailbox
   } = props
@@ -39,6 +56,11 @@ const Sidebar = props => {
     toggleCompose()
     setSidebarOpen(false)
   }
+
+  const mailboxPickerOptions = [
+    { value: null, label: 'My Mailbox', unreadCount: mailboxUnreadCounts?.own || 0 },
+    ...mailboxOptions.map(option => ({ ...option, unreadCount: mailboxUnreadCounts?.[option.value] || 0 }))
+  ]
 
   return (
     <div
@@ -91,12 +113,11 @@ const Sidebar = props => {
                   className='react-select'
                   classNamePrefix='select'
                   theme={selectThemeColors}
-                  options={[{ value: null, label: 'My Mailbox' }, ...mailboxOptions]}
-                  value={
-                    [{ value: null, label: 'My Mailbox' }, ...mailboxOptions].find(o => o.value === viewingMailboxId) ||
-                    null
-                  }
+                  options={mailboxPickerOptions}
+                  value={mailboxPickerOptions.find(o => o.value === viewingMailboxId) || null}
                   onChange={onSelectMailbox}
+                  onMenuOpen={onRefreshMailboxUnreadCounts}
+                  components={{ Option: MailboxOption }}
                   menuPlacement='top'
                 />
               </div>

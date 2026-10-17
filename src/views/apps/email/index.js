@@ -57,6 +57,10 @@ const EmailApp = () => {
     return isAdmin && initialFolder !== 'Scheduled' ? readStoredMailboxId() : null
   })
   const [mailboxOptions, setMailboxOptions] = useState([])
+  // Keyed by mailbox id, plus 'own' for the logged-in user's own mailbox -
+  // lets the mailbox picker show how many unread messages are waiting in
+  // each mailbox without having to switch to it first.
+  const [mailboxUnreadCounts, setMailboxUnreadCounts] = useState({})
 
   const toggleCompose = () => {
     if (composeOpen) setReplyTo(null)
@@ -66,6 +70,39 @@ const EmailApp = () => {
   const dispatch = useDispatch()
   const store = useSelector(state => state.email)
 
+  // Fetches unread counts for 'My Mailbox' plus every company mailbox in
+  // parallel - same per-mailbox endpoints the nav badge already polls for
+  // whichever single mailbox is currently being viewed
+  // (useEmailUnreadPolling.js), just fanned out across all of them at once.
+  // A mailbox whose request fails (e.g. sync hasn't completed yet) just
+  // keeps whatever count it last had instead of the whole picker erroring.
+  const loadMailboxUnreadCounts = mailboxes => {
+    // Promise.all rejects the whole batch the moment any single request
+    // fails - each call catches its own error and resolves to `count: null`
+    // instead, so one mailbox being unreachable doesn't blank out every
+    // other (successful) count.
+    Promise.all([
+      axios
+        .get('/mailbox/unread-count')
+        .then(r => ({ key: 'own', count: r.data.data.unreadCount }))
+        .catch(() => ({ key: 'own', count: null })),
+      ...mailboxes.map(m =>
+        axios
+          .get(`/admin-mailbox/${m.id}/unread-count`)
+          .then(r => ({ key: m.id, count: r.data.data.unreadCount }))
+          .catch(() => ({ key: m.id, count: null }))
+      )
+    ]).then(results => {
+      setMailboxUnreadCounts(current => {
+        const next = { ...current }
+        results.forEach(({ key, count }) => {
+          if (count !== null) next[key] = count
+        })
+        return next
+      })
+    })
+  }
+
   useEffect(() => {
     if (!isAdmin) return
     axios.get('/company-mailboxes').then(response => {
@@ -73,6 +110,7 @@ const EmailApp = () => {
       setMailboxOptions(
         sortOptions(mailboxes.map(m => ({ value: m.id, label: m.label ? `${m.label} (${m.email})` : m.email, email: m.email })))
       )
+      loadMailboxUnreadCounts(mailboxes)
       // A remembered mailbox that's since been deleted falls back to My Mailbox.
       setViewingMailboxId(current => {
         if (current && !mailboxes.some(m => m.id === current)) {
@@ -164,6 +202,8 @@ const EmailApp = () => {
         setSidebarOpen={setSidebarOpen}
         isAdmin={isAdmin}
         mailboxOptions={mailboxOptions}
+        mailboxUnreadCounts={mailboxUnreadCounts}
+        onRefreshMailboxUnreadCounts={() => loadMailboxUnreadCounts(mailboxOptions.map(o => ({ id: o.value })))}
         viewingMailboxId={viewingMailboxId}
         onSelectMailbox={handleSelectMailbox}
       />
