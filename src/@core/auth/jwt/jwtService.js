@@ -242,6 +242,14 @@ export default class JwtService {
     }
     localStorage.removeItem(this.jwtConfig.storageTokenKeyName)
     localStorage.removeItem(this.jwtConfig.storageRefreshTokenKeyName)
+    // A real logout (redux/authentication.js's handleLogout) clears this
+    // too - leaving it behind here made this a half-logout: PublicRoute.js
+    // only checks getUserData() (not the tokens) to decide whether a public
+    // route like /forgot-password should redirect a "logged in" user to the
+    // dashboard, so a stale userData with no valid session behind it sent
+    // people there anyway - visible as the dashboard flashing for a moment
+    // before its own auth check bounced them straight back out.
+    localStorage.removeItem('userData')
     // Avoid a reload loop if this fires while already on a public auth page.
     if (!/^\/(login|register|forgot-password|reset-password)/.test(window.location.pathname)) {
       window.location.href = '/login'
