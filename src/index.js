@@ -59,8 +59,11 @@ root.render(
 serviceWorker.unregister()
 
 // Background refresh only - never blocks or delays the first paint above.
-// Runs after login too since axios only carries a token once one exists;
-// a 401 on a public/login screen is expected and harmless here.
+// Hits the public /company/theme endpoint (not the authenticated /company
+// one) specifically so this also works on the login page itself, before
+// anyone has a token - otherwise a fresh browser with nothing cached yet
+// would be stuck showing the default Vuexy purple instead of the real
+// brand color until after signing in.
 //
 // This request is issued before the router has settled on its real route
 // (e.g. a "/" -> "/dashboard" redirect right after boot), and axiosConfig's
@@ -70,7 +73,7 @@ serviceWorker.unregister()
 // where no signal is already set) so it isn't silently killed by the very
 // first navigation.
 axios
-  .get('/company', { signal: new AbortController().signal })
+  .get('/company/theme', { signal: new AbortController().signal })
   .then(response => {
     const hex = response.data?.data?.theme_primary_color
     if (hex && hex !== getCachedThemeColor()) {
