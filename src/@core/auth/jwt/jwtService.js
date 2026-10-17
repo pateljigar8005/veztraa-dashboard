@@ -57,12 +57,19 @@ export default class JwtService {
             return Promise.reject(error)
           }
 
-          // No refresh token means there was never a session to refresh (e.g.
-          // a background request firing on the public login page before the
-          // user has signed in). Attempting a refresh here would itself 401
-          // against refreshEndpoint above and redirect to /login, which -
-          // since we're already there - just reloads the page and repeats.
+          // No refresh token usually means there was never a session to
+          // refresh (e.g. a background request firing on the public login
+          // page before the user has signed in) - but it can also mean a
+          // real session on an authenticated page lost its refresh token
+          // (storage cleared, an earlier failed refresh, etc.) while an
+          // access token lingered. onAccessTokenFetchFailed() already
+          // no-ops its own redirect when we're on a public auth page, so
+          // routing both cases through it is safe either way - it just
+          // means a dead session on a real page actually bounces to
+          // /login instead of being stuck re-401ing forever with no
+          // recovery path.
           if (!this.getRefreshToken()) {
+            this.onAccessTokenFetchFailed()
             return Promise.reject(error)
           }
 
@@ -123,7 +130,16 @@ export default class JwtService {
     const isFresh = exp && exp * 1000 - PROACTIVE_REFRESH_BUFFER_SECONDS * 1000 > Date.now()
     if (isFresh) return token
 
-    if (!this.getRefreshToken()) return token
+    // We already know there IS an access token (the !token check above
+    // would've returned otherwise), so reaching here with no refresh token
+    // can only be a dead/incomplete session, never the pristine
+    // never-logged-in case - sending the stale token anyway would just
+    // guarantee a 401 with no way to recover from it. Clean up and bounce
+    // to /login instead (a no-op if we're already on a public auth page).
+    if (!this.getRefreshToken()) {
+      this.onAccessTokenFetchFailed()
+      return null
+    }
 
     if (this.isAlreadyFetchingAccessToken) {
       return new Promise(resolve => {
