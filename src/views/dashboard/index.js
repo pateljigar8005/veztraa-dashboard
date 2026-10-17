@@ -1,7 +1,7 @@
 import { Fragment, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Row, Col } from 'reactstrap'
-import { Grid } from 'react-feather'
+import { Row, Col, Button } from 'reactstrap'
+import { Grid, AlertTriangle, RefreshCw } from 'react-feather'
 import { getSummary } from './store'
 import CardEmptyState from '@src/views/apps/shared/CardEmptyState'
 import { dashboardBlocks, dashboardSections } from './blockConfig'
@@ -35,6 +35,20 @@ const Dashboard = () => {
     <Fragment>
       {store.loading ? (
         <DashboardSkeleton />
+      ) : store.error && visibleBlocks.length === 0 && store.upcoming.length === 0 ? (
+        // Only shown when there's nothing left over from a previous
+        // successful load to fall back on - a failed background refresh
+        // with stale data already on screen just keeps showing that
+        // instead of replacing it with an error.
+        <CardEmptyState
+          icon={AlertTriangle}
+          message="Couldn't load the dashboard - check your connection and try again."
+          action={
+            <Button color='primary' size='sm' className='mt-1' onClick={() => dispatch(getSummary())}>
+              <RefreshCw size={14} className='me-50' /> Retry
+            </Button>
+          }
+        />
       ) : visibleBlocks.length === 0 && store.upcoming.length === 0 ? (
         <CardEmptyState icon={Grid} message='Nothing to show here yet' />
       ) : (

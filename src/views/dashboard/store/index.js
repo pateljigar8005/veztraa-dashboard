@@ -16,13 +16,15 @@ export const appDashboardSlice = createSlice({
     blocks: {},
     upcoming: [],
     reportCurrencyIcon: '',
-    loading: true
+    loading: true,
+    error: false
   },
   reducers: {},
   extraReducers: builder => {
     builder
       .addCase(getSummary.pending, state => {
         state.loading = true
+        state.error = false
       })
       .addCase(getSummary.fulfilled, (state, action) => {
         state.blocks = action.payload.blocks
@@ -32,6 +34,7 @@ export const appDashboardSlice = createSlice({
       })
       .addCase(getSummary.rejected, state => {
         state.loading = false
+        state.error = true
       })
   }
 })
