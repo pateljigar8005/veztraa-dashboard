@@ -157,6 +157,21 @@ export const bulkDeleteMessages = createAsyncThunk(
   }
 )
 
+// Permanently deletes every message in Trash - unlike bulkDeleteMessages,
+// the backend sources uids itself (from its own cache of the whole folder,
+// not just whatever page/selection the frontend has loaded), so this never
+// needs a uids list from here.
+export const emptyTrash = createAsyncThunk('appEmail/emptyTrash', async (_, { dispatch, getState }) => {
+  const params = getState().email.params
+  if (params.adminMailboxId) {
+    await axios.post(`/admin-mailbox/${params.adminMailboxId}/Trash/empty`)
+  } else {
+    await axios.post('/mailbox/Trash/empty')
+  }
+  await dispatch(getMessages(params))
+  if (!params.adminMailboxId) dispatch(getFolders())
+})
+
 export const sendMessage = createAsyncThunk('appEmail/sendMessage', async (message, { dispatch, getState }) => {
   let payload = message
   if (message.attachments?.length) {

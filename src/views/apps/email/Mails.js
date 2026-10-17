@@ -6,7 +6,7 @@ import MailCardContextMenu from './MailCardContextMenu'
 import toast from 'react-hot-toast'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 import ReactPaginate from 'react-paginate'
-import { Menu, Search, Mail } from 'react-feather'
+import { Menu, Search, Mail, Trash2 } from 'react-feather'
 import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
 import { Input, InputGroup, InputGroupText, Button } from 'reactstrap'
 import MailListSkeleton from './MailListSkeleton'
@@ -16,6 +16,7 @@ import {
   clearCurrentMessage,
   getMessages,
   bulkDeleteMessages,
+  emptyTrash,
   moveMessage,
   deleteMessage,
   removeMessageFromList,
@@ -154,6 +155,20 @@ const Mails = props => {
     })
   }
 
+  const handleEmptyTrash = () => {
+    confirmDelete({
+      title: 'Empty Trash?',
+      text: 'This permanently deletes every email in Trash. This can\'t be undone.',
+      onConfirm: () => {
+        setSelectedUids([])
+        dispatch(emptyTrash())
+          .unwrap()
+          .then(() => toast.success('Trash emptied'))
+          .catch(err => toast.error(err?.message || 'Failed to empty Trash'))
+      }
+    })
+  }
+
   const openComposeFor = (uid, mode) => {
     setReplyTo({ uid, mode, loading: true })
     toggleCompose()
@@ -238,6 +253,17 @@ const Mails = props => {
             <Button id='email-bulk-delete-btn' className='d-none' onClick={handleBulkDelete}>
               Delete selected
             </Button>
+            {store.params.folder === 'Trash' && !viewingMailboxId && store.total > 0 && (
+              <Button
+                color='flat-danger'
+                size='sm'
+                className='text-nowrap ms-1'
+                onClick={handleEmptyTrash}
+              >
+                <Trash2 size={14} className='me-50' />
+                Empty Trash
+              </Button>
+            )}
             {store.lastSyncedAt && (
               <span className='text-muted text-nowrap ms-1' style={{ fontSize: '0.75rem' }}>
                 Synced {formatRelativeDate(store.lastSyncedAt)}
