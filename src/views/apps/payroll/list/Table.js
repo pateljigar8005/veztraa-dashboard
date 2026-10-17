@@ -9,6 +9,7 @@ import { ChevronDown, DollarSign } from 'react-feather'
 import { Row, Col, Card, Input, Button, CardHeader, CardTitle } from 'reactstrap'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
+import UILoader from '@components/ui-loader'
 import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import GeneratePayrollModal from './GeneratePayrollModal'
 
@@ -100,32 +101,33 @@ const PayrollTable = () => {
             Generate Payroll
           </Button>
         </CardHeader>
-        <div className='react-dataTable'>
-          {loading ? (
-            <TableRowsSkeleton rows={8} />
-          ) : (
-          <DataTable
-            noDataComponent={
-              <TableEmptyState
-                icon={DollarSign}
-                noun='payroll runs'
-                message='Generate a month to create payslips for every active employee.'
-              />
-            }
-            noHeader
-            subHeader
-            pagination
-            responsive
-            paginationServer
-            columns={columns}
-            sortIcon={<ChevronDown />}
-            className='react-dataTable'
-            paginationComponent={CustomPagination}
-            data={store.data}
-            subHeaderComponent={<CustomHeader rowsPerPage={rowsPerPage} handlePerPage={handlePerPage} />}
-          />
-          )}
-        </div>
+        {loading && store.data.length === 0 ? (
+          <TableRowsSkeleton rows={8} />
+        ) : (
+          <UILoader blocking={loading} overlayColor='transparent' className='react-dataTable'>
+            <DataTable
+              noDataComponent={
+                <TableEmptyState
+                  icon={DollarSign}
+                  noun='payroll runs'
+                  message='Generate a month to create payslips for every active employee.'
+                />
+              }
+              noHeader
+              subHeader
+              pagination
+              responsive
+              paginationServer
+              columns={columns}
+              sortIcon={<ChevronDown />}
+              className='react-dataTable'
+              paginationComponent={CustomPagination}
+              data={store.data}
+              customStyles={{ rows: { style: { opacity: loading ? 0.5 : 1, transition: 'opacity 0.15s' } } }}
+              subHeaderComponent={<CustomHeader rowsPerPage={rowsPerPage} handlePerPage={handlePerPage} />}
+            />
+          </UILoader>
+        )}
       </Card>
       <GeneratePayrollModal open={generateOpen} setOpen={setGenerateOpen} />
     </Fragment>

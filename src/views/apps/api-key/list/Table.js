@@ -11,6 +11,7 @@ import { currentUserCan } from '@src/utility/navPermissions'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
+import UILoader from '@components/ui-loader'
 import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import { Key as EmptyIcon } from 'react-feather'
 
@@ -116,36 +117,37 @@ const ApiKeysTable = () => {
     <Fragment>
       <CreateApiKeyModal isOpen={modalOpen} toggle={() => setModalOpen(!modalOpen)} />
       <Card>
-        <div className='react-dataTable'>
-          {loading ? (
-            <TableRowsSkeleton rows={8} />
-          ) : (
-          <DataTable
-            noDataComponent={<TableEmptyState icon={EmptyIcon} noun='API keys' message='Create an API key to let your website read and submit data.' filtered={Boolean(searchTerm)} />}
-            noHeader
-            subHeader
-            pagination
-            responsive
-            columns={columns}
-            paginationPerPage={rowsPerPage}
-            paginationComponent={CustomPagination}
-            paginationResetDefaultPage={resetPage}
-            sortIcon={<ChevronDown />}
-            className='react-dataTable'
-            data={dataToRender()}
-            subHeaderComponent={
-              <CustomHeader
-                rowsPerPage={rowsPerPage}
-                handlePerPage={handlePerPage}
-                searchTerm={searchTerm}
-                handleFilter={handleFilter}
-                onCreate={() => setModalOpen(true)}
-                canCreate={currentUserCan('/api-key', 'add')}
-              />
-            }
-          />
-          )}
-        </div>
+        {loading && dataToRender().length === 0 ? (
+          <TableRowsSkeleton rows={8} />
+        ) : (
+          <UILoader blocking={loading} overlayColor='transparent' className='react-dataTable'>
+            <DataTable
+              noDataComponent={<TableEmptyState icon={EmptyIcon} noun='API keys' message='Create an API key to let your website read and submit data.' filtered={Boolean(searchTerm)} />}
+              noHeader
+              subHeader
+              pagination
+              responsive
+              columns={columns}
+              paginationPerPage={rowsPerPage}
+              paginationComponent={CustomPagination}
+              paginationResetDefaultPage={resetPage}
+              sortIcon={<ChevronDown />}
+              className='react-dataTable'
+              data={dataToRender()}
+              customStyles={{ rows: { style: { opacity: loading ? 0.5 : 1, transition: 'opacity 0.15s' } } }}
+              subHeaderComponent={
+                <CustomHeader
+                  rowsPerPage={rowsPerPage}
+                  handlePerPage={handlePerPage}
+                  searchTerm={searchTerm}
+                  handleFilter={handleFilter}
+                  onCreate={() => setModalOpen(true)}
+                  canCreate={currentUserCan('/api-key', 'add')}
+                />
+              }
+            />
+          </UILoader>
+        )}
       </Card>
     </Fragment>
   )

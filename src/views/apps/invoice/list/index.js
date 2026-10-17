@@ -15,6 +15,7 @@ import { Row, Col, Card, Input, Button } from 'reactstrap'
 import '@styles/react/apps/app-invoice.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState, { hasActiveFilters } from '@src/views/apps/shared/TableEmptyState'
+import UILoader from '@components/ui-loader'
 import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import { FileText as EmptyIcon } from 'react-feather'
 
@@ -204,35 +205,49 @@ const InvoiceList = () => {
         onClear={handleClearFilters}
       />
       <Card>
-        <div className='react-dataTable'>
-          {loading ? (
-            <TableRowsSkeleton rows={8} />
-          ) : (
-          <DataTable
-            noDataComponent={<TableEmptyState icon={EmptyIcon} noun='invoices' message='Create an invoice, or convert an accepted quotation into one.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            noHeader
-            subHeader
-            sortServer
-            pagination
-            responsive
-            paginationServer
-            columns={columns}
-            onSort={handleSort}
-            sortIcon={<ChevronDown />}
-            className='react-dataTable'
-            paginationComponent={CustomPagination}
-            data={dataToRender()}
-            subHeaderComponent={
-              <CustomHeader
-                searchTerm={searchTerm}
-                rowsPerPage={rowsPerPage}
-                handleFilter={handleFilter}
-                handlePerPage={handlePerPage}
-              />
-            }
-          />
-          )}
-        </div>
+        {loading && dataToRender().length === 0 ? (
+          // Nothing on screen yet to overlay a loader over (the very first
+          // fetch, or a refetch landing on a still-empty result) - fall back
+          // to the full skeleton instead of a loader hovering over a blank
+          // table. Safe to unmount/remount DataTable here (unlike the
+          // sort-direction bug this used to cause - see git history) since
+          // there's no prior sort state worth preserving when there was
+          // never any data on screen to have sorted in the first place.
+          <TableRowsSkeleton rows={8} />
+        ) : (
+          // Once there's data, DataTable stays mounted continuously (so its
+          // own internal sort-direction tracking survives every refetch) -
+          // UILoader overlays a transparent, non-darkening layer so the
+          // header/search/pagination read as fully normal, and
+          // customStyles dims just the body rows to show something's
+          // refreshing underneath.
+          <UILoader blocking={loading} overlayColor='transparent' className='react-dataTable'>
+            <DataTable
+              noDataComponent={<TableEmptyState icon={EmptyIcon} noun='invoices' message='Create an invoice, or convert an accepted quotation into one.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
+              noHeader
+              subHeader
+              sortServer
+              pagination
+              responsive
+              paginationServer
+              columns={columns}
+              onSort={handleSort}
+              sortIcon={<ChevronDown />}
+              className='react-dataTable'
+              paginationComponent={CustomPagination}
+              data={dataToRender()}
+              customStyles={{ rows: { style: { opacity: loading ? 0.5 : 1, transition: 'opacity 0.15s' } } }}
+              subHeaderComponent={
+                <CustomHeader
+                  searchTerm={searchTerm}
+                  rowsPerPage={rowsPerPage}
+                  handleFilter={handleFilter}
+                  handlePerPage={handlePerPage}
+                />
+              }
+            />
+          </UILoader>
+        )}
       </Card>
     </Fragment>
   )

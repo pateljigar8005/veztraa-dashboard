@@ -18,6 +18,7 @@ import { Row, Col, Card, Input, Button } from 'reactstrap'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState from '@src/views/apps/shared/TableEmptyState'
+import UILoader from '@components/ui-loader'
 import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import { Activity as EmptyIcon } from 'react-feather'
 
@@ -299,49 +300,50 @@ const ActivityLogList = () => {
   return (
     <Fragment>
       <Card>
-        <div className='react-dataTable'>
-          {loading ? (
-            <TableRowsSkeleton rows={8} />
-          ) : (
-          <DataTable
-            noDataComponent={<TableEmptyState icon={EmptyIcon} noun='activity' message='Changes made across the dashboard will be recorded here.' filtered={Boolean(searchTerm || entityType || action)} />}
-            noHeader
-            subHeader
-            sortServer
-            pagination
-            responsive
-            paginationServer
-            columns={columns}
-            onSort={handleSort}
-            defaultSortField='created_at'
-            defaultSortAsc={false}
-            sortIcon={<ChevronDown />}
-            className='react-dataTable auto-height-rows'
-            paginationComponent={CustomPagination}
-            data={store.data}
-            selectableRows={canDelete}
-            selectableRowsComponent={BootstrapCheckbox}
-            onSelectedRowsChange={({ selectedRows }) => dispatch(setSelectedIds(selectedRows.map(row => row.id)))}
-            clearSelectedRows={clearSelectionToggle}
-            subHeaderComponent={
-              <CustomHeader
-                searchTerm={searchTerm}
-                rowsPerPage={rowsPerPage}
-                handleFilter={handleFilter}
-                handlePerPage={handlePerPage}
-                entityTypes={store.entityTypes}
-                entityType={entityType}
-                handleEntityType={handleEntityType}
-                action={action}
-                handleAction={handleAction}
-                handleExport={handleExport}
-                exporting={exporting}
-                handleBulkDelete={handleBulkDelete}
-              />
-            }
-          />
-          )}
-        </div>
+        {loading && store.data.length === 0 ? (
+          <TableRowsSkeleton rows={8} />
+        ) : (
+          <UILoader blocking={loading} overlayColor='transparent' className='react-dataTable'>
+            <DataTable
+              noDataComponent={<TableEmptyState icon={EmptyIcon} noun='activity' message='Changes made across the dashboard will be recorded here.' filtered={Boolean(searchTerm || entityType || action)} />}
+              noHeader
+              subHeader
+              sortServer
+              pagination
+              responsive
+              paginationServer
+              columns={columns}
+              onSort={handleSort}
+              defaultSortField='created_at'
+              defaultSortAsc={false}
+              sortIcon={<ChevronDown />}
+              className='react-dataTable auto-height-rows'
+              paginationComponent={CustomPagination}
+              data={store.data}
+              customStyles={{ rows: { style: { opacity: loading ? 0.5 : 1, transition: 'opacity 0.15s' } } }}
+              selectableRows={canDelete}
+              selectableRowsComponent={BootstrapCheckbox}
+              onSelectedRowsChange={({ selectedRows }) => dispatch(setSelectedIds(selectedRows.map(row => row.id)))}
+              clearSelectedRows={clearSelectionToggle}
+              subHeaderComponent={
+                <CustomHeader
+                  searchTerm={searchTerm}
+                  rowsPerPage={rowsPerPage}
+                  handleFilter={handleFilter}
+                  handlePerPage={handlePerPage}
+                  entityTypes={store.entityTypes}
+                  entityType={entityType}
+                  handleEntityType={handleEntityType}
+                  action={action}
+                  handleAction={handleAction}
+                  handleExport={handleExport}
+                  exporting={exporting}
+                  handleBulkDelete={handleBulkDelete}
+                />
+              }
+            />
+          </UILoader>
+        )}
       </Card>
     </Fragment>
   )

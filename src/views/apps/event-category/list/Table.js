@@ -12,6 +12,7 @@ import { Row, Col, Card, Input, Button } from 'reactstrap'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import TableEmptyState, { hasActiveFilters } from '@src/views/apps/shared/TableEmptyState'
+import UILoader from '@components/ui-loader'
 import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import { Tag as EmptyIcon } from 'react-feather'
 
@@ -199,35 +200,36 @@ const EventCategoriesList = () => {
         onClear={handleClearFilters}
       />
       <Card>
-        <div className='react-dataTable'>
-          {loading ? (
-            <TableRowsSkeleton rows={8} />
-          ) : (
-          <DataTable
-            noDataComponent={<TableEmptyState icon={EmptyIcon} noun='event categories' message='Add categories to organise calendar events.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
-            noHeader
-            subHeader
-            sortServer
-            pagination
-            responsive
-            paginationServer
-            columns={columns}
-            onSort={handleSort}
-            sortIcon={<ChevronDown />}
-            className='react-dataTable'
-            paginationComponent={CustomPagination}
-            data={dataToRender()}
-            subHeaderComponent={
-              <CustomHeader
-                searchTerm={searchTerm}
-                rowsPerPage={rowsPerPage}
-                handleFilter={handleFilter}
-                handlePerPage={handlePerPage}
-              />
-            }
-          />
-          )}
-        </div>
+        {loading && dataToRender().length === 0 ? (
+          <TableRowsSkeleton rows={8} />
+        ) : (
+          <UILoader blocking={loading} overlayColor='transparent' className='react-dataTable'>
+            <DataTable
+              noDataComponent={<TableEmptyState icon={EmptyIcon} noun='event categories' message='Add categories to organise calendar events.' filtered={Boolean(searchTerm) || hasActiveFilters(filters)} />}
+              noHeader
+              subHeader
+              sortServer
+              pagination
+              responsive
+              paginationServer
+              columns={columns}
+              onSort={handleSort}
+              sortIcon={<ChevronDown />}
+              className='react-dataTable'
+              paginationComponent={CustomPagination}
+              data={dataToRender()}
+              customStyles={{ rows: { style: { opacity: loading ? 0.5 : 1, transition: 'opacity 0.15s' } } }}
+              subHeaderComponent={
+                <CustomHeader
+                  searchTerm={searchTerm}
+                  rowsPerPage={rowsPerPage}
+                  handleFilter={handleFilter}
+                  handlePerPage={handlePerPage}
+                />
+              }
+            />
+          </UILoader>
+        )}
       </Card>
     </Fragment>
   )
