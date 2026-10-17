@@ -7,6 +7,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { handleLogin } from '@store/authentication'
 import { AbilityContext } from '@src/utility/context/Can'
 import InputPasswordToggle from '@components/input-password-toggle'
+import OtpInput from '@components/otp-input'
 import logo from '@src/assets/images/logo/logo-full.svg'
 import { getHomeRouteForLoggedInUser } from '@utils'
 import { Card, CardBody, CardTitle, CardText, Form, Label, Input, Button, FormFeedback } from 'reactstrap'
@@ -67,16 +68,15 @@ const LoginBasic = () => {
     }
   }
 
-  const onVerifyOtp = e => {
-    e.preventDefault()
-    if (otp.length !== 6) {
+  const verifyOtp = code => {
+    if (code.length !== 6) {
       setOtpError('Enter the 6-digit code from your authenticator app')
       return
     }
     setVerifying(true)
     setOtpError('')
     axios
-      .post('/auth/verify-otp', { mfaToken, code: otp })
+      .post('/auth/verify-otp', { mfaToken, code })
       .then(res => completeLogin(res))
       .catch(err => {
         setOtpError(err.response?.data?.message || 'Invalid or expired code')
@@ -97,22 +97,30 @@ const LoginBasic = () => {
                 Two-factor authentication
               </CardTitle>
               <CardText className='mb-2'>Enter the 6-digit code from your authenticator app</CardText>
-              <Form className='auth-login-form mt-2' onSubmit={onVerifyOtp}>
+              <Form
+                className='auth-login-form mt-2'
+                onSubmit={e => {
+                  e.preventDefault()
+                  verifyOtp(otp)
+                }}
+              >
                 <div className='mb-1'>
                   <Label className='form-label' for='otp-code'>
                     Authentication code
                   </Label>
-                  <Input
+                  <OtpInput
                     autoFocus
                     id='otp-code'
-                    inputMode='numeric'
-                    maxLength={6}
-                    placeholder='123456'
-                    invalid={Boolean(otpError)}
                     value={otp}
-                    onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    onChange={code => {
+                      setOtp(code)
+                      setOtpError('')
+                    }}
+                    onComplete={verifyOtp}
+                    invalid={Boolean(otpError)}
+                    disabled={verifying}
                   />
-                  {otpError && <FormFeedback>{otpError}</FormFeedback>}
+                  {otpError && <FormFeedback className='d-block'>{otpError}</FormFeedback>}
                 </div>
                 <Button type='submit' color='primary' block disabled={verifying}>
                   Verify

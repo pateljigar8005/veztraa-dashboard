@@ -1,0 +1,31 @@
+// .otp-input-box alone would be the same specificity as Bootstrap's own
+// .form-control (one class each), so whichever one happens to load later in
+// the bundle would win - nesting under .otp-input makes this rule more
+// specific so it always wins regardless of load order, and every box-model
+// property that affects sizing is set explicitly so nothing is left to
+// Bootstrap's own (possibly-winning) defaults.
+.otp-input {
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+
+  .otp-input-box {
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    width: 3.1rem;
+    height: 3.4rem;
+    padding: 0;
+    line-height: normal;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .otp-input .otp-input-box {
+    width: 2.5rem;
+    height: 2.9rem;
+    font-size: 1.25rem;
+  }
+}

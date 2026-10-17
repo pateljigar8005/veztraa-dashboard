@@ -11,6 +11,7 @@ import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, Fo
 import { RefreshCw, Copy } from 'react-feather'
 import { addUser, updateUser, getUser, uploadAvatar } from '../store'
 import InputPasswordToggle from '@components/input-password-toggle'
+import OtpInput from '@components/otp-input'
 import ImageUploadField from '../../shared/ImageUploadField'
 import PhoneInput from '../../shared/PhoneInput'
 import AmountField from '../../shared/AmountField'
@@ -188,12 +189,11 @@ const UserForm = () => {
       .finally(() => setTwoFactorBusy(false))
   }
 
-  const confirmTwoFactorEnable = e => {
-    e.preventDefault()
+  const confirmTwoFactorEnable = code => {
     setTwoFactorBusy(true)
     setSetupError('')
     axios
-      .post('/account/2fa/enable', { code: setupCode })
+      .post('/account/2fa/enable', { code })
       .then(() => {
         setTwoFactorEnabled(true)
         setSetupModalOpen(false)
@@ -774,18 +774,26 @@ const UserForm = () => {
           <p className='text-center mb-2'>
             <code>{manualSecret}</code>
           </p>
-          <Form onSubmit={confirmTwoFactorEnable}>
+          <Form
+            onSubmit={e => {
+              e.preventDefault()
+              confirmTwoFactorEnable(setupCode)
+            }}
+          >
             <Label className='form-label' for='setup-code'>
               Enter the 6-digit code from your app to confirm
             </Label>
-            <Input
+            <OtpInput
+              autoFocus
               id='setup-code'
-              inputMode='numeric'
-              maxLength={6}
-              placeholder='123456'
-              invalid={Boolean(setupError)}
               value={setupCode}
-              onChange={e => setSetupCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              onChange={code => {
+                setSetupCode(code)
+                setSetupError('')
+              }}
+              onComplete={confirmTwoFactorEnable}
+              invalid={Boolean(setupError)}
+              disabled={twoFactorBusy}
             />
             {setupError && <FormText color='danger'>{setupError}</FormText>}
             <Button type='submit' color='primary' className='mt-1' block disabled={twoFactorBusy}>
