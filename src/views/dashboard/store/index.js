@@ -15,6 +15,7 @@ export const appDashboardSlice = createSlice({
   initialState: {
     blocks: {},
     upcoming: [],
+    reportCurrencyIcon: '',
     loading: true
   },
   reducers: {},
@@ -26,6 +27,7 @@ export const appDashboardSlice = createSlice({
       .addCase(getSummary.fulfilled, (state, action) => {
         state.blocks = action.payload.blocks
         state.upcoming = action.payload.upcoming
+        state.reportCurrencyIcon = action.payload.reportCurrencyIcon || ''
         state.loading = false
       })
       .addCase(getSummary.rejected, state => {

@@ -39,13 +39,13 @@ const Dashboard = () => {
         <CardEmptyState icon={Grid} message='Nothing to show here yet' />
       ) : (
         <Fragment>
-          <KpiStrip blocks={store.blocks} />
+          <KpiStrip blocks={store.blocks} reportCurrencyIcon={store.reportCurrencyIcon} />
 
           {(store.blocks.revenueReport || store.blocks.supportTracker) && (
             <Row className='g-2 mb-2'>
               {store.blocks.revenueReport && (
                 <Col md={store.blocks.supportTracker ? 6 : 12}>
-                  <RevenueReportCard data={store.blocks.revenueReport} />
+                  <RevenueReportCard data={store.blocks.revenueReport} currencyIcon={store.reportCurrencyIcon} />
                 </Col>
               )}
               {store.blocks.supportTracker && (

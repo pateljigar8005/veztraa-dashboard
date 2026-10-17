@@ -19,10 +19,12 @@ import { formatAmount } from '@utils'
 // bar can end up taller than that month's invoiced amount, which reads as a
 // bug). Grouped bars let the two be compared per month, which is the actual
 // point of this chart.
-// No currency conversion (same as the Earning Reports card) since invoices
-// can be in different currencies and there's no server-side conversion
-// helper yet - only the Profit Report page converts, client-side.
-const RevenueReportCard = ({ data }) => {
+// Invoiced/collected amounts are already converted into the company's
+// report currency server-side (DashboardController::revenueReport() ->
+// Invoice/InvoicePayment::monthlySumsForRange(), see
+// veztraa-api/helpers/ReportCurrency.php) - currencyIcon (from the same
+// /dashboard/summary response) just labels what that currency is.
+const RevenueReportCard = ({ data, currencyIcon = '' }) => {
   const { colors } = useContext(ThemeColors)
   const primary = colors?.primary?.main || '#7367f0'
   // Hardcoded, not pulled from the theme's "warning" token - that one
@@ -59,10 +61,10 @@ const RevenueReportCard = ({ data }) => {
         }
       },
       yaxis: {
-        labels: { style: { colors: '#b9b9c3', fontSize: '0.86rem' }, formatter: val => formatAmount(val) }
+        labels: { style: { colors: '#b9b9c3', fontSize: '0.86rem' }, formatter: val => `${currencyIcon}${formatAmount(val)}` }
       },
       tooltip: {
-        y: { formatter: val => formatAmount(val) }
+        y: { formatter: val => `${currencyIcon}${formatAmount(val)}` }
       }
     },
     revenueSeries = [

@@ -7,7 +7,7 @@ import { formatAmount } from '@utils'
 // blocks is present, i.e. the viewer's role can actually see that data.
 // Same "never invent a number" rule as the rest of the dashboard: a KPI
 // with no visible source block is omitted, not shown as 0.
-const buildKpis = blocks => {
+const buildKpis = (blocks, reportCurrencyIcon) => {
   const kpis = []
 
   if (blocks.invoiceApp) {
@@ -15,7 +15,7 @@ const buildKpis = blocks => {
       icon: DollarSign,
       color: 'primary',
       label: 'Outstanding Balance',
-      value: formatAmount(blocks.invoiceApp.outstanding_balance)
+      value: `${reportCurrencyIcon}${formatAmount(blocks.invoiceApp.outstanding_balance)}`
     })
   }
 
@@ -40,8 +40,8 @@ const buildKpis = blocks => {
   return kpis
 }
 
-const KpiStrip = ({ blocks }) => {
-  const kpis = buildKpis(blocks)
+const KpiStrip = ({ blocks, reportCurrencyIcon }) => {
+  const kpis = buildKpis(blocks, reportCurrencyIcon)
   if (kpis.length === 0) return null
 
   // Fills the row whatever the count is (1-4 KPIs, gated by role/permissions
