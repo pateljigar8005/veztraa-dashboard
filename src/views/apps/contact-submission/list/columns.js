@@ -62,6 +62,8 @@ export const columns = [
   {
     name: 'Budget',
     width: '150px',
+    sortable: true,
+    sortField: 'project_budget',
     selector: row => row.project_budget,
     cell: row => <span>{row.project_budget || '-'}</span>
   },
@@ -76,6 +78,8 @@ export const columns = [
   {
     name: 'Status',
     width: '140px',
+    sortable: true,
+    sortField: 'status',
     selector: row => row.status,
     cell: row => (
       <Badge className='text-capitalize' color={statusColorObj[row.status] || 'light-secondary'} pill>

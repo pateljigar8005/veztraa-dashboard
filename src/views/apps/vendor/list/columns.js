@@ -30,12 +30,16 @@ export const columns = [
   {
     name: 'Email',
     minWidth: '200px',
+    sortable: true,
+    sortField: 'email',
     selector: row => row.email,
     cell: row => <span>{row.email || '-'}</span>
   },
   {
     name: 'Phone',
     minWidth: '150px',
+    sortable: true,
+    sortField: 'phone',
     selector: row => row.phone,
     cell: row => <span>{row.phone || '-'}</span>
   },

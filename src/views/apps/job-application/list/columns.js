@@ -74,6 +74,8 @@ export const columns = [
   {
     name: 'Status',
     width: '150px',
+    sortable: true,
+    sortField: 'status',
     selector: row => row.status,
     cell: row => (
       <Badge className='text-capitalize' color={statusColorObj[row.status] || 'light-secondary'} pill>
