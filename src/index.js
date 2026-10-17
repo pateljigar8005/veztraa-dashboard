@@ -26,10 +26,33 @@ import './assets/scss/style.scss'
 import * as serviceWorker from './serviceWorker'
 import axios from 'axios'
 import { applyThemeColor, getCachedThemeColor, setCachedThemeColor, isValidHexColor, THEME_COLOR_STORAGE_KEY } from './utility/themeColor'
+import logo from './assets/images/logo/logo.svg'
 
 installChunkPreloadErrorHandler()
 
 const LazyApp = lazy(() => import('./App'))
+
+// Same markup as @core/components/spinner/Fallback-spinner.js, built as a
+// plain string instead of a React render since this runs before React has
+// mounted anything - it's what fills #root while waiting on the pre-render
+// theme fetch below, instead of a blank screen. Reusing the exact classes
+// (not a new skeleton) means it's already styled by core.scss and already
+// themed - buildThemeColorCSS() in utility/themeColor.js specifically
+// targets `.fallback-spinner .loading .effect-1/2/3`, so applyThemeColor()
+// recolors this the same as it would the real component.
+function renderBootSkeleton() {
+  const container = document.getElementById('root')
+  container.innerHTML = `
+    <div class="fallback-spinner app-loader">
+      <img class="fallback-logo" src="${logo}" alt="logo" height="55" />
+      <div class="loading">
+        <div class="effect-1 effects"></div>
+        <div class="effect-2 effects"></div>
+        <div class="effect-3 effects"></div>
+      </div>
+    </div>
+  `
+}
 
 function renderApp() {
   const container = document.getElementById('root')
@@ -95,7 +118,9 @@ if (isValidHexColor(rawCachedColor)) {
   // color the moment the API answers is exactly the jarring flash this is
   // meant to avoid. Wait briefly for the real answer first instead; a hard
   // cap means a slow/offline API still can't block the app from loading
-  // forever, it just falls back to the default like before.
+  // forever, it just falls back to the default like before. The skeleton
+  // fills that wait instead of a blank screen.
+  renderBootSkeleton()
   const WAIT_FOR_THEME_MS = 1200
   Promise.race([fetchThemeColor(), new Promise(resolve => setTimeout(() => resolve(null), WAIT_FOR_THEME_MS))]).then(
     hex => {
