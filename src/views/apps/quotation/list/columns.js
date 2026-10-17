@@ -57,6 +57,8 @@ export const columns = [
   {
     name: 'Total',
     width: '140px',
+    sortable: true,
+    sortField: 'total',
     selector: row => row.total,
     cell: row => <span>{row.total}</span>
   },

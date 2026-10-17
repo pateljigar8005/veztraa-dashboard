@@ -65,12 +65,16 @@ export const columns = [
   {
     name: 'Total',
     width: '140px',
+    sortable: true,
+    sortField: 'total',
     selector: row => row.total,
     cell: row => <span>{row.total}</span>
   },
   {
     name: 'Balance Due',
     width: '150px',
+    sortable: true,
+    sortField: 'balance_due',
     selector: row => row.balance_due,
     cell: row => <span className={parseAmount(row.balance_due) > 0 ? 'text-danger' : 'text-success'}>{row.balance_due}</span>
   },
