@@ -18,9 +18,24 @@ export default class JwtService {
     this.scheduleProactiveRefresh(this.getToken())
 
     axios.interceptors.request.use(
-      config => {
-        const accessToken = this.getToken()
+      async config => {
+        // Login/refresh/etc never need - and must never wait on - a fresh
+        // access token: ensureFreshToken() awaiting a refresh that itself
+        // posts to refreshEndpoint through this same interceptor would
+        // deadlock on its own in-flight flag.
+        const publicEndpoints = [
+          this.jwtConfig.loginEndpoint,
+          this.jwtConfig.registerEndpoint,
+          this.jwtConfig.refreshEndpoint,
+          this.jwtConfig.logoutEndpoint,
+          this.jwtConfig.forgotPasswordEndpoint,
+          this.jwtConfig.resetPasswordEndpoint
+        ]
+        if (publicEndpoints.includes(config.url)) {
+          return config
+        }
 
+        const accessToken = await this.ensureFreshToken()
         if (accessToken) {
           config.headers.Authorization = `${this.jwtConfig.tokenType} ${accessToken}`
         }
@@ -90,6 +105,43 @@ export default class JwtService {
         return Promise.reject(error)
       }
     )
+  }
+
+  // Called from the request interceptor before every authenticated call -
+  // refreshes ahead of time if the stored token is already past (or close
+  // to) its expiry, instead of sending it, taking the guaranteed 401, and
+  // only then refreshing. That round trip used to repeat for every request
+  // in flight the moment a tab resumes with a stale token (e.g. the
+  // dashboard's half-dozen parallel widget calls on mount), which is what
+  // made the first load after any idle period slow or flaky while every
+  // later load (fresh token already in hand) was instant.
+  async ensureFreshToken() {
+    const token = this.getToken()
+    if (!token) return null
+
+    const exp = this.decodeExp(token)
+    const isFresh = exp && exp * 1000 - PROACTIVE_REFRESH_BUFFER_SECONDS * 1000 > Date.now()
+    if (isFresh) return token
+
+    if (!this.getRefreshToken()) return token
+
+    if (this.isAlreadyFetchingAccessToken) {
+      return new Promise(resolve => {
+        this.addSubscriber({ onSuccess: resolve, onFailure: () => resolve(this.getToken()) })
+      })
+    }
+
+    this.isAlreadyFetchingAccessToken = true
+    try {
+      const { accessToken } = await this.performRefresh()
+      this.isAlreadyFetchingAccessToken = false
+      this.onAccessTokenFetched(accessToken)
+      return accessToken
+    } catch (e) {
+      this.isAlreadyFetchingAccessToken = false
+      this.onAccessTokenFetchFailed()
+      return null
+    }
   }
 
   onAccessTokenFetched(accessToken) {
