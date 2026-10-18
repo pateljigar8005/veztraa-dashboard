@@ -12,7 +12,7 @@ import SupportTrackerCard from './SupportTrackerCard'
 import RevenueReportCard from './RevenueReportCard'
 import UserTimelineCard from './UserTimelineCard'
 import SalesRadarCard from './SalesRadarCard'
-import AppDesignCard from './AppDesignCard'
+import NeedsAttentionCard from './NeedsAttentionCard'
 
 // Personalized per role: DashboardController::summary() on the API side
 // already omits any block the current role can't view (admin gets all of
@@ -82,7 +82,7 @@ const Dashboard = () => {
               </Col>
             )}
             <Col lg={4} md={12} xs={12}>
-              <AppDesignCard />
+              <NeedsAttentionCard />
             </Col>
           </Row>
 
