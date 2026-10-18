@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
 import axios from 'axios'
@@ -63,6 +63,13 @@ const UserForm = () => {
   const [isActive, setIsActive] = useState(true)
   const isViewerAdmin = (getUserData()?.role || '').toLowerCase() === 'admin'
   const isSelf = Boolean(id) && Number(id) === Number(getUserData()?.id)
+  // The field is pre-filled with the real decrypted mailbox password (same
+  // "admin can view the real secret" reveal as the cPanel token field), not
+  // a PASSWORD_PLACEHOLDER sentinel like the login password field uses - so
+  // "is it non-empty" can't tell an untouched field from an edited one.
+  // Comparing against what was actually loaded is what lets onSubmit only
+  // resend it (and re-trigger a cPanel sync) when it genuinely changed.
+  const originalEmailLoginPasswordRef = useRef('')
 
   // Two-factor authentication (account-settings self mode only)
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
@@ -160,6 +167,7 @@ const UserForm = () => {
         email_login_password: user.email_login_password || '',
         email_signature: user.email_signature || ''
       })
+      originalEmailLoginPasswordRef.current = user.email_login_password || ''
       setAutoAppendSignature(user.email_signature_auto_append !== false)
       setSamePasswordAsLogin(user.email_login_password_synced !== false)
       setIsEmployee(Boolean(user.is_employee))
@@ -287,7 +295,7 @@ const UserForm = () => {
 
       if (samePasswordAsLogin) {
         if (newLoginPassword) payload.email_login_password = newLoginPassword
-      } else if (data.email_login_password.length) {
+      } else if (data.email_login_password.length && data.email_login_password !== originalEmailLoginPasswordRef.current) {
         payload.email_login_password = data.email_login_password
       }
 
@@ -297,11 +305,13 @@ const UserForm = () => {
         .then(result => {
           toast.success(selfMode ? 'Account updated' : isEdit ? 'User updated' : 'User added')
           if (selfMode) {
+            const resetEmailLoginPassword = data.email_login_password ? PASSWORD_PLACEHOLDER : ''
             reset({
               ...data,
               password: PASSWORD_PLACEHOLDER,
-              email_login_password: data.email_login_password ? PASSWORD_PLACEHOLDER : ''
+              email_login_password: resetEmailLoginPassword
             })
+            originalEmailLoginPasswordRef.current = resetEmailLoginPassword
             setExtraDirty(false)
             return
           }
