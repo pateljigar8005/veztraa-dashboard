@@ -84,6 +84,16 @@ const CalendarComponent = () => {
     }
   }, [])
 
+  // Holidays load asynchronously (useHolidayDates fetches after mount), but
+  // FullCalendar's dayCellClassNames/dayCellDidMount only run when it redraws
+  // its day cells, not just because isHoliday/getHolidayName got new closures -
+  // so without this, holidays stay invisible until something else (changing
+  // month, resizing) forces FullCalendar to redraw. Re-rendering once the
+  // holiday list actually changes picks it up immediately instead.
+  useEffect(() => {
+    calendarApi?.render()
+  }, [holidayDates.length, calendarApi])
+
   return (
     <Fragment>
       <div className='app-calendar overflow-hidden border'>
