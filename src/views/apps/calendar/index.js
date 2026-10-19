@@ -85,19 +85,20 @@ const CalendarComponent = () => {
   }, [])
 
   // Holidays load asynchronously (useHolidayDates fetches after mount), but
-  // FullCalendar's dayCellClassNames/dayCellDidMount only run when it redraws
-  // its day cells, not just because isHoliday/getHolidayName got new closures -
-  // so without this, holidays stay invisible until something else (changing
-  // month, resizing) forces FullCalendar to redraw. Re-navigating to the
-  // current view/date (same thing switching month and back does, just
-  // without the visible jump) forces that redraw as soon as holidays load.
-  // The @fullcalendar/react getApi() handle is a slim CalendarApi wrapper
-  // with no render()/destroy() of its own (those only exist on @fullcalendar/
-  // core's own Calendar class) - changeView is the public method it does
-  // expose for forcing a full re-render of the current view.
+  // dayCellDidMount (which paints the holiday label/highlight) is a real
+  // React componentDidMount under the hood - FullCalendar only calls it when
+  // a day cell element is actually created, never again on a later re-render
+  // of the same cell. changeView() back to the same view/date doesn't change
+  // which dates are on screen, so React's reconciliation just keeps the
+  // existing (holiday-less) cell elements and nothing remounts. Actually
+  // navigating to another month and back, like the manual workaround, swaps
+  // in a whole new set of date cells both times, which does force a fresh
+  // mount - this reproduces that programmatically, without the visible jump
+  // (both calls apply synchronously before the browser paints).
   useEffect(() => {
     if (calendarApi) {
-      calendarApi.changeView(calendarApi.view.type, calendarApi.getDate())
+      calendarApi.next()
+      calendarApi.prev()
     }
   }, [holidayDates.length, calendarApi])
 
