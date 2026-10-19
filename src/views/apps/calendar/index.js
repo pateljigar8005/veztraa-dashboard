@@ -88,10 +88,17 @@ const CalendarComponent = () => {
   // FullCalendar's dayCellClassNames/dayCellDidMount only run when it redraws
   // its day cells, not just because isHoliday/getHolidayName got new closures -
   // so without this, holidays stay invisible until something else (changing
-  // month, resizing) forces FullCalendar to redraw. Re-rendering once the
-  // holiday list actually changes picks it up immediately instead.
+  // month, resizing) forces FullCalendar to redraw. Re-navigating to the
+  // current view/date (same thing switching month and back does, just
+  // without the visible jump) forces that redraw as soon as holidays load.
+  // The @fullcalendar/react getApi() handle is a slim CalendarApi wrapper
+  // with no render()/destroy() of its own (those only exist on @fullcalendar/
+  // core's own Calendar class) - changeView is the public method it does
+  // expose for forcing a full re-render of the current view.
   useEffect(() => {
-    calendarApi?.render()
+    if (calendarApi) {
+      calendarApi.changeView(calendarApi.view.type, calendarApi.getDate())
+    }
   }, [holidayDates.length, calendarApi])
 
   return (
