@@ -30,14 +30,17 @@ const Calendar = props => {
     handleContractEventClick,
     isHoliday,
     getHolidayName,
-    isWeekend
+    isWeekend,
+    calendarRemountKey
   } = props
 
+  // Re-grab the API on every remount (see calendarRemountKey below), not just
+  // the first time - calendarRef still points at a live FullCalendar instance
+  // each time, but a stale calendarApi left over from a destroyed instance
+  // would break refetchEvents/AddEventSidebar.
   useEffect(() => {
-    if (calendarApi === null) {
-      setCalendarApi(calendarRef.current.getApi())
-    }
-  }, [calendarApi])
+    setCalendarApi(calendarRef.current.getApi())
+  }, [calendarRemountKey])
 
   const holidayBlockReason = date => {
     const holidayName = getHolidayName(toDateOnly(date))
@@ -251,7 +254,15 @@ const Calendar = props => {
   return (
     <Card className='shadow-none border-0 mb-0 rounded-0'>
       <CardBody className='pb-0'>
-        <FullCalendar {...calendarOptions} />{' '}
+        {/* dayCellDidMount (paints the holiday label/highlight) is a real
+            componentDidMount under the hood - FullCalendar never calls it
+            again for a day cell that's already mounted, even across
+            changeView()/prev()/next(), it only reuses and updates the same
+            cell elements in place. Keying FullCalendar on calendarRemountKey
+            forces a real unmount+remount once holidays finish loading
+            (see index.js), which is the only way to get the label to paint
+            without a page refresh. */}
+        <FullCalendar key={calendarRemountKey} {...calendarOptions} />{' '}
       </CardBody>
     </Card>
   )

@@ -86,21 +86,23 @@ const CalendarComponent = () => {
 
   // Holidays load asynchronously (useHolidayDates fetches after mount), but
   // dayCellDidMount (which paints the holiday label/highlight) is a real
-  // React componentDidMount under the hood - FullCalendar only calls it when
-  // a day cell element is actually created, never again on a later re-render
-  // of the same cell. changeView() back to the same view/date doesn't change
-  // which dates are on screen, so React's reconciliation just keeps the
-  // existing (holiday-less) cell elements and nothing remounts. Actually
-  // navigating to another month and back, like the manual workaround, swaps
-  // in a whole new set of date cells both times, which does force a fresh
-  // mount - this reproduces that programmatically, without the visible jump
-  // (both calls apply synchronously before the browser paints).
+  // React componentDidMount under the hood - FullCalendar reuses and updates
+  // its existing day-cell elements rather than remounting them, whether
+  // re-rendered in place, sent through changeView() back to the same date,
+  // or paged a month away and back with next()/prev() - confirmed against
+  // this exact FullCalendar version in isolation, none of those make
+  // dayCellDidMount fire again for a cell that's already mounted. Forcing a
+  // real unmount+remount of the whole FullCalendar instance (via the `key`
+  // passed to it in Calendar.js) is the only thing that does. Bumping this
+  // once holidays actually load is what the manual "switch month and back"
+  // workaround was really doing - the navigation itself was incidental, the
+  // fix was the remount a route/visibility change happens to cause elsewhere.
+  const [calendarRemountKey, setCalendarRemountKey] = useState(0)
   useEffect(() => {
-    if (calendarApi) {
-      calendarApi.next()
-      calendarApi.prev()
+    if (holidayDates.length > 0) {
+      setCalendarRemountKey(key => key + 1)
     }
-  }, [holidayDates.length, calendarApi])
+  }, [holidayDates.length])
 
   return (
     <Fragment>
@@ -137,6 +139,7 @@ const CalendarComponent = () => {
               handleTaskEventClick={handleTaskEventClick}
               handleInvoiceEventClick={handleInvoiceEventClick}
               handleContractEventClick={handleContractEventClick}
+              calendarRemountKey={calendarRemountKey}
               isHoliday={isHoliday}
               getHolidayName={getHolidayName}
               isWeekend={isWeekend}
