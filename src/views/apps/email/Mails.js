@@ -253,7 +253,7 @@ const Mails = props => {
             <Button id='email-bulk-delete-btn' className='d-none' onClick={handleBulkDelete}>
               Delete selected
             </Button>
-            {store.params.folder === 'Trash' && !viewingMailboxId && store.total > 0 && (
+            {store.params.folder === 'Trash' && store.total > 0 && (
               <Button
                 color='flat-danger'
                 size='sm'
