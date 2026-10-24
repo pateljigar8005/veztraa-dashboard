@@ -2,7 +2,7 @@ import { Fragment, useState, useEffect } from 'react'
 import useClampPage from '@hooks/useClampPage'
 import useDebounce from '@hooks/useDebounce'
 import AdvancedSearchModal from '../../shared/AdvancedSearchModal'
-import { expenseCategoryOptions } from '../expenseCategoryOptions'
+import { fetchExpenseCategoryOptions } from '../expenseCategoryOptions'
 import { columns } from './columns'
 import { getAllData, getData, isFlatListing } from '../store'
 import SeriesRows from './SeriesRows'
@@ -21,7 +21,7 @@ import axios from 'axios'
 import { sortOptions, clientOptionLabel } from '@utils'
 
 const searchFields = [
-  { name: 'category', label: 'Category', type: 'select', options: expenseCategoryOptions },
+  { name: 'category', label: 'Category', type: 'select', fetchOptions: fetchExpenseCategoryOptions },
   {
     name: 'expense_type',
     label: 'Type',
@@ -141,6 +141,9 @@ const ExpensesList = () => {
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false)
   const [filters, setFilters] = useState({})
   const [loading, setLoading] = useState(true)
+  // Only one recurring series open at a time - opening another closes the
+  // previous one.
+  const [expandedId, setExpandedId] = useState(null)
 
   const debouncedSearchTerm = useDebounce(searchTerm, 400)
 
@@ -271,6 +274,8 @@ const ExpensesList = () => {
               columns={columns}
               expandableRows
               expandableRowsComponent={SeriesRows}
+              expandableRowExpanded={row => row.id === expandedId}
+              onRowExpandToggled={(expanded, row) => setExpandedId(expanded ? row.id : null)}
               expandableRowDisabled={row => isFlatListing(filters) || Boolean(row.recurring_parent_id) || !row.copy_count}
               onSort={handleSort}
               sortIcon={<ChevronDown />}

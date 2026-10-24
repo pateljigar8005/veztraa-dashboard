@@ -26,8 +26,7 @@ import {
   Activity,
   CheckCircle,
   Truck,
-  PieChart
-} from 'react-feather'
+  PieChart, TrendingDown } from 'react-feather'
 
 export default [
   {
@@ -209,6 +208,12 @@ export default [
     title: 'Profit Report',
     icon: <PieChart size={20} />,
     navLink: '/reports/profit'
+  },
+  {
+    id: 'expenseReports',
+    title: 'Expense Report',
+    icon: <TrendingDown size={20} />,
+    navLink: '/reports/expense'
   },
   {
     header: 'Settings'

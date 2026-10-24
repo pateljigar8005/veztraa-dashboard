@@ -12,7 +12,7 @@ import { selectThemeColors, sortOptions, clientOptionLabel } from '@utils'
 import DateField from '../../shared/DateField'
 import AmountField from '../../shared/AmountField'
 import ExpenseAttachments from './ExpenseAttachments'
-import { expenseCategoryOptions } from '../expenseCategoryOptions'
+import { expenseCategoryOptions, fetchExpenseCategoryOptions } from '../expenseCategoryOptions'
 import { addExpense, updateExpense, getExpense } from '../store'
 import HistoryModal from '../../activity-log/HistoryModal'
 
@@ -61,6 +61,7 @@ const ExpenseForm = () => {
   const [projectOptions, setProjectOptions] = useState([])
   const [paymentMethodOptions, setPaymentMethodOptions] = useState([])
   const [currencyOptions, setCurrencyOptions] = useState([])
+  const [categoryOptions, setCategoryOptions] = useState(expenseCategoryOptions)
   const [expenseType, setExpenseType] = useState('one_time')
   const [recurrence, setRecurrence] = useState('none')
   const [endMode, setEndMode] = useState('never')
@@ -85,6 +86,7 @@ const ExpenseForm = () => {
   const currency = watch('currency')
 
   useEffect(() => {
+    fetchExpenseCategoryOptions().then(setCategoryOptions)
     axios.get('/vendors', { params: { perPage: 100, is_active: '1' } }).then(response => {
       setVendorOptions(sortOptions(response.data.data.vendors.map(v => ({ value: v.id, label: v.name }))))
     })
@@ -215,7 +217,7 @@ const ExpenseForm = () => {
                   classNamePrefix='select'
                   className='react-select'
                   theme={selectThemeColors}
-                  options={expenseCategoryOptions}
+                  options={categoryOptions}
                   value={selectedCategoryOption}
                   onChange={option => setValue('category', option ? option.value : '', { shouldDirty: true })}
                   placeholder='Select or type a category...'

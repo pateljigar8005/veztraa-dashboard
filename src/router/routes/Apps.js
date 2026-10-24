@@ -54,6 +54,7 @@ const PayrollRunView = lazy(() => import('../../views/apps/payroll/view'))
 const InvoiceReport = lazy(() => import('../../views/apps/reports/invoice-report'))
 const TimesheetReport = lazy(() => import('../../views/apps/reports/timesheet-report'))
 const ProfitReport = lazy(() => import('../../views/apps/reports/profit-report'))
+const ExpenseReport = lazy(() => import('../../views/apps/reports/expense-report'))
 
 const VendorList = lazy(() => import('../../views/apps/vendor/list'))
 const VendorForm = lazy(() => import('../../views/apps/vendor/form'))
@@ -390,6 +391,10 @@ const AppRoutes = [
   {
     element: <ProfitReport />,
     path: '/reports/profit'
+  },
+  {
+    element: <ExpenseReport />,
+    path: '/reports/expense'
   },
   {
     element: <VendorList />,

@@ -57,6 +57,7 @@ const routeToMenuId = [
   { pattern: /^\/reports\/invoice/, id: 'invoiceReports' },
   { pattern: /^\/reports\/timesheet/, id: 'timesheetReports' },
   { pattern: /^\/reports\/profit/, id: 'profitReports' },
+  { pattern: /^\/reports\/expense/, id: 'expenseReports' },
   { pattern: /^\/vendor-bill/, id: 'vendorBills' },
   { pattern: /^\/vendor/, id: 'vendors' },
   { pattern: /^\/expense/, id: 'expenses' },
