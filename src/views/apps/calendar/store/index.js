@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
-import { parseAmount } from '@utils'
+import { parseAmount, formatAmount } from '@utils'
 
 // MySQL DATETIME wants local wall-clock parts, not a UTC-shifted ISO string
 // (same reasoning as the date-only fields elsewhere in this app, see
@@ -150,6 +150,42 @@ export const fetchContractInvoiceEvents = createAsyncThunk('appCalendar/fetchCon
   return { events }
 })
 
+// Recurring expenses (subscriptions, EMIs, monthly bills): the ones already
+// created, on their own date, plus the next 12 months of projected ones from
+// /expenses/upcoming so upcoming payments can be planned. Clicking either
+// opens the expense - a projected one opens its original (the template the
+// series repeats from).
+export const fetchExpenseEvents = createAsyncThunk('appCalendar/fetchExpenseEvents', async () => {
+  const [listResponse, upcomingResponse] = await Promise.all([
+    axios.get('/expenses', { params: { perPage: 100, sortColumn: 'expense_date', sortDirection: 'desc' } }),
+    axios.get('/expenses/upcoming')
+  ])
+  const label = (category, vendorName, currency, amount) =>
+    `${category}${vendorName ? ` - ${vendorName}` : ''} (${currency}${formatAmount(amount)})`
+
+  const recorded = listResponse.data.data.expenses
+    .filter(expense => expense.recurrence !== 'none' || expense.recurring_parent_id)
+    .map(expense => ({
+      id: `expense-${expense.id}`,
+      title: label(expense.category, expense.vendor_name, expense.currency, expense.amount),
+      start: expense.expense_date,
+      allDay: true,
+      editable: false,
+      extendedProps: { calendar: 'Expenses', source: 'expense', expenseId: expense.id }
+    }))
+
+  const upcoming = upcomingResponse.data.data.occurrences.map(occ => ({
+    id: `expense-upcoming-${occ.template_id}-${occ.date}`,
+    title: `Due: ${label(occ.category, occ.vendor_name, occ.currency, occ.amount)}`,
+    start: occ.date,
+    allDay: true,
+    editable: false,
+    extendedProps: { calendar: 'Expenses', source: 'expense-upcoming', expenseId: occ.template_id }
+  }))
+
+  return { events: [...recorded, ...upcoming] }
+})
+
 export const appCalendarSlice = createSlice({
   name: 'appCalendar',
   initialState: {
@@ -159,7 +195,8 @@ export const appCalendarSlice = createSlice({
     todoTasks: [],
     invoiceEvents: [],
     contractInvoiceEvents: [],
-    taskFilters: ['To-Do', 'Invoices', 'Upcoming Invoices'],
+    expenseEvents: [],
+    taskFilters: ['To-Do', 'Invoices', 'Upcoming Invoices', 'Expenses'],
     selectedEvent: {},
     // Category names currently shown - seeded to "all" once categories load
     // (see fetchEventCategories.fulfilled below). Purely a client-side
@@ -214,6 +251,9 @@ export const appCalendarSlice = createSlice({
       })
       .addCase(fetchContractInvoiceEvents.fulfilled, (state, action) => {
         state.contractInvoiceEvents = action.payload.events
+      })
+      .addCase(fetchExpenseEvents.fulfilled, (state, action) => {
+        state.expenseEvents = action.payload.events
       })
   }
 })

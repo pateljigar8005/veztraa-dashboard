@@ -27,6 +27,7 @@ const Calendar = props => {
     updateEvent,
     handleTaskEventClick,
     handleInvoiceEventClick,
+    handleExpenseEventClick,
     handleContractEventClick,
     isHoliday,
     getHolidayName,
@@ -52,7 +53,8 @@ const Calendar = props => {
   const taskEvents = [
     ...(store.taskFilters.includes('To-Do') ? store.todoEvents : []),
     ...(store.taskFilters.includes('Invoices') ? store.invoiceEvents : []),
-    ...(store.taskFilters.includes('Upcoming Invoices') ? store.contractInvoiceEvents : [])
+    ...(store.taskFilters.includes('Upcoming Invoices') ? store.contractInvoiceEvents : []),
+    ...(store.taskFilters.includes('Expenses') ? store.expenseEvents : [])
   ]
 
   // An event with no category (extendedProps.calendar null/undefined) is
@@ -154,6 +156,10 @@ const Calendar = props => {
         colorName = 'info'
       } else if (source === 'contract-invoice-due') {
         colorName = 'secondary'
+      } else if (source === 'expense') {
+        colorName = 'success'
+      } else if (source === 'expense-upcoming') {
+        colorName = 'danger'
       } else {
         colorName = calendarsColor[calendar]
       }
@@ -180,6 +186,11 @@ const Calendar = props => {
 
       if (clickedEvent._def.extendedProps.source === 'invoice') {
         handleInvoiceEventClick(clickedEvent._def.extendedProps.invoiceId)
+        return
+      }
+
+      if (['expense', 'expense-upcoming'].includes(clickedEvent._def.extendedProps.source)) {
+        handleExpenseEventClick(clickedEvent._def.extendedProps.expenseId)
         return
       }
 

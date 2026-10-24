@@ -3,43 +3,77 @@ import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { store } from '@store/store'
 import { deleteExpense } from '../store'
-import { Edit2, Trash2 } from 'react-feather'
+import { Edit2, Trash2, Repeat } from 'react-feather'
 import { Button, UncontrolledTooltip } from 'reactstrap'
 import { currentUserCan } from '@src/utility/navPermissions'
 import { confirmDelete } from '@src/utility/confirmDelete'
-import { formatAmount } from '@utils'
+import { formatAmount, formatDate } from '@utils'
 import { getCachedThemeColor } from '@src/utility/themeColor'
+
+const TYPE_LABELS = { one_time: 'One-time', subscription: 'Subscription', emi: 'EMI' }
+const REPEAT_LABELS = { monthly: 'Monthly', quarterly: 'Quarterly', yearly: 'Yearly' }
+// Date-only strings parsed as local midnight - new Date('YYYY-MM-DD') is UTC
+// and can show the previous day in timezones behind UTC.
+const shortDate = value => (value ? formatDate(`${value}T00:00:00`, { day: 'numeric', month: 'short', year: 'numeric' }) : '')
 
 export const columns = [
   {
-    name: 'Category',
+    name: 'Expense',
     sortable: true,
-    minWidth: '200px',
+    minWidth: '220px',
     sortField: 'category',
     selector: row => row.category,
     cell: row => (
       <div className='d-flex flex-column overflow-hidden' style={{ minWidth: 0 }}>
-        <Link to={`/expense/edit/${row.id}`} className='user_name text-truncate text-body' title={row.category}>
-          <span className='fw-bolder'>{row.category}</span>
+        <Link to={`/expense/edit/${row.id}`} className='text-truncate text-body fw-bolder' title={row.category}>
+          {row.category}
         </Link>
-        {row.vendor_name && (
-          <small className='text-truncate text-muted mb-0' title={row.vendor_name}>
-            {row.vendor_name}
-          </small>
-        )}
+        <small className='text-truncate text-muted' title={row.vendor_name || ''}>
+          {row.vendor_name || 'No vendor'}
+        </small>
       </div>
     )
+  },
+  {
+    name: 'Type',
+    minWidth: '170px',
+    selector: row => row.expense_type,
+    cell: row => {
+      const repeat = REPEAT_LABELS[row.recurrence]
+      return (
+        <div className='d-flex flex-column'>
+          <span>{TYPE_LABELS[row.expense_type] || 'One-time'}</span>
+          {repeat ? (
+            <small className='text-muted d-flex align-items-center'>
+              <Repeat size={11} className='me-25' />
+              {repeat}
+              {row.next_occurrence_date ? ` · next ${shortDate(row.next_occurrence_date)}` : ' · ended'}
+            </small>
+          ) : row.recurring_parent_id ? (
+            <small className='text-muted d-flex align-items-center'>
+              <Repeat size={11} className='me-25' />
+              Auto-created
+            </small>
+          ) : null}
+        </div>
+      )
+    }
   },
   {
     name: 'Client / Project',
     minWidth: '180px',
     selector: row => row.client_full_name || row.project_name,
-    cell: row => (
-      <div className='d-flex flex-column'>
-        <span>{row.client_full_name || '-'}</span>
-        {row.project_name && <small className='text-muted'>{row.project_name}</small>}
-      </div>
-    )
+    cell: row =>
+      row.client_full_name || row.project_name ? (
+        <div className='d-flex flex-column overflow-hidden' style={{ minWidth: 0 }}>
+          <span className='text-truncate'>{row.client_full_name || row.project_name}</span>
+          {row.client_full_name && row.project_name && (
+            <small className='text-truncate text-muted'>{row.project_name}</small>
+          )}
+        </div>
+      ) : (
+        <span className='text-muted'>General</span>
+      )
   },
   {
     name: 'Date',
@@ -47,7 +81,7 @@ export const columns = [
     sortable: true,
     sortField: 'expense_date',
     selector: row => row.expense_date,
-    cell: row => <span>{row.expense_date}</span>
+    cell: row => <span>{shortDate(row.expense_date)}</span>
   },
   {
     name: 'Amount',

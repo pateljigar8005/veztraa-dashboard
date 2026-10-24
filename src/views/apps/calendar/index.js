@@ -14,6 +14,7 @@ import {
   fetchEventCategories,
   fetchTodoTaskEvents,
   fetchInvoiceDueEvents,
+  fetchExpenseEvents,
   fetchContractInvoiceEvents,
   selectEvent,
   updateEvent,
@@ -68,6 +69,10 @@ const CalendarComponent = () => {
     navigate(`/invoice/view/${invoiceId}`)
   }
 
+  const handleExpenseEventClick = expenseId => {
+    navigate(`/expense/edit/${expenseId}`)
+  }
+
   const handleContractEventClick = contractId => {
     navigate(`/contract/view/${contractId}`)
   }
@@ -81,6 +86,9 @@ const CalendarComponent = () => {
     // user should see projected contract invoice dates on their calendar.
     if (currentUserCan('/contract', 'view')) {
       dispatch(fetchContractInvoiceEvents())
+    }
+    if (currentUserCan('/expense', 'view')) {
+      dispatch(fetchExpenseEvents())
     }
   }, [])
 
@@ -138,6 +146,7 @@ const CalendarComponent = () => {
               handleAddEventSidebar={handleAddEventSidebar}
               handleTaskEventClick={handleTaskEventClick}
               handleInvoiceEventClick={handleInvoiceEventClick}
+              handleExpenseEventClick={handleExpenseEventClick}
               handleContractEventClick={handleContractEventClick}
               calendarRemountKey={calendarRemountKey}
               isHoliday={isHoliday}

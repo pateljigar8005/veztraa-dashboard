@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
 import axios from 'axios'
 import toast from 'react-hot-toast'
@@ -19,8 +19,29 @@ import HistoryModal from '../../activity-log/HistoryModal'
 const defaultValues = {
   description: '',
   amount: '',
-  expense_date: ''
+  expense_date: '',
+  recurrence_count: '',
+  recurrence_end_date: ''
 }
+
+const typeOptions = [
+  { value: 'one_time', label: 'One-time' },
+  { value: 'subscription', label: 'Subscription' },
+  { value: 'emi', label: 'EMI' }
+]
+
+const recurrenceOptions = [
+  { value: 'none', label: "Doesn't repeat" },
+  { value: 'monthly', label: 'Every month' },
+  { value: 'quarterly', label: 'Every 3 months' },
+  { value: 'yearly', label: 'Every year' }
+]
+
+const endOptions = [
+  { value: 'never', label: 'Never' },
+  { value: 'count', label: 'After a number of times' },
+  { value: 'date', label: 'On a date' }
+]
 
 const ExpenseForm = () => {
   const { id } = useParams()
@@ -34,6 +55,9 @@ const ExpenseForm = () => {
   const [projectOptions, setProjectOptions] = useState([])
   const [paymentMethodOptions, setPaymentMethodOptions] = useState([])
   const [currencyOptions, setCurrencyOptions] = useState([])
+  const [expenseType, setExpenseType] = useState('one_time')
+  const [recurrence, setRecurrence] = useState('none')
+  const [endMode, setEndMode] = useState('never')
 
   const {
     control,
@@ -63,7 +87,7 @@ const ExpenseForm = () => {
       setClientOptions(sortOptions(clients.map(c => ({ value: c.id, label: clientOptionLabel(c) }))))
     })
     axios.get('/projects', { params: { perPage: 100 } }).then(response => {
-      setProjectOptions(sortOptions(response.data.data.projects.map(p => ({ value: p.id, label: p.name }))))
+      setProjectOptions(sortOptions(response.data.data.projects.map(p => ({ value: p.id, label: p.name, clientId: p.client_id }))))
     })
     axios.get('/payment-methods', { params: { perPage: 100 } }).then(response => {
       setPaymentMethodOptions(response.data.data.paymentMethods.map(m => ({ value: m.id, label: m.name })))
@@ -90,8 +114,13 @@ const ExpenseForm = () => {
       reset({
         description: expense.description || '',
         amount: expense.amount ?? '',
-        expense_date: expense.expense_date || ''
+        expense_date: expense.expense_date || '',
+        recurrence_count: expense.recurrence_count ?? '',
+        recurrence_end_date: expense.recurrence_end_date || ''
       })
+      setExpenseType(expense.expense_type || 'one_time')
+      setRecurrence(expense.recurrence || 'none')
+      setEndMode(expense.recurrence_count ? 'count' : expense.recurrence_end_date ? 'date' : 'never')
       setValue('vendor_id', expense.vendor_id || '')
       setValue('client_id', expense.client_id || '')
       setValue('project_id', expense.project_id || '')
@@ -101,7 +130,17 @@ const ExpenseForm = () => {
     }
   }, [store.selectedExpense])
 
-  const checkIsValid = data => data.amount !== '' && Number(data.amount) > 0 && data.expense_date && category
+  const isGeneratedCopy = isEdit && store.selectedExpense?.id === Number(id) && store.selectedExpense?.recurring_parent_id
+  const repeats = recurrence !== 'none'
+
+  const recurrenceValid = data =>
+    !repeats ||
+    endMode === 'never' ||
+    (endMode === 'count' && Number(data.recurrence_count) >= 2) ||
+    (endMode === 'date' && data.recurrence_end_date && data.recurrence_end_date > data.expense_date)
+
+  const checkIsValid = data =>
+    data.amount !== '' && Number(data.amount) > 0 && data.expense_date && category && recurrenceValid(data)
 
   const onSubmit = data => {
     if (checkIsValid(data)) {
@@ -114,7 +153,13 @@ const ExpenseForm = () => {
         description: data.description || null,
         amount: Number(data.amount),
         currency: currency || 'USD',
-        expense_date: data.expense_date
+        expense_date: data.expense_date,
+        expense_type: expenseType
+      }
+      if (!isGeneratedCopy) {
+        payload.recurrence = recurrence
+        payload.recurrence_count = repeats && endMode === 'count' ? Number(data.recurrence_count) : null
+        payload.recurrence_end_date = repeats && endMode === 'date' ? data.recurrence_end_date : null
       }
 
       const action = isEdit ? updateExpense({ id: Number(id), ...payload }) : addExpense(payload)
@@ -126,12 +171,19 @@ const ExpenseForm = () => {
       if (!category) setError('category', { type: 'manual' })
       if (data.amount === '' || Number(data.amount) <= 0) setError('amount', { type: 'manual' })
       if (!data.expense_date) setError('expense_date', { type: 'manual' })
+      if (repeats && endMode === 'count' && Number(data.recurrence_count) < 2) setError('recurrence_count', { type: 'manual' })
+      if (repeats && endMode === 'date' && !(data.recurrence_end_date > data.expense_date)) {
+        setError('recurrence_end_date', { type: 'manual' })
+      }
     }
   }
 
   const selectedVendorOption = vendorOptions.find(i => i.value === vendorId) || null
   const selectedClientOption = clientOptions.find(i => i.value === clientId) || null
   const selectedProjectOption = projectOptions.find(i => i.value === projectId) || null
+  // With a client picked, only that client's projects are offered; with no
+  // client, every project is (picking one then fills in its client).
+  const visibleProjectOptions = clientId ? projectOptions.filter(p => p.clientId === clientId) : projectOptions
   const selectedPaymentMethodOption = paymentMethodOptions.find(i => i.value === paymentMethodId) || null
   const selectedCurrencyOption = currencyOptions.find(i => i.value === currency) || null
   const selectedCategoryOption = category ? { value: category, label: category } : null
@@ -201,7 +253,14 @@ const ExpenseForm = () => {
                   theme={selectThemeColors}
                   options={clientOptions}
                   value={selectedClientOption}
-                  onChange={option => setValue('client_id', option ? option.value : '', { shouldDirty: true })}
+                  onChange={option => {
+                    const nextClientId = option ? option.value : ''
+                    setValue('client_id', nextClientId, { shouldDirty: true })
+                    const currentProject = projectOptions.find(p => p.value === projectId)
+                    if (currentProject && nextClientId && currentProject.clientId !== nextClientId) {
+                      setValue('project_id', '', { shouldDirty: true })
+                    }
+                  }}
                   placeholder='Select client...'
                 />
               </Col>
@@ -215,10 +274,14 @@ const ExpenseForm = () => {
                   classNamePrefix='select'
                   className='react-select'
                   theme={selectThemeColors}
-                  options={projectOptions}
+                  options={visibleProjectOptions}
                   value={selectedProjectOption}
-                  onChange={option => setValue('project_id', option ? option.value : '', { shouldDirty: true })}
+                  onChange={option => {
+                    setValue('project_id', option ? option.value : '', { shouldDirty: true })
+                    if (option?.clientId && !clientId) setValue('client_id', option.clientId, { shouldDirty: true })
+                  }}
                   placeholder='Select project...'
+                  noOptionsMessage={() => (clientId ? 'No projects for this client' : 'No projects')}
                 />
               </Col>
               <Col md={4} className='mb-1'>
@@ -264,6 +327,96 @@ const ExpenseForm = () => {
                   )}
                 />
               </Col>
+              <Col md={4} className='mb-1'>
+                <Label className='form-label' for='expense_type'>
+                  Type
+                </Label>
+                <Select
+                  inputId='expense_type'
+                  classNamePrefix='select'
+                  className='react-select'
+                  theme={selectThemeColors}
+                  options={typeOptions}
+                  value={typeOptions.find(o => o.value === expenseType)}
+                  onChange={option => setExpenseType(option ? option.value : 'one_time')}
+                />
+              </Col>
+              {isGeneratedCopy ? (
+                <Col md={8} className='mb-1 d-flex align-items-end'>
+                  <p className='text-muted small mb-50'>
+                    Auto-generated from a recurring expense.{' '}
+                    <Link to={`/expense/edit/${store.selectedExpense.recurring_parent_id}`}>
+                      Edit the repeat settings on the original
+                    </Link>
+                    . Changes here only affect this one.
+                  </p>
+                </Col>
+              ) : (
+                <Fragment>
+                  <Col md={4} className='mb-1'>
+                    <Label className='form-label' for='recurrence'>
+                      Repeat
+                    </Label>
+                    <Select
+                      inputId='recurrence'
+                      classNamePrefix='select'
+                      className='react-select'
+                      theme={selectThemeColors}
+                      options={recurrenceOptions}
+                      value={recurrenceOptions.find(o => o.value === recurrence)}
+                      onChange={option => setRecurrence(option ? option.value : 'none')}
+                    />
+                  </Col>
+                  {repeats && (
+                    <Col md={4} className='mb-1'>
+                      <Label className='form-label' for='recurrence_end'>
+                        Ends
+                      </Label>
+                      <div className='d-flex' style={{ gap: '0.5rem' }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <Select
+                            inputId='recurrence_end'
+                            classNamePrefix='select'
+                            className='react-select'
+                            theme={selectThemeColors}
+                            options={endOptions}
+                            value={endOptions.find(o => o.value === endMode)}
+                            onChange={option => setEndMode(option ? option.value : 'never')}
+                          />
+                        </div>
+                        {endMode === 'count' && (
+                          <Controller
+                            name='recurrence_count'
+                            control={control}
+                            render={({ field }) => (
+                              <Input
+                                type='number'
+                                min='2'
+                                step='1'
+                                placeholder='Times'
+                                style={{ width: '90px' }}
+                                invalid={errors.recurrence_count && true}
+                                {...field}
+                              />
+                            )}
+                          />
+                        )}
+                        {endMode === 'date' && (
+                          <div style={{ width: '150px' }}>
+                            <Controller
+                              name='recurrence_end_date'
+                              control={control}
+                              render={({ field }) => (
+                                <DateField invalid={errors.recurrence_end_date && true} value={field.value} onChange={field.onChange} />
+                              )}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </Col>
+                  )}
+                </Fragment>
+              )}
               <Col md={12} className='mb-1'>
                 <Label className='form-label' for='description'>
                   Description

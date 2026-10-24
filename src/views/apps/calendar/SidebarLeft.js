@@ -14,6 +14,7 @@ const baseTaskFilters = [
 // on their calendar - same view permission that gates the Contracts list
 // itself.
 const contractInvoiceFilter = { label: 'Upcoming Invoices', className: 'form-check-secondary' }
+const expenseFilter = { label: 'Expenses', className: 'form-check-danger' }
 
 const SidebarLeft = props => {
   const { handleAddEventSidebar, toggleSidebar, updateFilter, updateAllFilters, toggleTaskFilter, store, dispatch } = props
@@ -23,7 +24,11 @@ const SidebarLeft = props => {
     handleAddEventSidebar()
   }
 
-  const taskFilters = currentUserCan('/contract', 'view') ? [...baseTaskFilters, contractInvoiceFilter] : baseTaskFilters
+  const taskFilters = [
+    ...baseTaskFilters,
+    ...(currentUserCan('/contract', 'view') ? [contractInvoiceFilter] : []),
+    ...(currentUserCan('/expense', 'view') ? [expenseFilter] : [])
+  ]
 
   return (
     <Fragment>
