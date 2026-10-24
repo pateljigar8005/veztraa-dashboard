@@ -36,25 +36,34 @@ export const columns = [
   },
   {
     name: 'Type',
-    minWidth: '170px',
+    minWidth: '190px',
     selector: row => row.expense_type,
     cell: row => {
-      const repeat = REPEAT_LABELS[row.recurrence]
+      const repeat = REPEAT_LABELS[row.recurrence] || (row.copy_count > 0 ? 'Stopped' : null)
+      const type = TYPE_LABELS[row.expense_type] || 'One-time'
+      if (repeat) {
+        const paid = 1 + (row.copy_count || 0)
+        return (
+          <div className='d-flex flex-column'>
+            <span className='d-flex align-items-center'>
+              {type}
+              <span className='text-muted ms-50 d-inline-flex align-items-center'>
+                <Repeat size={11} className='me-25' />
+                {repeat}
+              </span>
+            </span>
+            <small className='text-muted'>
+              {paid}
+              {row.recurrence_count ? ` of ${row.recurrence_count}` : ''} paid
+              {row.next_occurrence_date ? ` · next ${shortDate(row.next_occurrence_date)}` : ' · finished'}
+            </small>
+          </div>
+        )
+      }
       return (
         <div className='d-flex flex-column'>
-          <span>{TYPE_LABELS[row.expense_type] || 'One-time'}</span>
-          {repeat ? (
-            <small className='text-muted d-flex align-items-center'>
-              <Repeat size={11} className='me-25' />
-              {repeat}
-              {row.next_occurrence_date ? ` · next ${shortDate(row.next_occurrence_date)}` : ' · ended'}
-            </small>
-          ) : row.recurring_parent_id ? (
-            <small className='text-muted d-flex align-items-center'>
-              <Repeat size={11} className='me-25' />
-              Auto-created
-            </small>
-          ) : null}
+          <span>{type}</span>
+          {row.recurring_parent_id && <small className='text-muted'>Recurring payment</small>}
         </div>
       )
     }
@@ -91,9 +100,30 @@ export const columns = [
     sortField: 'amount',
     selector: row => Number(row.amount),
     cell: row => (
-      <span className='fw-bolder'>
+      <span>
         {row.currency} {formatAmount(row.amount)}
       </span>
+    )
+  },
+  {
+    // Everything paid so far - for a recurring series that's the original
+    // plus every auto-created payment (in the series' own currency; payments
+    // in another currency are flagged and shown when the row is expanded).
+    name: 'Total Paid',
+    width: '160px',
+    right: true,
+    selector: row => Number(row.amount) + Number(row.copy_total || 0),
+    cell: row => (
+      <div className='d-flex flex-column align-items-end'>
+        <span className='fw-bolder'>
+          {row.currency} {formatAmount(Number(row.amount) + Number(row.copy_total || 0))}
+        </span>
+        {row.copy_other_currency > 0 && (
+          <small className='text-muted' title='Some payments in this series were in another currency - expand the row to see every total'>
+            + other currency
+          </small>
+        )}
+      </div>
     )
   },
   {

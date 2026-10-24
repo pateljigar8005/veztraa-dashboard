@@ -40,8 +40,14 @@ const recurrenceOptions = [
 const endOptions = [
   { value: 'never', label: 'Never' },
   { value: 'count', label: 'After a number of times' },
-  { value: 'date', label: 'On a date' }
+  { value: 'date', label: 'On a date' },
+  { value: 'stop', label: 'Stop now - no more payments' }
 ]
+
+const todayIso = () => {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
 
 const ExpenseForm = () => {
   const { id } = useParams()
@@ -137,7 +143,8 @@ const ExpenseForm = () => {
     !repeats ||
     endMode === 'never' ||
     (endMode === 'count' && Number(data.recurrence_count) >= 2) ||
-    (endMode === 'date' && data.recurrence_end_date && data.recurrence_end_date > data.expense_date)
+    (endMode === 'date' && data.recurrence_end_date && data.recurrence_end_date > data.expense_date) ||
+    endMode === 'stop'
 
   const checkIsValid = data =>
     data.amount !== '' && Number(data.amount) > 0 && data.expense_date && category && recurrenceValid(data)
@@ -159,7 +166,9 @@ const ExpenseForm = () => {
       if (!isGeneratedCopy) {
         payload.recurrence = recurrence
         payload.recurrence_count = repeats && endMode === 'count' ? Number(data.recurrence_count) : null
-        payload.recurrence_end_date = repeats && endMode === 'date' ? data.recurrence_end_date : null
+        // "Stop now" keeps the series (so its past payments stay grouped
+        // under this expense) and just ends it today - no new copies after.
+        payload.recurrence_end_date = repeats && endMode === 'date' ? data.recurrence_end_date : repeats && endMode === 'stop' ? todayIso() : null
       }
 
       const action = isEdit ? updateExpense({ id: Number(id), ...payload }) : addExpense(payload)
@@ -367,6 +376,14 @@ const ExpenseForm = () => {
                       onChange={option => setRecurrence(option ? option.value : 'none')}
                     />
                   </Col>
+                  {isEdit && !repeats && store.selectedExpense?.id === Number(id) && store.selectedExpense?.recurrence !== 'none' && (
+                    <Col md={4} className='mb-1 d-flex align-items-end'>
+                      <p className='text-warning small mb-50'>
+                        Turning repeat off removes this series' grouping. To just stop future payments, keep the repeat and
+                        choose Ends: "Stop now".
+                      </p>
+                    </Col>
+                  )}
                   {repeats && (
                     <Col md={4} className='mb-1'>
                       <Label className='form-label' for='recurrence_end'>

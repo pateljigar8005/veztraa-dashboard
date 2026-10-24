@@ -6,6 +6,12 @@ export const getAllData = createAsyncThunk('appExpenses/getAllData', async () =>
   return response.data.data.expenses
 })
 
+// A recurring series lists as one expandable row (grouped=1) - unless a
+// date or amount filter is active, where every individual payment needs its
+// own row so the results and totals actually match the filter.
+export const isFlatListing = (filters = {}) =>
+  Boolean(filters.expense_date_from || filters.expense_date_to || filters.amount_from || filters.amount_to)
+
 export const getData = createAsyncThunk('appExpenses/getData', async params => {
   const response = await axios.get('/expenses', {
     params: {
@@ -14,7 +20,8 @@ export const getData = createAsyncThunk('appExpenses/getData', async params => {
       q: params.q || '',
       sortColumn: params.sortColumn || 'id',
       sortDirection: params.sort || 'desc',
-      ...params.filters
+      ...params.filters,
+      grouped: isFlatListing(params.filters) ? undefined : 1
     }
   })
   return {

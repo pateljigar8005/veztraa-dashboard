@@ -4,7 +4,8 @@ import useDebounce from '@hooks/useDebounce'
 import AdvancedSearchModal from '../../shared/AdvancedSearchModal'
 import { expenseCategoryOptions } from '../expenseCategoryOptions'
 import { columns } from './columns'
-import { getAllData, getData } from '../store'
+import { getAllData, getData, isFlatListing } from '../store'
+import SeriesRows from './SeriesRows'
 import { useDispatch, useSelector } from 'react-redux'
 import ReactPaginate from 'react-paginate'
 import DataTable from 'react-data-table-component'
@@ -16,9 +17,71 @@ import TableEmptyState, { hasActiveFilters } from '@src/views/apps/shared/TableE
 import UILoader from '@components/ui-loader'
 import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import { DollarSign as EmptyIcon } from 'react-feather'
+import axios from 'axios'
+import { sortOptions, clientOptionLabel } from '@utils'
 
 const searchFields = [
   { name: 'category', label: 'Category', type: 'select', options: expenseCategoryOptions },
+  {
+    name: 'expense_type',
+    label: 'Type',
+    type: 'select',
+    options: [
+      { value: 'one_time', label: 'One-time' },
+      { value: 'subscription', label: 'Subscription' },
+      { value: 'emi', label: 'EMI' }
+    ]
+  },
+  {
+    name: 'recurrence',
+    label: 'Repeat',
+    type: 'select',
+    options: [
+      { value: 'none', label: "Doesn't repeat" },
+      { value: 'monthly', label: 'Monthly' },
+      { value: 'quarterly', label: 'Quarterly' },
+      { value: 'yearly', label: 'Yearly' }
+    ]
+  },
+  {
+    name: 'vendor_id',
+    label: 'Vendor',
+    type: 'select',
+    fetchOptions: () =>
+      axios.get('/vendors', { params: { perPage: 100 } }).then(r => sortOptions(r.data.data.vendors.map(v => ({ value: v.id, label: v.name }))))
+  },
+  {
+    name: 'client_id',
+    label: 'Client',
+    type: 'select',
+    fetchOptions: () =>
+      axios.get('/clients', { params: { perPage: 100 } }).then(r => sortOptions(r.data.data.clients.map(c => ({ value: c.id, label: clientOptionLabel(c) }))))
+  },
+  {
+    name: 'project_id',
+    label: 'Project',
+    type: 'select',
+    fetchOptions: () =>
+      axios.get('/projects', { params: { perPage: 100 } }).then(r => sortOptions(r.data.data.projects.map(p => ({ value: p.id, label: p.name }))))
+  },
+  {
+    name: 'payment_method_id',
+    label: 'Payment Method',
+    type: 'select',
+    fetchOptions: () =>
+      axios
+        .get('/payment-methods', { params: { perPage: 100 } })
+        .then(r => sortOptions(r.data.data.paymentMethods.map(m => ({ value: m.id, label: m.name }))))
+  },
+  {
+    name: 'currency',
+    label: 'Currency',
+    type: 'select',
+    fetchOptions: () =>
+      axios
+        .get('/currencies', { params: { perPage: 100 } })
+        .then(r => sortOptions(r.data.data.currencies.filter(c => c.is_active).map(c => ({ value: c.icon, label: `${c.name} (${c.icon})` }))))
+  },
   { name: 'expense_date', label: 'Expense Date', type: 'date-range' },
   { name: 'amount', label: 'Amount', type: 'number-range' }
 ]
@@ -206,6 +269,9 @@ const ExpensesList = () => {
               responsive
               paginationServer
               columns={columns}
+              expandableRows
+              expandableRowsComponent={SeriesRows}
+              expandableRowDisabled={row => isFlatListing(filters) || Boolean(row.recurring_parent_id) || !row.copy_count}
               onSort={handleSort}
               sortIcon={<ChevronDown />}
               className='react-dataTable'
