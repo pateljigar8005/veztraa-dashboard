@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { sanitizeHtml } from '@veztraa/editor'
 import { Link, useParams } from 'react-router-dom'
 import axios from 'axios'
 import toast from 'react-hot-toast'
@@ -345,7 +346,7 @@ const QuotationView = () => {
               </CardTitle>
             </CardHeader>
             <Collapse isOpen={termsOpen}>
-              <CardBody dangerouslySetInnerHTML={{ __html: quotation.terms_content }} />
+              <CardBody dangerouslySetInnerHTML={{ __html: sanitizeHtml(quotation.terms_content || '') }} />
             </Collapse>
           </Card>
         )}
@@ -359,7 +360,7 @@ const QuotationView = () => {
               </CardTitle>
             </CardHeader>
             <Collapse isOpen={paymentMethodOpen}>
-              <CardBody dangerouslySetInnerHTML={{ __html: quotation.payment_method_content }} />
+              <CardBody dangerouslySetInnerHTML={{ __html: sanitizeHtml(quotation.payment_method_content || '') }} />
             </Collapse>
           </Card>
         )}

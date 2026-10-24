@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { sanitizeHtml } from '@veztraa/editor'
 import { Link, useParams } from 'react-router-dom'
 import axios from 'axios'
 import toast from 'react-hot-toast'
@@ -358,7 +359,7 @@ const InvoiceView = () => {
               </CardTitle>
             </CardHeader>
             <Collapse isOpen={termsOpen}>
-              <CardBody dangerouslySetInnerHTML={{ __html: invoice.terms_content }} />
+              <CardBody dangerouslySetInnerHTML={{ __html: sanitizeHtml(invoice.terms_content || '') }} />
             </Collapse>
           </Card>
         )}
@@ -372,7 +373,7 @@ const InvoiceView = () => {
               </CardTitle>
             </CardHeader>
             <Collapse isOpen={paymentMethodOpen}>
-              <CardBody dangerouslySetInnerHTML={{ __html: invoice.payment_method_content }} />
+              <CardBody dangerouslySetInnerHTML={{ __html: sanitizeHtml(invoice.payment_method_content || '') }} />
             </Collapse>
           </Card>
         )}

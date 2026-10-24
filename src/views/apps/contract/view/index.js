@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { sanitizeHtml } from '@veztraa/editor'
 import { Link, useParams } from 'react-router-dom'
 import axios from 'axios'
 import toast from 'react-hot-toast'
@@ -283,7 +284,7 @@ const ContractView = () => {
           <CardHeader>
             <CardTitle tag='h4'>Contract Body</CardTitle>
           </CardHeader>
-          <CardBody dangerouslySetInnerHTML={{ __html: contract.body || '<p class="text-muted mb-0">No contract text.</p>' }} />
+          <CardBody dangerouslySetInnerHTML={{ __html: sanitizeHtml(contract.body || '<p class="text-muted mb-0">No contract text.</p>') }} />
         </Card>
 
         {contract.terms_content && (
@@ -295,7 +296,7 @@ const ContractView = () => {
               </CardTitle>
             </CardHeader>
             <Collapse isOpen={termsOpen}>
-              <CardBody dangerouslySetInnerHTML={{ __html: contract.terms_content }} />
+              <CardBody dangerouslySetInnerHTML={{ __html: sanitizeHtml(contract.terms_content || '') }} />
             </Collapse>
           </Card>
         )}
@@ -309,7 +310,7 @@ const ContractView = () => {
               </CardTitle>
             </CardHeader>
             <Collapse isOpen={paymentMethodOpen}>
-              <CardBody dangerouslySetInnerHTML={{ __html: contract.payment_method_content }} />
+              <CardBody dangerouslySetInnerHTML={{ __html: sanitizeHtml(contract.payment_method_content || '') }} />
             </Collapse>
           </Card>
         )}
