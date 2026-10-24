@@ -9,8 +9,17 @@
 // any day that didn't use the full 2-events-plus-more-link allowance (e.g. a
 // holiday-only day). A min-height keeps a bare day number from looking
 // cramped while letting rows with more content grow naturally.
+//
+// A fixed height (not just a min-height) that fits the most a day can show -
+// the day number / holiday label, dayMaxEvents (2, see Calendar.js) events
+// and the "+N more" link. FullCalendar otherwise reserves extra empty space
+// under any day that has events, so a row with events grew taller than an
+// empty one and every filter toggle made the rows jump. Anything beyond the
+// 2 events goes into "+N more", so nothing real is ever cut off here.
 .fc-daygrid-day-frame {
-  min-height: 60px;
+  height: 130px;
+  min-height: 130px;
+  overflow: hidden;
 }
 
 // Below 700px the view-switcher (Month/Week/Day/List) wraps onto its own

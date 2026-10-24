@@ -158,8 +158,13 @@ const UPCOMING_EXPENSE_DAYS = 30
 
 export const fetchExpenseEvents = createAsyncThunk('appCalendar/fetchExpenseEvents', async () => {
   const response = await axios.get('/expenses/upcoming', { params: { days: UPCOMING_EXPENSE_DAYS } })
+  // The API already limits this to `days`; the same cutoff here keeps the
+  // calendar right even against an older API that ignores the parameter.
+  const cutoff = new Date()
+  cutoff.setDate(cutoff.getDate() + UPCOMING_EXPENSE_DAYS)
+  const until = `${cutoff.getFullYear()}-${String(cutoff.getMonth() + 1).padStart(2, '0')}-${String(cutoff.getDate()).padStart(2, '0')}`
 
-  const events = response.data.data.occurrences.map(occ => ({
+  const events = response.data.data.occurrences.filter(occ => occ.date <= until).map(occ => ({
     id: `expense-upcoming-${occ.template_id}-${occ.date}`,
     title: `Due: ${occ.category}${occ.vendor_name ? ` - ${occ.vendor_name}` : ''} (${occ.currency}${formatAmount(occ.amount)})`,
     start: occ.date,
