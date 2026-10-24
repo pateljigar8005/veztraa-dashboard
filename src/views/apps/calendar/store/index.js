@@ -157,23 +157,16 @@ export const fetchContractInvoiceEvents = createAsyncThunk('appCalendar/fetchCon
 const UPCOMING_EXPENSE_DAYS = 30
 
 export const fetchExpenseEvents = createAsyncThunk('appCalendar/fetchExpenseEvents', async () => {
-  const response = await axios.get('/expenses/upcoming')
-  const pad = n => String(n).padStart(2, '0')
-  const toIso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
-  const today = new Date()
-  const until = new Date(today.getFullYear(), today.getMonth(), today.getDate() + UPCOMING_EXPENSE_DAYS)
-  const [from, to] = [toIso(today), toIso(until)]
+  const response = await axios.get('/expenses/upcoming', { params: { days: UPCOMING_EXPENSE_DAYS } })
 
-  const events = response.data.data.occurrences
-    .filter(occ => occ.date >= from && occ.date <= to)
-    .map(occ => ({
-      id: `expense-upcoming-${occ.template_id}-${occ.date}`,
-      title: `Due: ${occ.category}${occ.vendor_name ? ` - ${occ.vendor_name}` : ''} (${occ.currency}${formatAmount(occ.amount)})`,
-      start: occ.date,
-      allDay: true,
-      editable: false,
-      extendedProps: { calendar: 'Expenses', source: 'expense-upcoming', expenseId: occ.template_id }
-    }))
+  const events = response.data.data.occurrences.map(occ => ({
+    id: `expense-upcoming-${occ.template_id}-${occ.date}`,
+    title: `Due: ${occ.category}${occ.vendor_name ? ` - ${occ.vendor_name}` : ''} (${occ.currency}${formatAmount(occ.amount)})`,
+    start: occ.date,
+    allDay: true,
+    editable: false,
+    extendedProps: { calendar: 'Expenses', source: 'expense-upcoming', expenseId: occ.template_id }
+  }))
 
   return { events }
 })
