@@ -150,40 +150,32 @@ export const fetchContractInvoiceEvents = createAsyncThunk('appCalendar/fetchCon
   return { events }
 })
 
-// Recurring expenses (subscriptions, EMIs, monthly bills): the ones already
-// created, on their own date, plus the next 12 months of projected ones from
-// /expenses/upcoming so upcoming payments can be planned. Clicking either
-// opens the expense - a projected one opens its original (the template the
-// series repeats from).
-export const fetchExpenseEvents = createAsyncThunk('appCalendar/fetchExpenseEvents', async () => {
-  const [listResponse, upcomingResponse] = await Promise.all([
-    axios.get('/expenses', { params: { perPage: 100, sortColumn: 'expense_date', sortDirection: 'desc' } }),
-    axios.get('/expenses/upcoming')
-  ])
-  const label = (category, vendorName, currency, amount) =>
-    `${category}${vendorName ? ` - ${vendorName}` : ''} (${currency}${formatAmount(amount)})`
+// Upcoming recurring expenses (subscriptions, EMIs, monthly bills) due in
+// the next 30 days - a payment-reminder view. Expenses that already exist
+// (i.e. are paid/recorded) aren't shown. Clicking one opens the recurring
+// expense it comes from.
+const UPCOMING_EXPENSE_DAYS = 30
 
-  const recorded = listResponse.data.data.expenses
-    .filter(expense => expense.recurrence !== 'none' || expense.recurring_parent_id)
-    .map(expense => ({
-      id: `expense-${expense.id}`,
-      title: label(expense.category, expense.vendor_name, expense.currency, expense.amount),
-      start: expense.expense_date,
+export const fetchExpenseEvents = createAsyncThunk('appCalendar/fetchExpenseEvents', async () => {
+  const response = await axios.get('/expenses/upcoming')
+  const pad = n => String(n).padStart(2, '0')
+  const toIso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  const today = new Date()
+  const until = new Date(today.getFullYear(), today.getMonth(), today.getDate() + UPCOMING_EXPENSE_DAYS)
+  const [from, to] = [toIso(today), toIso(until)]
+
+  const events = response.data.data.occurrences
+    .filter(occ => occ.date >= from && occ.date <= to)
+    .map(occ => ({
+      id: `expense-upcoming-${occ.template_id}-${occ.date}`,
+      title: `Due: ${occ.category}${occ.vendor_name ? ` - ${occ.vendor_name}` : ''} (${occ.currency}${formatAmount(occ.amount)})`,
+      start: occ.date,
       allDay: true,
       editable: false,
-      extendedProps: { calendar: 'Expenses', source: 'expense', expenseId: expense.id }
+      extendedProps: { calendar: 'Expenses', source: 'expense-upcoming', expenseId: occ.template_id }
     }))
 
-  const upcoming = upcomingResponse.data.data.occurrences.map(occ => ({
-    id: `expense-upcoming-${occ.template_id}-${occ.date}`,
-    title: `Due: ${label(occ.category, occ.vendor_name, occ.currency, occ.amount)}`,
-    start: occ.date,
-    allDay: true,
-    editable: false,
-    extendedProps: { calendar: 'Expenses', source: 'expense-upcoming', expenseId: occ.template_id }
-  }))
-
-  return { events: [...recorded, ...upcoming] }
+  return { events }
 })
 
 export const appCalendarSlice = createSlice({
