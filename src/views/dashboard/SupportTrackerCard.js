@@ -2,6 +2,7 @@ import { useContext } from 'react'
 import Chart from 'react-apexcharts'
 import { Row, Col, Card, CardBody, CardText, CardTitle, CardHeader } from 'reactstrap'
 import { ThemeColors } from '@src/utility/context/ThemeColors'
+import { useSkin } from '@hooks/useSkin'
 
 // Same dashed dual-tone radial gauge/layout as Vuexy's reactstrap
 // "Support Tracker" card, now backed by real data
@@ -15,6 +16,14 @@ const SupportTrackerCard = ({ data }) => {
   const primary = colors?.primary?.main || '#7367f0'
   const danger = colors?.danger?.main || '#ea5455'
 
+  // The ring's empty track and the % label need to contrast with the card
+  // in both themes - a hardcoded white track vanished on the light theme's
+  // white card, and the default dark label vanished on the dark card.
+  const { skin } = useSkin()
+  const isDark = skin === 'dark'
+  const trackColor = isDark ? '#3b4253' : '#ebe9f1'
+  const labelColor = isDark ? '#d0d2d6' : '#5e5873'
+
   const stats = data?.stats || []
   const completionPct = data?.completion_pct || 0
   const totalOpenItems = stats.reduce((sum, stat) => sum + (stat.value || 0), 0)
@@ -23,14 +32,14 @@ const SupportTrackerCard = ({ data }) => {
     plotOptions: {
       radialBar: {
         size: 150,
-        offsetY: 20,
+        offsetY: -10,
         startAngle: -150,
         endAngle: 150,
         hollow: { size: '65%' },
-        track: { background: '#fff', strokeWidth: '100%' },
+        track: { background: trackColor, strokeWidth: '100%' },
         dataLabels: {
           name: { offsetY: -5, fontFamily: 'Montserrat', fontSize: '1rem' },
-          value: { offsetY: 15, fontFamily: 'Montserrat', fontSize: '1.714rem' }
+          value: { offsetY: 15, fontFamily: 'Montserrat', fontSize: '1.714rem', color: labelColor }
         }
       }
     },
@@ -63,7 +72,7 @@ const SupportTrackerCard = ({ data }) => {
             <h1 className='font-large-2 fw-bolder mt-2 mb-0'>{totalOpenItems}</h1>
             <CardText>Needs Attention</CardText>
           </Col>
-          <Col sm='10' className='d-flex justify-content-center'>
+          <Col sm='8' className='d-flex justify-content-center'>
             <Chart
               options={options}
               series={[completionPct]}

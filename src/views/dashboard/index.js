@@ -4,9 +4,8 @@ import { Row, Col, Button } from 'reactstrap'
 import { Grid, AlertTriangle, RefreshCw } from 'react-feather'
 import { getSummary } from './store'
 import CardEmptyState from '@src/views/apps/shared/CardEmptyState'
-import { dashboardBlocks, dashboardSections } from './blockConfig'
+import { dashboardBlocks } from './blockConfig'
 import DashboardSkeleton from './DashboardSkeleton'
-import CombinedChartCard from './CombinedChartCard'
 import KpiStrip from './KpiStrip'
 import SupportTrackerCard from './SupportTrackerCard'
 import RevenueReportCard from './RevenueReportCard'
@@ -83,45 +82,6 @@ const Dashboard = () => {
             )}
             <Col lg={4} md={12} xs={12}>
               <NeedsAttentionCard />
-            </Col>
-          </Row>
-
-          <Row className='g-2'>
-            <Col md={12}>
-              {/* Donut blocks (Invoices/Quotations/Projects) still render
-                  per-section, since a CombinedChartCard groups them by
-                  section on purpose (e.g. all of Billing's own donuts
-                  together) and merging across sections wouldn't make sense
-                  for a single chart. */}
-              {dashboardSections.map(section => {
-                const donutBlocks = visibleBlocks.filter(
-                  block => block.section === section && block.chart === 'donut'
-                )
-                if (donutBlocks.length === 0) return null
-
-                return (
-                  <div key={section} className='mb-2'>
-                    <h6 className='text-muted text-uppercase mb-1'>{section}</h6>
-                    <Row className='g-2'>
-                      <Col md={12}>
-                        <CombinedChartCard
-                          items={donutBlocks.map(block => {
-                            const data = store.blocks[block.id]
-                            return {
-                              icon: block.icon,
-                              color: block.color,
-                              title: block.title,
-                              path: block.path,
-                              byStatus: data[block.byStatusKey],
-                              extraStats: block.extraStats(data)
-                            }
-                          })}
-                        />
-                      </Col>
-                    </Row>
-                  </div>
-                )
-              })}
             </Col>
           </Row>
         </Fragment>

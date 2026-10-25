@@ -24,6 +24,15 @@ import { formatAmount } from '@utils'
 // Invoice/InvoicePayment::monthlySumsForRange(), see
 // veztraa-api/helpers/ReportCurrency.php) - currencyIcon (from the same
 // /dashboard/summary response) just labels what that currency is.
+// Short axis labels (₹40K, ₹1.2M) - the full ₹160,000.00 form ate a wide
+// strip of the card. Tooltips still show the exact amount.
+const compactAmount = val => {
+  const abs = Math.abs(val)
+  if (abs >= 1e6) return `${+(val / 1e6).toFixed(1)}M`
+  if (abs >= 1e3) return `${+(val / 1e3).toFixed(1)}K`
+  return `${Math.round(val)}`
+}
+
 const RevenueReportCard = ({ data, currencyIcon = '' }) => {
   const { colors } = useContext(ThemeColors)
   const primary = colors?.primary?.main || '#7367f0'
@@ -61,7 +70,7 @@ const RevenueReportCard = ({ data, currencyIcon = '' }) => {
         }
       },
       yaxis: {
-        labels: { style: { colors: '#b9b9c3', fontSize: '0.86rem' }, formatter: val => `${currencyIcon}${formatAmount(val)}` }
+        labels: { style: { colors: '#b9b9c3', fontSize: '0.86rem' }, formatter: val => `${currencyIcon}${compactAmount(val)}` }
       },
       tooltip: {
         y: { formatter: val => `${currencyIcon}${formatAmount(val)}` }

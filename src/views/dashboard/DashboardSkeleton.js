@@ -54,17 +54,6 @@ const DashboardSkeleton = () => (
         </Col>
       ))}
     </Row>
-
-    <Row className='g-2'>
-      <Col md={12}>
-        <Skeleton width={120} height={14} className='mb-1' />
-        <Row className='g-2'>
-          <Col md={12}>
-            <ChartCardSkeleton height={120} />
-          </Col>
-        </Row>
-      </Col>
-    </Row>
   </Fragment>
 )
 
