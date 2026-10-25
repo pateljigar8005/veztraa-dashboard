@@ -62,7 +62,7 @@ const SupportTrackerCard = ({ data }) => {
   }
 
   return (
-    <Card className='h-100'>
+    <Card className='h-100 mb-0'>
       <CardHeader className='pb-0'>
         <CardTitle tag='h4'>Support Tracker</CardTitle>
       </CardHeader>

@@ -82,7 +82,7 @@ const RevenueReportCard = ({ data, currencyIcon = '' }) => {
     ]
 
   return (
-    <Card className='card-revenue-budget h-100'>
+    <Card className='card-revenue-budget h-100 mb-0'>
       <Row className='mx-0'>
         <Col className='revenue-report-wrapper' md='12' xs='12'>
           <div className='d-sm-flex justify-content-between align-items-center mb-3'>

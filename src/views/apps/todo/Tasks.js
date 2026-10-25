@@ -209,12 +209,15 @@ const Tasks = props => {
             })}
           </ReactSortable>
         ) : (
-          <TableEmptyState
-            icon={CheckSquare}
-            noun='tasks'
-            message='Tasks you create or get assigned show up here.'
-            filtered={Boolean(query)}
-          />
+          // Centered in the whole list pane rather than pinned to its top.
+          <div className='d-flex align-items-center justify-content-center h-100'>
+            <TableEmptyState
+              icon={CheckSquare}
+              noun='tasks'
+              message='Tasks you create or get assigned show up here.'
+              filtered={Boolean(query)}
+            />
+          </div>
         )}
       </PerfectScrollbar>
     )
