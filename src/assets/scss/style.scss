@@ -20,3 +20,14 @@
 .app-content.invoice-form-page {
   overflow: visible !important;
 }
+
+// Breathing room under the sidebar logo. Making the header itself taller
+// (and the scroll area shorter by the same amount) keeps the gap fixed
+// while the menu scrolls, instead of padding the top of the list.
+.main-menu .navbar-header {
+  height: calc(4.45rem + 1rem);
+}
+
+.main-menu .main-menu-content {
+  height: calc(100% - 4.45rem - 1rem) !important;
+}

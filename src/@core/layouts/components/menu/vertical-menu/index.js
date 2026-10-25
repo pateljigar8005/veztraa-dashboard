@@ -1,4 +1,4 @@
-import { Fragment, useState, useRef } from 'react'
+import { Fragment, useState } from 'react'
 import classnames from 'classnames'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 import VerticalMenuHeader from './VerticalMenuHeader'
@@ -14,22 +14,8 @@ const Sidebar = props => {
 
   const [menuHover, setMenuHover] = useState(false)
 
-  const shadowRef = useRef(null)
-
   const onMouseEnter = () => {
     setMenuHover(true)
-  }
-
-  const scrollMenu = container => {
-    if (shadowRef && container.scrollTop > 0) {
-      if (!shadowRef.current.classList.contains('d-block')) {
-        shadowRef.current.classList.add('d-block')
-      }
-    } else {
-      if (shadowRef.current.classList.contains('d-block')) {
-        shadowRef.current.classList.remove('d-block')
-      }
-    }
   }
 
   return (
@@ -49,13 +35,12 @@ const Sidebar = props => {
           <Fragment>
             {                          }
             <VerticalMenuHeader setGroupOpen={setGroupOpen} menuHover={menuHover} {...props} />
-            {                                 }
-            <div className='shadow-bottom' ref={shadowRef}></div>
+            {/* No scroll shadow under the header - its blurred white
+                gradient washed out the logo once the menu was scrolled. */}
             {                       }
             <PerfectScrollbar
               className='main-menu-content'
               options={{ wheelPropagation: false }}
-              onScrollY={container => scrollMenu(container)}
             >
               <ul className='navigation navigation-main'>
                 <VerticalNavMenuItems
