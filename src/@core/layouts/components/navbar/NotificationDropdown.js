@@ -10,6 +10,10 @@ import { dismissNotification, dismissAllNotifications, markAllNotificationsRead,
 import CardEmptyState from '@src/views/apps/shared/CardEmptyState'
 
 // The API handles permission filtering; this component renders the returned items.
+// Types the API can clear one at a time (NotificationController::dismiss()).
+// Leave items aren't in here - they go away once acted on.
+const CLEAR_ON_OPEN = ['contact', 'job_application', 'todo_overdue', 'todo_assigned', 'todo_activity', 'invoice_overdue']
+
 const TYPE_META = {
   contact: { icon: <Mail size={14} />, color: 'primary' },
   job_application: { icon: <Send size={14} />, color: 'info' },
@@ -103,10 +107,14 @@ const NotificationDropdown = () => {
             {items.map(item => {
               const meta = TYPE_META[item.type]
               const key = `${item.type}-${item.id}`
-              // Marking a mention read keeps it visible until it is dismissed.
+              // Opening an item counts as reading it. A mention stays in the
+              // list (muted) until dismissed; the others have no "read"
+              // state, so opening one clears it from the bell.
               const handleOpen = () => {
-                if (item.type === 'mention' && !item.is_read) {
-                  dispatch(markNotificationRead({ type: item.type, id: item.id }))
+                if (item.type === 'mention') {
+                  if (!item.is_read) dispatch(markNotificationRead({ type: item.type, id: item.id }))
+                } else if (CLEAR_ON_OPEN.includes(item.type)) {
+                  dispatch(dismissNotification({ type: item.type, id: item.id }))
                 }
               }
               return (
