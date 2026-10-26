@@ -166,8 +166,16 @@ $fc-day-toggle-btn-padding: 0.55rem 1.5rem;
     background: $body-bg !important;
     background-color: $body-bg !important;
   }
+  // Holidays/weekends: diagonal hatching, so blocked days read at a glance.
   .fc-day-holiday {
-    background-color: rgba($black, 0.06) !important;
+    background-color: rgba($danger, 0.03) !important;
+    background-image: repeating-linear-gradient(
+      -45deg,
+      rgba($danger, 0.14) 0,
+      rgba($danger, 0.14) 2px,
+      transparent 2px,
+      transparent 12px
+    ) !important;
     cursor: not-allowed;
     .fc-daygrid-day-number {
       color: $text-muted;
