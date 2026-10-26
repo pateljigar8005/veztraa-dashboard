@@ -23,9 +23,10 @@ import {
   CreditCard,
   Globe
 } from 'react-feather'
-import { Modal, ModalBody, Spinner } from 'reactstrap'
+import { Modal, ModalBody } from 'reactstrap'
 import axios from 'axios'
 import useDebounce from '@hooks/useDebounce'
+import Skeleton from '@components/skeleton'
 import { canAccessRoute } from '@src/utility/navPermissions'
 
 const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform || navigator.userAgent || '')
@@ -138,10 +139,15 @@ const GlobalSearch = () => {
   const [query, setQuery] = useState('')
   const [groups, setGroups] = useState([])
   const [loading, setLoading] = useState(false)
+  const [resultsFor, setResultsFor] = useState('')
   const [activeIndex, setActiveIndex] = useState(0)
   const inputRef = useRef(null)
   const debouncedQuery = useDebounce(query, 300)
   const isSearching = query.trim().length >= 2
+  // Skeleton until results for exactly what's typed have landed - covers
+  // the debounce gap and the request itself, so stale results or a
+  // premature "No results" never flash in between.
+  const isPending = isSearching && (loading || resultsFor !== query.trim())
 
   const userData = getUserData()
   // Whole-system search is admin-only (the API enforces this too - see
@@ -155,13 +161,16 @@ const GlobalSearch = () => {
   )
 
   const flatItems = isSearching
-    ? groups.flatMap(g => g.items.map(item => ({ ...item, groupKey: g.key })))
+    ? isPending
+      ? []
+      : groups.flatMap(g => g.items.map(item => ({ ...item, groupKey: g.key })))
     : visibleColumns.flat().flatMap(g => g.items)
 
   const close = () => {
     setIsOpen(false)
     setQuery('')
     setGroups([])
+    setResultsFor('')
     setActiveIndex(0)
   }
 
@@ -205,10 +214,12 @@ const GlobalSearch = () => {
         const returned = response.data?.data?.groups || []
         const sorted = [...returned].sort((a, b) => GROUP_ORDER.indexOf(a.key) - GROUP_ORDER.indexOf(b.key))
         setGroups(sorted)
+        setResultsFor(q)
       })
       .catch(err => {
         if (axios.isCancel(err) || err.name === 'CanceledError') return
         setGroups([])
+        setResultsFor(q)
       })
       .finally(() => setLoading(false))
 
@@ -246,7 +257,7 @@ const GlobalSearch = () => {
 
   return (
     <Modal isOpen={isOpen} toggle={close} className='modal-dialog-centered modal-lg global-search-modal' contentClassName='p-0'>
-      <div className='d-flex align-items-center px-3 py-1' style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+      <div className='d-flex align-items-center px-1 py-1' style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
           <SearchIcon size={20} className='text-muted me-1' />
           <input
             ref={inputRef}
@@ -257,19 +268,19 @@ const GlobalSearch = () => {
             onChange={e => setQuery(e.target.value)}
             onKeyDown={handleKeyNav}
           />
-          {loading && <Spinner size='sm' className='mx-50' />}
           <span className='text-muted mx-1' style={{ fontSize: '0.85rem' }}>
             [esc]
           </span>
           <X size={20} className='cursor-pointer text-muted' onClick={close} />
         </div>
-        <ModalBody className='p-2' style={{ maxHeight: '65vh', overflowY: 'auto' }}>
+        {/* Fixed height so the popup doesn't jump in size as results come and go. */}
+        <ModalBody className='p-2' style={{ height: 380, maxHeight: '65vh', overflowY: 'auto' }}>
           {!isSearching && (
             <div className='row'>
               {visibleColumns.map((column, colIndex) => (
                 <div className='col-12 col-md-6' key={colIndex}>
-                  {column.map(group => (
-                    <div className='mb-2' key={group.label}>
+                  {column.map((group, groupIndex) => (
+                    <div className={groupIndex < column.length - 1 ? 'mb-2' : ''} key={group.label}>
                       <div
                         className='text-muted text-uppercase fw-bold mb-50'
                         style={{ fontSize: '0.7rem', letterSpacing: '0.05em' }}
@@ -298,11 +309,30 @@ const GlobalSearch = () => {
             </div>
           )}
 
-          {isSearching && !loading && groups.length === 0 && (
+          {isPending &&
+            [0, 1].map(g => (
+              <div key={g} className='mb-1'>
+                <div className='px-50 pt-50 pb-50'>
+                  <Skeleton width={90} height={10} />
+                </div>
+                {[0, 1, 2].map(i => (
+                  <div key={i} className='d-flex align-items-center gap-1 px-50 py-50'>
+                    <Skeleton width={16} height={16} />
+                    <div className='flex-grow-1'>
+                      <Skeleton width={`${55 - i * 10}%`} height={12} className='mb-25' />
+                      <Skeleton width={`${35 - i * 5}%`} height={10} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+
+          {isSearching && !isPending && groups.length === 0 && (
             <div className='text-muted text-center py-3'>No results found</div>
           )}
 
           {isSearching &&
+            !isPending &&
             groups.map(group => {
               const GroupIcon = GROUP_ICON[group.key] || FileText
               return (
