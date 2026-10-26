@@ -16,6 +16,8 @@ import { addProject, updateProject, getProject } from '../store'
 import { statusOptions } from '../statusOptions'
 import { budgetTypeOptions } from '../budgetTypeOptions'
 import HistoryModal from '../../activity-log/HistoryModal'
+import { fetchUserOptions } from '../../todo/pickerOptions'
+import { userSelectComponents } from '../../todo/userSelectParts'
 
 const defaultValues = {
   name: '',
@@ -34,6 +36,8 @@ const ProjectForm = () => {
   const [clientOptions, setClientOptions] = useState([])
   const [currencyOptions, setCurrencyOptions] = useState([])
   const [description, setDescription] = useState('')
+  const [userOptions, setUserOptions] = useState([])
+  const [memberIds, setMemberIds] = useState([])
   const [extraDirty, setExtraDirty] = useState(false)
 
   const {
@@ -58,6 +62,7 @@ const ProjectForm = () => {
       const clients = response.data.data.clients
       setClientOptions(sortOptions(clients.map(c => ({ value: c.id, label: clientOptionLabel(c) }))))
     })
+    fetchUserOptions().then(setUserOptions)
     axios.get('/currencies', { params: { perPage: 100 } }).then(response => {
       setCurrencyOptions(
         response.data.data.currencies
@@ -81,6 +86,7 @@ const ProjectForm = () => {
         budget: project.budget ?? ''
       })
       setDescription(project.description || '')
+      setMemberIds(project.member_ids || [])
       setValue('client_id', project.client_id || '')
       setValue('status', project.status || 'planning')
       setValue('currency', project.currency || 'USD')
@@ -101,7 +107,8 @@ const ProjectForm = () => {
         currency: currency || 'USD',
         budget_type: budgetType || null,
         client_id: clientId || null,
-        status: status || 'planning'
+        status: status || 'planning',
+        member_ids: memberIds
       }
 
       const action = isEdit ? updateProject({ id: Number(id), ...payload }) : addProject(payload)
@@ -233,6 +240,27 @@ const ProjectForm = () => {
                     <AmountField id='budget' placeholder='15000' value={field.value} onChange={field.onChange} />
                   )}
                 />
+              </Col>
+              <Col md={12} className='mb-1'>
+                <Label className='form-label' for='member_ids'>
+                  Team Members
+                </Label>
+                <Select
+                  inputId='member_ids'
+                  isMulti
+                  classNamePrefix='select'
+                  className='react-select'
+                  theme={selectThemeColors}
+                  options={userOptions}
+                  value={userOptions.filter(o => memberIds.includes(o.value))}
+                  onChange={picked => {
+                    setMemberIds((picked || []).map(o => o.value))
+                    setExtraDirty(true)
+                  }}
+                  components={userSelectComponents}
+                  placeholder='Select the people working on this project...'
+                />
+                <small className='text-muted'>Only these people can be assigned to this project's tasks.</small>
               </Col>
               <Col md={12} className='mb-1'>
                 <Label className='form-label'>Description</Label>

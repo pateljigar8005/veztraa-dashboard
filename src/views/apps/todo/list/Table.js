@@ -2,8 +2,10 @@ import { Fragment, useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import ReactPaginate from 'react-paginate'
 import DataTable from 'react-data-table-component'
-import { ChevronDown, CheckSquare as EmptyIcon } from 'react-feather'
-import { Row, Col, Card, Input, Button, Label } from 'reactstrap'
+import { ChevronDown, Plus, CheckSquare as EmptyIcon } from 'react-feather'
+import { Link } from 'react-router-dom'
+import { currentUserCan } from '@src/utility/navPermissions'
+import { Card, Button } from 'reactstrap'
 import useClampPage from '@hooks/useClampPage'
 import useDebounce from '@hooks/useDebounce'
 import UILoader from '@components/ui-loader'
@@ -11,6 +13,7 @@ import TableRowsSkeleton from '@components/skeleton/TableRowsSkeleton'
 import AdvancedSearchModal from '../../shared/AdvancedSearchModal'
 import TableEmptyState, { hasActiveFilters } from '../../shared/TableEmptyState'
 import { columns } from './columns'
+import ListHeader from '../ListHeader'
 import { getData } from '../store'
 import { fetchUserOptions, fetchProjectOptions } from '../pickerOptions'
 import {
@@ -18,8 +21,7 @@ import {
   severityOptions,
   priorityOptions,
   categoryOptions,
-  resolutionOptions,
-  statusBgColors
+  resolutionOptions
 } from '../todoOptions'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
@@ -38,14 +40,10 @@ const searchFields = [
     type: 'select',
     fetchOptions: () => fetchUserOptions().then(options => [{ value: 'none', label: '[none] - Unassigned' }, ...options])
   },
-  { name: 'due_date', label: 'Due Date', type: 'date-range' }
+  { name: 'due_date', label: 'Due Date', type: 'date-range' },
+  { name: 'show_closed', label: 'Closed Issues', type: 'select', options: [{ value: '1', label: 'Show closed issues' }] }
 ]
 
-// A strip of the Mantis status color down each row's left edge.
-const conditionalRowStyles = Object.entries(statusBgColors).map(([status, color]) => ({
-  when: row => row.status === status,
-  style: { boxShadow: `inset 4px 0 0 ${color}` }
-}))
 
 const IssuesTable = () => {
   const dispatch = useDispatch()
@@ -55,9 +53,7 @@ const IssuesTable = () => {
   const [sortColumn, setSortColumn] = useState('updated_at')
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const [rowsPerPage, setRowsPerPage] = useState(25)
-  // Mantis hides closed issues by default.
-  const [hideClosed, setHideClosed] = useState(true)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
   const [filters, setFilters] = useState({})
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -75,10 +71,12 @@ const IssuesTable = () => {
         q: debouncedSearchTerm,
         page: currentPage,
         perPage: rowsPerPage,
-        filters: { ...filters, hide_closed: hideClosed && !filters.status ? 1 : undefined }
+        // Closed issues stay hidden (like Mantis) unless the filter asks for them
+        // or a status filter is picking statuses itself.
+        filters: { ...filters, hide_closed: filters.show_closed !== '1' && !filters.status?.length ? 1 : undefined }
       })
     ).finally(() => setLoading(false))
-  }, [dispatch, sort, sortColumn, currentPage, rowsPerPage, debouncedSearchTerm, filters, hideClosed])
+  }, [dispatch, sort, sortColumn, currentPage, rowsPerPage, debouncedSearchTerm, filters])
 
   const handleSort = (column, direction) => {
     setSort(direction)
@@ -124,64 +122,8 @@ const IssuesTable = () => {
         }}
       />
       <Card>
-        <div className='w-100 px-1 pt-1 pb-75'>
-          <Row className='g-1 align-items-center'>
-            <Col md='6' className='d-flex align-items-center flex-wrap' style={{ gap: '1rem' }}>
-              <div className='d-flex align-items-center'>
-                <Label for='issues-per-page' className='mb-0'>
-                  Show
-                </Label>
-                <Input
-                  id='issues-per-page'
-                  type='select'
-                  className='mx-50'
-                  style={{ width: '5rem' }}
-                  value={rowsPerPage}
-                  onChange={e => {
-                    setRowsPerPage(Number(e.target.value))
-                    setCurrentPage(1)
-                  }}
-                >
-                  <option value='25'>25</option>
-                  <option value='50'>50</option>
-                  <option value='100'>100</option>
-                </Input>
-              </div>
-              <div className='form-check mb-0'>
-                <Input
-                  id='issues-hide-closed'
-                  type='checkbox'
-                  checked={hideClosed}
-                  disabled={Boolean(filters.status)}
-                  onChange={e => {
-                    setHideClosed(e.target.checked)
-                    setCurrentPage(1)
-                  }}
-                />
-                <Label for='issues-hide-closed' className='form-check-label'>
-                  Hide closed
-                </Label>
-              </div>
-              <span className='text-muted small'>
-                {store.total} issue{store.total === 1 ? '' : 's'}
-              </span>
-            </Col>
-            <Col md='6' className='d-flex justify-content-md-end'>
-              <Input
-                type='text'
-                placeholder='Search summary or #id'
-                style={{ maxWidth: 280 }}
-                value={searchTerm}
-                onChange={e => {
-                  setSearchTerm(e.target.value)
-                  setCurrentPage(1)
-                }}
-              />
-            </Col>
-          </Row>
-        </div>
         {loading && store.data.length === 0 ? (
-          <TableRowsSkeleton rows={8} columns={[8, 34, 10, 10, 10, 14, 8, 8]} />
+          <TableRowsSkeleton rows={8} columns={[8, 34, 14, 10, 10, 10, 8]} />
         ) : (
           <UILoader blocking={loading} overlayColor='transparent' className='react-dataTable'>
             <DataTable
@@ -196,13 +138,37 @@ const IssuesTable = () => {
               sortIcon={<ChevronDown />}
               className='react-dataTable'
               paginationComponent={CustomPagination}
-              conditionalRowStyles={conditionalRowStyles}
+              subHeader
+              subHeaderComponent={
+                <ListHeader
+                  id='issues'
+                  rowsPerPage={rowsPerPage}
+                  onPerPage={value => {
+                    setRowsPerPage(value)
+                    setCurrentPage(1)
+                  }}
+                  searchTerm={searchTerm}
+                  onSearch={value => {
+                    setSearchTerm(value)
+                    setCurrentPage(1)
+                  }}
+                />
+              }
               noDataComponent={
                 <TableEmptyState
+                  spacious
                   icon={EmptyIcon}
-                  noun='issues'
-                  message='Report an issue to start tracking it here.'
+                  noun='tasks'
+                  message='Bugs, features and to-dos you report or get assigned will show up here.'
                   filtered={isFiltered}
+                  action={
+                    currentUserCan('/todo/add', 'add') && (
+                      <Button tag={Link} to='/todo/add' color='primary'>
+                        <Plus size={14} className='me-50' />
+                        Report Issue
+                      </Button>
+                    )
+                  }
                 />
               }
             />

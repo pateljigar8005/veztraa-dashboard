@@ -58,3 +58,11 @@ export const formatDateTime = value =>
 // Date-only strings parsed as local midnight - new Date('YYYY-MM-DD') is UTC
 // and can show the previous day in timezones behind UTC.
 export const formatDay = value => (value ? formatDate(`${value}T00:00:00`, { day: 'numeric', month: 'short', year: 'numeric' }) : '')
+
+// Status in a dropdown: the Mantis status color as a square, then the label.
+export const StatusOptionLabel = ({ status }) => (
+  <span className='d-inline-flex align-items-center text-nowrap'>
+    <span className='flex-shrink-0 me-50' style={{ width: 14, height: 14, borderRadius: 4, background: statusBgColors[status] || '#e0e0e0' }} />
+    {statusLabels[status] || status}
+  </span>
+)

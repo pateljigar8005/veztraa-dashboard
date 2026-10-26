@@ -12,11 +12,11 @@ export const hasActiveFilters = filters =>
 // exclude everything (say so, rather than implying the module is empty).
 // Deliberately no Add button here - adding lives in the navbar's Add icon,
 // not duplicated inside the table body.
-const TableEmptyState = ({ icon: Icon, noun, message, filtered = false, filteredMessage }) => {
+const TableEmptyState = ({ icon: Icon, noun, message, filtered = false, filteredMessage, action = null, spacious = false }) => {
   const DisplayIcon = filtered ? Search : Icon
 
   return (
-    <div className='table-empty-state d-flex flex-column align-items-center text-center py-4 px-2'>
+    <div className={`table-empty-state d-flex flex-column align-items-center text-center px-2 ${spacious ? 'py-5' : 'py-4'}`}>
       <div className='avatar avatar-xl bg-light-primary mb-1'>
         <div className='avatar-content'>
           <DisplayIcon size={28} />
@@ -26,6 +26,9 @@ const TableEmptyState = ({ icon: Icon, noun, message, filtered = false, filtered
       <p className='text-muted mb-0' style={{ maxWidth: 420 }}>
         {filtered ? filteredMessage || 'Nothing matches your current search or filters. Try adjusting or clearing them.' : message}
       </p>
+      {/* Optional call to action, for pages whose main action isn't
+          obvious from the navbar alone. */}
+      {!filtered && action && <div className='mt-1'>{action}</div>}
     </div>
   )
 }

@@ -1,14 +1,12 @@
 import { Fragment, useEffect, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import axios from 'axios'
+import { useNavigate, useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import Select, { components } from 'react-select'
+import Select from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 import { Editor } from '@veztraa/editor'
 import { useForm, Controller } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
 import { Card, CardHeader, CardTitle, CardBody, Row, Col, Form, Label, Input, FormFeedback } from 'reactstrap'
-import Avatar from '@components/avatar'
 import { useUnsavedChangesGuard } from '@hooks/useUnsavedChangesGuard'
 import useHolidayDates from '@hooks/useHolidayDates'
 import useWeekendDays from '@hooks/useWeekendDays'
@@ -16,7 +14,9 @@ import { selectThemeColors, uploadEditorImage } from '@utils'
 import DateField from '../../shared/DateField'
 import AttachmentsField from '../../shared/AttachmentsField'
 import { addIssue, updateIssue, getIssue } from '../store'
-import { fetchUserOptions, fetchProjectOptions } from '../pickerOptions'
+import { fetchUserOptions, fetchProjectOptions, assigneeOptionsFor } from '../pickerOptions'
+import { PriorityBadge, SeverityBadge, StatusOptionLabel } from '../IssueBits'
+import { userSelectComponents } from '../userSelectParts'
 import { uploadInChunks } from '../attachmentFiles'
 import {
   categoryOptions,
@@ -56,19 +56,6 @@ const defaultSelects = {
   resolution: 'open'
 }
 
-const UserOption = ({ data, ...props }) => (
-  <components.Option {...props}>
-    <div className='d-flex align-items-center'>
-      {data.img ? (
-        <img className='d-block rounded-circle me-50' src={data.img} height='24' width='24' alt={data.label} />
-      ) : (
-        <Avatar initials size='sm' className='me-50' color='light-primary' content={data.label} />
-      )}
-      <span>{data.label}</span>
-    </div>
-  </components.Option>
-)
-
 const FieldLabel = ({ htmlFor, children, required }) => (
   <Label className='form-label' for={htmlFor}>
     {children} {required && <span className='text-danger'>*</span>}
@@ -78,8 +65,6 @@ const FieldLabel = ({ htmlFor, children, required }) => (
 const IssueForm = () => {
   const { id } = useParams()
   const isEdit = Boolean(id)
-  const [searchParams] = useSearchParams()
-  const cloneId = isEdit ? null : Number(searchParams.get('clone')) || null
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
@@ -88,7 +73,7 @@ const IssueForm = () => {
   const [selects, setSelects] = useState(defaultSelects)
   const [description, setDescription] = useState('')
   const [pendingFiles, setPendingFiles] = useState([])
-  const [loaded, setLoaded] = useState(!isEdit && !cloneId)
+  const [loaded, setLoaded] = useState(!isEdit)
   const { holidayDates } = useHolidayDates()
   const { isWeekend } = useWeekendDays()
 
@@ -101,19 +86,29 @@ const IssueForm = () => {
 
   useUnsavedChangesGuard(isDirty)
 
-  const setSelect = (name, value) => setSelects(prev => ({ ...prev, [name]: value }))
+  const setSelect = (name, value) =>
+    setSelects(prev => {
+      const next = { ...prev, [name]: value }
+      // Switching project drops assignees who aren't on the new one.
+      if (name === 'project_id') {
+        const project = projectOptions.find(p => p.value === value)
+        if (project?.memberIds?.length) next.assignee_ids = prev.assignee_ids.filter(id => project.memberIds.includes(id))
+      }
+      return next
+    })
+
+  const selectedProject = projectOptions.find(p => p.value === selects.project_id)
+  const assigneeOptions = assigneeOptionsFor(userOptions, selectedProject, selects.assignee_ids)
 
   useEffect(() => {
     fetchUserOptions().then(setUserOptions)
     fetchProjectOptions().then(setProjectOptions)
   }, [])
 
-  // Edit loads the issue; Clone (?clone=<id>) copies an existing one into a
-  // new report, like Mantis's Clone button.
+  // Edit loads the issue into the form.
   useEffect(() => {
-    const sourceId = id || cloneId
-    if (!sourceId) return
-    dispatch(getIssue(sourceId))
+    if (!id) return
+    dispatch(getIssue(id))
       .unwrap()
       .then(issue => {
         reset({
@@ -145,7 +140,7 @@ const IssueForm = () => {
         toast.error('That issue no longer exists or you no longer have access to it')
         navigate('/todo')
       })
-  }, [id, cloneId])
+  }, [id])
 
   const uploadPendingFiles = async issueId => {
     for (const file of pendingFiles) {
@@ -180,9 +175,6 @@ const IssueForm = () => {
       } else {
         const issue = await dispatch(addIssue(payload)).unwrap()
         await uploadPendingFiles(issue.id)
-        if (cloneId) {
-          await axios.post(`/todos/${issue.id}/relationships`, { type: 'related_to', other_id: cloneId }).catch(() => {})
-        }
         toast.success(`Issue ${issueNumber(issue.id)} reported`)
         navigate(`/todo/view/${issue.id}`)
       }
@@ -191,7 +183,7 @@ const IssueForm = () => {
     }
   }
 
-  const renderSelect = (name, options, { isClearable = false, placeholder, optionComponent } = {}) => (
+  const renderSelect = (name, options, { isClearable = false, placeholder, optionComponent, formatOptionLabel } = {}) => (
     <Select
       inputId={name}
       isClearable={isClearable}
@@ -203,6 +195,7 @@ const IssueForm = () => {
       onChange={option => setSelect(name, option ? option.value : null)}
       placeholder={placeholder}
       components={optionComponent ? { Option: optionComponent } : undefined}
+      formatOptionLabel={formatOptionLabel}
     />
   )
 
@@ -238,7 +231,7 @@ const IssueForm = () => {
     </Col>
   )
 
-  const title = isEdit ? `Edit Issue ${issueNumber(id)}` : cloneId ? `Clone Issue ${issueNumber(cloneId)}` : 'Report Issue'
+  const title = isEdit ? `Edit Issue ${issueNumber(id)}` : 'Report Issue'
 
   return (
     <Fragment>
@@ -276,12 +269,19 @@ const IssueForm = () => {
                     classNamePrefix='select'
                     className='react-select'
                     theme={selectThemeColors}
-                    options={userOptions}
+                    options={assigneeOptions}
                     value={userOptions.filter(o => selects.assignee_ids.includes(o.value))}
                     onChange={picked => setSelect('assignee_ids', (picked || []).map(o => o.value))}
                     placeholder='Unassigned'
-                    components={{ Option: UserOption }}
+                    components={userSelectComponents}
                   />
+                  {selectedProject && (
+                    <small className='text-muted'>
+                      {selectedProject.memberIds.length
+                        ? `Showing members of ${selectedProject.label}.`
+                        : `${selectedProject.label} has no members yet - showing everyone.`}
+                    </small>
+                  )}
                 </Col>
                 <Col md={4} className='mb-1'>
                   <FieldLabel htmlFor='reproducibility'>Reproducibility</FieldLabel>
@@ -289,17 +289,17 @@ const IssueForm = () => {
                 </Col>
                 <Col md={4} className='mb-1'>
                   <FieldLabel htmlFor='severity'>Severity</FieldLabel>
-                  {renderSelect('severity', severityOptions)}
+                  {renderSelect('severity', severityOptions, { formatOptionLabel: o => <SeverityBadge severity={o.value} /> })}
                 </Col>
                 <Col md={4} className='mb-1'>
                   <FieldLabel htmlFor='priority'>Priority</FieldLabel>
-                  {renderSelect('priority', priorityOptions)}
+                  {renderSelect('priority', priorityOptions, { formatOptionLabel: o => <PriorityBadge priority={o.value} /> })}
                 </Col>
                 {isEdit && (
                   <Fragment>
                     <Col md={4} className='mb-1'>
                       <FieldLabel htmlFor='status'>Status</FieldLabel>
-                      {renderSelect('status', statusOptions)}
+                      {renderSelect('status', statusOptions, { formatOptionLabel: o => <StatusOptionLabel status={o.value} /> })}
                     </Col>
                     <Col md={4} className='mb-1'>
                       <FieldLabel htmlFor='resolution'>Resolution</FieldLabel>

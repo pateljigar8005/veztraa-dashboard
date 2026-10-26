@@ -4,16 +4,18 @@ import toast from 'react-hot-toast'
 import Select from 'react-select'
 import { sanitizeHtml } from '@veztraa/editor'
 import { useDispatch, useSelector } from 'react-redux'
-import { Card, CardBody, Button, Table, Modal, ModalHeader, ModalBody, ModalFooter, Label, Input, Badge } from 'reactstrap'
-import { Edit2, Copy, Trash2, Eye, EyeOff, X } from 'react-feather'
+import { Card, CardBody, Button, Table, Modal, ModalHeader, ModalBody, ModalFooter, Label, Input, Badge, UncontrolledTooltip } from 'reactstrap'
+import { Edit2, Trash2, Eye, EyeOff, X, CheckCircle, RotateCcw } from 'react-feather'
 import Avatar from '@components/avatar'
 import Skeleton from '@components/skeleton'
 import { selectThemeColors, getUserData, resolveAvatarUrl } from '@utils'
 import { currentUserCan } from '@src/utility/navPermissions'
+import { getCachedThemeColor } from '@src/utility/themeColor'
 import { confirmDelete } from '@src/utility/confirmDelete'
 import { getIssue, updateIssue, deleteIssue, setMonitoring, addComment } from '../store'
-import { StatusBadge, SeverityBadge, PriorityBadge, formatDateTime, formatDay } from '../IssueBits'
-import { fetchUserOptions } from '../pickerOptions'
+import { StatusBadge, SeverityBadge, PriorityBadge, StatusOptionLabel, formatDateTime, formatDay } from '../IssueBits'
+import { fetchUserOptions, fetchProjectOptions, assigneeOptionsFor } from '../pickerOptions'
+import { userSelectComponents } from '../userSelectParts'
 import {
   statusOptions,
   resolutionOptions,
@@ -38,15 +40,6 @@ const compactSelectStyles = {
   dropdownIndicator: base => ({ ...base, padding: '0 6px' }),
   clearIndicator: base => ({ ...base, padding: '0 4px' })
 }
-// The assignee picker can hold several names, so it grows in height
-// instead of being fixed at 32px.
-const multiSelectStyles = {
-  ...compactSelectStyles,
-  control: base => ({ ...base, minHeight: 32 }),
-  valueContainer: base => ({ ...base, padding: '0 6px' }),
-  indicatorsContainer: base => ({ ...base, alignSelf: 'stretch' })
-}
-
 const sameIds = (a, b) => a.length === b.length && a.every(id => b.includes(id))
 
 const selectProps = {
@@ -96,6 +89,33 @@ const TextSection = ({ label, children }) => (
   </tr>
 )
 
+// Icon-only action with its name in a tooltip.
+// Same tinted square buttons as the Edit/Delete actions on every list page.
+const ACTION_TINT = {
+  primary: () => getCachedThemeColor() + '1f',
+  secondary: () => 'rgba(130, 134, 139, 0.12)',
+  danger: () => '#ea54551f'
+}
+
+const IconAction = ({ id, label, tint = 'secondary', children, ...props }) => (
+  <>
+    <Button
+      id={id}
+      size='sm'
+      color={`flat-${tint}`}
+      className='btn-icon'
+      style={{ borderRadius: '4px', backgroundColor: ACTION_TINT[tint]() }}
+      aria-label={label}
+      {...props}
+    >
+      {children}
+    </Button>
+    <UncontrolledTooltip target={id} placement='top'>
+      {label}
+    </UncontrolledTooltip>
+  </>
+)
+
 // Small caption over each group in the action bar.
 const ToolbarGroup = ({ label, children }) => (
   <div className='d-flex flex-column' style={{ gap: '0.25rem' }}>
@@ -128,7 +148,6 @@ const IssueView = () => {
   const currentUser = getUserData()
   const isAdmin = (currentUser?.role || '').toLowerCase() === 'admin'
 
-  const canAdd = currentUserCan('/todo/add', 'add')
   const canEdit = currentUserCan(`/todo/edit/${issueId}`, 'edit')
   const canDelete = currentUserCan('/todo', 'delete')
 
@@ -143,8 +162,11 @@ const IssueView = () => {
   const [statusNote, setStatusNote] = useState('')
   const [monitorUser, setMonitorUser] = useState(null)
 
+  const [projectOptions, setProjectOptions] = useState([])
+
   useEffect(() => {
     fetchUserOptions().then(setUserOptions)
+    fetchProjectOptions().then(setProjectOptions)
   }, [])
 
   useEffect(() => {
@@ -220,6 +242,15 @@ const IssueView = () => {
       })
       .catch(err => toast.error(err?.message || 'Failed to update monitoring'))
 
+  // Ending monitoring can take away a non-admin's access to the issue.
+  const confirmEndMonitor = () =>
+    confirmDelete({
+      title: 'Stop monitoring this issue?',
+      text: "You won't get updates about it anymore.",
+      confirmButtonText: 'Yes, stop monitoring',
+      onConfirm: () => handleMonitor(false)
+    })
+
   const handleDelete = () =>
     confirmDelete({
       title: `Delete issue ${issueNumber(issueId)}?`,
@@ -277,20 +308,20 @@ const IssueView = () => {
           >
             <div className='d-flex flex-wrap align-items-end' style={{ gap: '1rem' }}>
               {canEdit && (
-                <Button tag={Link} to={`/todo/edit/${issue.id}`} size='sm' color='primary' style={{ height: 32 }}>
-                  <Edit2 size={14} className='me-50' />
-                  Edit
-                </Button>
-              )}
-              {canEdit && (
                 <ToolbarGroup label='Assign to'>
                   <div style={{ minWidth: 220, maxWidth: 420 }}>
                     <Select
-                      {...selectProps}
-                      styles={multiSelectStyles}
+                      classNamePrefix='select'
+                      className='react-select'
+                      theme={selectThemeColors}
                       isMulti
+                      components={userSelectComponents}
                       placeholder='Unassigned'
-                      options={userOptions}
+                      options={assigneeOptionsFor(
+                        userOptions,
+                        projectOptions.find(p => p.value === issue.project_id),
+                        issue.assignees.map(a => a.id)
+                      )}
                       value={userOptions.filter(o => assignTo.includes(o.value))}
                       onChange={picked => setAssignTo((picked || []).map(o => o.value))}
                     />
@@ -313,6 +344,7 @@ const IssueView = () => {
                     <Select
                       {...selectProps}
                       options={statusOptions}
+                      formatOptionLabel={o => <StatusOptionLabel status={o.value} />}
                       value={statusOptions.find(o => o.value === nextStatus) || null}
                       onChange={option => setNextStatus(option.value)}
                     />
@@ -330,32 +362,33 @@ const IssueView = () => {
                 </ToolbarGroup>
               )}
             </div>
-            <div className='d-flex flex-wrap align-items-center' style={{ gap: '0.5rem' }}>
-              <Button size='sm' color='flat-secondary' style={{ height: 32 }} onClick={() => handleMonitor(!isMonitoring)}>
-                {isMonitoring ? <EyeOff size={14} className='me-50' /> : <Eye size={14} className='me-50' />}
-                {isMonitoring ? 'End Monitor' : 'Monitor'}
-              </Button>
-              {canAdd && (
-                <Button tag={Link} to={`/todo/add?clone=${issue.id}`} size='sm' color='flat-secondary' style={{ height: 32 }}>
-                  <Copy size={14} className='me-50' />
-                  Clone
-                </Button>
+            <div className='d-flex flex-wrap align-items-center' style={{ gap: '0.75rem' }}>
+              {canEdit && (
+                <IconAction id='issue-edit-btn' label='Edit issue' tint='primary' tag={Link} to={`/todo/edit/${issue.id}`}>
+                  <Edit2 size={16} className='text-primary' />
+                </IconAction>
               )}
+              <IconAction
+                id='issue-monitor-btn'
+                label={isMonitoring ? 'End monitoring' : 'Monitor this issue'}
+                onClick={() => (isMonitoring ? confirmEndMonitor() : handleMonitor(true))}
+              >
+                {isMonitoring ? <EyeOff size={16} /> : <Eye size={16} />}
+              </IconAction>
               {canEdit && issue.status === 'resolved' && (
-                <Button size='sm' color='flat-secondary' style={{ height: 32 }} onClick={() => openStatusChange('closed')}>
-                  Close
-                </Button>
+                <IconAction id='issue-close-btn' label='Close issue' onClick={() => openStatusChange('closed')}>
+                  <CheckCircle size={16} />
+                </IconAction>
               )}
               {canEdit && isDone && (
-                <Button size='sm' color='flat-secondary' style={{ height: 32 }} onClick={handleReopen}>
-                  Reopen
-                </Button>
+                <IconAction id='issue-reopen-btn' label='Reopen issue' onClick={handleReopen}>
+                  <RotateCcw size={16} />
+                </IconAction>
               )}
               {canDelete && (
-                <Button size='sm' color='flat-danger' style={{ height: 32 }} onClick={handleDelete}>
-                  <Trash2 size={14} className='me-50' />
-                  Delete
-                </Button>
+                <IconAction id='issue-delete-btn' label='Delete issue' tint='danger' onClick={handleDelete}>
+                  <Trash2 size={16} className='text-danger' />
+                </IconAction>
               )}
             </div>
           </div>
@@ -393,7 +426,7 @@ const IssueView = () => {
                   <SeverityBadge severity={issue.severity} />
                 </DetailCell>
                 <DetailCell label='Status'>
-                  <StatusBadge status={issue.status} />
+                  <StatusOptionLabel status={issue.status} />
                 </DetailCell>
               </tr>
               <tr>

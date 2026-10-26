@@ -3,7 +3,7 @@ import { MessageSquare, Paperclip } from 'react-feather'
 import Avatar from '@components/avatar'
 import { resolveAvatarUrl } from '@utils'
 import { categoryLabels, issueNumber } from '../todoOptions'
-import { StatusBadge, PriorityBadge, SeverityBadge, formatDay } from '../IssueBits'
+import { StatusOptionLabel, PriorityBadge, SeverityBadge, formatDay } from '../IssueBits'
 
 // Local YYYY-MM-DD - toISOString() is UTC and can be a day off.
 const todayLocal = () => {
@@ -59,30 +59,6 @@ export const columns = [
     )
   },
   {
-    name: 'Priority',
-    width: '130px',
-    sortable: true,
-    sortField: 'priority',
-    selector: row => row.priority,
-    cell: row => <PriorityBadge priority={row.priority} />
-  },
-  {
-    name: 'Severity',
-    width: '120px',
-    sortable: true,
-    sortField: 'severity',
-    selector: row => row.severity,
-    cell: row => <SeverityBadge severity={row.severity} />
-  },
-  {
-    name: 'Status',
-    width: '140px',
-    sortable: true,
-    sortField: 'status',
-    selector: row => row.status,
-    cell: row => <StatusBadge status={row.status} />
-  },
-  {
     name: 'Assigned To',
     minWidth: '190px',
     sortable: true,
@@ -119,23 +95,39 @@ export const columns = [
     }
   },
   {
-    name: 'Due',
+    name: 'Priority',
+    width: '130px',
+    sortable: true,
+    sortField: 'priority',
+    selector: row => row.priority,
+    cell: row => <PriorityBadge priority={row.priority} />
+  },
+  {
+    name: 'Severity',
     width: '120px',
+    sortable: true,
+    sortField: 'severity',
+    selector: row => row.severity,
+    cell: row => <SeverityBadge severity={row.severity} />
+  },
+  {
+    name: 'Status',
+    width: '140px',
+    sortable: true,
+    sortField: 'status',
+    selector: row => row.status,
+    cell: row => <StatusOptionLabel status={row.status} />
+  },
+  {
+    name: 'Due',
+    width: '150px',
     sortable: true,
     sortField: 'due_date',
     selector: row => row.due_date,
     cell: row => {
       if (!row.due_date) return <span className='text-muted'>-</span>
       const overdue = !row.is_completed && row.due_date < todayLocal()
-      return <span className={overdue ? 'text-danger fw-bolder' : ''}>{formatDay(row.due_date)}</span>
+      return <span className={`text-nowrap ${overdue ? 'text-danger fw-bolder' : ''}`}>{formatDay(row.due_date)}</span>
     }
-  },
-  {
-    name: 'Updated',
-    width: '130px',
-    sortable: true,
-    sortField: 'updated_at',
-    selector: row => row.updated_at,
-    cell: row => <span className='text-muted'>{formatDay((row.updated_at || '').slice(0, 10))}</span>
   }
 ]

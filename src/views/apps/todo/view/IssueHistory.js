@@ -1,6 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Card, CardHeader, CardTitle, Table } from 'reactstrap'
+import { Card, CardHeader, CardTitle } from 'reactstrap'
+import DataTable from 'react-data-table-component'
+import ReactPaginate from 'react-paginate'
+import { ChevronDown } from 'react-feather'
+import '@styles/react/libs/tables/react-dataTable-component.scss'
+import ListHeader from '../ListHeader'
 import { getHistory } from '../store'
 import { formatDateTime, formatDay } from '../IssueBits'
 import {
@@ -94,36 +99,93 @@ const IssueHistory = ({ issueId }) => {
     dispatch(getHistory(issueId))
   }, [issueId])
 
+  // Client-side search and paging - an issue's history is loaded whole.
+  const [searchTerm, setSearchTerm] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
+
+  const rows = useMemo(
+    () =>
+      // Newest first, like other module lists.
+      [...history].reverse().map(h => {
+        const [field, change] = describe(h)
+        return { id: h.id, date: h.created_at, user: h.user_name || 'System', field, change: change || '' }
+      }),
+    [history]
+  )
+
+  const filtered = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase()
+    if (!q) return rows
+    return rows.filter(r => [r.user, r.field, r.change, formatDateTime(r.date)].some(v => v.toLowerCase().includes(q)))
+  }, [rows, searchTerm])
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / rowsPerPage))
+  const page = Math.min(currentPage, pageCount)
+  const pageRows = filtered.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+
+  const columns = [
+    { name: 'Date Modified', width: '200px', selector: r => r.date, cell: r => <span className='text-nowrap'>{formatDateTime(r.date)}</span> },
+    { name: 'Username', minWidth: '160px', selector: r => r.user },
+    { name: 'Field', minWidth: '180px', selector: r => r.field },
+    { name: 'Change', minWidth: '260px', grow: 2, selector: r => r.change, cell: r => <span style={{ wordBreak: 'break-word' }}>{r.change}</span> }
+  ]
+
+  const CustomPagination = () => (
+    <ReactPaginate
+      previousLabel=''
+      nextLabel=''
+      pageCount={pageCount}
+      activeClassName='active'
+      forcePage={page - 1}
+      onPageChange={p => setCurrentPage(p.selected + 1)}
+      pageClassName='page-item'
+      nextLinkClassName='page-link'
+      nextClassName='page-item next'
+      previousClassName='page-item prev'
+      previousLinkClassName='page-link'
+      pageLinkClassName='page-link'
+      containerClassName='pagination react-paginate justify-content-end my-2 pe-1'
+    />
+  )
+
   return (
     <Card>
-      <CardHeader className='pb-50'>
+      <CardHeader className='pb-0'>
         <CardTitle tag='h5' className='mb-0'>
           Issue History
         </CardTitle>
       </CardHeader>
-      <Table responsive size='sm' striped className='mb-0'>
-        <thead>
-          <tr>
-            <th style={{ width: 190 }}>Date Modified</th>
-            <th style={{ width: 180 }}>Username</th>
-            <th style={{ width: 200 }}>Field</th>
-            <th>Change</th>
-          </tr>
-        </thead>
-        <tbody>
-          {history.map(h => {
-            const [field, change] = describe(h)
-            return (
-              <tr key={h.id}>
-                <td className='text-nowrap'>{formatDateTime(h.created_at)}</td>
-                <td>{h.user_name || 'System'}</td>
-                <td>{field}</td>
-                <td style={{ wordBreak: 'break-word' }}>{change}</td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </Table>
+      <div className='react-dataTable'>
+        <DataTable
+          noHeader
+          subHeader
+          pagination
+          paginationServer
+          responsive
+          columns={columns}
+          data={pageRows}
+          sortIcon={<ChevronDown />}
+          className='react-dataTable'
+          paginationComponent={CustomPagination}
+          noDataComponent={<div className='text-muted py-2'>{searchTerm ? 'No matching history.' : 'No history yet.'}</div>}
+          subHeaderComponent={
+            <ListHeader
+              id='issue-history'
+              rowsPerPage={rowsPerPage}
+              onPerPage={value => {
+                setRowsPerPage(value)
+                setCurrentPage(1)
+              }}
+              searchTerm={searchTerm}
+              onSearch={value => {
+                setSearchTerm(value)
+                setCurrentPage(1)
+              }}
+            />
+          }
+        />
+      </div>
     </Card>
   )
 }
