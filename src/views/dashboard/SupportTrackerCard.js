@@ -58,7 +58,7 @@ const SupportTrackerCard = ({ data }) => {
       }
     },
     stroke: { dashArray: 8 },
-    labels: ['Completed Todos']
+    labels: ['Completed Tasks']
   }
 
   return (

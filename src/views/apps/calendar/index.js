@@ -55,14 +55,9 @@ const CalendarComponent = () => {
     }
   }
 
-  // Only Todo events are clickable task tiles now - the only source left
-  // after Kanban's removal. Redirects to the Todo page's own `?task=` deep
-  // link (already used by the notification bell's mention/overdue items -
-  // see NotificationController.php) instead of opening a second, local copy
-  // of TaskSidebar in place - one real task view, not two independent mounts
-  // of the same component that could drift out of sync with each other.
+  // Todo tiles open the issue's own View Issue page.
   const handleTaskEventClick = taskId => {
-    navigate(`/todo?task=${taskId}`)
+    navigate(`/todo/view/${taskId}`)
   }
 
   const handleInvoiceEventClick = invoiceId => {

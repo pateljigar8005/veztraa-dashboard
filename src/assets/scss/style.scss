@@ -31,3 +31,12 @@
 .main-menu .main-menu-content {
   height: calc(100% - 4.45rem - 1rem) !important;
 }
+
+// Todo issue page: detail grid labels in black (white in dark mode).
+.issue-detail-label {
+  color: #000 !important;
+}
+
+.dark-layout .issue-detail-label {
+  color: #fff !important;
+}

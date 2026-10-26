@@ -51,7 +51,7 @@ const Calendar = props => {
   }
 
   const taskEvents = [
-    ...(store.taskFilters.includes('To-Do') ? store.todoEvents : []),
+    ...(store.taskFilters.includes('Tasks') ? store.todoEvents : []),
     ...(store.taskFilters.includes('Invoices') ? store.invoiceEvents : []),
     ...(store.taskFilters.includes('Upcoming Invoices') ? store.contractInvoiceEvents : []),
     ...(store.taskFilters.includes('Expenses') ? store.expenseEvents : [])

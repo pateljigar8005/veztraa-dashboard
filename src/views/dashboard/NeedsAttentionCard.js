@@ -25,7 +25,8 @@ const TYPE_META = {
   mention: { icon: <MessageSquare size={16} />, color: 'secondary' },
   leave_pending: { icon: <Calendar size={16} />, color: 'warning' },
   leave_decided: { icon: <CheckCircle size={16} />, color: 'success' },
-  invoice_overdue: { icon: <FileText size={16} />, color: 'danger' }
+  invoice_overdue: { icon: <FileText size={16} />, color: 'danger' },
+  todo_activity: { icon: <CheckSquare size={16} />, color: 'warning' }
 }
 
 const MAX_ITEMS = 6

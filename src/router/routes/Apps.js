@@ -1,7 +1,9 @@
 import { lazy } from 'react'
 
 const Chat = lazy(() => import('../../views/apps/chat'))
-const Todo = lazy(() => import('../../views/apps/todo'))
+const TodoList = lazy(() => import('../../views/apps/todo/list'))
+const TodoForm = lazy(() => import('../../views/apps/todo/form'))
+const TodoView = lazy(() => import('../../views/apps/todo/view'))
 const Email = lazy(() => import('../../views/apps/email'))
 const Calendar = lazy(() => import('../../views/apps/calendar'))
 
@@ -120,28 +122,20 @@ const AppRoutes = [
     }
   },
   {
-    element: <Todo />,
-    path: '/todo',
-    meta: {
-      appLayout: true,
-      className: 'todo-application'
-    }
+    element: <TodoList />,
+    path: '/todo'
   },
   {
-    element: <Todo />,
-    path: '/todo/:filter',
-    meta: {
-      appLayout: true,
-      className: 'todo-application'
-    }
+    element: <TodoForm />,
+    path: '/todo/add'
   },
   {
-    element: <Todo />,
-    path: '/todo/priority/:priority',
-    meta: {
-      appLayout: true,
-      className: 'todo-application'
-    }
+    element: <TodoForm />,
+    path: '/todo/edit/:id'
+  },
+  {
+    element: <TodoView />,
+    path: '/todo/view/:id'
   },
   {
     element: <Calendar />,

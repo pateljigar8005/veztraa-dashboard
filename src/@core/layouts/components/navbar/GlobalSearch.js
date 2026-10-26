@@ -40,6 +40,7 @@ const GROUP_ORDER = [
   'contracts',
   'invoiceApp',
   'projects',
+  'todo',
   'users',
   'teamMembers',
   'contactSubmissions',
@@ -62,6 +63,7 @@ const GROUP_ICON = {
   contracts: Briefcase,
   invoiceApp: DollarSign,
   projects: Folder,
+  todo: CheckSquare,
   users: User,
   teamMembers: Users,
   contactSubmissions: Mail,
@@ -89,7 +91,7 @@ const QUICK_LINK_COLUMNS = [
       items: [
         { title: 'Dashboard', path: '/dashboard', icon: Grid },
         { title: 'Calendar', path: '/calendar', icon: Calendar },
-        { title: 'Todo', path: '/todo', icon: CheckSquare },
+        { title: 'Tasks', path: '/todo', icon: CheckSquare },
         { title: 'Email', path: '/email', icon: Mail }
       ]
     },

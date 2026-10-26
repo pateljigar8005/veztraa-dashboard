@@ -15,6 +15,7 @@ const TYPE_META = {
   job_application: { icon: <Send size={14} />, color: 'info' },
   todo_overdue: { icon: <CheckSquare size={14} />, color: 'danger' },
   todo_assigned: { icon: <CheckSquare size={14} />, color: 'info' },
+  todo_activity: { icon: <CheckSquare size={14} />, color: 'warning' },
   mention: { icon: <AtSign size={14} />, color: 'warning' },
   leave_pending: { icon: <Briefcase size={14} />, color: 'warning' },
   leave_decided: { icon: <Briefcase size={14} />, color: 'success' },

@@ -6,7 +6,7 @@ import { Card, CardBody, Button, Input, Label } from 'reactstrap'
 import { currentUserCan } from '@src/utility/navPermissions'
 
 const baseTaskFilters = [
-  { label: 'To-Do', className: 'form-check-info' },
+  { label: 'Tasks', className: 'form-check-info' },
   { label: 'Invoices', className: 'form-check-warning' }
 ]
 

@@ -51,7 +51,7 @@ export default [
       },
       {
         id: 'todo',
-        title: 'Todo',
+        title: 'Tasks',
         icon: <CheckSquare />,
         navLink: '/todo'
       },

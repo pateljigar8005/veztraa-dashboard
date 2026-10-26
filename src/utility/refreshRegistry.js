@@ -24,7 +24,13 @@ import { getAllData as getApiKeyAllData } from '@src/views/apps/api-key/store'
 import { getData as getUserData } from '@src/views/apps/user/store'
 import { getData as getPdfDesignerTemplateData } from '@src/views/apps/pdf-designer/store'
 import { getAllData as getRolesAllData } from '@src/views/apps/roles-permissions/roles/store'
-import { getTasks as getTodoTasks } from '@src/views/apps/todo/store'
+import {
+  getData as getTodoData,
+  getIssue as getTodoIssue,
+  getHistory as getTodoHistory,
+  fetchComments as getTodoNotes,
+  getTaskAttachments as getTodoAttachments
+} from '@src/views/apps/todo/store'
 import {
   fetchEvents as fetchCalendarEvents,
   fetchTodoTaskEvents as fetchCalendarTodoEvents
@@ -56,7 +62,17 @@ const registry = [
   { pattern: /^\/user$/, refetch: (d, g) => d(getUserData(g().users.params)) },
   { pattern: /^\/pdf-designer$/, refetch: (d, g) => d(getPdfDesignerTemplateData(g().pdfDesignerTemplates.params)) },
   { pattern: /^\/roles$/, refetch: d => d(getRolesAllData()) },
-  { pattern: /^\/todo(\/.*)?$/, refetch: (d, g) => d(getTodoTasks(g().todo.params)) },
+  { pattern: /^\/todo$/, refetch: (d, g) => d(getTodoData(g().todo.params)) },
+  {
+    pattern: /^\/todo\/view\/\d+$/,
+    refetch: d => {
+      const id = Number(window.location.pathname.split('/').pop())
+      d(getTodoIssue(id))
+      d(getTodoHistory(id))
+      d(getTodoNotes(id))
+      d(getTodoAttachments(id))
+    }
+  },
   {
     pattern: /^\/calendar$/,
     refetch: (d, g) => {

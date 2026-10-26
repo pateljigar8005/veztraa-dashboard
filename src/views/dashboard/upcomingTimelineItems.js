@@ -5,7 +5,7 @@ import { formatAmount } from '@utils'
 // Shared by UserTimelineCard.js (the sidebar Upcoming block was removed as
 // a duplicate of this card) so item styling/paths stay in one place.
 export const TYPE_META = {
-  todo: { icon: <CheckSquare size={12} />, color: 'info', path: id => `/todo?task=${id}`, label: 'Todo' },
+  todo: { icon: <CheckSquare size={12} />, color: 'info', path: id => `/todo/view/${id}`, label: 'Task' },
   calendar: { icon: <Calendar size={12} />, color: 'warning', path: () => '/calendar', label: 'Event' },
   holiday: { icon: <Sun size={12} />, color: 'secondary', path: id => `/holiday/edit/${id}`, label: 'Holiday' },
   invoice: { icon: <FileText size={12} />, color: 'primary', path: id => `/invoice/view/${id}`, label: 'Invoice' }

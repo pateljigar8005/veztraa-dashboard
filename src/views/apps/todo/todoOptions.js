@@ -1,37 +1,113 @@
-// Moved out of the (now-removed) Kanban module's kanbanOptions.js - Todo
-// and Calendar's Todo-task tiles are the only remaining consumers of a
-// task's priority, so this lives here rather than in a shared/ folder.
-export const priorityOptions = [
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
-  { value: 'urgent', label: 'Urgent' }
-]
+// MantisBT's default enums. Values must stay in sync with the constants on
+// veztraa-api's Todo.php.
+const toOptions = labels => Object.entries(labels).map(([value, label]) => ({ value, label }))
 
+export const statusLabels = {
+  new: 'New',
+  feedback: 'Feedback',
+  acknowledged: 'Acknowledged',
+  confirmed: 'Confirmed',
+  assigned: 'Assigned',
+  resolved: 'Resolved',
+  closed: 'Closed'
+}
+
+// Mantis's own status colors - used to tint list rows and status chips.
+export const statusBgColors = {
+  new: '#fcbdbd',
+  feedback: '#e3b7eb',
+  acknowledged: '#ffcd85',
+  confirmed: '#fff494',
+  assigned: '#c2dfff',
+  resolved: '#d2f5b0',
+  closed: '#c9ccc4'
+}
+
+export const severityLabels = {
+  feature: 'Feature',
+  trivial: 'Trivial',
+  text: 'Text',
+  tweak: 'Tweak',
+  minor: 'Minor',
+  major: 'Major',
+  crash: 'Crash',
+  block: 'Block'
+}
+
+export const priorityLabels = {
+  none: 'None',
+  low: 'Low',
+  normal: 'Normal',
+  high: 'High',
+  urgent: 'Urgent',
+  immediate: 'Immediate'
+}
+
+// Theme color names per priority - Calendar tiles and the dashboard
+// timeline color todo items by these.
 export const priorityColors = {
+  none: 'secondary',
   low: 'secondary',
-  medium: 'info',
+  normal: 'info',
   high: 'warning',
-  urgent: 'danger'
+  urgent: 'danger',
+  immediate: 'danger'
 }
 
-// A real multi-state Status (not just the done/not-done checkbox) so a
-// team can see what's actually in flight at a glance, not just what's
-// finished. Fixed list, same for everyone (unlike Kanban's old
-// freely-renamable columns) - see Todo::VALID_STATUSES on the API side,
-// which must stay in sync with these values.
-export const statusOptions = [
-  { value: 'not_started', label: 'Not Started' },
-  { value: 'in_progress', label: 'In Progress' },
-  { value: 'in_review', label: 'In Review' },
-  { value: 'on_hold', label: 'On Hold' },
-  { value: 'completed', label: 'Completed' }
-]
-
-export const statusColors = {
-  not_started: 'secondary',
-  in_progress: 'warning',
-  in_review: 'info',
-  on_hold: 'danger',
-  completed: 'success'
+export const reproducibilityLabels = {
+  always: 'Always',
+  sometimes: 'Sometimes',
+  random: 'Random',
+  have_not_tried: 'Have not tried',
+  unable_to_reproduce: 'Unable to reproduce',
+  n_a: 'N/A'
 }
+
+export const resolutionLabels = {
+  open: 'Open',
+  fixed: 'Fixed',
+  reopened: 'Reopened',
+  unable_to_reproduce: 'Unable to reproduce',
+  not_fixable: 'Not fixable',
+  duplicate: 'Duplicate',
+  no_change_required: 'No change required',
+  suspended: 'Suspended',
+  wont_fix: "Won't fix"
+}
+
+export const categoryLabels = {
+  general: 'General',
+  ui: 'UI',
+  backend: 'Backend',
+  api: 'API',
+  database: 'Database',
+  documentation: 'Documentation',
+  other: 'Other'
+}
+
+// How each relationship reads from the issue you're looking at.
+export const relationshipLabels = {
+  duplicate_of: 'duplicate of',
+  has_duplicate: 'has duplicate',
+  related_to: 'related to',
+  parent_of: 'parent of',
+  child_of: 'child of'
+}
+
+// Common Platform / OS picks - the form also accepts anything typed in.
+const plainOptions = values => values.map(value => ({ value, label: value }))
+export const platformOptions = plainOptions(['Web', 'Mobile Web', 'Android App', 'iOS App', 'Desktop App', 'API', 'Admin Panel'])
+export const osOptions = plainOptions(['Windows 11', 'Windows 10', 'macOS', 'Linux', 'Ubuntu', 'Android', 'iOS', 'iPadOS', 'ChromeOS'])
+
+export const statusOptions = toOptions(statusLabels)
+export const severityOptions = toOptions(severityLabels)
+export const priorityOptions = toOptions(priorityLabels)
+export const reproducibilityOptions = toOptions(reproducibilityLabels)
+export const resolutionOptions = toOptions(resolutionLabels)
+export const categoryOptions = toOptions(categoryLabels)
+export const relationshipOptions = toOptions(relationshipLabels)
+
+export const DONE_STATUSES = ['resolved', 'closed']
+
+// Mantis shows ids zero-padded to 7 digits (0000123).
+export const issueNumber = id => String(id).padStart(7, '0')

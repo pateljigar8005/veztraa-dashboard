@@ -31,6 +31,7 @@ const AttachmentsField = ({
   onFilesSelect,
   onDownload,
   onDelete,
+  onView,
   maxSize = ATTACHMENT_MAX_SIZE,
   accept = ATTACHMENT_ACCEPT,
   helperText = 'PDF, Word, Excel, PowerPoint, TXT, CSV, JPG or PNG — max 5MB each.'
@@ -50,24 +51,42 @@ const AttachmentsField = ({
               <div className='d-flex align-items-center overflow-hidden' style={{ gap: '0.6rem', minWidth: 0 }}>
                 <FileText size={18} className='text-primary flex-shrink-0' />
                 <div className='overflow-hidden' style={{ minWidth: 0 }}>
-                  <div className='text-truncate' title={file.file_name}>
-                    {file.file_name}
-                  </div>
+                  {/* With onView the name opens the file in a new tab. */}
+                  {onView ? (
+                    <a
+                      href='#'
+                      className='d-block text-truncate'
+                      title={`Open ${file.file_name}`}
+                      onClick={e => {
+                        e.preventDefault()
+                        onView(file)
+                      }}
+                    >
+                      {file.file_name}
+                    </a>
+                  ) : (
+                    <div className='text-truncate' title={file.file_name}>
+                      {file.file_name}
+                    </div>
+                  )}
                   <small className='text-muted'>{formatFileSize(file.file_size)}</small>
                 </div>
               </div>
               <div className='d-flex align-items-center flex-shrink-0' style={{ gap: '0.25rem' }}>
-                <Button
-                  type='button'
-                  color='flat-primary'
-                  className='btn-icon'
-                  size='sm'
-                  disabled={downloadingId === file.id}
-                  onClick={() => onDownload(file)}
-                  title='Download'
-                >
-                  <Download size={16} />
-                </Button>
+                {/* No download for files that aren't uploaded yet. */}
+                {onDownload && (
+                  <Button
+                    type='button'
+                    color='flat-primary'
+                    className='btn-icon'
+                    size='sm'
+                    disabled={downloadingId === file.id}
+                    onClick={() => onDownload(file)}
+                    title='Download'
+                  >
+                    <Download size={16} />
+                  </Button>
+                )}
                 <Button
                   type='button'
                   color='flat-danger'

@@ -31,11 +31,12 @@ const listToAddRoute = {
   '/leave-type': '/leave-type/add',
   '/vendor': '/vendor/add',
   '/expense': '/expense/add',
-  '/vendor-bill': '/vendor-bill/add'
+  '/vendor-bill': '/vendor-bill/add',
+  '/todo': '/todo/add'
 }
 
 const addOrEditRoutePattern =
-  /^\/(user|client|payment-method|event-category|service-item|project|quotation|contract|invoice|terms-template|email-template|holiday|roles|pdf-designer|currency|industry|team-member|portfolio|case-study|job-listing|timesheet-activity|timesheet|leave-type|vendor-bill|vendor|expense)\/(add|edit\/[^/]+)$/
+  /^\/(user|client|payment-method|event-category|service-item|project|quotation|contract|invoice|terms-template|email-template|holiday|roles|pdf-designer|currency|industry|team-member|portfolio|case-study|job-listing|timesheet-activity|timesheet|leave-type|vendor-bill|vendor|expense|todo)\/(add|edit\/[^/]+)$/
 
 const isPdfDesignerFormRoute = pathname => /^\/pdf-designer\/(add|edit\/[^/]+)$/.test(pathname)
 
@@ -44,9 +45,6 @@ const isCompanySettingsRoute = pathname => pathname === '/company'
 const isAccountSettingsRoute = pathname => pathname === '/account-settings'
 
 const isEmailRoute = pathname => /^\/email(\/[^/]+)?$/.test(pathname)
-
-// Todo owns its Add button, but still uses the navbar search action.
-const isTodoRoute = pathname => /^\/todo(\/.*)?$/.test(pathname)
 
 // Modal-based add actions use a hidden page button instead of navigation.
 const listToAddButtonId = {
@@ -141,8 +139,7 @@ const NavbarBookmarks = props => {
 
   const isSearchRoute =
     (isListRoute && !noSearchRoutes.includes(location.pathname)) ||
-    isEmailRoute(location.pathname) ||
-    isTodoRoute(location.pathname)
+    isEmailRoute(location.pathname)
   const handleSearch = () => {
     if (!isSearchRoute) return
     document.getElementById('navbar-advanced-search-trigger')?.click()

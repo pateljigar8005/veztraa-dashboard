@@ -64,25 +64,22 @@ export const removeEvent = createAsyncThunk('appCalendar/removeEvent', async (id
 })
 
 export const fetchTodoTaskEvents = createAsyncThunk('appCalendar/fetchTodoTaskEvents', async () => {
-  const response = await axios.get('/todos')
-  const tasks = response.data.data
-  const events = tasks
-    .filter(task => task.dueDate && !task.isCompleted && !task.isDeleted)
-    .map(task => ({
-      id: `todo-${task.id}`,
-      title: task.title,
-      start: task.dueDate,
-      allDay: true,
-      editable: false,
-      extendedProps: {
-        calendar: 'To-Do',
-        source: 'todo',
-        taskId: task.id,
-        // low/medium/high/urgent - Todo used to have only a free-form
-        // `tags` array instead of a real priority column.
-        priority: task.priority
-      }
-    }))
+  // Only unfinished issues with a due date belong on the calendar.
+  const response = await axios.get('/todos', { params: { perPage: 500, has_due_date: 1, hide_done: 1, sortColumn: 'due_date', sortDirection: 'asc' } })
+  const tasks = response.data.data.issues
+  const events = tasks.map(task => ({
+    id: `todo-${task.id}`,
+    title: task.title,
+    start: task.due_date,
+    allDay: true,
+    editable: false,
+    extendedProps: {
+      calendar: 'Tasks',
+      source: 'todo',
+      taskId: task.id,
+      priority: task.priority
+    }
+  }))
   return { events, tasks }
 })
 
@@ -186,7 +183,7 @@ export const appCalendarSlice = createSlice({
     invoiceEvents: [],
     contractInvoiceEvents: [],
     expenseEvents: [],
-    taskFilters: ['To-Do', 'Invoices', 'Upcoming Invoices', 'Expenses'],
+    taskFilters: ['Tasks', 'Invoices', 'Upcoming Invoices', 'Expenses'],
     selectedEvent: {},
     // Category names currently shown - seeded to "all" once categories load
     // (see fetchEventCategories.fulfilled below). Purely a client-side

@@ -46,7 +46,7 @@ export default [
   },
   {
     id: 'todo',
-    title: 'Todo',
+    title: 'Tasks',
     icon: <CheckSquare size={20} />,
     navLink: '/todo'
   },

@@ -58,7 +58,7 @@ const BreadCrumbs = props => {
             <DropdownMenu tag='ul' end>
               <DropdownItem tag={Link} to='/todo'>
                 <CheckSquare className='me-1' size={14} />
-                <span className='align-middle'>Todo</span>
+                <span className='align-middle'>Tasks</span>
               </DropdownItem>
               <DropdownItem tag={Link} to='/chat'>
                 <MessageSquare className='me-1' size={14} />
