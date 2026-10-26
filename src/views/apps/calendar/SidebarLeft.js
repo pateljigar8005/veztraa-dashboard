@@ -4,11 +4,9 @@ import classnames from 'classnames'
 import { Settings } from 'react-feather'
 import { Card, CardBody, Button, Input, Label } from 'reactstrap'
 import { currentUserCan } from '@src/utility/navPermissions'
+import Skeleton from '@components/skeleton'
 
-const baseTaskFilters = [
-  { label: 'Tasks', className: 'form-check-info' },
-  { label: 'Invoices', className: 'form-check-warning' }
-]
+const baseTaskFilters = [{ label: 'Tasks', className: 'form-check-info' }]
 
 // Contract-projected invoice dates aren't something every user should see
 // on their calendar - same view permission that gates the Contracts list
@@ -49,51 +47,62 @@ const SidebarLeft = props => {
               </Link>
             )}
           </div>
-          <div className='form-check mb-1'>
-            <Input
-              id='view-all'
-              type='checkbox'
-              label='View All'
-              className='select-all'
-              checked={store.selectedCalendars.length === store.eventCategories.length}
-              onChange={e => dispatch(updateAllFilters(e.target.checked))}
-            />
-            <Label className='form-check-label' for='view-all'>
-              View All
-            </Label>
-          </div>
-          <div className='calendar-events-filter'>
-            {store.eventCategories.length ? (
-              store.eventCategories.map(category => (
-                <div
-                  key={`${category.name}-key`}
-                  className={classnames('form-check', {
-                    [`form-check-${category.color} mb-1`]: true
-                  })}
-                >
-                  <Input
-                    type='checkbox'
-                    key={category.name}
-                    label={category.name}
-                    className='input-filter'
-                    id={`${category.name}-event`}
-                    checked={store.selectedCalendars.includes(category.name)}
-                    onChange={() => {
-                      dispatch(updateFilter(category.name))
-                    }}
-                  />
-                  <Label className='form-check-label' for={`${category.name}-event`}>
-                    {category.name}
-                  </Label>
-                </div>
-              ))
-            ) : (
-              <p className='text-muted small mb-0'>
-                No event categories yet - add one under{' '}
-                <Link to='/event-category'>Settings &rarr; Event Categories</Link>.
-              </p>
-            )}
-          </div>
+          {!store.categoriesLoaded ? (
+            [72, 80, 70, 62, 56].map((width, i) => (
+              <div key={i} className='d-flex align-items-center mb-1' style={{ gap: '0.6rem' }}>
+                <Skeleton width={18} height={18} />
+                <Skeleton width={width} height={12} />
+              </div>
+            ))
+          ) : (
+            <>
+            <div className='form-check mb-1'>
+              <Input
+                id='view-all'
+                type='checkbox'
+                label='View All'
+                className='select-all'
+                checked={store.selectedCalendars.length === store.eventCategories.length}
+                onChange={e => dispatch(updateAllFilters(e.target.checked))}
+              />
+              <Label className='form-check-label' for='view-all'>
+                View All
+              </Label>
+            </div>
+            <div className='calendar-events-filter'>
+              {store.eventCategories.length ? (
+                store.eventCategories.map(category => (
+                  <div
+                    key={`${category.name}-key`}
+                    className={classnames('form-check', {
+                      [`form-check-${category.color} mb-1`]: true
+                    })}
+                  >
+                    <Input
+                      type='checkbox'
+                      key={category.name}
+                      label={category.name}
+                      className='input-filter'
+                      id={`${category.name}-event`}
+                      checked={store.selectedCalendars.includes(category.name)}
+                      onChange={() => {
+                        dispatch(updateFilter(category.name))
+                      }}
+                    />
+                    <Label className='form-check-label' for={`${category.name}-event`}>
+                      {category.name}
+                    </Label>
+                  </div>
+                ))
+              ) : (
+                <p className='text-muted small mb-0'>
+                  No event categories yet - add one under{' '}
+                  <Link to='/event-category'>Settings &rarr; Event Categories</Link>.
+                </p>
+              )}
+            </div>
+            </>
+          )}
         </CardBody>
         <CardBody>
           <h5 className='section-label mb-1'>

@@ -166,6 +166,22 @@ $fc-day-toggle-btn-padding: 0.55rem 1.5rem;
     background: $body-bg !important;
     background-color: $body-bg !important;
   }
+  // Long event titles end in "..." instead of just being cut off (the full
+  // title shows on hover - see eventDidMount in Calendar.js).
+  .fc-daygrid-event,
+  .fc-daygrid-event .fc-event-main,
+  .fc-daygrid-event .fc-event-main-frame,
+  .fc-daygrid-event .fc-event-title-container {
+    min-width: 0;
+    overflow: hidden;
+  }
+  .fc-daygrid-event .fc-event-title {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
   // Holidays/weekends: diagonal hatching, so blocked days read at a glance.
   .fc-day-holiday {
     background-color: rgba($danger, 0.03) !important;
@@ -184,13 +200,16 @@ $fc-day-toggle-btn-padding: 0.55rem 1.5rem;
 
   .fc-day-holiday-label {
     display: block;
+    // The day-top row is a stretched flex row - without this the label grew
+    // to the day number's height and left empty space under the text.
+    align-self: flex-start;
     margin-left: auto;
     padding: 0.25rem 0.4rem;
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     line-height: 1;
     font-weight: 700;
-    color: $danger;
-    background-color: rgba($danger, 0.12);
+    color: $white;
+    background-color: $danger;
     border-radius: 0.25rem;
     white-space: nowrap;
     overflow: hidden;

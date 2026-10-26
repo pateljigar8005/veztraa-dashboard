@@ -16,6 +16,8 @@ import { columns } from './columns'
 import ListHeader from '../ListHeader'
 import { getData } from '../store'
 import { fetchUserOptions, fetchProjectOptions } from '../pickerOptions'
+import { StatusOptionLabel, PriorityBadge, SeverityBadge } from '../IssueBits'
+import { UserOption } from '../userSelectParts'
 import {
   statusOptions,
   severityOptions,
@@ -28,17 +30,39 @@ import '@styles/react/libs/tables/react-dataTable-component.scss'
 
 const searchFields = [
   { name: 'project_id', label: 'Project', type: 'select', fetchOptions: fetchProjectOptions },
-  { name: 'status', label: 'Status', type: 'select', isMulti: true, options: statusOptions },
-  { name: 'severity', label: 'Severity', type: 'select', isMulti: true, options: severityOptions },
-  { name: 'priority', label: 'Priority', type: 'select', isMulti: true, options: priorityOptions },
+  {
+    name: 'status',
+    label: 'Status',
+    type: 'select',
+    isMulti: true,
+    options: statusOptions,
+    formatOptionLabel: o => <StatusOptionLabel status={o.value} />
+  },
+  {
+    name: 'severity',
+    label: 'Severity',
+    type: 'select',
+    isMulti: true,
+    options: severityOptions,
+    formatOptionLabel: o => <SeverityBadge severity={o.value} />
+  },
+  {
+    name: 'priority',
+    label: 'Priority',
+    type: 'select',
+    isMulti: true,
+    options: priorityOptions,
+    formatOptionLabel: o => <PriorityBadge priority={o.value} />
+  },
   { name: 'category', label: 'Category', type: 'select', isMulti: true, options: categoryOptions },
   { name: 'resolution', label: 'Resolution', type: 'select', isMulti: true, options: resolutionOptions },
-  { name: 'reporter_id', label: 'Reporter', type: 'select', fetchOptions: fetchUserOptions },
+  { name: 'reporter_id', label: 'Reporter', type: 'select', fetchOptions: fetchUserOptions, components: { Option: UserOption } },
   {
     name: 'handler_id',
     label: 'Assigned To',
     type: 'select',
-    fetchOptions: () => fetchUserOptions().then(options => [{ value: 'none', label: '[none] - Unassigned' }, ...options])
+    fetchOptions: () => fetchUserOptions().then(options => [{ value: 'none', label: '[none] - Unassigned' }, ...options]),
+    components: { Option: UserOption }
   },
   { name: 'due_date', label: 'Due Date', type: 'date-range' },
   { name: 'show_closed', label: 'Closed Issues', type: 'select', options: [{ value: '1', label: 'Show closed issues' }] }

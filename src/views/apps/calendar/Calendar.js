@@ -26,7 +26,6 @@ const Calendar = props => {
     selectEvent,
     updateEvent,
     handleTaskEventClick,
-    handleInvoiceEventClick,
     handleExpenseEventClick,
     handleContractEventClick,
     isHoliday,
@@ -52,7 +51,6 @@ const Calendar = props => {
 
   const taskEvents = [
     ...(store.taskFilters.includes('Tasks') ? store.todoEvents : []),
-    ...(store.taskFilters.includes('Invoices') ? store.invoiceEvents : []),
     ...(store.taskFilters.includes('Upcoming Invoices') ? store.contractInvoiceEvents : []),
     ...(store.taskFilters.includes('Expenses') ? store.expenseEvents : [])
   ]
@@ -137,21 +135,40 @@ const Calendar = props => {
       frame?.appendChild(label)
     },
 
-    eventClassNames({ event: calendarEvent }) {
-      const { calendar, source, priority, status } = calendarEvent._def.extendedProps
+    // Task tiles lead with their priority's colored square, same as the
+    // Tasks list. Every other event keeps FullCalendar's default content.
+    eventContent({ event: calendarEvent, timeText }) {
+      const { source, priority } = calendarEvent._def.extendedProps
+      if (source !== 'todo') return undefined
+      return (
+        <div className='fc-event-main-frame d-flex align-items-center overflow-hidden' style={{ gap: '0.4rem' }}>
+          <span
+            className={`bg-${priorityColors[priority] || 'secondary'} flex-shrink-0`}
+            style={{ width: 10, height: 10, borderRadius: 3 }}
+          />
+          {timeText && <span className='fc-event-time'>{timeText}</span>}
+          <span className='fc-event-title text-truncate'>{calendarEvent.title}</span>
+        </div>
+      )
+    },
 
-      // Todo tiles color by the task's own priority (low/medium/high/urgent,
-      // see todoOptions.js), invoice tiles by whether they're already
-      // overdue, instead of one fixed color per source, so a glance at the
-      // calendar shows what's actually urgent. Every other event
-      // (Meeting/Deadline/etc.) keeps its admin-managed category color.
+    // Long titles are cut off in the day cells - hovering shows the full one.
+    eventDidMount({ el, event: calendarEvent }) {
+      el.setAttribute('title', calendarEvent.title)
+    },
+
+    eventClassNames({ event: calendarEvent }) {
+      const { calendar, source, priority } = calendarEvent._def.extendedProps
+
+      // Task tiles color by the task's own priority (see todoOptions.js)
+      // instead of one fixed color per source, so a glance at the calendar
+      // shows what's actually urgent. Every other event (Meeting/Deadline/
+      // etc.) keeps its admin-managed category color.
       let colorName
       if (source === 'leave') {
         colorName = 'danger'
       } else if (source === 'todo') {
         colorName = priorityColors[priority] || 'secondary'
-      } else if (source === 'invoice') {
-        colorName = status === 'overdue' ? 'danger' : 'warning'
       } else if (source === 'contract-invoice') {
         colorName = 'info'
       } else if (source === 'contract-invoice-due') {
@@ -181,11 +198,6 @@ const Calendar = props => {
 
       if (clickedEvent._def.extendedProps.source === 'todo') {
         handleTaskEventClick(clickedEvent._def.extendedProps.taskId)
-        return
-      }
-
-      if (clickedEvent._def.extendedProps.source === 'invoice') {
-        handleInvoiceEventClick(clickedEvent._def.extendedProps.invoiceId)
         return
       }
 

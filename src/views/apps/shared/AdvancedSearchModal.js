@@ -48,6 +48,8 @@ const AdvancedSearchModal = ({ isOpen, toggle, title = 'Advanced Search', fields
 
     switch (field.type) {
       case 'select':
+        // formatOptionLabel/components are optional per field (e.g. Tasks'
+        // colored squares and user pictures).
         // isMulti is opt-in per field (e.g. Todo's Assignee filter, admin
         // only - see Tasks.js) - every other select-type field across the
         // app is untouched, still a single value in formValues.
@@ -66,6 +68,8 @@ const AdvancedSearchModal = ({ isOpen, toggle, title = 'Advanced Search', fields
                 classNamePrefix='select'
                 theme={selectThemeColors}
                 options={options}
+                formatOptionLabel={field.formatOptionLabel}
+                components={field.components}
                 value={options.filter(o => selected.map(String).includes(String(o.value)))}
                 onChange={picked => setValue(field.name, (picked || []).map(o => o.value))}
                 placeholder={`Select ${field.label.toLowerCase()}...`}
@@ -85,6 +89,8 @@ const AdvancedSearchModal = ({ isOpen, toggle, title = 'Advanced Search', fields
               classNamePrefix='select'
               theme={selectThemeColors}
               options={options}
+              formatOptionLabel={field.formatOptionLabel}
+              components={field.components}
               value={options.find(o => String(o.value) === String(formValues[field.name])) || null}
               onChange={option => setValue(field.name, option ? option.value : '')}
               placeholder={`Select ${field.label.toLowerCase()}...`}

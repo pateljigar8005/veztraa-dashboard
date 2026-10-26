@@ -13,7 +13,6 @@ import {
   fetchEvents,
   fetchEventCategories,
   fetchTodoTaskEvents,
-  fetchInvoiceDueEvents,
   fetchExpenseEvents,
   fetchContractInvoiceEvents,
   selectEvent,
@@ -60,10 +59,6 @@ const CalendarComponent = () => {
     navigate(`/todo/view/${taskId}`)
   }
 
-  const handleInvoiceEventClick = invoiceId => {
-    navigate(`/invoice/view/${invoiceId}`)
-  }
-
   const handleExpenseEventClick = expenseId => {
     navigate(`/expense/edit/${expenseId}`)
   }
@@ -76,7 +71,6 @@ const CalendarComponent = () => {
     dispatch(fetchEventCategories())
     dispatch(fetchEvents())
     dispatch(fetchTodoTaskEvents())
-    dispatch(fetchInvoiceDueEvents())
     // Same permission that gates the Contracts list itself - not every
     // user should see projected contract invoice dates on their calendar.
     if (currentUserCan('/contract', 'view')) {
@@ -140,7 +134,6 @@ const CalendarComponent = () => {
               setCalendarApi={setCalendarApi}
               handleAddEventSidebar={handleAddEventSidebar}
               handleTaskEventClick={handleTaskEventClick}
-              handleInvoiceEventClick={handleInvoiceEventClick}
               handleExpenseEventClick={handleExpenseEventClick}
               handleContractEventClick={handleContractEventClick}
               calendarRemountKey={calendarRemountKey}

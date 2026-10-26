@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
-import { parseAmount, formatAmount } from '@utils'
+import { formatAmount } from '@utils'
 
 // MySQL DATETIME wants local wall-clock parts, not a UTC-shifted ISO string
 // (same reasoning as the date-only fields elsewhere in this app, see
@@ -83,35 +83,10 @@ export const fetchTodoTaskEvents = createAsyncThunk('appCalendar/fetchTodoTaskEv
   return { events, tasks }
 })
 
-export const fetchInvoiceDueEvents = createAsyncThunk('appCalendar/fetchInvoiceDueEvents', async () => {
-  const response = await axios.get('/invoices', { params: { perPage: 100 } })
-  const invoices = response.data.data.invoices
-  const events = invoices
-    // Draft invoices aren't a commitment yet, and a fully paid balance has
-    // nothing left to chase - only an outstanding, issued invoice belongs
-    // on the calendar as something due.
-    .filter(invoice => invoice.status !== 'draft' && invoice.due_date && parseAmount(invoice.balance_due) > 0)
-    .map(invoice => ({
-      id: `invoice-${invoice.id}`,
-      title: `Invoice #${invoice.id} due - ${invoice.company_name || invoice.contact_name}`,
-      start: invoice.due_date,
-      allDay: true,
-      editable: false,
-      extendedProps: {
-        calendar: 'Invoices',
-        source: 'invoice',
-        invoiceId: invoice.id,
-        status: invoice.status
-      }
-    }))
-  return { events }
-})
-
 // Two events per projected occurrence - when the contract's next invoice
 // will be generated (by the recurring-invoice cron) and the projected due
 // date that invoice will get - so collections can be planned before either
-// actually exists yet. Once the cron creates the real invoice, its actual
-// due date takes over via fetchInvoiceDueEvents above.
+// actually exists yet.
 export const fetchContractInvoiceEvents = createAsyncThunk('appCalendar/fetchContractInvoiceEvents', async () => {
   const response = await axios.get('/contracts/upcoming-invoices')
   const occurrences = response.data.data.occurrences
@@ -178,12 +153,14 @@ export const appCalendarSlice = createSlice({
   initialState: {
     events: [],
     eventCategories: [],
+    // False until the first category fetch settles - the sidebar shows a
+    // skeleton instead of the filter list until then.
+    categoriesLoaded: false,
     todoEvents: [],
     todoTasks: [],
-    invoiceEvents: [],
     contractInvoiceEvents: [],
     expenseEvents: [],
-    taskFilters: ['Tasks', 'Invoices', 'Upcoming Invoices', 'Expenses'],
+    taskFilters: ['Tasks', 'Upcoming Invoices', 'Expenses'],
     selectedEvent: {},
     // Category names currently shown - seeded to "all" once categories load
     // (see fetchEventCategories.fulfilled below). Purely a client-side
@@ -217,7 +194,11 @@ export const appCalendarSlice = createSlice({
   },
   extraReducers: builder => {
     builder
+      .addCase(fetchEventCategories.rejected, state => {
+        state.categoriesLoaded = true
+      })
       .addCase(fetchEventCategories.fulfilled, (state, action) => {
+        state.categoriesLoaded = true
         state.eventCategories = action.payload
         // Default to "all selected" the first time categories load - only
         // when nothing's been chosen yet, so a user's filter picks aren't
@@ -232,9 +213,6 @@ export const appCalendarSlice = createSlice({
       .addCase(fetchTodoTaskEvents.fulfilled, (state, action) => {
         state.todoEvents = action.payload.events
         state.todoTasks = action.payload.tasks
-      })
-      .addCase(fetchInvoiceDueEvents.fulfilled, (state, action) => {
-        state.invoiceEvents = action.payload.events
       })
       .addCase(fetchContractInvoiceEvents.fulfilled, (state, action) => {
         state.contractInvoiceEvents = action.payload.events
