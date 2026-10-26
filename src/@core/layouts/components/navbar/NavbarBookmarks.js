@@ -77,6 +77,7 @@ const findSendEmailRoute = pathname => sendEmailButtonIdByRoute.find(i => i.patt
 // Detail pages expose a hidden history button that this navbar triggers.
 const historyButtonIdByRoute = [
   { pattern: /^\/invoice\/view\/[^/]+$/, buttonId: 'invoice-history-btn' },
+  { pattern: /^\/todo\/view\/[^/]+$/, buttonId: 'todo-history-btn' },
   { pattern: /^\/contract\/view\/[^/]+$/, buttonId: 'contract-history-btn' },
   { pattern: /^\/quotation\/view\/[^/]+$/, buttonId: 'quotation-history-btn' },
   { pattern: /^\/client\/edit\/[^/]+$/, buttonId: 'client-history-btn' },

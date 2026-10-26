@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Card, CardHeader, CardTitle } from 'reactstrap'
+import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap'
 import DataTable from 'react-data-table-component'
 import ReactPaginate from 'react-paginate'
-import { ChevronDown } from 'react-feather'
+import { ChevronDown, Clock } from 'react-feather'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 import ListHeader from '../ListHeader'
 import { getHistory } from '../store'
@@ -99,6 +99,9 @@ const IssueHistory = ({ issueId }) => {
     dispatch(getHistory(issueId))
   }, [issueId])
 
+  // Opened from the navbar's History icon (NavbarBookmarks.js clicks the
+  // hidden button below), same as other modules' history.
+  const [open, setOpen] = useState(false)
   // Client-side search and paging - an issue's history is loaded whole.
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
@@ -125,10 +128,21 @@ const IssueHistory = ({ issueId }) => {
   const pageRows = filtered.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
   const columns = [
-    { name: 'Date Modified', width: '200px', selector: r => r.date, cell: r => <span className='text-nowrap'>{formatDateTime(r.date)}</span> },
+    {
+      name: 'Date Modified',
+      width: '200px',
+      selector: r => r.date,
+      cell: r => <span className='text-nowrap'>{formatDateTime(r.date)}</span>
+    },
     { name: 'Username', minWidth: '160px', selector: r => r.user },
     { name: 'Field', minWidth: '180px', selector: r => r.field },
-    { name: 'Change', minWidth: '260px', grow: 2, selector: r => r.change, cell: r => <span style={{ wordBreak: 'break-word' }}>{r.change}</span> }
+    {
+      name: 'Change',
+      minWidth: '260px',
+      grow: 2,
+      selector: r => r.change,
+      cell: r => <span style={{ wordBreak: 'break-word' }}>{r.change}</span>
+    }
   ]
 
   const CustomPagination = () => (
@@ -150,43 +164,49 @@ const IssueHistory = ({ issueId }) => {
   )
 
   return (
-    <Card>
-      <CardHeader className='pb-0'>
-        <CardTitle tag='h5' className='mb-0'>
+    <>
+      <Button id='todo-history-btn' className='d-none' onClick={() => setOpen(true)}>
+        History
+      </Button>
+      <Modal isOpen={open} toggle={() => setOpen(false)} size='xl'>
+        <ModalHeader toggle={() => setOpen(false)}>
+          <Clock size={18} className='me-50' />
           Issue History
-        </CardTitle>
-      </CardHeader>
-      <div className='react-dataTable'>
-        <DataTable
-          noHeader
-          subHeader
-          pagination
-          paginationServer
-          responsive
-          columns={columns}
-          data={pageRows}
-          sortIcon={<ChevronDown />}
-          className='react-dataTable'
-          paginationComponent={CustomPagination}
-          noDataComponent={<div className='text-muted py-2'>{searchTerm ? 'No matching history.' : 'No history yet.'}</div>}
-          subHeaderComponent={
-            <ListHeader
-              id='issue-history'
-              rowsPerPage={rowsPerPage}
-              onPerPage={value => {
-                setRowsPerPage(value)
-                setCurrentPage(1)
-              }}
-              searchTerm={searchTerm}
-              onSearch={value => {
-                setSearchTerm(value)
-                setCurrentPage(1)
-              }}
+        </ModalHeader>
+        <ModalBody className='p-0'>
+          <div className='react-dataTable'>
+            <DataTable
+              noHeader
+              subHeader
+              pagination
+              paginationServer
+              responsive
+              columns={columns}
+              data={pageRows}
+              sortIcon={<ChevronDown />}
+              className='react-dataTable'
+              paginationComponent={CustomPagination}
+              noDataComponent={<div className='text-muted py-2'>{searchTerm ? 'No matching history.' : 'No history yet.'}</div>}
+              subHeaderComponent={
+                <ListHeader
+                  id='issue-history'
+                  rowsPerPage={rowsPerPage}
+                  onPerPage={value => {
+                    setRowsPerPage(value)
+                    setCurrentPage(1)
+                  }}
+                  searchTerm={searchTerm}
+                  onSearch={value => {
+                    setSearchTerm(value)
+                    setCurrentPage(1)
+                  }}
+                />
+              }
             />
-          }
-        />
-      </div>
-    </Card>
+          </div>
+        </ModalBody>
+      </Modal>
+    </>
   )
 }
 
