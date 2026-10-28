@@ -128,15 +128,83 @@ const ToolbarGroup = ({ label, children }) => (
   </div>
 )
 
+// Same shape as the loaded page: header, action bar, details grid, then
+// the Relationships / Files / Monitoring cards.
+const SkeletonLabel = () => (
+  <th className='issue-detail-label' style={{ ...labelCellStyle, width: '13%' }}>
+    <Skeleton width='70%' height={14} />
+  </th>
+)
+
 const ViewSkeleton = () => (
-  <Card>
-    <CardBody>
-      <Skeleton width='40%' height={22} className='mb-2' />
-      {[0, 1, 2, 3, 4].map(i => (
-        <Skeleton key={i} width='100%' height={14} className='mb-1' />
-      ))}
-    </CardBody>
-  </Card>
+  <Fragment>
+    <Card>
+      <CardBody>
+        <div className='d-flex align-items-start justify-content-between mb-1' style={{ gap: '0.75rem' }}>
+          <div className='flex-grow-1'>
+            <Skeleton width={60} height={12} className='mb-50' />
+            <Skeleton width='45%' height={24} className='mb-50' />
+            <Skeleton width={240} height={12} />
+          </div>
+          <Skeleton width={90} height={26} style={{ borderRadius: 6 }} />
+        </div>
+
+        <div
+          className='d-flex flex-wrap align-items-end justify-content-between rounded p-1 mb-2'
+          style={{ gap: '0.75rem', background: 'rgba(var(--bs-secondary-rgb), 0.06)' }}
+        >
+          <div className='d-flex flex-wrap align-items-end' style={{ gap: '1rem' }}>
+            {[280, 240].map(w => (
+              <div key={w}>
+                <Skeleton width={70} height={10} className='mb-50' />
+                <Skeleton width={w} height={32} style={{ borderRadius: 6 }} />
+              </div>
+            ))}
+          </div>
+          <div className='d-flex' style={{ gap: '0.75rem' }}>
+            {[0, 1, 2].map(i => (
+              <Skeleton key={i} width={34} height={34} style={{ borderRadius: 6 }} />
+            ))}
+          </div>
+        </div>
+
+        <Table bordered responsive className='mb-0' style={{ borderColor: 'rgba(var(--bs-secondary-rgb), 0.18)' }}>
+          <tbody>
+            {[0, 1, 2, 3, 4, 5].map(row => (
+              <tr key={row}>
+                {[0, 1, 2].map(col => (
+                  <Fragment key={col}>
+                    <SkeletonLabel />
+                    <td style={{ ...valueCellStyle, width: '20%' }}>
+                      <Skeleton width={`${50 + ((row + col) % 3) * 15}%`} height={14} />
+                    </td>
+                  </Fragment>
+                ))}
+              </tr>
+            ))}
+            {[60, 90, 40].map((w, i) => (
+              <tr key={`text-${i}`}>
+                <SkeletonLabel />
+                <td colSpan={5} style={valueCellStyle}>
+                  <Skeleton width={`${w}%`} height={14} className={i === 1 ? 'mb-50' : ''} />
+                  {i === 1 && <Skeleton width='70%' height={14} />}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </CardBody>
+    </Card>
+
+    {[0, 1, 2].map(i => (
+      <Card key={i}>
+        <CardBody>
+          <Skeleton width={180} height={18} className='mb-1' />
+          <Skeleton width='100%' height={i === 1 ? 72 : 36} style={{ borderRadius: 6 }} />
+        </CardBody>
+      </Card>
+    ))}
+  </Fragment>
 )
 
 const IssueView = () => {

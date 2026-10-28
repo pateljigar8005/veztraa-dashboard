@@ -365,8 +365,14 @@ $fc-day-toggle-btn-padding: 0.55rem 1.5rem;
       color: $text-muted;
     }
   }
+  // "+N more" popover: a fixed width so FullCalendar can keep it inside the
+  // calendar (it was sized by its longest title and spilled off the right
+  // edge), and above the floating navbar so its top isn't hidden.
   .fc-popover {
     box-shadow: $box-shadow;
+    z-index: 1031 !important;
+    width: 300px;
+    max-width: calc(100vw - 2rem);
     .fc-popover-header {
       background: transparent;
       padding: 0.5rem;
@@ -376,6 +382,8 @@ $fc-day-toggle-btn-padding: 0.55rem 1.5rem;
       }
     }
     .fc-popover-body {
+      max-height: 320px;
+      overflow-y: auto;
       *:not(:last-of-type) {
         margin-bottom: 0.3rem;
       }

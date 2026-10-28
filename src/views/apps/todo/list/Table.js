@@ -29,7 +29,7 @@ import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 
 const searchFields = [
-  { name: 'project_id', label: 'Project', type: 'select', fetchOptions: fetchProjectOptions },
+  { name: 'project_id', label: 'Project', type: 'select', isMulti: true, fetchOptions: fetchProjectOptions },
   {
     name: 'status',
     label: 'Status',
