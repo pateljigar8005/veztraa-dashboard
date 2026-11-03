@@ -1,4 +1,5 @@
 import { Fragment, useState, useEffect, useMemo, useRef } from 'react'
+import UpdateWebsiteButton from '../../shared/UpdateWebsiteButton'
 import useClampPage from '@hooks/useClampPage'
 import useDebounce from '@hooks/useDebounce'
 import AdvancedSearchModal from '../../shared/AdvancedSearchModal'
@@ -80,6 +81,7 @@ const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) 
               onChange={e => handleFilter(e.target.value)}
             />
           </div>
+          <UpdateWebsiteButton endpoint='/case-studies/revalidate' route='/case-study' />
         </Col>
       </Row>
     </div>
