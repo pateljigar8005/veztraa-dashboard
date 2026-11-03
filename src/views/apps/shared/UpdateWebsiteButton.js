@@ -5,10 +5,10 @@ import { RefreshCw } from 'react-feather'
 import { Button, Spinner } from 'reactstrap'
 import { currentUserCan } from '@src/utility/navPermissions'
 
-// Manual "Update Website" for the Case Studies / Job Listings / Portfolio /
-// Team lists. Every save already refreshes the website on its own - this is
-// the backup for when that didn't go through. Needs the module's edit
-// permission, same as the API route (ModulePermission).
+// "Update Website" for the Case Studies / Job Listings / Portfolio / Team
+// lists - saves don't touch the website, so changes go live only when this
+// is clicked. Needs the module's edit permission, same as the API route
+// (ModulePermission).
 const UpdateWebsiteButton = ({ endpoint, route }) => {
   const [busy, setBusy] = useState(false)
 

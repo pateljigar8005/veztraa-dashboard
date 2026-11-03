@@ -240,7 +240,10 @@ const UserForm = () => {
   const handleAvatarChange = file => {
     setAvatarPreview(URL.createObjectURL(file))
     if (isEdit) {
-      dispatch(uploadAvatar({ id: Number(id), file })).then(() => toast.success('Avatar updated'))
+      dispatch(uploadAvatar({ id: Number(id), file }))
+        .unwrap()
+        .then(() => toast.success('Avatar updated'))
+        .catch(err => toast.error(err?.message || 'Upload failed'))
     } else {
       setAvatarFile(file)
       setExtraDirty(true)
@@ -316,7 +319,10 @@ const UserForm = () => {
             return
           }
           if (!isEdit && avatarFile) {
-            dispatch(uploadAvatar({ id: result.id, file: avatarFile })).finally(() => navigate('/user'))
+            dispatch(uploadAvatar({ id: result.id, file: avatarFile }))
+          .unwrap()
+          .catch(err => toast.error(err?.message || 'Upload failed'))
+          .finally(() => navigate('/user'))
           } else {
             navigate('/user')
           }

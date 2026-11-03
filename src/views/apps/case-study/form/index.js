@@ -138,7 +138,10 @@ const CaseStudyForm = () => {
   const handleImageChange = file => {
     setImagePreview(URL.createObjectURL(file))
     if (isEdit) {
-      dispatch(uploadCaseStudyCoverImage({ id: Number(id), file })).then(() => toast.success('Cover image updated'))
+      dispatch(uploadCaseStudyCoverImage({ id: Number(id), file }))
+        .unwrap()
+        .then(() => toast.success('Cover image updated'))
+        .catch(err => toast.error(err?.message || 'Upload failed'))
     } else {
       setImageFile(file)
       setExtraDirty(true)
@@ -180,7 +183,10 @@ const CaseStudyForm = () => {
       if (result.error) return
       toast.success(isEdit ? 'Case study updated' : 'Case study added')
       if (!isEdit && imageFile) {
-        dispatch(uploadCaseStudyCoverImage({ id: result.payload.id, file: imageFile })).finally(() =>
+        dispatch(uploadCaseStudyCoverImage({ id: result.payload.id, file: imageFile }))
+          .unwrap()
+          .catch(err => toast.error(err?.message || 'Upload failed'))
+          .finally(() =>
           navigate('/case-study')
         )
       } else {

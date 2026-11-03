@@ -63,7 +63,10 @@ const TeamMemberForm = () => {
   const handlePhotoChange = file => {
     setPhotoPreview(URL.createObjectURL(file))
     if (isEdit) {
-      dispatch(uploadTeamMemberPhoto({ id: Number(id), file })).then(() => toast.success('Photo updated'))
+      dispatch(uploadTeamMemberPhoto({ id: Number(id), file }))
+        .unwrap()
+        .then(() => toast.success('Photo updated'))
+        .catch(err => toast.error(err?.message || 'Upload failed'))
     } else {
       setPhotoFile(file)
       setExtraDirty(true)
@@ -97,7 +100,10 @@ const TeamMemberForm = () => {
     dispatch(action).then(result => {
       toast.success(isEdit ? 'Team member updated' : 'Team member added')
       if (!isEdit && photoFile) {
-        dispatch(uploadTeamMemberPhoto({ id: result.payload.id, file: photoFile })).finally(() => navigate('/team-member'))
+        dispatch(uploadTeamMemberPhoto({ id: result.payload.id, file: photoFile }))
+          .unwrap()
+          .catch(err => toast.error(err?.message || 'Upload failed'))
+          .finally(() => navigate('/team-member'))
       } else {
         navigate('/team-member')
       }

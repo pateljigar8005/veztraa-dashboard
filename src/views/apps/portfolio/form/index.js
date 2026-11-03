@@ -69,7 +69,10 @@ const PortfolioForm = () => {
   const handleImageChange = file => {
     setImagePreview(URL.createObjectURL(file))
     if (isEdit) {
-      dispatch(uploadPortfolioItemImage({ id: Number(id), file })).then(() => toast.success('Image updated'))
+      dispatch(uploadPortfolioItemImage({ id: Number(id), file }))
+        .unwrap()
+        .then(() => toast.success('Image updated'))
+        .catch(err => toast.error(err?.message || 'Upload failed'))
     } else {
       setImageFile(file)
       setExtraDirty(true)
@@ -106,7 +109,10 @@ const PortfolioForm = () => {
     dispatch(action).then(result => {
       toast.success(isEdit ? 'Portfolio item updated' : 'Portfolio item added')
       if (!isEdit && imageFile) {
-        dispatch(uploadPortfolioItemImage({ id: result.payload.id, file: imageFile })).finally(() => navigate('/portfolio'))
+        dispatch(uploadPortfolioItemImage({ id: result.payload.id, file: imageFile }))
+          .unwrap()
+          .catch(err => toast.error(err?.message || 'Upload failed'))
+          .finally(() => navigate('/portfolio'))
       } else {
         navigate('/portfolio')
       }
