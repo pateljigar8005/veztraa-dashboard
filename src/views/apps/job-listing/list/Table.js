@@ -57,6 +57,7 @@ const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) 
           xl='6'
           className='d-flex align-items-sm-center justify-content-xl-end justify-content-start flex-xl-nowrap flex-wrap flex-sm-row flex-column  p-0 mt-xl-0 mt-1'
         >
+          <UpdateWebsiteButton endpoint='/job-listings/revalidate' route='/job-listing' />
           <div className='d-flex align-items-center mb-sm-0 mb-1'>
             <Input
               id='search-job-listing'
@@ -67,7 +68,6 @@ const CustomHeader = ({ handlePerPage, rowsPerPage, handleFilter, searchTerm }) 
               onChange={e => handleFilter(e.target.value)}
             />
           </div>
-          <UpdateWebsiteButton endpoint='/job-listings/revalidate' route='/job-listing' />
         </Col>
       </Row>
     </div>

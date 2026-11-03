@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import axios from 'axios'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
-import { Trash2, Download } from 'react-feather'
-import { Card, CardBody, CardHeader, CardTitle, Row, Col, Button, Spinner } from 'reactstrap'
+import { Trash2 } from 'react-feather'
+import { Card, CardBody, CardHeader, CardTitle, Row, Col, Button } from 'reactstrap'
 import {
   getJobApplication,
   deleteJobApplication,
@@ -18,6 +17,7 @@ import { confirmDelete } from '@src/utility/confirmDelete'
 import { currentUserCan } from '@src/utility/navPermissions'
 import HistoryModal from '../../activity-log/HistoryModal'
 import NotesSection from '../../shared/NotesSection'
+import ResumePreviewModal from './ResumePreviewModal'
 
 const statusOptions = [
   { value: 'new', label: 'New' },
@@ -40,7 +40,6 @@ const JobApplicationView = () => {
   const dispatch = useDispatch()
   const store = useSelector(state => state.jobApplications)
 
-  const [downloading, setDownloading] = useState(false)
   const [statusSaving, setStatusSaving] = useState(false)
   const [noteSaving, setNoteSaving] = useState(false)
   const canEdit = currentUserCan('/job-application', 'edit')
@@ -87,29 +86,6 @@ const JobApplicationView = () => {
     })
   }
 
-  // Same blob-download-then-save pattern as project documents (see
-  // ProjectDocuments.js's handleDownload) - the resume lives outside the
-  // docroot, so it's fetched through the authenticated API, not linked to
-  // directly.
-  const handleDownloadResume = async () => {
-    setDownloading(true)
-    try {
-      const response = await axios.get(`/job-applications/${application.id}/resume`, { responseType: 'blob' })
-      const url = URL.createObjectURL(response.data)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `${application.full_name} - Resume`
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      URL.revokeObjectURL(url)
-    } catch (err) {
-      toast.error('Failed to download resume')
-    } finally {
-      setDownloading(false)
-    }
-  }
-
   return (
     <div>
       <Card>
@@ -129,12 +105,7 @@ const JobApplicationView = () => {
                 entityLabel={application.full_name}
                 buttonId='job-application-history-btn'
               />
-              {application.has_resume && (
-                <Button color='primary' outline onClick={handleDownloadResume} disabled={downloading}>
-                  {downloading ? <Spinner size='sm' className='me-50' /> : <Download size={14} className='me-50' />}
-                  Download Resume
-                </Button>
-              )}
+              {application.has_resume && <ResumePreviewModal application={application} />}
               {currentUserCan('/job-application', 'delete') && (
                 <Button color='danger' outline onClick={handleDelete}>
                   <Trash2 size={14} className='me-50' /> Delete

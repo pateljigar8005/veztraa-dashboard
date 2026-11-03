@@ -54,6 +54,15 @@ const ComposePopup = ({
   const [bccOpen, setBCCOpen] = useState(false)
   const [sending, setSending] = useState(false)
   const [savingDraft, setSavingDraft] = useState(false)
+  // The editor takes a fixed pixel height, so size it to the window: the
+  // modal fills the screen and the message area gets whatever is left after
+  // the header, To/Subject, editor toolbar and footer (~470px).
+  const [editorHeight, setEditorHeight] = useState(() => Math.max(300, window.innerHeight - 470))
+  useEffect(() => {
+    const onResize = () => setEditorHeight(Math.max(300, window.innerHeight - 470))
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
   const [scheduleOpen, setScheduleOpen] = useState(false)
   const [scheduleDate, setScheduleDate] = useState(null)
   const [fields, setFields] = useState(blank)
@@ -387,6 +396,7 @@ const ComposePopup = ({
       isOpen={composeOpen}
       centered
       size='xl'
+      className='my-1'
       container={container}
       toggle={handleClose}
     >
@@ -395,7 +405,7 @@ const ComposePopup = ({
         <X className='fw-normal cursor-pointer' size={16} onClick={handleClose} />
       </div>
       <Form className='compose-form' onSubmit={handleSend} noValidate>
-        <ModalBody style={{ maxHeight: '65vh', overflowY: 'auto' }}>
+        <ModalBody style={{ maxHeight: 'calc(100vh - 170px)', overflowY: 'auto' }}>
           {replyTo?.loading ? (
             <div className='placeholder-glow' aria-hidden='true'>
               <div className='compose-mail-form-field'>
@@ -407,7 +417,7 @@ const ComposePopup = ({
                 <span className='placeholder rounded flex-grow-1 ms-2' style={{ height: '34px' }} />
               </div>
               <div className='mt-1'>
-                <span className='placeholder rounded d-block w-100' style={{ height: '400px' }} />
+                <span className='placeholder rounded d-block w-100' style={{ height: `${editorHeight}px` }} />
               </div>
             </div>
           ) : (
@@ -474,7 +484,7 @@ const ComposePopup = ({
                   value={fields.body}
                   onChange={value => setField('body', value)}
                   placeholder='Message'
-                  height={400}
+                  height={editorHeight}
                   onImageUpload={uploadEditorImage}
                 />
               </div>

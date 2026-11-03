@@ -5,7 +5,7 @@ import { RefreshCw } from 'react-feather'
 import { Button, Spinner } from 'reactstrap'
 import { currentUserCan } from '@src/utility/navPermissions'
 
-// "Update Website" for the Case Studies / Job Listings / Portfolio / Team
+// "Publish" for the Case Studies / Job Listings / Portfolio / Team
 // lists - saves don't touch the website, so changes go live only when this
 // is clicked. Needs the module's edit permission, same as the API route
 // (ModulePermission).
@@ -18,15 +18,15 @@ const UpdateWebsiteButton = ({ endpoint, route }) => {
     setBusy(true)
     axios
       .post(endpoint)
-      .then(() => toast.success('Website updated'))
-      .catch(err => toast.error(err.response?.data?.message || 'Could not update the website'))
+      .then(() => toast.success('Published to website'))
+      .catch(err => toast.error(err.response?.data?.message || 'Could not publish to the website'))
       .finally(() => setBusy(false))
   }
 
   return (
-    <Button color='primary' outline className='ms-1 text-nowrap' disabled={busy} onClick={handleClick}>
+    <Button color='primary' outline className='me-1 mb-sm-0 mb-1 text-nowrap' disabled={busy} onClick={handleClick}>
       {busy ? <Spinner size='sm' className='me-50' /> : <RefreshCw size={14} className='me-50' />}
-      Update Website
+      Publish
     </Button>
   )
 }
