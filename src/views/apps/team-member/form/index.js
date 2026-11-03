@@ -24,6 +24,7 @@ const TeamMemberForm = () => {
   const store = useSelector(state => state.teamMembers)
 
   const [isActive, setIsActive] = useState(true)
+  const [isLeader, setIsLeader] = useState(false)
   const [photoFile, setPhotoFile] = useState(null)
   const [photoPreview, setPhotoPreview] = useState(null)
   const [extraDirty, setExtraDirty] = useState(false)
@@ -54,6 +55,7 @@ const TeamMemberForm = () => {
         introduction: member.introduction || ''
       })
       setIsActive(member.is_active !== false)
+      setIsLeader(Boolean(member.is_leader))
       setPhotoPreview(resolveAvatarUrl(member.photo))
     }
   }, [store.selectedTeamMember])
@@ -87,7 +89,8 @@ const TeamMemberForm = () => {
       full_name: data.full_name,
       role_title: data.role_title,
       introduction: data.introduction,
-      is_active: isActive
+      is_active: isActive,
+      is_leader: isLeader
     }
 
     const action = isEdit ? updateTeamMember({ id: Number(id), ...payload }) : addTeamMember(payload)
@@ -182,6 +185,21 @@ const TeamMemberForm = () => {
                 />
                 <Label className='form-label mb-0' for='is_active'>
                   Active (visible on website)
+                </Label>
+              </div>
+              <div className='form-switch d-flex align-items-center mt-1'>
+                <Input
+                  type='switch'
+                  id='is_leader'
+                  checked={isLeader}
+                  onChange={e => {
+                    setIsLeader(e.target.checked)
+                    setExtraDirty(true)
+                  }}
+                  className='me-50'
+                />
+                <Label className='form-label mb-0' for='is_leader'>
+                  Leader (shown in the leadership section on Our Story / Our People)
                 </Label>
               </div>
             </CardBody>

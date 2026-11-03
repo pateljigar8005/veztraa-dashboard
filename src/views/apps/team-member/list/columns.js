@@ -45,10 +45,15 @@ export const getColumns = dragEnabled => [
         ) : (
           <Avatar className='me-1' color='light-primary' content={getInitials(row.full_name) || 'TM'} />
         )}
-        <div className='d-flex flex-column overflow-hidden' style={{ minWidth: 0 }}>
+        <div className='d-flex align-items-center overflow-hidden' style={{ minWidth: 0 }}>
           <Link to={`/team-member/edit/${row.id}`} className='user_name text-truncate text-body' title={row.full_name}>
             <span className='fw-bolder'>{row.full_name}</span>
           </Link>
+          {row.is_leader && (
+            <Badge color='light-primary' pill className='ms-50 flex-shrink-0'>
+              Leader
+            </Badge>
+          )}
         </div>
       </div>
     )
